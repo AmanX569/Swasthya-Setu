@@ -1,0 +1,3113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Swasthya Setu · Rural Care Access & Quality Network | स्वास्थ्य सेतु</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="auth.css">
+<link rel="stylesheet" href="admin.css">
+<link rel="stylesheet" href="doctor.css">
+<link rel="stylesheet" href="patient.css">
+<link rel="stylesheet" href="worker.css">
+<style>
+/* =========================================================
+   DESIGN SYSTEM & GLASS-TOUCHED ARCHITECTURE
+========================================================= */
+:root {
+  /* Ambient Obsidian & Emerald Void */
+  --void-950: #020b09;
+  --void-900: #051814;
+  --void-850: #09241f;
+  --void-800: #0d302a;
+  --void-700: #13423a;
+
+  /* Glass Surfaces & Layered Translucency */
+  --glass-1: rgba(220, 252, 243, 0.045);
+  --glass-2: rgba(220, 252, 243, 0.085);
+  --glass-3: rgba(220, 252, 243, 0.14);
+  --glass-4: rgba(220, 252, 243, 0.22);
+  --glass-border: rgba(220, 252, 243, 0.13);
+  --glass-border-strong: rgba(220, 252, 243, 0.28);
+  --glass-glow: rgba(95, 227, 196, 0.25);
+  --glass-specular: rgba(255, 255, 255, 0.55);
+  --rail-glass: rgba(4, 18, 15, 0.78);
+
+  /* Primary Brand: Healing Emerald & Luminous Teal */
+  --primary: #10b981;
+  --primary-dark: #064e3b;
+  --primary-bright: #34d399;
+  --primary-glow: rgba(52, 211, 153, 0.45);
+  --teal-cyan: #22d3ee;
+  --teal-glow: rgba(34, 211, 238, 0.35);
+
+  /* Warm Harvest Amber (Rural Energy & Warmth) */
+  --accent: #f59e0b;
+  --accent-light: #fbbf24;
+  --accent-soft: rgba(245, 158, 11, 0.16);
+  --accent-glow: rgba(245, 158, 11, 0.55);
+
+  /* Emergency & Safety Alerts */
+  --danger: #ef4444;
+  --danger-bright: #f87171;
+  --danger-soft: rgba(239, 68, 68, 0.16);
+  --danger-glow: rgba(239, 68, 68, 0.65);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245, 158, 11, 0.15);
+  --good: #10b981;
+  --good-soft: rgba(16, 185, 129, 0.15);
+
+  /* Typography & Ink */
+  --ink: #f0fdf4;
+  --ink-dim: #cbd5e1;
+  --muted: #86a79e;
+  --line: rgba(220, 252, 243, 0.1);
+
+  /* Radii & Physics */
+  --radius-sm: 10px;
+  --radius: 16px;
+  --radius-lg: 24px;
+  --radius-pill: 9999px;
+  --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* 3D Shadows & Inner Glows */
+  --shadow-ambient: 0 10px 30px -10px rgba(0, 0, 0, 0.65), 0 20px 50px -15px rgba(0, 0, 0, 0.8);
+  --shadow-3d: 0 25px 60px -15px rgba(0, 0, 0, 0.7), 0 0 35px -5px var(--glass-glow);
+  --shadow-inset: inset 0 1px 1px rgba(255, 255, 255, 0.35), inset 0 -1px 1px rgba(0, 0, 0, 0.5), inset 0 0 20px -10px rgba(255, 255, 255, 0.06);
+
+  font-size: 16px;
+  color-scheme: dark;
+}
+
+/* =========================================================
+   5 THEME ENGINES: EMERALD / NAVY / GOV / DAYLIGHT / OLED
+   ========================================================= */
+
+/* 1. Deep Navy Blue Theme */
+[data-theme="navy"], body[data-theme="navy"] {
+  --void-950: #030a16;
+  --void-900: #07152b;
+  --void-850: #0c2140;
+  --void-800: #12305c;
+  --void-700: #1a427d;
+
+  --glass-1: rgba(186, 230, 253, 0.045);
+  --glass-2: rgba(186, 230, 253, 0.085);
+  --glass-3: rgba(186, 230, 253, 0.14);
+  --glass-4: rgba(186, 230, 253, 0.22);
+  --glass-border: rgba(186, 230, 253, 0.14);
+  --glass-border-strong: rgba(56, 189, 248, 0.35);
+  --glass-glow: rgba(56, 189, 248, 0.3);
+  --glass-specular: rgba(255, 255, 255, 0.65);
+  --rail-glass: rgba(4, 14, 30, 0.88);
+
+  --primary: #0284c7;
+  --primary-dark: #0369a1;
+  --primary-bright: #38bdf8;
+  --primary-glow: rgba(56, 189, 248, 0.5);
+  --teal-cyan: #22d3ee;
+  --teal-glow: rgba(34, 211, 238, 0.4);
+
+  --accent: #f59e0b;
+  --accent-light: #fbbf24;
+  --accent-soft: rgba(245, 158, 11, 0.16);
+
+  --ink: #f8fafc;
+  --ink-dim: #cbd5e1;
+  --muted: #94a3b8;
+  --line: rgba(186, 230, 253, 0.12);
+
+  --shadow-ambient: 0 10px 30px -10px rgba(0, 0, 0, 0.75);
+  --shadow-3d: 0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 35px -5px rgba(56, 189, 248, 0.25);
+  color-scheme: dark;
+}
+
+/* 2. Official Government Portal (Sarkari Classic Blue & White) */
+[data-theme="gov"], body[data-theme="gov"] {
+  --void-950: #f0f4f9;
+  --void-900: #e2eaf4;
+  --void-850: #d4e0ee;
+  --void-800: #c1d2e5;
+  --void-700: #98b4d6;
+
+  --glass-1: #ffffff;
+  --glass-2: #ffffff;
+  --glass-3: #ffffff;
+  --glass-4: #ffffff;
+  --glass-border: rgba(0, 51, 102, 0.14);
+  --glass-border-strong: rgba(0, 51, 102, 0.32);
+  --glass-glow: rgba(11, 94, 215, 0.18);
+  --glass-specular: #ffffff;
+  --rail-glass: #ffffff;
+
+  --primary: #003366;
+  --primary-dark: #002244;
+  --primary-bright: #0b5ed7;
+  --primary-glow: rgba(11, 94, 215, 0.3);
+  --teal-cyan: #0284c7;
+
+  --accent: #ea580c;
+  --accent-light: #c2410c;
+  --accent-soft: rgba(234, 88, 12, 0.12);
+  --accent-glow: rgba(234, 88, 12, 0.35);
+
+  --danger: #dc2626;
+  --danger-bright: #b91c1c;
+  --warn: #d97706;
+  --good: #16a34a;
+
+  --ink: #0a192f;
+  --ink-dim: #1e293b;
+  --muted: #475569;
+  --line: rgba(0, 51, 102, 0.1);
+
+  --shadow-ambient: 0 4px 18px rgba(0, 51, 102, 0.08);
+  --shadow-3d: 0 10px 25px rgba(0, 51, 102, 0.12);
+  color-scheme: light;
+}
+
+/* 3. Daylight Pearl (High-Contrast, Non-Glare, Crystal-Clear Dark Text) */
+[data-theme="daylight"], [data-theme="day"], body[data-theme="daylight"], body[data-theme="day"] {
+  --void-950: #f8fafc;
+  --void-900: #f1f5f9;
+  --void-850: #e2e8f0;
+  --void-800: #cbd5e1;
+  --void-700: #94a3b8;
+
+  --glass-1: #ffffff;
+  --glass-2: #ffffff;
+  --glass-3: #ffffff;
+  --glass-4: #ffffff;
+  --glass-border: rgba(15, 23, 42, 0.12);
+  --glass-border-strong: rgba(15, 23, 42, 0.25);
+  --glass-glow: rgba(5, 150, 105, 0.15);
+  --glass-specular: #ffffff;
+  --rail-glass: #ffffff;
+
+  --primary: #059669;
+  --primary-dark: #065f46;
+  --primary-bright: #047857;
+  --primary-glow: rgba(5, 150, 105, 0.25);
+  --teal-cyan: #0284c7;
+  --teal-glow: rgba(2, 132, 199, 0.2);
+
+  --accent: #d97706;
+  --accent-light: #b45309;
+  --accent-soft: rgba(217, 119, 6, 0.12);
+
+  --danger: #dc2626;
+  --danger-bright: #b91c1c;
+  --warn: #d97706;
+  --good: #059669;
+
+  --ink: #0f172a;
+  --ink-dim: #334155;
+  --muted: #64748b;
+  --line: rgba(15, 23, 42, 0.08);
+
+  --shadow-ambient: 0 4px 20px -2px rgba(15, 23, 42, 0.08);
+  --shadow-3d: 0 12px 30px -6px rgba(15, 23, 42, 0.12);
+  color-scheme: light;
+}
+
+/* 4. Midnight OLED */
+[data-theme="oled"], body[data-theme="oled"] {
+  --void-950: #000000;
+  --void-900: #020605;
+  --void-850: #050c09;
+  --void-800: #0a1612;
+  --glass-1: rgba(255, 255, 255, 0.035);
+  --glass-2: rgba(255, 255, 255, 0.065);
+  --glass-border: rgba(255, 255, 255, 0.09);
+  --rail-glass: rgba(0, 0, 0, 0.92);
+  --ink: #ffffff;
+}
+
+/* Universal Light Theme Component Overrides */
+body[data-theme="daylight"] .glass-panel,
+body[data-theme="day"] .glass-panel,
+body[data-theme="gov"] .glass-panel,
+body[data-theme="daylight"] .card-3d,
+body[data-theme="day"] .card-3d,
+body[data-theme="gov"] .card-3d,
+body[data-theme="daylight"] .auth-modal-card,
+body[data-theme="day"] .auth-modal-card,
+body[data-theme="gov"] .auth-modal-card {
+  background: #ffffff !important;
+  color: var(--ink) !important;
+  border-color: var(--glass-border) !important;
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.07) !important;
+}
+
+body[data-theme="daylight"] .doc-nav-tab,
+body[data-theme="day"] .doc-nav-tab,
+body[data-theme="gov"] .doc-nav-tab,
+body[data-theme="daylight"] .worker-nav-tab,
+body[data-theme="day"] .worker-nav-tab,
+body[data-theme="gov"] .worker-nav-tab,
+body[data-theme="daylight"] .family-pill,
+body[data-theme="day"] .family-pill,
+body[data-theme="gov"] .family-pill {
+  background: #f1f5f9 !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
+}
+
+body[data-theme="daylight"] .doc-nav-tab:hover,
+body[data-theme="day"] .doc-nav-tab:hover,
+body[data-theme="gov"] .doc-nav-tab:hover,
+body[data-theme="daylight"] .worker-nav-tab:hover,
+body[data-theme="day"] .worker-nav-tab:hover,
+body[data-theme="gov"] .worker-nav-tab:hover,
+body[data-theme="daylight"] .family-pill:hover,
+body[data-theme="day"] .family-pill:hover,
+body[data-theme="gov"] .family-pill:hover {
+  background: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+body[data-theme="daylight"] .doc-nav-tab.active,
+body[data-theme="day"] .doc-nav-tab.active,
+body[data-theme="daylight"] .worker-nav-tab.active,
+body[data-theme="day"] .worker-nav-tab.active {
+  background: linear-gradient(135deg, #059669, #047857) !important;
+  color: #ffffff !important;
+  border-color: transparent !important;
+}
+
+body[data-theme="gov"] .doc-nav-tab.active,
+body[data-theme="gov"] .worker-nav-tab.active {
+  background: linear-gradient(135deg, #003366, #0b5ed7) !important;
+  color: #ffffff !important;
+  border-color: transparent !important;
+}
+
+body[data-theme="daylight"] .input-field,
+body[data-theme="day"] .input-field,
+body[data-theme="gov"] .input-field {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
+}
+
+body[data-theme="daylight"] .btn-glass,
+body[data-theme="day"] .btn-glass,
+body[data-theme="gov"] .btn-glass {
+  background: #f1f5f9 !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
+}
+
+body[data-theme="daylight"] .top-appbar,
+body[data-theme="day"] .top-appbar,
+body[data-theme="gov"] .top-appbar {
+  background: rgba(255, 255, 255, 0.94) !important;
+  border-bottom-color: rgba(15, 23, 42, 0.1) !important;
+}
+
+body[data-theme="daylight"] .sidebar-rail,
+body[data-theme="day"] .sidebar-rail,
+body[data-theme="gov"] .sidebar-rail {
+  background: #ffffff !important;
+  border-right-color: rgba(15, 23, 42, 0.1) !important;
+}
+
+body[data-theme="daylight"] .weather-ticker,
+body[data-theme="day"] .weather-ticker,
+body[data-theme="gov"] .weather-ticker {
+  background: #e0f2fe !important;
+  color: #0369a1 !important;
+  border-color: #bae6fd !important;
+}
+
+body[data-theme="gov"] {
+  background-image:
+    radial-gradient(100% 70% at 15% 0%, rgba(11, 94, 215, 0.1) 0%, transparent 60%),
+    radial-gradient(80% 60% at 85% 10%, rgba(234, 88, 12, 0.08) 0%, transparent 50%),
+    linear-gradient(175deg, #f0f4f9 0%, #e2eaf4 100%) !important;
+}
+
+body[data-theme="daylight"], body[data-theme="day"] {
+  background-image:
+    radial-gradient(100% 70% at 15% 0%, rgba(5, 150, 105, 0.08) 0%, transparent 60%),
+    radial-gradient(80% 60% at 85% 10%, rgba(2, 132, 199, 0.08) 0%, transparent 50%),
+    linear-gradient(175deg, #f8fafc 0%, #f1f5f9 100%) !important;
+}
+
+body[data-theme="navy"] {
+  background-image:
+    radial-gradient(100% 70% at 15% 0%, rgba(56, 189, 248, 0.18) 0%, transparent 60%),
+    radial-gradient(80% 60% at 85% 10%, rgba(34, 211, 238, 0.12) 0%, transparent 50%),
+    linear-gradient(175deg, #030a16 0%, #07152b 40%, #0c2140 100%) !important;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  min-height: 100vh;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: var(--void-950);
+  color: var(--ink);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+body {
+  background-image:
+    radial-gradient(100% 70% at 15% 0%, rgba(16, 185, 129, 0.18) 0%, transparent 60%),
+    radial-gradient(80% 60% at 85% 10%, rgba(245, 158, 11, 0.12) 0%, transparent 50%),
+    radial-gradient(70% 50% at 50% 100%, rgba(34, 211, 238, 0.10) 0%, transparent 55%),
+    linear-gradient(175deg, var(--void-950) 0%, var(--void-900) 40%, var(--void-850) 100%);
+  background-attachment: fixed;
+}
+
+h1, h2, h3, h4, .serif {
+  font-family: 'Fraunces', Georgia, serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+
+.mono {
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+button {
+  font-family: inherit;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: inherit;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--primary-bright);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/* Custom Glass Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(220, 252, 243, 0.16);
+  border-radius: 20px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(95, 227, 196, 0.35);
+}
+
+/* =========================================================
+   AMBIENT 3D PARTICLES & GLOWING MESH
+========================================================= */
+.ambient-scene {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.orb-3d {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.6;
+  mix-blend-mode: screen;
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+.orb-emerald {
+  width: 50vw;
+  height: 50vw;
+  left: -15vw;
+  top: -15vw;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.45) 0%, rgba(5, 150, 105, 0.2) 50%, transparent 70%);
+  animation: orbDrift1 28s ease-in-out infinite alternate;
+}
+
+.orb-amber {
+  width: 42vw;
+  height: 42vw;
+  right: -12vw;
+  top: 15vh;
+  background: radial-gradient(circle, rgba(245, 158, 11, 0.35) 0%, rgba(217, 119, 6, 0.15) 50%, transparent 70%);
+  animation: orbDrift2 34s ease-in-out infinite alternate;
+}
+
+.orb-cyan {
+  width: 38vw;
+  height: 38vw;
+  left: 25vw;
+  bottom: -15vh;
+  background: radial-gradient(circle, rgba(34, 211, 238, 0.28) 0%, transparent 68%);
+  animation: orbDrift3 30s ease-in-out infinite alternate;
+}
+
+@keyframes orbDrift1 {
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(5vw, 6vh, 40px) scale(1.1); }
+  100% { transform: translate3d(-3vw, 8vh, -20px) scale(0.95); }
+}
+
+@keyframes orbDrift2 {
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(-6vw, -5vh, -30px) scale(1.08); }
+  100% { transform: translate3d(4vw, 7vh, 25px) scale(0.92); }
+}
+
+@keyframes orbDrift3 {
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(4vw, -7vh, 35px) scale(1.15); }
+  100% { transform: translate3d(-5vw, 3vh, -15px) scale(0.9); }
+}
+
+/* =========================================================
+   3D GLASS TOUCHED CONTROLS & CARDS
+========================================================= */
+.glass-panel {
+  background: linear-gradient(145deg, var(--glass-2), var(--glass-1));
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-ambient), var(--shadow-inset);
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  transition: transform 0.35s var(--ease-out), box-shadow 0.35s var(--ease-out), border-color 0.25s ease;
+}
+
+/* Dynamic Specular Sheen on Pointer Move */
+.glass-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(320px circle at var(--mx, 50%) var(--my, 50%), var(--glass-specular), transparent 70%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  z-index: 2;
+}
+
+.glass-panel:hover::before {
+  opacity: 0.16;
+}
+
+/* Glass Iridescent Shimmer Sweep on Hover */
+.glass-panel::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    60deg,
+    transparent 40%,
+    rgba(255, 255, 255, 0.09) 50%,
+    transparent 60%
+  );
+  transform: rotate(25deg) translateY(-100%);
+  transition: transform 0.75s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.glass-panel:hover::after {
+  transform: rotate(25deg) translateY(100%);
+}
+
+/* 3D Interactive Parallax Tilt Card */
+.card-3d {
+  transform-style: preserve-3d;
+  will-change: transform;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
+}
+
+.card-3d:hover {
+  border-color: var(--glass-border-strong);
+  box-shadow: var(--shadow-3d), var(--shadow-inset);
+  transform: translateY(-3px) perspective(800px);
+}
+
+/* Glass Buttons */
+.btn-glass {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 18px;
+  font-size: 13.5px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  border-radius: var(--radius-sm);
+  background: var(--glass-2);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  color: var(--ink);
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  box-shadow: var(--shadow-inset);
+  transition: transform 0.2s var(--ease-spring), background 0.2s ease, border-color 0.2s ease, box-shadow 0.25s ease;
+  min-height: 44px;
+}
+
+.btn-glass::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(120px circle at var(--mx, 50%) var(--my, 50%), rgba(255, 255, 255, 0.35), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  z-index: -1;
+}
+
+.btn-glass:hover {
+  background: var(--glass-3);
+  border-color: var(--glass-border-strong);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px -8px var(--glass-glow), var(--shadow-inset);
+}
+
+.btn-glass:hover::before {
+  opacity: 1;
+}
+
+.btn-glass:active {
+  transform: translateY(0) scale(0.97);
+}
+
+.btn-glass.btn-primary {
+  background: linear-gradient(135deg, var(--primary-bright), var(--primary));
+  color: #03231c;
+  border-color: rgba(255, 255, 255, 0.3);
+  font-weight: 800;
+  box-shadow: 0 8px 25px -6px var(--primary-glow), var(--shadow-inset);
+}
+
+.btn-glass.btn-primary:hover {
+  background: linear-gradient(135deg, #5eead4, var(--primary-bright));
+  box-shadow: 0 12px 30px -4px var(--primary-glow), var(--shadow-inset);
+  transform: translateY(-2px) scale(1.02);
+}
+
+.btn-glass.btn-danger {
+  background: linear-gradient(135deg, var(--danger-bright), var(--danger));
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 25px -6px var(--danger-glow), var(--shadow-inset);
+  animation: dangerPulse 2.6s infinite ease-in-out;
+}
+
+@keyframes dangerPulse {
+  0%, 100% { box-shadow: 0 8px 25px -6px var(--danger-glow), var(--shadow-inset); }
+  50% { box-shadow: 0 12px 36px 2px var(--danger-glow), var(--shadow-inset); }
+}
+
+.btn-glass.btn-accent {
+  background: linear-gradient(135deg, var(--accent-light), var(--accent));
+  color: #2e1a02;
+  font-weight: 800;
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 25px -6px var(--accent-glow), var(--shadow-inset);
+}
+
+/* Fluid Ripple Animation */
+.glass-ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.65) 0%, rgba(95, 227, 196, 0.2) 60%, transparent 80%);
+  transform: translate(-50%, -50%) scale(0);
+  pointer-events: none;
+  animation: rippleExpand 0.65s var(--ease-out) forwards;
+  z-index: 10;
+}
+
+@keyframes rippleExpand {
+  to {
+    transform: translate(-50%, -50%) scale(24);
+    opacity: 0;
+  }
+}
+
+/* =========================================================
+   AUDIO VOICE ASSIST BUTTON (RURAL-FIRST)
+========================================================= */
+.voice-speak-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(52, 211, 153, 0.2), rgba(16, 185, 129, 0.1));
+  border: 1px solid rgba(52, 211, 153, 0.4);
+  color: var(--primary-bright);
+  font-size: 16px;
+  cursor: pointer;
+  transition: transform 0.2s var(--ease-spring), background 0.2s ease, box-shadow 0.2s ease;
+  flex-shrink: 0;
+}
+
+.voice-speak-btn:hover {
+  transform: scale(1.12);
+  background: rgba(52, 211, 153, 0.3);
+  box-shadow: 0 0 15px var(--primary-glow);
+}
+
+.voice-speak-btn:active {
+  transform: scale(0.94);
+}
+
+.voice-speak-btn.speaking {
+  background: var(--accent);
+  color: #271403;
+  animation: speakPulse 1.2s infinite ease-in-out;
+}
+
+@keyframes speakPulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); }
+  50% { transform: scale(1.15); box-shadow: 0 0 0 8px rgba(245, 158, 11, 0); }
+}
+
+/* =========================================================
+   LOGIN & ONBOARDING 3D GLASS PORTAL
+========================================================= */
+.login-portal {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  place-items: center;
+  overflow-y: auto;
+  padding: 24px;
+  background: radial-gradient(circle at 50% 10%, rgba(6, 40, 33, 0.88), rgba(2, 11, 9, 0.96) 80%);
+  backdrop-filter: blur(28px) saturate(160%);
+  -webkit-backdrop-filter: blur(28px) saturate(160%);
+  transition: opacity 0.5s var(--ease-out), visibility 0.5s step-end;
+}
+
+.login-portal.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.portal-container {
+  width: min(1080px, 100%);
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 36px;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+.portal-hero {
+  padding: 10px;
+}
+
+.portal-emblem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.emblem-3d-box {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--accent), #d97706);
+  box-shadow: 0 10px 30px -5px var(--accent-glow), inset 0 2px 2px rgba(255, 255, 255, 0.6);
+  display: grid;
+  place-items: center;
+  font-family: 'Fraunces', serif;
+  font-weight: 800;
+  font-size: 26px;
+  color: #271502;
+  transform: perspective(600px) rotateY(-12deg) rotateX(6deg);
+  animation: emblemFloat 6s ease-in-out infinite alternate;
+}
+
+@keyframes emblemFloat {
+  0% { transform: perspective(600px) rotateY(-12deg) rotateX(6deg) translateY(0); }
+  100% { transform: perspective(600px) rotateY(10deg) rotateX(-4deg) translateY(-8px); }
+}
+
+.portal-hero h1 {
+  font-size: clamp(34px, 4.4vw, 54px);
+  line-height: 1.08;
+  margin-bottom: 16px;
+  letter-spacing: -0.03em;
+  background: linear-gradient(160deg, #ffffff 30%, #a7f3d0 85%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.portal-hero p {
+  font-size: 15.5px;
+  color: var(--ink-dim);
+  line-height: 1.6;
+  max-width: 480px;
+  margin-bottom: 24px;
+}
+
+.rural-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.rural-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  background: rgba(220, 252, 243, 0.06);
+  border: 1px solid var(--glass-border);
+  font-size: 12px;
+  color: #d1fae5;
+  backdrop-filter: blur(10px);
+}
+
+.portal-card {
+  padding: 30px;
+  border-radius: 28px;
+  background: linear-gradient(155deg, rgba(20, 60, 52, 0.45), rgba(6, 25, 21, 0.65));
+  border: 1.5px solid rgba(145, 245, 216, 0.3);
+  box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.85), inset 0 2px 2px rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(32px) saturate(180%);
+  -webkit-backdrop-filter: blur(32px) saturate(180%);
+  transform: perspective(1000px) rotateY(-4deg) rotateX(2deg);
+  transition: transform 0.4s var(--ease-out);
+}
+
+.portal-card:hover {
+  transform: perspective(1000px) rotateY(0deg) rotateX(0deg);
+}
+
+.portal-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 4px;
+  border-radius: 14px;
+  margin-bottom: 20px;
+  border: 1px solid var(--glass-border);
+}
+
+.portal-tab-btn {
+  padding: 9px 12px;
+  font-size: 12.5px;
+  font-weight: 700;
+  border-radius: 10px;
+  color: var(--muted);
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.portal-tab-btn.active {
+  background: linear-gradient(135deg, var(--primary-bright), var(--primary));
+  color: #03231c;
+  box-shadow: 0 4px 15px -3px var(--primary-glow);
+}
+
+.role-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.role-card-select {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 13px;
+  border-radius: 14px;
+  background: rgba(4, 22, 18, 0.45);
+  border: 1px solid var(--glass-border);
+  color: var(--ink);
+  text-align: left;
+  transition: all 0.25s var(--ease-spring);
+  cursor: pointer;
+}
+
+.role-card-select:hover {
+  background: var(--glass-2);
+  border-color: var(--glass-border-strong);
+  transform: translateY(-2px);
+}
+
+.role-card-select.selected {
+  background: linear-gradient(145deg, rgba(52, 211, 153, 0.2), rgba(16, 185, 129, 0.08));
+  border-color: var(--primary-bright);
+  box-shadow: 0 8px 20px -8px var(--primary-glow), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px) scale(1.02);
+}
+
+.role-icon-3d {
+  font-size: 22px;
+  margin-bottom: 6px;
+}
+
+.role-card-select strong {
+  font-size: 13px;
+  margin-bottom: 2px;
+  display: block;
+}
+
+.role-card-select small {
+  font-size: 10.5px;
+  color: var(--muted);
+  line-height: 1.25;
+}
+
+.input-group {
+  margin-bottom: 16px;
+}
+
+.input-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.input-field {
+  width: 100%;
+  height: 46px;
+  padding: 0 14px;
+  background: rgba(2, 15, 12, 0.55);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  backdrop-filter: blur(10px);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.input-field:focus {
+  border-color: var(--primary-bright);
+  background: rgba(2, 15, 12, 0.8);
+  box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.2);
+}
+
+/* OTP Digits Container */
+.otp-container {
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.otp-box {
+  width: 52px;
+  height: 52px;
+  text-align: center;
+  font-size: 22px;
+  font-weight: 800;
+  font-family: 'IBM Plex Mono', monospace;
+  background: rgba(2, 15, 12, 0.6);
+  border: 1.5px solid var(--glass-border);
+  border-radius: 12px;
+  color: var(--primary-bright);
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.otp-box:focus {
+  border-color: var(--primary-bright);
+  box-shadow: 0 0 15px var(--primary-glow);
+  transform: scale(1.05);
+}
+
+/* =========================================================
+   APP SHELL LAYOUT
+========================================================= */
+.app-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  min-height: 100vh;
+  position: relative;
+  z-index: 1;
+}
+
+/* Sidebar Rail */
+.sidebar-rail {
+  background: var(--rail-glass);
+  backdrop-filter: blur(28px) saturate(160%);
+  -webkit-backdrop-filter: blur(28px) saturate(160%);
+  border-right: 1px solid var(--glass-border);
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  z-index: 30;
+}
+
+.brand-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 6px 18px;
+  border-bottom: 1px solid var(--glass-border);
+  margin-bottom: 18px;
+}
+
+.brand-emblem-sm {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: linear-gradient(145deg, var(--accent), #c97a1e);
+  box-shadow: 0 6px 18px -3px var(--accent-glow), inset 0 1px 1px rgba(255, 255, 255, 0.6);
+  display: grid;
+  place-items: center;
+  font-family: 'Fraunces', serif;
+  font-weight: 800;
+  font-size: 20px;
+  color: #271403;
+  flex-shrink: 0;
+}
+
+.brand-title {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.brand-subline {
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-top: 2px;
+}
+
+.nav-group-title {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  margin: 16px 10px 6px;
+  opacity: 0.8;
+}
+
+.nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  margin-bottom: 4px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ink-dim);
+  background: transparent;
+  border: 1px solid transparent;
+  width: 100%;
+  text-align: left;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  transition: all 0.2s var(--ease-out);
+}
+
+.nav-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(140px circle at var(--mx, 50%) var(--my, 50%), rgba(52, 211, 153, 0.2), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  z-index: -1;
+}
+
+.nav-btn:hover {
+  background: var(--glass-1);
+  border-color: var(--glass-border);
+  color: var(--ink);
+  transform: translateX(3px);
+}
+
+.nav-btn:hover::before {
+  opacity: 1;
+}
+
+.nav-btn.active {
+  background: linear-gradient(135deg, var(--accent), #d97706);
+  color: #271403;
+  font-weight: 800;
+  border-color: rgba(255, 255, 255, 0.35);
+  box-shadow: 0 6px 20px -4px var(--accent-glow), var(--shadow-inset);
+}
+
+.nav-btn .nav-icon {
+  font-size: 17px;
+  width: 22px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.nav-badge {
+  margin-left: auto;
+  background: var(--danger);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 20px;
+  box-shadow: 0 0 10px var(--danger-glow);
+}
+
+.rail-footer {
+  margin-top: auto;
+  padding-top: 14px;
+  border-top: 1px solid var(--glass-border);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.signal-status-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--glass-border);
+  font-size: 11.5px;
+  color: var(--ink-dim);
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.signal-status-pill:hover {
+  background: var(--glass-2);
+}
+
+.signal-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--good);
+  box-shadow: 0 0 8px var(--good);
+  animation: dotPulse 2s infinite ease-in-out;
+}
+
+.signal-status-pill.low .signal-dot {
+  background: var(--warn);
+  box-shadow: 0 0 8px var(--warn);
+}
+
+.signal-status-pill.offline .signal-dot {
+  background: var(--danger);
+  box-shadow: 0 0 8px var(--danger);
+}
+
+/* =========================================================
+   TOPBAR & HEADER
+========================================================= */
+.main-stage {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  position: relative;
+}
+
+.top-appbar {
+  background: rgba(4, 18, 15, 0.65);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border-bottom: 1px solid var(--glass-border);
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 25;
+}
+
+.top-title-area {
+  display: flex;
+  flex-direction: column;
+}
+
+.top-eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--primary-bright);
+}
+
+.top-heading {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.topbar-spacer {
+  flex: 1;
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.glass-dropdown {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--glass-1);
+  border: 1px solid var(--glass-border);
+  font-size: 12.5px;
+  backdrop-filter: blur(12px);
+  position: relative;
+}
+
+.glass-dropdown select {
+  background: transparent;
+  border: none;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+}
+
+.glass-dropdown select option {
+  background: #06211b;
+  color: #fff;
+}
+
+.profile-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px 5px 5px;
+  border-radius: var(--radius-pill);
+  background: var(--glass-2);
+  border: 1px solid var(--glass-border);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.profile-chip:hover {
+  background: var(--glass-3);
+  border-color: var(--glass-border-strong);
+}
+
+.profile-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), #d97706);
+  color: #271403;
+  font-family: 'Fraunces', serif;
+  font-weight: 800;
+  font-size: 14px;
+  display: grid;
+  place-items: center;
+}
+
+/* =========================================================
+   VILLAGE HEALTH & WEATHER ADVISORY TICKER
+========================================================= */
+.weather-ticker {
+  background: linear-gradient(90deg, rgba(245, 158, 11, 0.18), rgba(16, 185, 129, 0.15) 50%, rgba(34, 211, 238, 0.18));
+  border-bottom: 1px solid rgba(245, 158, 11, 0.25);
+  padding: 8px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+  color: #fef3c7;
+  backdrop-filter: blur(12px);
+}
+
+.ticker-icon {
+  font-size: 16px;
+  animation: pulseRotate 4s infinite linear;
+}
+
+@keyframes pulseRotate {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+
+/* =========================================================
+   MAIN VIEW CONTAINER & ANIMATED SECTIONS
+========================================================= */
+.content-stage {
+  padding: 24px 28px 80px;
+  max-width: 1240px;
+  width: 100%;
+  margin: 0 auto;
+  flex: 1;
+}
+
+.view-panel {
+  display: none;
+  animation: viewFadeIn 0.4s var(--ease-out);
+}
+
+.view-panel.active {
+  display: block;
+}
+
+@keyframes viewFadeIn {
+  from { opacity: 0; transform: translateY(16px) scale(0.99); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Stagger Animation for Cards */
+.stagger-card {
+  animation: cardFadeIn 0.5s var(--ease-spring) both;
+  animation-delay: calc(var(--i, 0) * 60ms);
+}
+
+@keyframes cardFadeIn {
+  from { opacity: 0; transform: translateY(24px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Grid Layouts */
+.grid { display: grid; gap: 16px; }
+.grid-4 { grid-template-columns: repeat(4, 1fr); }
+.grid-3 { grid-template-columns: repeat(3, 1fr); }
+.grid-2 { grid-template-columns: repeat(2, 1fr); }
+.grid-2-1 { grid-template-columns: 1.4fr 1fr; }
+.grid-1-2 { grid-template-columns: 1fr 1.4fr; }
+
+/* Stat Cards */
+.stat-card-3d {
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 120px;
+}
+
+.stat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.stat-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+.stat-value {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--ink);
+  margin: 6px 0 2px;
+}
+
+.stat-badge {
+  font-size: 11.5px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.stat-badge.good { color: var(--good); }
+.stat-badge.warn { color: var(--warn); }
+.stat-badge.danger { color: var(--danger-bright); }
+
+/* Section Header with Speak Button */
+.section-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 32px 0 14px;
+}
+
+.section-bar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.section-bar h3 {
+  font-size: 18px;
+}
+
+/* =========================================================
+   RURAL CARE JOURNEY & 3D STEPPED PATHWAY
+========================================================= */
+.stepped-pathway {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin: 14px 0 6px;
+  position: relative;
+}
+
+.pathway-step {
+  padding: 16px 14px;
+  border-radius: 14px;
+  background: rgba(4, 22, 18, 0.4);
+  border: 1px solid var(--glass-border);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  transition: all 0.3s var(--ease-spring);
+}
+
+.pathway-step.done {
+  background: linear-gradient(145deg, rgba(16, 185, 129, 0.22), rgba(5, 150, 105, 0.1));
+  border-color: var(--good);
+  box-shadow: 0 8px 20px -8px rgba(16, 185, 129, 0.4);
+}
+
+.pathway-step.current {
+  background: linear-gradient(145deg, rgba(245, 158, 11, 0.25), rgba(217, 119, 6, 0.12));
+  border-color: var(--accent);
+  box-shadow: 0 10px 25px -6px var(--accent-glow);
+  transform: translateY(-4px) scale(1.02);
+  animation: activeStepPulse 3s infinite ease-in-out;
+}
+
+@keyframes activeStepPulse {
+  0%, 100% { box-shadow: 0 8px 25px -6px var(--accent-glow); }
+  50% { box-shadow: 0 14px 35px 0 var(--accent-glow); }
+}
+
+.step-node-bubble {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 14px;
+  margin-bottom: 8px;
+  background: var(--glass-2);
+  border: 2px solid var(--glass-border-strong);
+  color: var(--muted);
+  box-shadow: var(--shadow-inset);
+}
+
+.pathway-step.done .step-node-bubble {
+  background: var(--good);
+  color: #022c22;
+  border-color: #a7f3d0;
+  box-shadow: 0 0 15px var(--primary-glow);
+}
+
+.pathway-step.current .step-node-bubble {
+  background: var(--accent);
+  color: #271403;
+  border-color: #fde68a;
+  box-shadow: 0 0 18px var(--accent-glow);
+}
+
+.step-tier-tag {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+.step-facility-name {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 2px;
+}
+
+.step-distance-meta {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* =========================================================
+   3D ANATOMICAL TRIAGE (HUMAN BODY MAP)
+========================================================= */
+.body-triage-container {
+  display: grid;
+  grid-template-columns: 1fr 1.3fr;
+  gap: 20px;
+  align-items: center;
+}
+
+.body-3d-visual {
+  position: relative;
+  min-height: 380px;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, transparent 70%);
+  border-radius: var(--radius);
+  border: 1px dashed var(--glass-border);
+  perspective: 800px;
+}
+
+.body-silhouette-svg {
+  width: 220px;
+  height: 340px;
+  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.5));
+}
+
+.body-hotspot {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--accent) 0%, rgba(245, 158, 11, 0.4) 60%, transparent 100%);
+  border: 2px solid #fff;
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+  cursor: pointer;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 15px var(--accent-glow);
+  transition: all 0.25s var(--ease-spring);
+  animation: hotspotBreath 2s infinite ease-in-out;
+}
+
+.body-hotspot:hover {
+  transform: translate(-50%, -50%) scale(1.35);
+  background: var(--danger);
+  border-color: #fecaca;
+  box-shadow: 0 0 25px var(--danger-glow);
+}
+
+@keyframes hotspotBreath {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); }
+  50% { transform: translate(-50%, -50%) scale(1.18); }
+}
+
+.hotspot-head { top: 18%; left: 50%; }
+.hotspot-chest { top: 34%; left: 50%; }
+.hotspot-belly { top: 48%; left: 50%; }
+.hotspot-pelvis { top: 60%; left: 50%; }
+.hotspot-limbs { top: 78%; left: 62%; }
+
+/* =========================================================
+   EMERGENCY 108 RADAR & DISPATCH HUD
+========================================================= */
+.sos-hud-panel {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(155deg, rgba(239, 68, 68, 0.2), rgba(6, 22, 18, 0.8));
+  border: 1.5px solid rgba(239, 68, 68, 0.4);
+  padding: 24px;
+  text-align: center;
+}
+
+.sos-radar-sphere {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  margin: 10px auto 20px;
+  background: radial-gradient(circle at 35% 30%, #fca5a5, var(--danger) 55%, #991b1b);
+  border: 6px solid rgba(255, 255, 255, 0.2);
+  display: grid;
+  place-items: center;
+  font-family: 'Fraunces', serif;
+  font-weight: 800;
+  font-size: 28px;
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 0 0 10px rgba(239, 68, 68, 0.15), 0 0 50px var(--danger-glow);
+  animation: radarWave 2s infinite ease-out;
+  transition: transform 0.2s var(--ease-spring);
+}
+
+.sos-radar-sphere:active {
+  transform: scale(0.92);
+}
+
+@keyframes radarWave {
+  0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7), 0 0 30px var(--danger-glow); }
+  70% { box-shadow: 0 0 0 35px rgba(239, 68, 68, 0), 0 0 60px var(--danger-glow); }
+  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0), 0 0 30px var(--danger-glow); }
+}
+
+.landmark-pill-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin: 14px 0;
+}
+
+.landmark-pill {
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  color: #fef3c7;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.landmark-pill.selected {
+  background: var(--accent);
+  color: #271403;
+  font-weight: 800;
+  box-shadow: 0 0 15px var(--accent-glow);
+}
+
+/* =========================================================
+   JAN AUSHADHI GENERIC SAVINGS CALCULATOR
+========================================================= */
+.generic-compare-card {
+  padding: 16px;
+  border-radius: 14px;
+  background: rgba(220, 252, 243, 0.05);
+  border: 1px solid var(--glass-border);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.compare-col {
+  padding: 12px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.compare-col.generic {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.1));
+  border: 1px solid var(--good);
+}
+
+.price-strike {
+  font-size: 16px;
+  text-decoration: line-through;
+  color: var(--muted);
+}
+
+.price-big-green {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--primary-bright);
+}
+
+/* =========================================================
+   3D TELECONSULTATION VIEWPORT
+========================================================= */
+.tele-stage {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  border-radius: 18px;
+  overflow: hidden;
+  background: radial-gradient(120% 90% at 50% 10%, rgba(16, 185, 129, 0.3), rgba(2, 11, 9, 0.95));
+  border: 1.5px solid var(--glass-border-strong);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-3d), inset 0 1px 2px rgba(255, 255, 255, 0.4);
+}
+
+.tele-live-badge {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--glass-border);
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.tele-pip-window {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  width: 120px;
+  height: 85px;
+  border-radius: 12px;
+  background: linear-gradient(145deg, rgba(20, 70, 60, 0.9), rgba(5, 20, 17, 0.95));
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.7);
+  display: grid;
+  place-items: center;
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.voice-wave-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: 24px;
+}
+
+.voice-wave-bars span {
+  width: 4px;
+  border-radius: 2px;
+  background: var(--primary-bright);
+  height: 6px;
+  animation: waveDance 1s infinite ease-in-out;
+}
+
+.voice-wave-bars span:nth-child(1) { animation-delay: 0s; }
+.voice-wave-bars span:nth-child(2) { animation-delay: 0.15s; }
+.voice-wave-bars span:nth-child(3) { animation-delay: 0.3s; }
+.voice-wave-bars span:nth-child(4) { animation-delay: 0.45s; }
+.voice-wave-bars span:nth-child(5) { animation-delay: 0.2s; }
+
+@keyframes waveDance {
+  0%, 100% { height: 6px; }
+  50% { height: 24px; }
+}
+
+/* =========================================================
+   TABLES & LISTS
+========================================================= */
+.glass-table-wrap {
+  overflow-x: auto;
+  border-radius: var(--radius);
+}
+
+.glass-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+  text-align: left;
+}
+
+.glass-table th {
+  padding: 12px 16px;
+  background: rgba(0, 0, 0, 0.3);
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.glass-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--glass-border);
+  color: var(--ink-dim);
+  vertical-align: middle;
+}
+
+.glass-table tr:hover td {
+  background: var(--glass-1);
+  color: var(--ink);
+}
+
+/* Status Badges */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 11.5px;
+  font-weight: 700;
+  backdrop-filter: blur(8px);
+}
+
+.status-pill.good { background: var(--good-soft); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.4); }
+.status-pill.warn { background: var(--warn-soft); color: #fde68a; border: 1px solid rgba(245, 158, 11, 0.4); }
+.status-pill.danger { background: var(--danger-soft); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.4); }
+.status-pill.info { background: var(--accent-soft); color: #fde68a; border: 1px solid rgba(245, 158, 11, 0.4); }
+
+/* =========================================================
+   FLOATING TOAST & MODALS
+========================================================= */
+.toast-bar {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(40px) scale(0.95);
+  padding: 12px 24px;
+  border-radius: 14px;
+  background: linear-gradient(145deg, rgba(20, 60, 52, 0.95), rgba(6, 25, 21, 0.98));
+  border: 1px solid var(--glass-border-strong);
+  color: var(--ink);
+  font-size: 13.5px;
+  font-weight: 600;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.8), var(--shadow-inset);
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.35s var(--ease-spring);
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.toast-bar.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+/* Glass Modal Overlay */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 11, 9, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: none;
+  place-items: center;
+  padding: 20px;
+  z-index: 250;
+}
+
+.modal-overlay.open {
+  display: grid;
+  animation: modalFadeIn 0.3s var(--ease-out);
+}
+
+.modal-card {
+  width: min(520px, 100%);
+  padding: 28px;
+  border-radius: 24px;
+  background: linear-gradient(155deg, rgba(20, 60, 52, 0.85), rgba(6, 25, 21, 0.95));
+  border: 1.5px solid var(--glass-border-strong);
+  box-shadow: 0 35px 90px -20px rgba(0, 0, 0, 0.9), var(--shadow-inset);
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; transform: scale(0.95) translateY(15px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* =========================================================
+   MOBILE BOTTOM NAVIGATION & RESPONSIVENESS
+========================================================= */
+.mobile-bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  background: rgba(4, 18, 15, 0.92);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border-top: 1px solid var(--glass-border);
+  z-index: 40;
+  justify-content: space-around;
+  align-items: center;
+  padding: 0 8px;
+}
+
+.mobile-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--muted);
+  padding: 6px 10px;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+}
+
+.mobile-nav-item.active {
+  color: var(--primary-bright);
+}
+
+.mobile-nav-item .mob-icon {
+  font-size: 18px;
+}
+
+@media (max-width: 900px) {
+  .app-layout {
+    grid-template-columns: 1fr;
+  }
+  .sidebar-rail {
+    display: none;
+  }
+  .mobile-bottom-nav {
+    display: flex;
+  }
+  .content-stage {
+    padding: 16px 16px 90px;
+  }
+  .portal-container {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .portal-card {
+    transform: none !important;
+  }
+  .grid-4, .grid-3 {
+    grid-template-columns: 1fr 1fr;
+  }
+  .grid-2-1, .grid-1-2, .body-triage-container {
+    grid-template-columns: 1fr;
+  }
+  .stepped-pathway {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 540px) {
+  .grid-4, .grid-3, .grid-2 {
+    grid-template-columns: 1fr;
+  }
+  .stepped-pathway {
+    grid-template-columns: 1fr;
+  }
+  .top-heading {
+    font-size: 16px;
+  }
+  .top-appbar {
+    padding: 10px 14px;
+    gap: 8px;
+  }
+}
+</style>
+</head>
+<body data-theme="emerald">
+
+<!-- =========================================================
+   AMBIENT 3D PARTICLES / ORB FIELD
+========================================================= -->
+<div class="ambient-scene" aria-hidden="true">
+  <div class="orb-3d orb-emerald"></div>
+  <div class="orb-3d orb-amber"></div>
+  <div class="orb-3d orb-cyan"></div>
+</div>
+
+<!-- Unified Auth Overlay & Onboarding is dynamically controlled by auth.js and auth-ui.js -->
+
+<!-- =========================================================
+   APPLICATION SHELL
+========================================================= -->
+<div class="app-layout">
+
+  <!-- SIDEBAR NAVIGATION RAIL (DESKTOP) -->
+  <aside class="sidebar-rail">
+    <div class="brand-header">
+      <div class="brand-emblem-sm">स</div>
+      <div>
+        <div class="brand-title">Swasthya Setu · स्वास्थ्य सेतु</div>
+        <div class="brand-subline" data-i18n="tagline">Rural Health Command Grid</div>
+      </div>
+    </div>
+
+    <!-- Nav Section: Patient Care -->
+    <div class="nav-group-title" data-i18n="nav_patient_care">Patient Care · रोगी सेवा</div>
+    <button class="nav-btn active" data-view="home"><span class="nav-icon">⌂</span><span data-i18n="nav_home">Home &amp; Journey</span></button>
+    <button class="nav-btn" data-view="triage"><span class="nav-icon">🩺</span><span data-i18n="nav_triage">3D Symptom Check</span></button>
+    <button class="nav-btn" data-view="appointments"><span class="nav-icon">📅</span><span data-i18n="nav_appt">Queue &amp; Token</span></button>
+    <button class="nav-btn" data-view="tele"><span class="nav-icon">🎥</span><span data-i18n="nav_tele">Teleconsultation</span></button>
+    <button class="nav-btn" data-view="records"><span class="nav-icon">📋</span><span data-i18n="nav_records">Health Locker (ABHA)</span></button>
+
+    <!-- Nav Section: Village Grid -->
+    <div class="nav-group-title" data-i18n="nav_village_grid">Village Grid · ग्रामीण सेवा</div>
+    <button class="nav-btn" data-view="sos"><span class="nav-icon">🚨</span><span data-i18n="nav_sos">Emergency 108 SOS</span></button>
+    <button class="nav-btn" data-view="medicines"><span class="nav-icon">💊</span><span data-i18n="nav_meds">Jan Aushadhi &amp; Stock</span></button>
+    <button class="nav-btn" data-view="referrals"><span class="nav-icon">⇄</span><span data-i18n="nav_referrals">Referral Ladder</span><span class="nav-badge" id="sidebarRefBadge">2</span></button>
+    <button class="nav-btn" data-view="worker"><span class="nav-icon">🤝</span><span data-i18n="nav_asha">ASHA Didi Desk</span></button>
+    <button class="nav-btn" data-view="firstaid"><span class="nav-icon">🩹</span><span data-i18n="nav_firstaid">Visual First Aid</span></button>
+
+    <!-- Nav Section: Administration -->
+    <div class="nav-group-title" data-i18n="nav_admin">Admin Command · प्रशासन</div>
+    <button class="nav-btn" data-view="dashboard"><span class="nav-icon">🏥</span><span data-i18n="nav_dashboard">Admin Command Center</span></button>
+
+    <!-- Rail Footer / Connectivity Status -->
+    <div class="rail-footer">
+      <div class="signal-status-pill" id="signalPill" onclick="toggleSignalSimulation()">
+        <span class="signal-dot"></span>
+        <span id="signalText">Online · Full 4G Sync</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN STAGE -->
+  <main class="main-stage">
+    
+    <!-- Topbar -->
+    <header class="top-appbar">
+      <div class="top-title-area">
+        <span class="top-eyebrow" id="topEyebrow">Andhra Pradesh · Kondapalli Sector</span>
+        <h2 class="top-heading" id="topHeading">Namaste, Anitha K.</h2>
+      </div>
+
+      <div class="topbar-spacer"></div>
+
+      <div class="topbar-actions">
+        <!-- Audio Read-Aloud Assistant -->
+        <button class="voice-speak-btn" onclick="speakCurrentPage()" title="Read current page aloud">🔊</button>
+
+        <!-- Pilot Village Switcher -->
+        <div class="glass-dropdown">
+          <span style="font-size:14px">📍</span>
+          <select id="headerVillageSelect" onchange="patientController.selectVillage(this.value)">
+            <option value="kondapalli" selected>Kondapalli Gramam (AP)</option>
+            <option value="dhampur">Dhampur Kalan (UP)</option>
+            <option value="seohara">Seohara Village (UP)</option>
+            <option value="nehtaur">Nehtaur Block (UP)</option>
+            <option value="afzalgarh">Afzalgarh Rural (UP)</option>
+            <option value="noorpur">Noorpur Gram (UP)</option>
+          </select>
+        </div>
+
+        <!-- Language Selector Pill -->
+        <div class="glass-dropdown">
+          <span style="font-size:14px">🌐</span>
+          <select id="headerLangSelect" onchange="onLanguageChange(this.value)">
+            <option value="en">English</option>
+            <option value="hi" selected>हिंदी (Hindi)</option>
+            <option value="te">తెలుగు (Telugu)</option>
+            <option value="ta">தமிழ் (Tamil)</option>
+            <option value="mr">मराठी (Marathi)</option>
+            <option value="bn">বাংলা (Bengali)</option>
+            <option value="kn">ಕನ್ನಡ (Kannada)</option>
+          </select>
+        </div>
+
+        <!-- Triple Theme Toggle -->
+        <button class="btn-glass" style="padding:7px 12px;min-height:36px;font-size:12px" onclick="patientController.toggleThemeNext()" id="themeToggleBtn">
+          <span>🌙 Emerald Night</span>
+        </button>
+
+        <!-- Emergency Header Trigger -->
+        <button class="btn-glass btn-danger" onclick="patientController.triggerAmbulanceDispatch()" style="min-height:38px;padding:7px 14px">
+          <span>🚨 SOS 108</span>
+        </button>
+
+        <!-- Dynamic Profile Chip & Switch Role Menu (RBAC Controlled) -->
+        <div id="topbarProfileChipContainer"></div>
+      </div>
+    </header>
+
+    <!-- Village Health & Weather Advisory Banner -->
+    <div class="weather-ticker">
+      <span class="ticker-icon">☀️</span>
+      <span style="font-weight:700">Kondapalli Weather Advisory:</span>
+      <span id="weatherText">38°C High Heat — Drink Clean Water &amp; ORS | 🌧️ Keep water storage covered to prevent dengue.</span>
+    </div>
+
+    <!-- CONTENT VIEW CONTAINER -->
+    <div class="content-stage">
+
+      <!-- =========================================================
+         VIEW 1: HOME & CARE JOURNEY (मुख्य पृष्ठ)
+      ========================================================= -->
+      <section class="view-panel active" id="view-home">
+        
+        <!-- Welcome Reassurance Banner -->
+        <div class="glass-panel card-3d stagger-card" style="--i:1;padding:20px;margin-bottom:20px;background:linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(5, 40, 32, 0.6) 60%, rgba(245, 158, 11, 0.15));border-color:rgba(145, 245, 216, 0.35)">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px">
+            <div style="display:flex;align-items:center;gap:16px">
+              <div style="width:52px;height:52px;border-radius:18px;background:linear-gradient(135deg, var(--primary-bright), var(--primary));color:#022c22;display:grid;place-items:center;font-size:26px;box-shadow:0 8px 20px -4px var(--primary-glow)">
+                🌿
+              </div>
+              <div>
+                <h3 style="font-size:20px;margin-bottom:2px" id="welcomeTitle">Care is close to your home</h3>
+                <p style="font-size:13.5px;color:var(--ink-dim);max-width:560px" id="welcomeDesc">Start with one simple step. Your nearest Kondapalli Sub-Centre &amp; ASHA Didi are ready to help, even when phone signal is low.</p>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <button class="voice-speak-btn" onclick="speakText('स्वास्थ्य सेवा आपके घर के पास है। कोंडापल्ली उप-केंद्र और आपकी आशा दीदी हमेशा मदद के लिए तैयार हैं।')" title="Listen in Hindi">🔊</button>
+              <div class="status-pill good">
+                <span>● Kondapalli PHC · 3.2 km (Open)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4 Core Live Stat Cards -->
+        <div class="grid grid-4" style="margin-bottom:24px">
+          <div class="glass-panel card-3d stat-card-3d stagger-card" style="--i:2">
+            <div class="stat-header">
+              <span class="stat-label" data-i18n="stat_wait">Avg Queue Wait</span>
+              <button class="voice-speak-btn" onclick="speakText('आज का औसत प्रतीक्षा समय 18 मिनट है')">🔊</button>
+            </div>
+            <div class="stat-value">18 min</div>
+            <div class="stat-badge good">↓ 34% faster via digital token</div>
+          </div>
+
+          <div class="glass-panel card-3d stat-card-3d stagger-card" style="--i:3">
+            <div class="stat-header">
+              <span class="stat-label" data-i18n="stat_referrals">Referral Ladder</span>
+              <button class="voice-speak-btn" onclick="speakText('आपके दो रेफ़रल सक्रिय हैं')">🔊</button>
+            </div>
+            <div class="stat-value">2 Active</div>
+            <div class="stat-badge warn">1 In-transit to CHC</div>
+          </div>
+
+          <div class="glass-panel card-3d stat-card-3d stagger-card" style="--i:4">
+            <div class="stat-header">
+              <span class="stat-label" data-i18n="stat_followups">Follow-ups Due</span>
+              <button class="voice-speak-btn" onclick="speakText('मातृत्व जांच और बच्चे का टीकाकरण लंबित है')">🔊</button>
+            </div>
+            <div class="stat-value">3 Visits</div>
+            <div class="stat-badge danger">1 ANC Visit Overdue</div>
+          </div>
+
+          <div class="glass-panel card-3d stat-card-3d stagger-card" style="--i:5">
+            <div class="stat-header">
+              <span class="stat-label" data-i18n="stat_medicines">Medicines in Stock</span>
+              <button class="voice-speak-btn" onclick="speakText('कोंडापल्ली प्राथमिक स्वास्थ्य केंद्र में 92 प्रतिशत आवश्यक दवाइयां उपलब्ध हैं')">🔊</button>
+            </div>
+            <div class="stat-value">92%</div>
+            <div class="stat-badge good">Kondapalli PHC Stock Healthy</div>
+          </div>
+        </div>
+
+        <!-- Family Member Profile Switcher (Rural Family Care) -->
+        <div class="section-bar">
+          <div class="section-bar-left">
+            <h3 data-i18n="family_care">Family Health Circle · परिवार स्वास्थ्य चक्र</h3>
+            <button class="voice-speak-btn" onclick="speakText('परिवार के सदस्य को चुनें: अनिता, बेबी रवि, रामू या सरस्वती देवी')">🔊</button>
+          </div>
+        </div>
+        <div id="familyProfileSelector" class="family-profile-grid"></div>
+
+        <!-- 3D Stepped Care Pathway (Village Sub-centre -> District Hospital) -->
+        <div class="section-bar">
+          <div class="section-bar-left">
+            <h3 data-i18n="care_ladder">Care Journey &amp; Referral Ladder · देखभाल सीढ़ी</h3>
+            <button class="voice-speak-btn" onclick="speakText('यह आपकी देखभाल यात्रा है: उप-केंद्र से लेकर जिला अस्पताल तक सभी रिकॉर्ड सुरक्षित साझा होते हैं')">🔊</button>
+          </div>
+        </div>
+        <div class="glass-panel card-3d" style="padding:22px">
+          <div class="stepped-pathway" id="steppedPathway">
+            <div class="pathway-step done">
+              <div class="step-tier-tag">Tier 1 · Sub-Centre</div>
+              <div class="step-node-bubble">✓</div>
+              <div class="step-facility-name">Kondapalli Sub-Centre</div>
+              <div class="step-distance-meta">0.8 km · Vitals &amp; RDT</div>
+            </div>
+
+            <div class="pathway-step current">
+              <div class="step-tier-tag">Tier 2 · PHC</div>
+              <div class="step-node-bubble">2</div>
+              <div class="step-facility-name">Kondapalli PHC</div>
+              <div class="step-distance-meta">3.2 km · Lab &amp; MO Exam</div>
+            </div>
+
+            <div class="pathway-step">
+              <div class="step-tier-tag">Tier 3 · CHC</div>
+              <div class="step-node-bubble">3</div>
+              <div class="step-facility-name">Ibrahimpatnam CHC</div>
+              <div class="step-distance-meta">11 km · Ultrasound/Specialist</div>
+            </div>
+
+            <div class="pathway-step">
+              <div class="step-tier-tag">Tier 4 · District Hospital</div>
+              <div class="step-node-bubble">4</div>
+              <div class="step-facility-name">Vijayawada Dist. Hospital</div>
+              <div class="step-distance-meta">26 km · Blood Bank / Surgery</div>
+            </div>
+          </div>
+          <p style="font-size:12.5px;color:var(--muted);margin-top:14px;text-align:center">
+            🔒 ABHA interoperable: No repeated questions or lost papers. Every doctor sees what the frontline worker already recorded.
+          </p>
+        </div>
+
+        <!-- Daily Medication Adherence & Schedule Hub -->
+        <div class="section-bar" style="margin-top:24px;">
+          <div class="section-bar-left">
+            <h3>💊 Daily Medication Schedule &amp; Jan Aushadhi Tracker</h3>
+            <button class="voice-speak-btn" onclick="speakText('आपकी आज की दवाओं की सूची और जन औषधि बचत ट्रैकर')">🔊</button>
+          </div>
+        </div>
+        <div class="glass-panel" style="padding:22px;">
+          <div id="dailyMedicationChecklist"></div>
+        </div>
+
+        <!-- Live Hospital & Bed Capacity Tracker -->
+        <div class="section-bar" style="margin-top:24px;">
+          <div class="section-bar-left">
+            <h3>🏥 Live Hospital &amp; Bed Capacity Near You</h3>
+            <button class="voice-speak-btn" onclick="speakText('नजदीकी अस्पताल, आईसीयू और सामान्य बिस्तरों की लाइव स्थिति')">🔊</button>
+          </div>
+        </div>
+        <div id="liveHospitalBedGridPatient"></div>
+
+        <!-- Quick 3D Action Cards -->
+        <div class="section-bar">
+          <div class="section-bar-left">
+            <h3 data-i18n="quick_tools">Instant Village Health Tools · त्वरित सेवाएँ</h3>
+            <button class="voice-speak-btn" onclick="speakText('त्वरित सेवाएँ: लक्षण जांच, डॉक्टर परामर्श, आपातकालीन एम्बुलेंस या सस्ती दवाइयां चुनें')">🔊</button>
+          </div>
+        </div>
+        <div class="grid grid-4">
+          <button class="glass-panel card-3d" style="padding:18px;text-align:left" onclick="switchView('triage')">
+            <div style="font-size:28px;margin-bottom:10px">🩺</div>
+            <strong style="font-size:14.5px;display:block">3D Symptom Check</strong>
+            <p style="font-size:12px;color:var(--muted);margin-top:4px">Touch the body map or speak symptoms in your language.</p>
+          </button>
+
+          <button class="glass-panel card-3d" style="padding:18px;text-align:left" onclick="switchView('tele')">
+            <div style="font-size:28px;margin-bottom:10px">🎥</div>
+            <strong style="font-size:14.5px;display:block">e-Sanjeevani Teleconsult</strong>
+            <p style="font-size:12px;color:var(--muted);margin-top:4px">Free video call with government specialist doctors.</p>
+          </button>
+
+          <button class="glass-panel card-3d" style="padding:18px;text-align:left" onclick="switchView('medicines')">
+            <div style="font-size:28px;margin-bottom:10px">💊</div>
+            <strong style="font-size:14.5px;display:block">Jan Aushadhi Savings</strong>
+            <p style="font-size:12px;color:var(--muted);margin-top:4px">Find 80% cheaper generic medicines nearby.</p>
+          </button>
+
+          <button class="glass-panel card-3d" style="padding:18px;text-align:left" onclick="switchView('sos')">
+            <div style="font-size:28px;margin-bottom:10px">🚨</div>
+            <strong style="font-size:14.5px;display:block;color:var(--danger-bright)">Emergency 108 Radar</strong>
+            <p style="font-size:12px;color:var(--muted);margin-top:4px">Instant 1-tap village ambulance dispatch.</p>
+          </button>
+        </div>
+
+      </section>
+
+      <!-- =========================================================
+         VIEW 2: 3D ANATOMICAL TRIAGE & SYMPTOM CHECK
+      ========================================================= -->
+      <section class="view-panel" id="view-triage">
+        <div class="section-bar" style="margin-top:0">
+          <div class="section-bar-left">
+            <h3 data-i18n="triage_title">Interactive 3D Symptom Triage · लक्षण जांच</h3>
+            <button class="voice-speak-btn" onclick="speakText('शरीर के जिस हिस्से में दर्द या तकलीफ है, उस पर टैप करें या बोलकर बताएं')">🔊</button>
+          </div>
+          <button class="btn-glass" onclick="startVoiceDictation()">🎙️ बोलकर बताएं (Voice Input)</button>
+        </div>
+
+        <div class="glass-panel card-3d" style="padding:24px">
+          <div class="body-triage-container">
+            
+            <!-- 3D Body Silhouette -->
+            <div class="body-3d-visual" id="bodyMapArea">
+              <svg class="body-silhouette-svg" viewBox="0 0 200 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <ellipse cx="100" cy="38" rx="22" ry="26" fill="rgba(52, 211, 153, 0.18)" stroke="#34d399" stroke-width="2"/>
+                <path d="M92 64 L108 64 L125 90 L140 160 L128 165 L118 115 L118 200 L135 295 L118 298 L104 210 L96 210 L82 298 L65 295 L82 200 L82 115 L72 165 L60 160 L75 90 Z" fill="rgba(16, 185, 129, 0.12)" stroke="#10b981" stroke-width="1.8"/>
+              </svg>
+
+              <!-- Interactive Hotspots -->
+              <div class="body-hotspot hotspot-head" onclick="selectBodyArea('Head & Fever', 'सिर दर्द, बुखार, चक्कर')">🧠</div>
+              <div class="body-hotspot hotspot-chest" onclick="selectBodyArea('Chest & Breathing', 'सीने में दर्द, सांस फूलना')">🫁</div>
+              <div class="body-hotspot hotspot-belly" onclick="selectBodyArea('Abdomen & Digestive', 'पेट दर्द, उल्टी, दस्त')">🤰</div>
+              <div class="body-hotspot hotspot-pelvis" onclick="selectBodyArea('Pregnancy & Maternal', 'गर्भावस्था जांच, प्रसव दर्द')">👶</div>
+              <div class="body-hotspot hotspot-limbs" onclick="selectBodyArea('Joints & Limbs', 'जोड़ों का दर्द, चोट, सूजन')">🦵</div>
+            </div>
+
+            <!-- Triage Interactive Questionnaire -->
+            <div>
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+                <span class="status-pill warn" id="triageRegionBadge">Selected: General Body</span>
+                <span style="font-size:12px;color:var(--muted)">Step 1 of 3</span>
+              </div>
+
+              <h4 style="font-size:20px;margin-bottom:12px" id="triageQuestionText">What is the primary symptom bothering you today?</h4>
+              
+              <div class="grid grid-2" id="triageOptionGrid" style="gap:10px;margin-bottom:16px">
+                <button class="btn-glass" style="justify-content:flex-start" onclick="patientController.runAITriage('high_fever')">🌡️ High Fever &amp; Chills</button>
+                <button class="btn-glass" style="justify-content:flex-start" onclick="patientController.runAITriage('chest_pain')">⚡ Acute Chest Pain</button>
+                <button class="btn-glass" style="justify-content:flex-start" onclick="patientController.runAITriage('breathing')">🫁 Difficulty Breathing</button>
+                <button class="btn-glass" style="justify-content:flex-start" onclick="patientController.runAITriage('snakebite')">🐍 Snakebite Emergency</button>
+                <button class="btn-glass" style="justify-content:flex-start" onclick="patientController.runAITriage('high_fever')">🤰 Pregnancy Cramps</button>
+                <button class="btn-glass" style="justify-content:flex-start" onclick="patientController.runAITriage('chest_pain')">🩸 Trauma / Bleeding</button>
+              </div>
+
+              <!-- Recommendation Card Box -->
+              <div id="triageAIResultBox">
+                <div id="triageResultBox" style="padding:16px;border-radius:12px;background:rgba(0,0,0,0.3);border:1px solid var(--glass-border)">
+                  <div style="font-weight:700;font-size:14px;color:var(--primary-bright);margin-bottom:4px">💡 AI Clinical Safety Guidance (Gemini 3.7 Flash)</div>
+                  <p style="font-size:12.5px;color:var(--ink-dim)" id="triageResultText">Select a symptom or tap any body hotspot above for instant Red/Yellow/Green triage and pre-hospital first aid guidance.</p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+         VIEW 3: APPOINTMENTS & LIVE QUEUE TOKEN
+      ========================================================= -->
+      <section class="view-panel" id="view-appointments">
+        <div class="section-bar" style="margin-top:0">
+          <div class="section-bar-left">
+            <h3 data-i18n="appt_title">Appointments &amp; Live Queue Token · टोकन कतार</h3>
+            <button class="voice-speak-btn" onclick="speakText('आपकी टोकन संख्या 48 है। डॉक्टर के पास पहुंचने में लगभग 18 मिनट बाकी हैं')">🔊</button>
+          </div>
+        </div>
+
+        <div class="grid grid-2-1">
+          <!-- Book a Visit -->
+          <div class="glass-panel card-3d" style="padding:22px">
+            <h4 style="margin-bottom:14px">Book a New Consultation</h4>
+            <div class="input-group">
+              <label class="input-label"><span>Select Facility</span></label>
+              <select id="bookFacility" class="input-field">
+                <option>Kondapalli Sub-Centre (0.8 km)</option>
+                <option selected>Kondapalli PHC (3.2 km)</option>
+                <option>Ibrahimpatnam CHC (11 km)</option>
+                <option>Vijayawada District Hospital (26 km)</option>
+              </select>
+            </div>
+
+            <div class="input-group">
+              <label class="input-label"><span>Consultation Type</span></label>
+              <select id="bookType" class="input-field">
+                <option>In-Person Doctor OPD</option>
+                <option>Assisted Teleconsultation via ASHA Kiosk</option>
+                <option>Maternal ANC Checkup</option>
+                <option>Child Immunization</option>
+              </select>
+            </div>
+
+            <div class="input-group">
+              <label class="input-label"><span>Preferred Date</span></label>
+              <input type="date" id="bookDate" class="input-field" value="2026-08-28">
+            </div>
+
+            <button class="btn-glass btn-primary" style="width:100%" onclick="confirmBooking()">
+              <span>Confirm Booking &amp; Get SMS Token →</span>
+            </button>
+            <p style="font-size:11.5px;color:var(--muted);margin-top:8px;text-align:center">
+              📲 Works via SMS &amp; USSD (*99#) if you don't have active mobile internet.
+            </p>
+          </div>
+
+          <!-- Live Token Display -->
+          <div class="glass-panel card-3d" style="padding:22px;text-align:center">
+            <span class="status-pill good" style="margin-bottom:12px">🟢 LIVE OPD QUEUE</span>
+            <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em">Your Token Number</div>
+            <div style="font-size:56px;font-weight:800;color:var(--accent);line-height:1;margin:6px 0" id="liveTokenNum">#48</div>
+            <div style="font-size:14px;font-weight:700;color:var(--ink)">Anitha K. (Kondapalli PHC)</div>
+            <div style="font-size:13px;color:var(--primary-bright);margin:6px 0 14px">Estimated Wait: ~18 mins (7 patients ahead)</div>
+
+            <div class="grid grid-2" style="gap:8px">
+              <button class="btn-glass" onclick="toast('SMS notification enabled for token #48')">🔔 Alert via SMS</button>
+              <button class="btn-glass" onclick="toast('Refreshing queue status...')">🔄 Refresh Queue</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Appointment History Table -->
+        <div class="section-bar">
+          <div class="section-bar-left">
+            <h3>Recent &amp; Past Visits · विज़िट इतिहास</h3>
+          </div>
+        </div>
+        <div class="glass-panel glass-table-wrap">
+          <table class="glass-table">
+            <thead>
+              <tr>
+                <th>Date &amp; Time</th>
+                <th>Patient</th>
+                <th>Facility</th>
+                <th>Service Type</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="appointmentTableBody">
+              <tr>
+                <td>28 Aug, 10:30 AM</td>
+                <td><strong>Anitha K.</strong></td>
+                <td>Kondapalli PHC</td>
+                <td>ANC Review &amp; Hb check</td>
+                <td><span class="status-pill warn">Upcoming</span></td>
+              </tr>
+              <tr>
+                <td>25 Aug, 04:00 PM</td>
+                <td><strong>Aarav K. (Son)</strong></td>
+                <td>Kondapalli Sub-Centre</td>
+                <td>DPT Booster Vaccine</td>
+                <td><span class="status-pill good">Completed</span></td>
+              </tr>
+              <tr>
+                <td>19 Aug, 11:00 AM</td>
+                <td><strong>Anitha K.</strong></td>
+                <td>Kondapalli PHC</td>
+                <td>General Examination</td>
+                <td><span class="status-pill good">Completed</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- =========================================================
+         VIEW 4: SWASTHYA SETU - DOCTOR PORTAL & TELEMEDICINE SUITE
+      ========================================================= -->
+      <section class="view-panel" id="view-tele">
+        <!-- Rendered dynamically by doctor.js (doctorController.renderDoctorWorkspace()) -->
+      </section>
+
+      <!-- =========================================================
+         VIEW 5: ABHA HEALTH LOCKER & LONGITUDINAL RECORDS
+      ========================================================= -->
+      <section class="view-panel" id="view-records">
+        <div class="section-bar" style="margin-top:0">
+          <div class="section-bar-left">
+            <h3 data-i18n="records_title">ABHA Health Locker · डिजिटल स्वास्थ्य रिकॉर्ड</h3>
+            <button class="voice-speak-btn" onclick="speakText('यह आपका आयुष्मान भारत डिजिटल रिकॉर्ड है। सभी लैब रिपोर्ट और डॉक्टर की पर्चियां यहाँ सुरक्षित हैं')">🔊</button>
+          </div>
+          <button class="btn-glass" onclick="downloadAbhaCard()">📄 Download ABHA Card</button>
+        </div>
+
+        <!-- ABHA Virtual Card -->
+        <div class="glass-panel card-3d" style="padding:22px;margin-bottom:20px;background:linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(6, 35, 28, 0.8) 60%, rgba(245, 158, 11, 0.2));border:1.5px solid rgba(145, 245, 216, 0.4)">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px">
+            <div style="display:flex;align-items:center;gap:16px">
+              <div class="profile-avatar" style="width:54px;height:54px;font-size:22px">AK</div>
+              <div>
+                <h3 style="font-size:20px">Anitha K.</h3>
+                <div style="font-size:12px;color:var(--ink-dim);margin-top:2px">
+                  <span class="mono" style="background:rgba(0,0,0,0.4);padding:3px 8px;border-radius:6px;border:1px solid var(--glass-border)">ABHA: 14-2938-7710-4521</span>
+                  <span style="margin-left:8px;color:var(--primary-bright)">● Verified Active</span>
+                </div>
+              </div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-size:11px;color:var(--muted)">Linked Facility</div>
+              <strong style="font-size:13.5px">Kondapalli Sub-Centre / PHC</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Longitudinal Record Timeline -->
+        <div class="grid grid-2">
+          <div class="glass-panel card-3d" style="padding:20px">
+            <h4 style="margin-bottom:14px">Longitudinal Health Timeline</h4>
+            <div style="display:flex;flex-direction:column;gap:16px">
+              <div style="border-left:2px solid var(--primary-bright);padding-left:14px;position:relative">
+                <span style="font-size:10.5px;color:var(--muted);text-transform:uppercase">24 Aug 2026</span>
+                <strong style="display:block;font-size:13.5px">ANC 2nd Trimester Follow-up</strong>
+                <p style="font-size:12px;color:var(--ink-dim)">BP 118/76, Weight 58kg, Foetal Heart Rate Normal. Iron supplementation continued.</p>
+              </div>
+
+              <div style="border-left:2px solid var(--accent);padding-left:14px;position:relative">
+                <span style="font-size:10.5px;color:var(--muted);text-transform:uppercase">22 Aug 2026</span>
+                <strong style="display:block;font-size:13.5px">Iron-Folic Acid Dispensed</strong>
+                <p style="font-size:12px;color:var(--ink-dim)">30-day course issued by ANM Saraswati at Village Sub-centre.</p>
+              </div>
+
+              <div style="border-left:2px solid var(--teal-cyan);padding-left:14px;position:relative">
+                <span style="font-size:10.5px;color:var(--muted);text-transform:uppercase">12 Aug 2026</span>
+                <strong style="display:block;font-size:13.5px">Complete Blood Count (CBC) Lab Report</strong>
+                <p style="font-size:12px;color:var(--ink-dim)">Hb 9.2 g/dL (Mild Anaemia flagged for dietary monitoring).</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="glass-panel card-3d" style="padding:20px">
+            <h4 style="margin-bottom:14px">Active Risk Flags &amp; Care Directives</h4>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px">
+              <span class="status-pill warn">⚠️ Maternal ANC · 2nd Trimester</span>
+              <span class="status-pill danger">🩸 Mild Anaemia · Hb 9.2</span>
+              <span class="status-pill good">✓ No Known Drug Allergies</span>
+            </div>
+
+            <div style="padding:14px;border-radius:12px;background:rgba(0,0,0,0.3);border:1px solid var(--glass-border)">
+              <strong style="font-size:13px;color:var(--primary-bright)">Consent &amp; Privacy Log:</strong>
+              <p style="font-size:12px;color:var(--ink-dim);margin-top:4px">
+                Your medical records are encrypted. Shared strictly with verified clinicians at Kondapalli PHC and Ibrahimpatnam CHC for your treatment.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+         VIEW 6: SWASTHYA SETU - EMERGENCY RESPONSE & 108 LIVE HUD
+      ========================================================= -->
+      <section class="view-panel" id="view-sos">
+        <!-- Rendered dynamically by patient.js (patientController.renderAmbulanceHUD()) -->
+      </section>
+
+      <!-- =========================================================
+         VIEW 7: JAN AUSHADHI & GENERIC MEDICINES
+      ========================================================= -->
+      <section class="view-panel" id="view-medicines">
+        <div class="section-bar" style="margin-top:0">
+          <div class="section-bar-left">
+            <h3 data-i18n="meds_title">Jan Aushadhi Generic Medicine Savings · जन औषधि व बचत</h3>
+            <button class="voice-speak-btn" onclick="speakText('जेनेरिक दवाएं 80 प्रतिशत तक सस्ती होती हैं और उतनी ही असरदार होती हैं')">🔊</button>
+          </div>
+        </div>
+
+        <!-- AI Prescription Scanner Banner -->
+        <div class="glass-panel" style="padding:22px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;background:linear-gradient(135deg, rgba(16,185,129,0.15), rgba(6,24,20,0.85));border-color:rgba(95,227,196,0.35);">
+          <div>
+            <h3 style="font-size:18px;color:#ffffff;margin:0 0 2px;">📷 AI Prescription Scanner (Gemini Multimodal OCR)</h3>
+            <p style="font-size:12.5px;color:var(--ink-dim);margin:0;">Upload or take a photo of doctor's handwritten Rx to extract medicines and calculate 80%+ Jan Aushadhi generic savings.</p>
+          </div>
+          <button class="auth-btn-primary" onclick="patientController.scanPrescriptionDemo()">
+            <span>📷 Scan Prescription Now →</span>
+          </button>
+        </div>
+        <div id="rxScanResultArea"></div>
+
+        <div class="grid grid-2">
+          <!-- Price Comparison Cards -->
+          <div>
+            <div class="generic-compare-card glass-panel card-3d">
+              <div class="compare-col">
+                <span style="font-size:11px;color:var(--muted)">Branded Medicine</span>
+                <strong style="display:block;font-size:14px">Iron + Folic Acid Strip</strong>
+                <div class="price-strike">₹ 180.00</div>
+              </div>
+              <div style="font-size:22px;color:var(--primary-bright)">→</div>
+              <div class="compare-col generic">
+                <span style="font-size:11px;color:#a7f3d0">Jan Aushadhi Generic</span>
+                <strong style="display:block;font-size:14px">IFA Tablets (100 Tab)</strong>
+                <div class="price-big-green">₹ 32.00</div>
+                <span class="status-pill good" style="font-size:10px">Save ₹148 (82%)</span>
+              </div>
+            </div>
+
+            <div class="generic-compare-card glass-panel card-3d">
+              <div class="compare-col">
+                <span style="font-size:11px;color:var(--muted)">Branded BP Medicine</span>
+                <strong style="display:block;font-size:14px">Amlodipine 5mg (15 Tab)</strong>
+                <div class="price-strike">₹ 95.00</div>
+              </div>
+              <div style="font-size:22px;color:var(--primary-bright)">→</div>
+              <div class="compare-col generic">
+                <span style="font-size:11px;color:#a7f3d0">Jan Aushadhi Generic</span>
+                <strong style="display:block;font-size:14px">Amlodipine 5mg (10 Tab)</strong>
+                <div class="price-big-green">₹ 6.50</div>
+                <span class="status-pill good" style="font-size:10px">Save ₹88.5 (93%)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Medicine Stock Status at Nearest Center -->
+          <div class="glass-panel card-3d" style="padding:20px">
+            <h4 style="margin-bottom:12px">Stock at Kondapalli PHC Pharmacy</h4>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--glass-border)">
+                <span>Iron-Folic Acid Tablets</span>
+                <span class="status-pill good">1,240 Strips · Adequate</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--glass-border)">
+                <span>ORS Packets</span>
+                <span class="status-pill good">860 Packs · Adequate</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--glass-border)">
+                <span>Amoxicillin 500mg</span>
+                <span class="status-pill warn">140 Strips · Reordered</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0">
+                <span>Paracetamol 500mg</span>
+                <span class="status-pill good">2,100 Strips · In Stock</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+         VIEW 8: REFERRAL LADDER TRACKING
+      ========================================================= -->
+      <section class="view-panel" id="view-referrals">
+        <div class="section-bar" style="margin-top:0">
+          <div class="section-bar-left">
+            <h3 data-i18n="referrals_title">Referral Tracking &amp; Escalations · रेफ़रल ट्रैकिंग</h3>
+            <button class="voice-speak-btn" onclick="speakText('आपके सभी रेफ़रल की वास्तविक स्थिति यहां देखें')">🔊</button>
+          </div>
+        </div>
+
+        <div class="glass-panel glass-table-wrap">
+          <table class="glass-table">
+            <thead>
+              <tr>
+                <th>Patient</th>
+                <th>Route</th>
+                <th>Clinical Reason</th>
+                <th>Urgency</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Anitha K.</strong></td>
+                <td>Kondapalli PHC → Ibrahimpatnam CHC</td>
+                <td>Anaemia in pregnancy (Hb 9.2 review)</td>
+                <td><span class="status-pill warn">Priority</span></td>
+                <td><span class="status-pill warn">In-transit · Day 2</span></td>
+              </tr>
+              <tr>
+                <td><strong>Suresh B.</strong></td>
+                <td>Kondapalli Sub-Centre → PHC</td>
+                <td>Uncontrolled Hypertension</td>
+                <td><span class="status-pill danger">Urgent</span></td>
+                <td><span class="status-pill danger">Delayed > 48h</span></td>
+              </tr>
+              <tr>
+                <td><strong>Lakshmi P.</strong></td>
+                <td>PHC → Vijayawada District Hospital</td>
+                <td>Suspected TB — Sputum Positive</td>
+                <td><span class="status-pill danger">Urgent</span></td>
+                <td><span class="status-pill good">Transport Arranged</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- =========================================================
+         VIEW 9: SWASTHYA SETU - ASHA & FIELD WORKER PORTAL
+      ========================================================= -->
+      <section class="view-panel" id="view-worker">
+        <!-- Rendered dynamically by worker.js (workerController.renderWorkerWorkspace()) -->
+      </section>
+
+      <!-- =========================================================
+         VIEW 10: VISUAL FIRST AID GUIDES (OFFLINE READY)
+      ========================================================= -->
+      <section class="view-panel" id="view-firstaid">
+        <div class="section-bar" style="margin-top:0">
+          <div class="section-bar-left">
+            <h3 data-i18n="firstaid_title">Visual First-Aid Offline Guides · प्राथमिक उपचार</h3>
+            <button class="voice-speak-btn" onclick="speakText('आपातकालीन प्राथमिक उपचार निर्देश: सर्पदंश, सीपीआर, गंभीर रक्तस्राव या लू लगना')">🔊</button>
+          </div>
+        </div>
+
+        <div class="grid grid-3">
+          <div class="glass-panel card-3d" style="padding:20px;border-color:rgba(239, 68, 68, 0.4)">
+            <div style="font-size:32px;margin-bottom:8px">🐍</div>
+            <h4 style="color:var(--danger-bright)">Snakebite (सर्पदंश)</h4>
+            <p style="font-size:12.5px;color:var(--ink-dim);margin:8px 0">
+              <strong>DO:</strong> Keep patient still and calm. Immobilize the limb with a splint. Rush to PHC for anti-venom.<br>
+              <strong>DON'T:</strong> Do NOT cut, suck, tie tight tourniquets or apply ice.
+            </p>
+            <button class="btn-glass" style="width:100%" onclick="speakText('सर्पदंश: मरीज को शांत रखें, काटे हुए अंग को न हिलाएं, तुरंत प्राथमिक स्वास्थ्य केंद्र ले जाएं। कोई चीरा या पट्टी न बांधें।')">🔊 Listen Steps</button>
+          </div>
+
+          <div class="glass-panel card-3d" style="padding:20px;border-color:rgba(245, 158, 11, 0.4)">
+            <div style="font-size:32px;margin-bottom:8px">❤️</div>
+            <h4 style="color:var(--accent)">CPR &amp; Cardiac (हार्ट अटैक)</h4>
+            <p style="font-size:12.5px;color:var(--ink-dim);margin:8px 0">
+              <strong>DO:</strong> If unresponsive and not breathing, place hands in center of chest. Push hard and fast (100–120/min).<br>
+              <strong>CALL:</strong> 108 ambulance immediately.
+            </p>
+            <button class="btn-glass" style="width:100%" onclick="speakText('सीपीआर: यदि व्यक्ति बेहोश है और सांस नहीं ले रहा, तो छाती के बीच में दोनों हाथों से तेजी से दबाव डालें और 108 पर कॉल करें।')">🔊 Listen Steps</button>
+          </div>
+
+          <div class="glass-panel card-3d" style="padding:20px;border-color:rgba(16, 185, 129, 0.4)">
+            <div style="font-size:32px;margin-bottom:8px">☀️</div>
+            <h4 style="color:var(--good)">Heatstroke (लू लगना)</h4>
+            <p style="font-size:12.5px;color:var(--ink-dim);margin:8px 0">
+              <strong>DO:</strong> Move to shade. Sponge with cool water. Give ORS / lemonade in small sips if conscious.<br>
+              <strong>DON'T:</strong> Do not give ice-cold water or heavy food.
+            </p>
+            <button class="btn-glass" style="width:100%" onclick="speakText('लू लगना: मरीज को तुरंत छांव में लाएं, गीले कपड़े से शरीर पोंछें और थोड़ा-थोड़ा ओआरएस का घोल पिलाएं।')">🔊 Listen Steps</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+         VIEW 11: SWASTHYA SETU - ADMIN & SYSTEM COMMAND CENTER
+      ========================================================= -->
+      <section class="view-panel" id="view-dashboard">
+        <!-- Rendered dynamically by admin.js (adminController.renderCommandCenter()) -->
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<!-- =========================================================
+   MOBILE BOTTOM NAVIGATION BAR (THUMB-FRIENDLY)
+========================================================= -->
+<nav class="mobile-bottom-nav">
+  <button class="mobile-nav-item active" onclick="switchView('home')">
+    <span class="mob-icon">⌂</span>
+    <span>Home</span>
+  </button>
+  <button class="mobile-nav-item" onclick="switchView('triage')">
+    <span class="mob-icon">🩺</span>
+    <span>Triage</span>
+  </button>
+  <button class="mobile-nav-item" onclick="switchView('sos')" style="color:var(--danger-bright)">
+    <span class="mob-icon">🚨</span>
+    <span>108 SOS</span>
+  </button>
+  <button class="mobile-nav-item" onclick="switchView('records')">
+    <span class="mob-icon">📋</span>
+    <span>ABHA</span>
+  </button>
+  <button class="mobile-nav-item" onclick="switchView('worker')">
+    <span class="mob-icon">🤝</span>
+    <span>ASHA</span>
+  </button>
+</nav>
+
+<!-- =========================================================
+   EMERGENCY 108 MODAL
+========================================================= -->
+<div class="modal-overlay" id="emergencyModal">
+  <div class="modal-card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <h3 style="color:var(--danger-bright);font-size:22px">🚨 Instant 108 Emergency Escalation</h3>
+      <button onclick="closeEmergencyModal()" style="font-size:20px;color:var(--muted)">✕</button>
+    </div>
+    <p style="font-size:13px;color:var(--ink-dim);margin-bottom:16px">
+      Alerts Kondapalli PHC and dispatches the nearest emergency transport. Your location, selected landmark, and medical summary are transmitted immediately.
+    </p>
+
+    <div class="input-group">
+      <label class="input-label"><span>Select Emergency Condition</span></label>
+      <select class="input-field" id="modalSymptom">
+        <option>Severe Bleeding / Accident Injury</option>
+        <option>Snakebite / Poisoning</option>
+        <option>Chest Pain / Severe Breathlessness</option>
+        <option>Labour &amp; Delivery Emergency</option>
+        <option>Unconsciousness / Fainting</option>
+      </select>
+    </div>
+
+    <button class="btn-glass btn-danger" style="width:100%;height:48px;font-size:15px;margin-top:10px" onclick="confirmEmergencyDispatch()">
+      <span>🚨 Send Immediate 108 SOS Alert</span>
+    </button>
+  </div>
+</div>
+
+<!-- =========================================================
+   FLOATING TOAST NOTIFICATION
+========================================================= -->
+<div class="toast-bar" id="toastBar">
+  <span id="toastIcon">✨</span>
+  <span id="toastMsg">Notification message</span>
+</div>
+
+<!-- =========================================================
+   APPLICATION JAVASCRIPT LOGIC & 3D ANIMATION ENGINE
+========================================================= -->
+<script src="i18n.js"></script>
+<script src="auth.js"></script>
+<script src="auth-ui.js"></script>
+<script src="admin.js"></script>
+<script src="doctor.js"></script>
+<script src="patient.js"></script>
+<script src="worker.js"></script>
+<script>
+// Global Application State
+const appState = {
+  role: 'patient',
+  userName: 'Anitha K.',
+  view: 'home',
+  lang: 'hi',
+  signal: 'online',
+  theme: 'emerald'
+};
+
+// Multilingual Dictionary
+const i18nDict = {
+  en: {
+    tagline: 'Swasthya Setu · Rural Care Grid',
+    nav_home: 'Home & Journey',
+    nav_triage: '3D Symptom Check',
+    nav_appt: 'Queue & Token',
+    nav_tele: 'Teleconsultation',
+    nav_records: 'Health Locker (ABHA)',
+    nav_sos: 'Emergency 108 SOS',
+    nav_meds: 'Jan Aushadhi & Stock',
+    nav_referrals: 'Referral Ladder',
+    nav_asha: 'ASHA Didi Desk',
+    nav_firstaid: 'Visual First Aid',
+    nav_dashboard: 'Admin Command Center',
+    family_care: 'Family Health Circle',
+    care_ladder: 'Care Journey & Referral Ladder'
+  },
+  hi: {
+    tagline: 'स्वास्थ्य सेतु · ग्रामीण स्वास्थ्य ग्रिड',
+    nav_home: 'मुख्य पृष्ठ व यात्रा',
+    nav_triage: '3D लक्षण जांच',
+    nav_appt: 'कतार व टोकन',
+    nav_tele: 'टेलीकंसल्टेशन',
+    nav_records: 'डिजिटल स्वास्थ्य लॉकर (ABHA)',
+    nav_sos: 'आपातकालीन 108 SOS',
+    nav_meds: 'जन औषधि व दवाइयां',
+    nav_referrals: 'रेफ़रल सीढ़ी',
+    nav_asha: 'आशा दीदी डेस्क',
+    nav_firstaid: 'प्राथमिक उपचार',
+    nav_dashboard: 'प्रशासन कमांड सेंटर',
+    family_care: 'परिवार स्वास्थ्य चक्र',
+    care_ladder: 'देखभाल यात्रा व रेफ़रल सीढ़ी'
+  },
+  te: {
+    tagline: 'స్వాస్థ్య సేతు · గ్రామీణ ఆరోగ్య నెట్‌వర్క్',
+    nav_home: 'హోమ్ & ప్రయాణం',
+    nav_triage: '3D లక్షణాల పరీక్ష',
+    nav_appt: 'క్యూ & టోకెన్',
+    nav_tele: 'టెలికన్సల్టేషన్',
+    nav_records: 'ఆరోగ్య రికార్డు (ABHA)',
+    nav_sos: 'అత్యవసర 108 SOS',
+    nav_meds: 'జన్ ఔషధి & మందులు',
+    nav_referrals: 'రిఫరల్ నిచ్చెన',
+    nav_asha: 'ఆశా దీదీ డెస్క్',
+    nav_firstaid: 'ప్రథమ చికిత్స',
+    nav_dashboard: 'అడ్మిన్ కమాండ్ సెంటర్',
+    family_care: 'కుటుంబ ఆరోగ్య చక్రం',
+    care_ladder: 'సంరక్షణ ప్రయాణం & రిఫరల్'
+  }
+};
+
+/* =========================================================
+   3D MOUSE PARALLAX TILT & SPECULAR GLOW
+========================================================= */
+function init3DGlassInteractions() {
+  document.querySelectorAll('.card-3d, .btn-glass, .glass-panel').forEach(card => {
+    card.addEventListener('pointermove', e => {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const px = (x / rect.width) * 100;
+      const py = (y / rect.height) * 100;
+      card.style.setProperty('--mx', px + '%');
+      card.style.setProperty('--my', py + '%');
+
+      if (card.classList.contains('card-3d')) {
+        const rx = (0.5 - (y / rect.height)) * 8;
+        const ry = ((x / rect.width) - 0.5) * 8;
+        card.style.transform = `perspective(800px) rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg) translateZ(6px)`;
+      }
+    });
+
+    card.addEventListener('pointerleave', () => {
+      if (card.classList.contains('card-3d')) {
+        card.style.transform = 'perspective(800px) rotateX(0deg) rotateY(0deg) translateZ(0)';
+      }
+    });
+
+    // Ripple click
+    card.addEventListener('pointerdown', e => {
+      const rect = card.getBoundingClientRect();
+      const rip = document.createElement('span');
+      rip.className = 'glass-ripple';
+      rip.style.left = (e.clientX - rect.left) + 'px';
+      rip.style.top = (e.clientY - rect.top) + 'px';
+      card.appendChild(rip);
+      rip.addEventListener('animationend', () => rip.remove());
+    });
+  });
+}
+
+/* =========================================================
+   NAVIGATION & VIEW SWITCHER (RBAC PROTECTED)
+========================================================= */
+function switchView(viewId) {
+  // Enforce Role-Based Access Control
+  if (typeof authUI !== 'undefined' && typeof authUI.checkViewAccess === 'function') {
+    if (!authUI.checkViewAccess(viewId)) {
+      return; // Access blocked, Unauthorized modal shown
+    }
+  }
+
+  appState.view = viewId;
+  document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
+  const target = document.getElementById('view-' + viewId);
+  if (target) {
+    target.classList.add('active');
+    
+    // Dynamic component renders per view
+    if (viewId === 'dashboard' && typeof adminController !== 'undefined') {
+      adminController.renderCommandCenter();
+    } else if (viewId === 'tele' && typeof doctorController !== 'undefined') {
+      doctorController.renderDoctorWorkspace();
+    } else if (viewId === 'worker' && typeof workerController !== 'undefined') {
+      workerController.renderWorkerWorkspace();
+    } else if (viewId === 'sos' && typeof patientController !== 'undefined') {
+      patientController.renderAmbulanceHUD();
+    } else if (viewId === 'home' && typeof patientController !== 'undefined') {
+      patientController.init();
+    }
+
+    // Trigger card stagger animation
+    target.querySelectorAll('.card-3d').forEach((el, idx) => {
+      el.style.setProperty('--i', idx);
+      el.classList.remove('stagger-card');
+      void el.offsetWidth;
+      el.classList.add('stagger-card');
+    });
+  }
+
+  // Update Nav Buttons
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.view === viewId);
+  });
+  document.querySelectorAll('.mobile-nav-item').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('onclick')?.includes(viewId));
+  });
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+document.querySelectorAll('.nav-btn[data-view]').forEach(btn => {
+  btn.addEventListener('click', () => switchView(btn.dataset.view));
+});
+
+function openLoginModal() {
+  if (typeof authUI !== 'undefined') {
+    authUI.showPhoneLoginScreen();
+  }
+}
+
+/* =========================================================
+   TEXT-TO-SPEECH & ACCESSIBILITY (WEB SPEECH API)
+========================================================= */
+function speakText(text) {
+  if (!('speechSynthesis' in window)) {
+    toast('Voice speech is not supported in this browser');
+    return;
+  }
+  window.speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(text);
+  
+  if (appState.lang === 'hi') utterance.lang = 'hi-IN';
+  else if (appState.lang === 'te') utterance.lang = 'te-IN';
+  else if (appState.lang === 'ta') utterance.lang = 'ta-IN';
+  else if (appState.lang === 'mr') utterance.lang = 'mr-IN';
+  else if (appState.lang === 'bn') utterance.lang = 'bn-IN';
+  else utterance.lang = 'en-IN';
+
+  utterance.rate = 0.92;
+  window.speechSynthesis.speak(utterance);
+  toast('🔊 Speaking aloud in your language...');
+}
+
+function speakOtpDemo() {
+  speakText('आपका सेतु सुरक्षा ओटीपी है: सात, तीन, नौ, दो।');
+}
+
+function speakCurrentPage() {
+  const currentView = document.getElementById('view-' + appState.view);
+  const text = currentView ? currentView.innerText.substring(0, 180) : 'Swasthya Setu Rural Health Grid';
+  speakText(text);
+}
+
+function startVoiceDictation() {
+  toast('🎙️ Listening... बोलिए, हम आपकी समस्या सुन रहे हैं (Voice Demo)');
+  speakText('हम सुन रहे हैं, कृपया अपनी समस्या बताएं');
+  setTimeout(() => {
+    document.getElementById('triageResultText').textContent = 'Recorded: "सिर में तेज दर्द और 2 दिन से बुखार है" (Added to clinical triage draft)';
+    toast('✓ Symptoms recorded by voice');
+  }, 2400);
+}
+
+/* =========================================================
+   INTERACTIVE FEATURES & DEMOS
+========================================================= */
+function selectBodyArea(areaName, desc) {
+  document.getElementById('triageRegionBadge').textContent = 'Selected: ' + areaName;
+  document.getElementById('triageQuestionText').textContent = `What symptoms are you experiencing in ${areaName}?`;
+  document.getElementById('triageResultText').textContent = `Triage focused on: ${desc}. Select an option below for guidance.`;
+  speakText(`${areaName}: ${desc}`);
+}
+
+function answerTriage(answer) {
+  const isDanger = /Breath|Bleeding|Snakebite|Chest/.test(answer);
+  const resultBox = document.getElementById('triageResultBox');
+  if (isDanger) {
+    resultBox.innerHTML = `
+      <div style="font-weight:800;font-size:14px;color:var(--danger-bright);margin-bottom:4px">🚨 Red-Flag Detected — Immediate Action</div>
+      <p style="font-size:12.5px;color:#fecaca">This symptom requires immediate emergency escalation. Connecting to 108 ambulance &amp; Kondapalli PHC.</p>
+      <button class="btn-glass btn-danger" style="margin-top:10px" onclick="openEmergencyModal()">Open Emergency 108 SOS Now</button>
+    `;
+    speakText('सावधान: यह गंभीर लक्षण है। तुरंत आपातकालीन सहायता लें।');
+  } else {
+    resultBox.innerHTML = `
+      <div style="font-weight:800;font-size:14px;color:var(--primary-bright);margin-bottom:4px">✓ Non-Emergency Recommendation</div>
+      <p style="font-size:12.5px;color:var(--ink-dim)">Suggested: Book a routine OPD slot at Kondapalli PHC or speak with ASHA Saraswati.</p>
+      <button class="btn-glass btn-primary" style="margin-top:10px" onclick="switchView('appointments')">Book OPD Slot at PHC →</button>
+    `;
+    speakText('यह सामान्य लक्षण है। कृपया प्राथमिक स्वास्थ्य केंद्र पर अपॉइंटमेंट बुक करें।');
+  }
+}
+
+function selectFamilyMember(name, condition, abha) {
+  toast(`Switched profile to ${name} (${condition})`);
+  speakText(`${name} का रिकॉर्ड चुना गया`);
+}
+
+function selectLandmark(el) {
+  document.querySelectorAll('.landmark-pill').forEach(p => p.classList.remove('selected'));
+  el.classList.add('selected');
+  toast('Landmark updated for 108 driver: ' + el.textContent);
+}
+
+function trigger108Emergency() {
+  speakText('108 एम्बुलेंस आपातकालीन अलर्ट भेजा गया। ड्राइवर रवि 12 मिनट में पहुंच रहा है।');
+  toast('🚨 108 Alert Sent! Nearest Ambulance Dispatched (ETA: 12 min)');
+  document.getElementById('dispatchEta').textContent = '10 Mins (Enroute)';
+}
+
+function openEmergencyModal() {
+  document.getElementById('emergencyModal').classList.add('open');
+}
+
+function closeEmergencyModal() {
+  document.getElementById('emergencyModal').classList.remove('open');
+}
+
+function confirmEmergencyDispatch() {
+  closeEmergencyModal();
+  trigger108Emergency();
+}
+
+function confirmBooking() {
+  const date = document.getElementById('bookDate').value;
+  toast(`✓ Appointment booked for ${date} — SMS token #49 sent to mobile!`);
+  speakText('आपकी अपॉइंटमेंट बुक हो गई है और एसएमएस भेज दिया गया है।');
+}
+
+function connectTeleconsult() {
+  document.getElementById('teleStatusCenter').innerHTML = `
+    <div style="font-size:48px;margin-bottom:8px">🟢</div>
+    <strong style="font-size:16px;display:block">Connected: Dr. Rao is examining Anitha's record</strong>
+    <span style="font-size:12.5px;color:var(--primary-bright)">HD Audio/Video Active · FHIR R4 Synchronized</span>
+  `;
+  toast('Connected to Dr. Rao (Ibrahimpatnam CHC)');
+  speakText('डॉक्टर से संपर्क हो गया है। वे आपका स्वास्थ्य रिकॉर्ड देख रहे हैं।');
+}
+
+function switchAudioOnly() {
+  toast('Switched to low-bandwidth 2G audio mode');
+  speakText('कम सिग्नल मोड: केवल ऑडियो कॉल जारी है।');
+}
+
+function downloadAbhaCard() {
+  toast('📥 Downloading Ayushman Bharat ABHA Health Card (PDF)...');
+}
+
+function toggleSignalSimulation() {
+  const pill = document.getElementById('signalPill');
+  const text = document.getElementById('signalText');
+  if (appState.signal === 'online') {
+    appState.signal = 'low';
+    pill.className = 'signal-status-pill low';
+    text.textContent = 'Low-Bandwidth · 2G Text Mode';
+    toast('📶 Low-Bandwidth Mode: Photos paused, text & emergency active.');
+  } else if (appState.signal === 'low') {
+    appState.signal = 'offline';
+    pill.className = 'signal-status-pill offline';
+    text.textContent = 'Offline · 6 Entries Queued';
+    toast('⛔ Offline Mode: Working from local cache. Will sync when connected.');
+  } else {
+    appState.signal = 'online';
+    pill.className = 'signal-status-pill';
+    text.textContent = 'Online · Full 4G Sync';
+    toast('🟢 Online: All records synced successfully.');
+  }
+}
+
+function toggleTheme() {
+  if (typeof patientController !== 'undefined' && typeof patientController.toggleThemeNext === 'function') {
+    patientController.toggleThemeNext();
+  } else {
+    const themes = ['emerald', 'navy', 'gov', 'daylight', 'oled'];
+    const curIdx = themes.indexOf(appState.theme || 'emerald');
+    appState.theme = themes[(curIdx + 1) % themes.length];
+    document.body.dataset.theme = appState.theme;
+    document.documentElement.dataset.theme = appState.theme;
+    toast(`Theme: ${appState.theme.toUpperCase()}`);
+  }
+}
+
+function onLanguageChange(lang) {
+  appState.lang = lang;
+  if (window.i18n && typeof window.i18n.setLanguage === 'function') {
+    window.i18n.setLanguage(lang);
+  } else {
+    toast(`Language changed to ${lang.toUpperCase()}`);
+  }
+}
+
+let toastTimer;
+function toast(msg) {
+  const bar = document.getElementById('toastBar');
+  if (bar) {
+    document.getElementById('toastMsg').textContent = msg;
+    bar.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => bar.classList.remove('show'), 3200);
+  }
+}
+
+// Initialize on DOM load
+window.addEventListener('DOMContentLoaded', () => {
+  init3DGlassInteractions();
+  if (window.i18n && typeof window.i18n.translateDOM === 'function') {
+    window.i18n.translateDOM();
+  }
+  if (typeof patientController !== 'undefined') {
+    patientController.init();
+  }
+});
+</script>
+</body>
+</html>

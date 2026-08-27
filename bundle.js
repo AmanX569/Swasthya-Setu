@@ -1,0 +1,37 @@
+const fs = require('fs');
+const path = require('path');
+
+const baseDir = 'C:/Users/grani/OneDrive/Desktop/Swasthya-setu/frontend';
+let html = fs.readFileSync(path.join(baseDir, 'index.html'), 'utf8');
+
+// Inline CSS files
+const cssFiles = ['auth.css', 'admin.css', 'doctor.css', 'patient.css', 'worker.css'];
+let inlinedCss = '';
+for (const f of cssFiles) {
+  const cssPath = path.join(baseDir, f);
+  if (fs.existsSync(cssPath)) {
+    inlinedCss += '\n/* --- ' + f + ' --- */\n' + fs.readFileSync(cssPath, 'utf8');
+    html = html.replace('<link rel="stylesheet" href="' + f + '">', '');
+  }
+}
+html = html.replace('</head>', '<style>\n' + inlinedCss + '\n</style>\n</head>');
+
+// Inline JS files
+const jsFiles = ['i18n.js', 'auth.js', 'auth-ui.js', 'admin.js', 'doctor.js', 'patient.js', 'worker.js'];
+let inlinedJs = '';
+for (const f of jsFiles) {
+  const jsPath = path.join(baseDir, f);
+  if (fs.existsSync(jsPath)) {
+    inlinedJs += '\n/* --- ' + f + ' --- */\n' + fs.readFileSync(jsPath, 'utf8');
+    html = html.replace('<script src="' + f + '"></script>', '');
+  }
+}
+
+// Place inlined scripts right before the first inline script block
+html = html.replace('<script>', '<script>\n' + inlinedJs + '\n');
+
+const outPath = 'C:/Users/grani/OneDrive/Desktop/Swasthya-setu/swasthya-setu-standalone.html';
+fs.writeFileSync(outPath, html, 'utf8');
+
+console.log('✓ Successfully created 100% standalone single HTML file at:', outPath);
+console.log('File size:', (html.length / 1024).toFixed(1), 'KB');

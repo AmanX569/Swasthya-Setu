@@ -1,0 +1,102 @@
+/* =========================================================
+   SWASTHYA SETU - FIELD WORKER / ASHA PORTAL STYLES
+   ========================================================= */
+
+.worker-command-shell {
+  width: 100%;
+  animation: workerFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes workerFadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Worker Sub-Navigation Tab Bar */
+.worker-nav-bar {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 6px 4px 14px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid rgba(220, 252, 243, 0.12);
+  scrollbar-width: none;
+}
+
+.worker-nav-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.worker-nav-tab {
+  white-space: nowrap;
+  min-height: 40px;
+  padding: 8px 16px;
+  border-radius: 12px;
+  background: rgba(220, 252, 243, 0.05);
+  border: 1px solid rgba(220, 252, 243, 0.14);
+  color: var(--ink-dim, #cbd5e1);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.worker-nav-tab:hover {
+  background: rgba(220, 252, 243, 0.12);
+  color: #ffffff;
+  border-color: rgba(245, 158, 11, 0.4);
+  transform: translateY(-1px);
+}
+
+.worker-nav-tab.active {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #03231b;
+  border-color: transparent;
+  font-weight: 700;
+  box-shadow: 0 6px 18px -4px rgba(245, 158, 11, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+/* Worker Tab Panes */
+.worker-tab-pane {
+  display: none;
+}
+
+.worker-tab-pane.active {
+  display: block;
+  animation: workerTabFade 0.3s ease;
+}
+
+@keyframes workerTabFade {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.worker-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #f59e0b, #b45309);
+  color: #03241d;
+  font-weight: 800;
+  font-size: 18px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 14px -2px rgba(245, 158, 11, 0.5);
+}
+
+.worker-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+@media (max-width: 1024px) {
+  .worker-kpi-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 560px) {
+  .worker-kpi-grid { grid-template-columns: 1fr; }
+}

@@ -1,0 +1,391 @@
+/* =========================================================
+   SWASTHYA SETU - DOCTOR PORTAL & TELEMEDICINE SUITE STYLES
+   ========================================================= */
+
+.doc-command-shell {
+  width: 100%;
+  animation: docFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes docFadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- Doctor Sub-Navigation Tab Bar ---------- */
+.doc-nav-bar {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 6px 4px 14px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid rgba(220, 252, 243, 0.12);
+  scrollbar-width: none;
+}
+
+.doc-nav-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.doc-nav-tab {
+  white-space: nowrap;
+  min-height: 40px;
+  padding: 8px 16px;
+  border-radius: 12px;
+  background: rgba(220, 252, 243, 0.05);
+  border: 1px solid rgba(220, 252, 243, 0.14);
+  color: var(--ink-dim, #cbd5e1);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.doc-nav-tab:hover {
+  background: rgba(220, 252, 243, 0.12);
+  color: #ffffff;
+  border-color: rgba(95, 227, 196, 0.3);
+  transform: translateY(-1px);
+}
+
+.doc-nav-tab.active {
+  background: linear-gradient(135deg, var(--auth-primary-bright, #34d399), var(--auth-primary, #10b981));
+  color: #03231b;
+  border-color: transparent;
+  font-weight: 700;
+  box-shadow: 0 6px 18px -4px rgba(52, 211, 153, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+/* Tab Panes */
+.doc-tab-pane {
+  display: none;
+}
+
+.doc-tab-pane.active {
+  display: block;
+  animation: docTabFade 0.3s ease;
+}
+
+@keyframes docTabFade {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- KPI Counter Cards ---------- */
+.doc-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+@media (max-width: 1024px) {
+  .doc-kpi-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 560px) {
+  .doc-kpi-grid { grid-template-columns: 1fr; }
+}
+
+.doc-kpi-card {
+  background: linear-gradient(145deg, rgba(20, 48, 42, 0.7), rgba(7, 24, 20, 0.85));
+  border: 1px solid rgba(220, 252, 243, 0.14);
+  border-radius: 18px;
+  padding: 18px 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+  backdrop-filter: blur(18px);
+  box-shadow: 0 10px 25px -10px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.doc-kpi-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(95, 227, 196, 0.45);
+  box-shadow: 0 16px 35px -12px rgba(0, 0, 0, 0.8), 0 0 20px -6px rgba(95, 227, 196, 0.3);
+}
+
+.doc-patient-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 13px;
+  background: linear-gradient(135deg, var(--accent, #f59e0b), #d97706);
+  color: #03241d;
+  font-weight: 800;
+  font-size: 16px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 14px -2px rgba(245, 158, 11, 0.5);
+}
+
+.doc-patient-avatar.emergency {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: #ffffff;
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.6);
+  animation: docPulse 1.8s infinite;
+}
+
+@keyframes docPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.06); }
+}
+
+/* Vitals Strip */
+.doc-vitals-strip {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 10px;
+}
+
+@media (max-width: 900px) {
+  .doc-vitals-strip { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 520px) {
+  .doc-vitals-strip { grid-template-columns: repeat(2, 1fr); }
+}
+
+.doc-vital-box {
+  padding: 10px 12px;
+  background: rgba(4, 18, 15, 0.55);
+  border: 1px solid rgba(220, 252, 243, 0.12);
+  border-radius: 12px;
+  text-align: center;
+}
+
+.doc-vital-box small {
+  display: block;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted, #86a79e);
+  margin-bottom: 4px;
+}
+
+.doc-vital-box strong {
+  font-size: 15px;
+  color: #ffffff;
+  font-family: 'Fraunces', serif;
+}
+
+.doc-action-card {
+  padding: 20px;
+  cursor: pointer;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.doc-action-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(95, 227, 196, 0.4);
+}
+
+/* ---------- Consultation Queue Cards ---------- */
+.doc-queue-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.doc-queue-card {
+  padding: 18px;
+  border-radius: 18px;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.doc-queue-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(95, 227, 196, 0.35);
+}
+
+.doc-queue-card.emergency {
+  border-left: 5px solid #ef4444;
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.12), rgba(4, 18, 15, 0.75));
+  box-shadow: 0 0 25px -8px rgba(239, 68, 68, 0.4);
+}
+
+/* ---------- Teleconsultation Video Layout & Controls ---------- */
+.doc-tele-layout {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+@media (max-width: 1024px) {
+  .doc-tele-layout { grid-template-columns: 1fr; }
+}
+
+.doc-video-viewport {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  border-radius: 20px;
+  background: radial-gradient(circle at 50% 30%, rgba(16, 185, 129, 0.15), transparent 60%),
+              linear-gradient(165deg, #051a15 0%, #020b08 100%);
+  border: 1px solid rgba(95, 227, 196, 0.25);
+  box-shadow: 0 20px 50px -15px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 16px;
+}
+
+.doc-video-viewport.audio-only-mode {
+  background: radial-gradient(circle at 50% 50%, rgba(6, 182, 212, 0.2), transparent 70%),
+              linear-gradient(165deg, #041814 0%, #010806 100%);
+}
+
+.doc-video-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 2;
+}
+
+.doc-rec-led {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: rgba(4, 18, 15, 0.6);
+  border: 1px solid rgba(220, 252, 243, 0.15);
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #ffffff;
+  backdrop-filter: blur(8px);
+}
+
+.doc-rec-led .dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ef4444;
+  box-shadow: 0 0 8px #ef4444;
+  animation: docPulse 1.4s infinite;
+}
+
+.doc-video-center-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+
+.doc-patient-cam-mock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.patient-cam-silhouette {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  background: rgba(220, 252, 243, 0.08);
+  border: 2px solid rgba(95, 227, 196, 0.3);
+  display: grid;
+  place-items: center;
+  font-size: 54px;
+  box-shadow: 0 0 35px rgba(52, 211, 153, 0.2);
+}
+
+.patient-cam-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #ffffff;
+  background: rgba(4, 18, 15, 0.6);
+  padding: 4px 12px;
+  border-radius: 999px;
+  backdrop-filter: blur(8px);
+}
+
+.doc-pip-cam {
+  position: absolute;
+  bottom: 74px;
+  right: 18px;
+  width: 100px;
+  height: 72px;
+  border-radius: 12px;
+  background: rgba(6, 24, 20, 0.85);
+  border: 1.5px solid rgba(95, 227, 196, 0.4);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  backdrop-filter: blur(10px);
+}
+
+.doc-pip-cam span {
+  font-size: 9.5px;
+  font-weight: 700;
+  color: var(--auth-primary-bright, #34d399);
+  margin-top: 2px;
+}
+
+/* Call Controls Bar */
+.doc-call-controls-bar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  z-index: 2;
+  background: rgba(4, 18, 15, 0.7);
+  padding: 8px 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(220, 252, 243, 0.12);
+  backdrop-filter: blur(14px);
+}
+
+.doc-ctrl-btn {
+  padding: 8px 14px;
+  border-radius: 10px;
+  background: rgba(220, 252, 243, 0.08);
+  border: 1px solid rgba(220, 252, 243, 0.15);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.15s ease;
+}
+
+.doc-ctrl-btn:hover {
+  background: rgba(220, 252, 243, 0.18);
+  transform: translateY(-1px);
+}
+
+.doc-ctrl-btn.muted {
+  background: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+  border-color: rgba(239, 68, 68, 0.35);
+}
+
+.doc-ctrl-btn.active {
+  background: rgba(16, 185, 129, 0.25);
+  color: #86efac;
+  border-color: var(--auth-primary-bright, #34d399);
+}
+
+/* ---------- Smart e-Prescription Row Editor ---------- */
+.rx-medicine-row {
+  padding: 14px;
+  background: rgba(4, 18, 15, 0.5);
+  border: 1px solid rgba(220, 252, 243, 0.12);
+  border-radius: 14px;
+  transition: border-color 0.2s ease;
+}
+
+.rx-medicine-row:hover {
+  border-color: rgba(95, 227, 196, 0.3);
+}
