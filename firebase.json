@@ -4,7 +4,22 @@
     "ignore": [
       "firebase.json",
       "**/.*",
-      "**/node_modules/**"
+      "**/node_modules/**",
+      "**/*.bat",
+      "**/*.cmd",
+      "**/*.exe",
+      "**/*.ps1",
+      "**/*.sh",
+      "**/*.log",
+      ".git/**",
+      ".github/**",
+      "scratch/**",
+      "bundle.js",
+      "server.js",
+      "package.json",
+      "package-lock.json",
+      "firestore.rules",
+      "database.rules.json"
     ],
     "headers": [
       {
