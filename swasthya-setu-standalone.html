@@ -2005,7 +2005,7 @@ a {
   display: none;
   place-items: center;
   padding: 20px;
-  z-index: 250;
+  z-index: 10000;
 }
 
 .modal-overlay.open {
@@ -9718,7 +9718,108 @@ a {
 
     openAddStaffModal() {
       const modal = document.getElementById('addStaffModal');
-      if (modal) modal.classList.add('open');
+      if (modal) {
+        modal.classList.add('open');
+        modal.style.display = 'grid';
+      }
+    }
+
+    closeAddStaffModal() {
+      const modal = document.getElementById('addStaffModal');
+      if (modal) {
+        modal.classList.remove('open');
+        modal.style.display = 'none';
+      }
+    }
+
+    async submitAddStaff(event) {
+      if (event && event.preventDefault) event.preventDefault();
+
+      const nameEl = document.getElementById('newStaffName');
+      const roleEl = document.getElementById('newStaffRole');
+      const phoneEl = document.getElementById('newStaffPhone');
+      const facilityEl = document.getElementById('newStaffFacility');
+
+      const name = nameEl ? nameEl.value.trim() : '';
+      const role = roleEl ? roleEl.value : 'patient';
+      const phone = phoneEl ? phoneEl.value.trim() : '';
+      const facility = facilityEl ? facilityEl.value.trim() : 'Kondapalli Community Grid';
+
+      if (!name) {
+        alert('Please enter a Full Name.');
+        if (nameEl) nameEl.focus();
+        return;
+      }
+
+      if (!phone || phone.length < 10) {
+        alert('Please enter a valid 10-digit mobile number.');
+        if (phoneEl) phoneEl.focus();
+        return;
+      }
+
+      const rolePrefix = {
+        'doctor': 'USR-DOC',
+        'worker': 'USR-WRK',
+        'admin': 'USR-ADM',
+        'patient': 'USR-PAT'
+      }[role] || 'USR';
+
+      const uniqueId = `${rolePrefix}-${Date.now().toString().slice(-4)}`;
+
+      const newMember = {
+        id: uniqueId,
+        userId: uniqueId,
+        name: name,
+        role: role,
+        roles: [role],
+        phone: phone,
+        facility: facility,
+        location: facility,
+        status: 'Active',
+        regDate: 'Today',
+        isNew: true,
+        verified: true,
+        designation: role === 'doctor' ? 'Clinical Specialist' : (role === 'worker' ? 'Field Healthcare Worker' : (role === 'admin' ? 'Facility Administrator' : 'Citizen')),
+        specialization: role === 'doctor' ? 'General Medicine' : undefined,
+        abhaId: role === 'patient' ? `14-${Math.floor(1000+Math.random()*9000)}-${Math.floor(1000+Math.random()*9000)}-${Math.floor(1000+Math.random()*9000)}` : undefined
+      };
+
+      // 1. Update local admin state
+      const existingIdx = this.data.users.findIndex(u => u.phone === phone || u.id === uniqueId);
+      if (existingIdx >= 0) {
+        this.data.users[existingIdx] = newMember;
+      } else {
+        this.data.users.unshift(newMember);
+      }
+
+      // 2. Register in Auth Service
+      if (window.authService && typeof window.authService.registerAccount === 'function') {
+        window.authService.registerAccount(newMember);
+      }
+
+      // 3. Sync to Firebase Realtime Database
+      try {
+        await fetch(`https://swasthya-setu-2b67d-default-rtdb.firebaseio.com/staff_registry/${uniqueId}.json`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newMember)
+        });
+      } catch (e) {
+        console.warn('Cloud sync offline:', e);
+      }
+
+      // 4. Clear fields & close modal
+      if (nameEl) nameEl.value = '';
+      if (phoneEl) phoneEl.value = '';
+      this.closeAddStaffModal();
+
+      // 5. Toast & re-render
+      if (typeof window.toast === 'function') {
+        window.toast(`✓ Added ${name} (${role.toUpperCase()}) to Cloud Database!`);
+      }
+
+      this.calculateLiveStats();
+      this.renderStaffManagement();
     }
 
     // -------------------------------------------------------------
@@ -14412,13 +14513,21 @@ function onLanguageChange(lang) {
 
 // Add Staff Modal Controller
 function openAddStaffModal() {
+  if (window.adminController) window.adminController.openAddStaffModal();
   const modal = document.getElementById('addStaffModal');
-  if (modal) modal.classList.add('open');
+  if (modal) {
+    modal.classList.add('open');
+    modal.style.display = 'grid';
+  }
 }
 
 function closeAddStaffModal() {
+  if (window.adminController) window.adminController.closeAddStaffModal();
   const modal = document.getElementById('addStaffModal');
-  if (modal) modal.classList.remove('open');
+  if (modal) {
+    modal.classList.remove('open');
+    modal.style.display = 'none';
+  }
 }
 
 // Firebase Cloud Sync Diagnostic Modal Controller

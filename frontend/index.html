@@ -2005,7 +2005,7 @@ a {
   display: none;
   place-items: center;
   padding: 20px;
-  z-index: 250;
+  z-index: 10000;
 }
 
 .modal-overlay.open {
@@ -3723,13 +3723,21 @@ function onLanguageChange(lang) {
 
 // Add Staff Modal Controller
 function openAddStaffModal() {
+  if (window.adminController) window.adminController.openAddStaffModal();
   const modal = document.getElementById('addStaffModal');
-  if (modal) modal.classList.add('open');
+  if (modal) {
+    modal.classList.add('open');
+    modal.style.display = 'grid';
+  }
 }
 
 function closeAddStaffModal() {
+  if (window.adminController) window.adminController.closeAddStaffModal();
   const modal = document.getElementById('addStaffModal');
-  if (modal) modal.classList.remove('open');
+  if (modal) {
+    modal.classList.remove('open');
+    modal.style.display = 'none';
+  }
 }
 
 // Firebase Cloud Sync Diagnostic Modal Controller
