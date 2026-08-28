@@ -110,17 +110,7 @@
       email: 'saraswati.asha@setucare.org',
       avatar: 'BS'
     },
-    {
-      userId: 'USR-PATIENT-004',
-      name: 'Anitha K.',
-      phone: '4444444444',
-      roles: ['patient'],
-      activeRole: 'patient',
-      designation: 'Kondapalli Resident (ABHA Linked)',
-      facility: 'Kondapalli PHC',
-      email: 'anitha.k@example.com',
-      avatar: 'AK'
-    },
+
     {
       userId: 'USR-MULTI-005',
       name: 'Vikram Mehta',

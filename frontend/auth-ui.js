@@ -234,9 +234,7 @@
             <button type="button" class="auth-demo-chip" onclick="authUI.fillDemoPhone('3333333333')">
               🤝 Worker (3333333333)
             </button>
-            <button type="button" class="auth-demo-chip" onclick="authUI.fillDemoPhone('4444444444')">
-              🌾 Patient (4444444444)
-            </button>
+            
             <button type="button" class="auth-demo-chip" onclick="authUI.fillDemoPhone('5555555555')" style="border-color:rgba(59,130,246,0.4)">
               ✨ Admin + Patient (5555555555)
             </button>

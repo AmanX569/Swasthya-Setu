@@ -7204,17 +7204,7 @@ a {
       email: 'saraswati.asha@setucare.org',
       avatar: 'BS'
     },
-    {
-      userId: 'USR-PATIENT-004',
-      name: 'Anitha K.',
-      phone: '4444444444',
-      roles: ['patient'],
-      activeRole: 'patient',
-      designation: 'Kondapalli Resident (ABHA Linked)',
-      facility: 'Kondapalli PHC',
-      email: 'anitha.k@example.com',
-      avatar: 'AK'
-    },
+
     {
       userId: 'USR-MULTI-005',
       name: 'Vikram Mehta',
@@ -7960,9 +7950,7 @@ a {
             <button type="button" class="auth-demo-chip" onclick="authUI.fillDemoPhone('3333333333')">
               🤝 Worker (3333333333)
             </button>
-            <button type="button" class="auth-demo-chip" onclick="authUI.fillDemoPhone('4444444444')">
-              🌾 Patient (4444444444)
-            </button>
+            
             <button type="button" class="auth-demo-chip" onclick="authUI.fillDemoPhone('5555555555')" style="border-color:rgba(59,130,246,0.4)">
               ✨ Admin + Patient (5555555555)
             </button>
@@ -12416,11 +12404,40 @@ a {
 
     init() {
       this.initTheme();
+      this.syncCurrentUserProfile();
       this.renderFamilySelector();
       this.renderMedicationTracker();
       this.renderJanAushadhiCalculator();
       this.renderLiveHospitalBeds();
       this.syncLivePatientDatabase();
+    }
+
+    syncCurrentUserProfile() {
+      if (typeof window.authService !== 'undefined' && window.authService.isAuthenticated()) {
+        const u = window.authService.getCurrentUser();
+        if (u && u.name) {
+          const userKey = u.userId ? u.userId.toLowerCase().replace(/[^a-z0-9]/g, '_') : 'self';
+          if (!this.data.familyMembers[userKey]) {
+            this.data.familyMembers[userKey] = {
+              id: u.userId || 'PAT-01',
+              name: u.name,
+              role: 'Self (Primary)',
+              phone: u.phone,
+              age: u.age || 28,
+              gender: u.gender || 'Female',
+              bloodGroup: u.bloodGroup || 'O+',
+              abhaId: u.abha || '14-2938-7710-4521',
+              conditions: u.conditions ? (Array.isArray(u.conditions) ? u.conditions : [u.conditions]) : ['General Health Checkup Active'],
+              avatar: u.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase(),
+              assignedAsha: 'ASHA Field Worker (Ward 6)',
+              emergencyContact: u.emergencyContact || u.phone
+            };
+          }
+          if (!this.data.currentFamilyMember || !this.data.familyMembers[this.data.currentFamilyMember]) {
+            this.data.currentFamilyMember = userKey;
+          }
+        }
+      }
     }
 
     syncLivePatientDatabase() {
@@ -12559,22 +12576,101 @@ a {
       const container = document.getElementById('familyProfileSelector');
       if (!container) return;
 
-      const members = this.data.familyMembers;
-      const activeKey = this.data.currentFamilyMember;
+      this.syncCurrentUserProfile();
 
-      container.innerHTML = Object.keys(members).map(key => {
+      const members = this.data.familyMembers || {};
+      const activeKey = this.data.currentFamilyMember;
+      const memberKeys = Object.keys(members);
+
+      let html = memberKeys.map(key => {
         const m = members[key];
         const isActive = key === activeKey;
         return `
           <div class="family-pill ${isActive ? 'active' : ''}" data-member="${key}" onclick="patientController.selectFamilyMember('${key}')">
-            <div class="family-avatar">${m.avatar}</div>
+            <div class="family-avatar">${m.avatar || 'U'}</div>
             <div>
               <strong style="display:block;font-size:13px;color:${isActive ? '#03231b' : '#ffffff'};">${m.name}</strong>
-              <small style="font-size:10.5px;color:${isActive ? '#064e3b' : 'var(--muted)'};">${m.role} · ${m.bloodGroup}</small>
+              <small style="font-size:10.5px;color:${isActive ? '#064e3b' : 'var(--muted)'};">${m.role || 'Family Member'} · ${m.bloodGroup || 'O+'}</small>
             </div>
           </div>
         `;
       }).join('');
+
+      // Always append + Add Family Member card
+      html += `
+        <div class="family-pill" onclick="patientController.openAddFamilyMemberModal()" style="border-style:dashed;border-color:var(--auth-primary-bright);background:rgba(52,211,153,0.08);cursor:pointer;" title="Add a family member to your circle">
+          <div class="family-avatar" style="background:linear-gradient(135deg,#10b981,#34d399);color:#03231b;font-weight:800;font-size:18px;">+</div>
+          <div>
+            <strong style="display:block;font-size:13px;color:#34d399;">+ Add Family Member</strong>
+            <small style="font-size:10.5px;color:var(--muted);">ABHA &amp; Health Circle</small>
+          </div>
+        </div>
+      `;
+
+      container.innerHTML = html;
+    }
+
+    openAddFamilyMemberModal() {
+      const name = prompt('Family Member Full Name: (e.g. Baby Ravi / Ramu K. / Saraswati)');
+      if (!name || name.trim().length < 2) return;
+
+      const role = prompt('Relationship / Family Role: (e.g. Son, Daughter, Spouse, Mother, Father, Self)', 'Child') || 'Family Member';
+      const age = prompt('Age & Gender: (e.g. 8 Months Male / 34 Yrs Female)', '28 Yrs') || 'Adult';
+      const blood = prompt('Blood Group: (e.g. O+, A+, B+, AB+, O-, A-)', 'O+') || 'O+';
+      const condition = prompt('Health Condition or Note:', 'General Health Checkup Active') || 'Healthy';
+
+      const memberKey = 'fam_' + Date.now().toString().slice(-6);
+      const abha = '14-' + Math.floor(1000 + Math.random() * 9000) + '-' + Math.floor(1000 + Math.random() * 9000) + '-' + Math.floor(1000 + Math.random() * 9000);
+
+      const newMember = {
+        id: 'FAM-' + Date.now().toString().slice(-4),
+        name: name.trim(),
+        role: role.trim(),
+        age: age.trim(),
+        bloodGroup: blood.trim(),
+        abhaId: abha,
+        conditions: [condition.trim()],
+        avatar: name.trim().split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase(),
+        assignedAsha: 'ASHA Field Worker (Ward 6)',
+        emergencyContact: 'Family Head'
+      };
+
+      this.data.familyMembers[memberKey] = newMember;
+      this.data.currentFamilyMember = memberKey;
+
+      // Sync to Firebase Realtime Database
+      try {
+        fetch(`https://swasthya-setu-2b67d-default-rtdb.firebaseio.com/patient_family_members/${memberKey}.json`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newMember)
+        }).catch(() => {});
+
+        // Also add to staff_registry for doctor visibility
+        const staffObj = {
+          id: newMember.id,
+          name: newMember.name,
+          role: 'patient',
+          phone: (window.authService && window.authService.getCurrentUser() ? window.authService.getCurrentUser().phone : '9876543210'),
+          facility: 'Kondapalli PHC',
+          location: 'Kondapalli Sector',
+          status: 'Active',
+          regDate: 'Today',
+          isNew: true,
+          abhaId: newMember.abhaId
+        };
+        fetch(`https://swasthya-setu-2b67d-default-rtdb.firebaseio.com/staff_registry/${staffObj.id}.json`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(staffObj)
+        }).catch(() => {});
+      } catch (e) {}
+
+      if (typeof window.toast === 'function') {
+        window.toast(`✓ Added ${name} to Family Circle with ABHA: ${abha}!`);
+      }
+
+      this.selectFamilyMember(memberKey);
     }
 
     selectVillage(villageKey) {
