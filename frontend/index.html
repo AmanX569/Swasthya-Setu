@@ -89,8 +89,52 @@
 }
 
 /* =========================================================
-   6 THEME ENGINES: DARK / EMERALD / NAVY / GOV / DAYLIGHT / OLED
+   7 THEME ENGINES: BLACK / DARK / EMERALD / NAVY / GOV / DAYLIGHT / OLED
    ========================================================= */
+
+/* 0. Pure Black Theme (AMOLED / Pitch Black 100%) */
+[data-theme="black"], body[data-theme="black"] {
+  --void-950: #000000;
+  --void-900: #050505;
+  --void-850: #0a0a0a;
+  --void-800: #121212;
+  --void-700: #1a1a1a;
+
+  --glass-1: rgba(18, 18, 18, 0.9);
+  --glass-2: rgba(26, 26, 26, 0.95);
+  --glass-3: #121212;
+  --glass-4: #1c1c1c;
+  --glass-border: rgba(255, 255, 255, 0.16);
+  --glass-border-strong: rgba(52, 211, 153, 0.55);
+  --glass-glow: rgba(52, 211, 153, 0.4);
+  --glass-specular: rgba(255, 255, 255, 0.7);
+  --rail-glass: #000000;
+
+  --primary: #10b981;
+  --primary-dark: #064e3b;
+  --primary-bright: #34d399;
+  --primary-glow: rgba(52, 211, 153, 0.55);
+  --teal-cyan: #38bdf8;
+  --teal-glow: rgba(56, 189, 248, 0.45);
+
+  --accent: #f59e0b;
+  --accent-light: #fbbf24;
+  --accent-soft: rgba(245, 158, 11, 0.2);
+
+  --ink: #ffffff;
+  --ink-dim: #d1d5db;
+  --muted: #9ca3af;
+  --line: rgba(255, 255, 255, 0.14);
+
+  --shadow-ambient: 0 10px 30px -10px rgba(0, 0, 0, 0.95);
+  --shadow-3d: 0 25px 60px -15px rgba(0, 0, 0, 1);
+  color-scheme: dark;
+}
+
+body[data-theme="black"] {
+  background: #000000 !important;
+  background-image: none !important;
+}
 
 /* 1. Classic Modern Dark Mode */
 [data-theme="dark"], body[data-theme="dark"] {

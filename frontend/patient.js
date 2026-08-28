@@ -250,12 +250,13 @@
       document.body.className = `theme-${themeName}`;
 
       const themeLabels = {
+        'black': '⬛ Pure Black',
         'dark': '🌙 Modern Dark',
         'emerald': '🌿 Emerald Night',
         'navy': '🌊 Deep Navy Blue',
         'gov': '🏛️ Sarkari Blue & White',
         'daylight': '☀️ Daylight Pearl',
-        'oled': '⬛ Midnight OLED'
+        'oled': '🌑 Midnight OLED'
       };
 
       const themeBtn = document.getElementById('themeToggleBtn');
@@ -271,10 +272,11 @@
     }
 
     toggleThemeNext() {
-      const themes = ['dark', 'emerald', 'navy', 'gov', 'daylight', 'oled'];
+      const themes = ['black', 'dark', 'emerald', 'navy', 'gov', 'daylight', 'oled'];
       const nextIdx = (themes.indexOf(this.data.currentTheme) + 1) % themes.length;
       this.setTheme(themes[nextIdx]);
       const themeLabels = {
+        'black': 'Pure Black (AMOLED Pitch Black)',
         'dark': 'Modern Dark Mode',
         'emerald': 'Emerald Night',
         'navy': 'Deep Navy Blue',
