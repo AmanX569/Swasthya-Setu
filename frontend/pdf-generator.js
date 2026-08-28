@@ -53,15 +53,17 @@
             .abha-number { font-family: 'IBM Plex Mono', monospace; font-size: 17px; font-weight: 700; color: #0b5ed7; background: #eff6ff; padding: 6px 10px; border-radius: 8px; display: inline-block; margin: 4px 0 10px; border: 1px dashed #bfdbfe; }
             .card-footer { background: #f8fafc; padding: 12px 20px; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #64748b; }
             .qr-mock { width: 48px; height: 48px; background: #0f172a; border-radius: 6px; display: grid; place-items: center; color: #fff; font-size: 8px; font-family: monospace; text-align: center; }
-            .print-btn-bar { position: fixed; top: 15px; right: 15px; display: flex; gap: 10px; }
-            .print-btn { background: #003366; color: #fff; border: none; padding: 10px 18px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 13px; }
-            @media print { .print-btn-bar { display: none; } body { background: #fff; margin: 0; } .card-wrapper { box-shadow: none; } }
+            .print-btn-bar { position: fixed; top: 15px; left: 50%; transform: translateX(-50%); display: flex; gap: 12px; z-index: 9999999; background: #003366; padding: 10px 20px; border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.25); }
+            .print-btn { background: #34d399; color: #022c22; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 14px; box-shadow: 0 4px 12px rgba(52,211,153,0.4); }
+            .print-btn:hover { background: #5eead4; }
+            .card-wrapper { width: 500px; background: #ffffff; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.12); border: 2px solid #003366; overflow: hidden; position: relative; margin-top: 70px !important; }
+            @media print { .print-btn-bar { display: none; } body { background: #fff; margin: 0; padding: 0; } .card-wrapper { box-shadow: none; margin-top: 0 !important; } }
           </style>
         </head>
         <body>
           <div class="print-btn-bar">
-            <button class="print-btn" onclick="window.print()">🖨️ Print / Save as PDF</button>
-            <button class="print-btn" style="background:#64748b;" onclick="window.close()">✕ Close</button>
+            <button class="print-btn" onclick="window.print()">📥 Download / Save PDF</button>
+            <button class="print-btn" style="background:#64748b;color:#fff;box-shadow:none;" onclick="window.close()">✕ Close</button>
           </div>
           <div class="card-wrapper">
             <div class="card-header">
@@ -164,7 +166,7 @@
           <style>
             @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=IBM+Plex+Mono:wght@600&display=swap');
             body { font-family: 'Plus Jakarta Sans', sans-serif; margin: 30px; background: #f8fafc; color: #0f172a; }
-            .rx-paper { max-width: 750px; margin: 0 auto; background: #ffffff; padding: 35px 40px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border-top: 6px solid #003366; position: relative; }
+            .rx-paper { max-width: 750px; margin: 70px auto 30px; background: #ffffff; padding: 35px 40px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border-top: 6px solid #003366; position: relative; }
             .header { display: flex; justify-content: space-between; border-bottom: 2px solid #003366; padding-bottom: 15px; margin-bottom: 20px; }
             .doc-info h2 { margin: 0; color: #003366; font-size: 20px; font-weight: 800; }
             .doc-info p { margin: 3px 0; font-size: 12px; color: #475569; }
@@ -174,15 +176,16 @@
             th { text-align: left; background: #003366; color: #ffffff; padding: 10px; font-size: 12px; text-transform: uppercase; }
             .seal-box { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e2e8f0; }
             .digital-seal { border: 2px dashed #0b5ed7; border-radius: 8px; padding: 10px 16px; background: #eff6ff; font-size: 11.5px; color: #0b5ed7; }
-            .print-btn-bar { position: fixed; top: 15px; right: 15px; display: flex; gap: 10px; }
-            .print-btn { background: #003366; color: #fff; border: none; padding: 10px 18px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 13px; }
-            @media print { .print-btn-bar { display: none; } body { background: #fff; margin: 0; } .rx-paper { box-shadow: none; padding: 0; } }
+            .print-btn-bar { position: fixed; top: 15px; left: 50%; transform: translateX(-50%); display: flex; gap: 12px; z-index: 9999999; background: #003366; padding: 10px 20px; border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.25); }
+            .print-btn { background: #34d399; color: #022c22; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 14px; box-shadow: 0 4px 12px rgba(52,211,153,0.4); }
+            .print-btn:hover { background: #5eead4; }
+            @media print { .print-btn-bar { display: none; } body { background: #fff; margin: 0; padding: 0; } .rx-paper { box-shadow: none; padding: 0; margin-top: 0 !important; } }
           </style>
         </head>
         <body>
           <div class="print-btn-bar">
-            <button class="print-btn" onclick="window.print()">🖨️ Print / Download PDF</button>
-            <button class="print-btn" style="background:#64748b;" onclick="window.close()">✕ Close</button>
+            <button class="print-btn" onclick="window.print()">📥 Download / Print Prescription PDF</button>
+            <button class="print-btn" style="background:#64748b;color:#fff;box-shadow:none;" onclick="window.close()">✕ Close</button>
           </div>
           <div class="rx-paper">
             <div class="header">

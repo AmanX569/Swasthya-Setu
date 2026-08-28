@@ -558,6 +558,132 @@
       if (weatherEl && dict.weather_ticker) {
         weatherEl.textContent = dict.weather_ticker;
       }
+
+      // 4. Universal deep text translation for all visible UI elements
+      this.translateTextNodes(document.body, lang);
+    }
+
+    translateTextNodes(root, lang) {
+      if (!root || lang === 'en') return;
+
+      const PHRASES = {
+        hi: {
+          'Care is close to your home': 'स्वास्थ्य सेवा आपके घर के पास है',
+          'Start with one simple step. Your nearest Kondapalli Sub-Centre & ASHA Didi are ready to help, even when phone signal is low.': 'एक साधारण कदम से शुरुआत करें। आपका नजदीकी कोंडापल्ली उप-केंद्र व आशा दीदी फोन सिग्नल कम होने पर भी आपकी सेवा के लिए तैयार हैं।',
+          'Avg Queue Wait': 'औसत कतार प्रतीक्षा',
+          'Referral Ladder': 'रेफरल सीढ़ी',
+          'Follow-ups Due': 'लंबित स्वास्थ्य दौरे',
+          'Medicines in Stock': 'दवाइयों की उपलब्धता',
+          'Family Health Circle · परिवार स्वास्थ्य चक्र': 'परिवार स्वास्थ्य चक्र · सभी सदस्य',
+          'Care Journey & Referral Ladder · देखभाल सीढ़ी': 'देखभाल यात्रा व रेफरल सीढ़ी',
+          'Download ABHA Card (PDF)': 'आभा कार्ड डाउनलोड (PDF)',
+          'Download e-Rx (PDF)': 'ई-पर्चा डाउनलोड (PDF)',
+          '18 min': '18 मिनट',
+          '2 Active': '2 सक्रिय',
+          '3 Visits': '3 दौरे',
+          '92%': '92% उपलब्ध',
+          'Kondapalli PHC Stock Healthy': 'कोंडापल्ली स्वास्थ्य केंद्र स्टॉक पर्याप्त',
+          '1 ANC Visit Overdue': '1 मातृत्व जांच लंबित',
+          '1 In-transit to CHC': '1 सीएचसी की ओर अग्रसर',
+          '↓ 34% faster via digital token': 'डिजिटल टोकन से 34% तेज',
+          'Daily Medication Schedule & Jan Aushadhi Tracker': 'दैनिक दवा सूची व जन औषधि बचत ट्रैकर',
+          'Live Hospital & Bed Capacity Near You': 'नजदीकी अस्पताल, आईसीयू व सामान्य बेड की लाइव स्थिति',
+          '3D AI Symptom Self-Triage (Gemini Flash)': '3D AI लक्षण स्व-जांच व सलाह (Gemini)',
+          'What is the primary symptom bothering you today?': 'आज आपको मुख्य रूप से क्या शारीरिक समस्या है?',
+          'Emergency 108 SOS': 'आपातकालीन 108 एम्बुलेंस',
+          'Jan Aushadhi & Stock': 'जन औषधि व दवाइयां',
+          'Visual First Aid': 'प्राथमिक उपचार',
+          'Admin Command Center': 'प्रशासन कमांड सेंटर',
+          'Doctor Clinical Desk': 'डॉक्टर क्लिनिकल डेस्क',
+          'ASHA Frontline Desk': 'आशा फ्रंटलाइन डेस्क',
+          'Queue & Token': 'टोकन व कतार',
+          'Health Locker (ABHA)': 'डिजिटल लॉकर (ABHA)',
+          'Teleconsultation': 'टेलीकंसल्टेशन',
+          'Home & Journey': 'मुख्य पृष्ठ व यात्रा',
+          'Kondapalli Weather Advisory:': 'कोंडापल्ली मौसम व स्वास्थ्य सलाह:'
+        },
+        te: {
+          'Care is close to your home': 'వైద్య సంరక్షణ మీ ఇంటి సమీపంలోనే ఉంది',
+          'Start with one simple step. Your nearest Kondapalli Sub-Centre & ASHA Didi are ready to help, even when phone signal is low.': 'ఒక సాధారణ అడుగుతో ప్రారంభించండి. ఫోన్ సిగ్నల్ తక్కువగా ఉన్నప్పటికీ కొండపల్లి ఉప-కేంద్రం మరియు ఆశా దీదీ సహాయం చేయడానికి సిద్ధంగా ఉన్నారు.',
+          'Avg Queue Wait': 'సగటు క్యూ సమయం',
+          'Referral Ladder': 'రిఫరల్ నిచ్చెన',
+          'Follow-ups Due': 'రాబోయే తనిఖీలు',
+          'Medicines in Stock': 'మందుల నిల్వ',
+          'Family Health Circle · परिवार स्वास्थ्य चक्र': 'కుటుంబ ఆరోగ్య చక్రం',
+          'Care Journey & Referral Ladder · देखभाल सीढ़ी': 'సంరక్షణ ప్రయాణం & రిఫరల్ నిచ్చెన',
+          'Download ABHA Card (PDF)': 'ఆభా కార్డు డౌన్‌లోడ్ (PDF)',
+          'Download e-Rx (PDF)': 'ఈ-ప్రిస్క్రిప్షన్ డౌన్‌లోడ్ (PDF)',
+          'Daily Medication Schedule & Jan Aushadhi Tracker': 'రోజువారీ మందుల షెడ్యూల్ & జన్ ఔషధి పొదుపు',
+          'Live Hospital & Bed Capacity Near You': 'సమీప ఆసుపత్రులు, ఐసీయూ బెడ్ల లైవ్ వివరాలు',
+          '3D AI Symptom Self-Triage (Gemini Flash)': '3D AI లక్షణాల పరీక్ష & అత్యవసర సలహా',
+          'Emergency 108 SOS': 'అత్యవసర 108 SOS',
+          'Jan Aushadhi & Stock': 'జన్ ఔషధి మందులు',
+          'Visual First Aid': 'ప్రథమ చికిత్స',
+          'Admin Command Center': 'అడ్మిన్ కమాండ్ సెంటర్',
+          'Doctor Clinical Desk': 'డాక్టర్ క్లినికల్ డెస్క్',
+          'ASHA Frontline Desk': 'ఆశా ఫ్రంట్‌లైన్ డెస్క్',
+          'Queue & Token': 'క్యూ & టోకెన్',
+          'Health Locker (ABHA)': 'ఆరోగ్య రికార్డు (ABHA)',
+          'Teleconsultation': 'టెలికన్సల్టేషన్',
+          'Home & Journey': 'హోమ్ & ప్రయాణం'
+        },
+        ta: {
+          'Care is close to your home': 'மருத்துவ சேவை உங்கள் வீட்டின் அருகில் உள்ளது',
+          'Avg Queue Wait': 'சராசரி காத்திருப்பு நேரம்',
+          'Referral Ladder': 'பரிந்துரை ஏணி',
+          'Follow-ups Due': 'நிலுவையில் உள்ள பரிசோதனை',
+          'Medicines in Stock': 'மருந்து இருப்பு',
+          'Family Health Circle · परिवार स्वास्थ्य चक्र': 'குடும்ப சுகாதார வட்டம்',
+          'Care Journey & Referral Ladder · देखभाल सीढ़ी': 'சிகிச்சை பயணம் & பரிந்துரை ஏணி',
+          'Download ABHA Card (PDF)': 'ஆபா அட்டை பதிவிறக்கம் (PDF)',
+          'Download e-Rx (PDF)': 'மருந்து சீட்டு பதிவிறக்கம் (PDF)'
+        },
+        mr: {
+          'Care is close to your home': 'आरोग्य सेवा तुमच्या घराच्या जवळ आहे',
+          'Avg Queue Wait': 'सरासरी रांगेतील वेळ',
+          'Referral Ladder': 'रेफरल शिडी',
+          'Follow-ups Due': 'प्रलंबित तपासणी',
+          'Medicines in Stock': 'औषध साठा',
+          'Family Health Circle · परिवार स्वास्थ्य चक्र': 'कुटुंब आरोग्य चक्र',
+          'Care Journey & Referral Ladder · देखभाल सीढ़ी': 'काळजी प्रवास आणि रेफरल शिडी',
+          'Download ABHA Card (PDF)': 'आभा कार्ड डाउनलोड (PDF)',
+          'Download e-Rx (PDF)': 'ई-प्रिस्क्रिप्शन डाउनलोड (PDF)'
+        },
+        bn: {
+          'Care is close to your home': 'স্বাস্থ্যসেবা আপনার বাড়ির কাছেই',
+          'Avg Queue Wait': 'গড় অপেক্ষার সময়',
+          'Referral Ladder': 'রেফারেল মই',
+          'Follow-ups Due': 'বাকি ফলো-আপ',
+          'Medicines in Stock': 'ওষুধের স্টক',
+          'Family Health Circle · परिवार स्वास्थ्य चक्र': 'পারিবারিক স্বাস্থ্য চক্র',
+          'Care Journey & Referral Ladder · देखभाल सीढ़ी': 'চিকিৎসা যাত্রা ও রেফারেল মই',
+          'Download ABHA Card (PDF)': 'আভা কার্ড ডাউনলোড (PDF)',
+          'Download e-Rx (PDF)': 'ই-প্রেসক্রিপশন ডাউনলোড (PDF)'
+        },
+        kn: {
+          'Care is close to your home': 'ಆರೋಗ್ಯ ಸೇವೆ ನಿಮ್ಮ ಮನೆಯ ಸಮೀಪದಲ್ಲಿದೆ',
+          'Avg Queue Wait': 'ಸರಾಸರಿ ಸರತಿ ಸಮಯ',
+          'Referral Ladder': 'ರೆಫರಲ್ ಏಣಿ',
+          'Follow-ups Due': 'ಬಾಕಿ ಇರುವ ತಪಾಸಣೆಗಳು',
+          'Medicines in Stock': 'ಔಷಧಿಗಳ ಲಭ್ಯತೆ',
+          'Family Health Circle · परिवार स्वास्थ्य चक्र': 'ಕುಟುಂಬ ಆರೋಗ್ಯ ವೃತ್ತ',
+          'Care Journey & Referral Ladder · देखभाल सीढ़ी': 'ಆರೋಗ್ಯ ಪಯಣ ಮತ್ತು ರೆಫರಲ್ ಏಣಿ',
+          'Download ABHA Card (PDF)': 'ಆಭಾ ಕಾರ್ಡ್ ಡೌನ್‌ಲೋಡ್ (PDF)',
+          'Download e-Rx (PDF)': 'ಇ-ಪ್ರಿಸ್ಕ್ರಿಪ್ಷನ್ ಡೌನ್‌ಲೋಡ್ (PDF)'
+        }
+      };
+
+      const langPhrases = PHRASES[lang];
+      if (!langPhrases) return;
+
+      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null, false);
+      let node;
+      while ((node = walker.nextNode())) {
+        const text = node.nodeValue.trim();
+        if (text && langPhrases[text]) {
+          node.nodeValue = node.nodeValue.replace(text, langPhrases[text]);
+        }
+      }
     }
   }
 
@@ -581,7 +707,7 @@
         bn: 'বাংলা (Bengali)',
         kn: 'ಕನ್ನಡ (Kannada)'
       };
-      window.toast(`🌐 Language changed to ${langNames[lang] || lang.toUpperCase()}`);
+      window.toast(`🌐 ${langNames[lang] || lang.toUpperCase()}`);
     }
   };
 

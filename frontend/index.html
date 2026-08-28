@@ -89,10 +89,56 @@
 }
 
 /* =========================================================
-   5 THEME ENGINES: EMERALD / NAVY / GOV / DAYLIGHT / OLED
+   6 THEME ENGINES: DARK / EMERALD / NAVY / GOV / DAYLIGHT / OLED
    ========================================================= */
 
-/* 1. Deep Navy Blue Theme */
+/* 1. Classic Modern Dark Mode */
+[data-theme="dark"], body[data-theme="dark"] {
+  --void-950: #0b1120;
+  --void-900: #0f172a;
+  --void-850: #1e293b;
+  --void-800: #334155;
+  --void-700: #475569;
+
+  --glass-1: rgba(30, 41, 59, 0.65);
+  --glass-2: rgba(30, 41, 59, 0.85);
+  --glass-3: #1e293b;
+  --glass-4: #334155;
+  --glass-border: rgba(148, 163, 184, 0.18);
+  --glass-border-strong: rgba(52, 211, 153, 0.4);
+  --glass-glow: rgba(52, 211, 153, 0.35);
+  --glass-specular: rgba(255, 255, 255, 0.65);
+  --rail-glass: rgba(15, 23, 42, 0.92);
+
+  --primary: #10b981;
+  --primary-dark: #065f46;
+  --primary-bright: #34d399;
+  --primary-glow: rgba(52, 211, 153, 0.5);
+  --teal-cyan: #38bdf8;
+  --teal-glow: rgba(56, 189, 248, 0.4);
+
+  --accent: #f59e0b;
+  --accent-light: #fbbf24;
+  --accent-soft: rgba(245, 158, 11, 0.16);
+
+  --ink: #f8fafc;
+  --ink-dim: #cbd5e1;
+  --muted: #94a3b8;
+  --line: rgba(148, 163, 184, 0.15);
+
+  --shadow-ambient: 0 10px 30px -10px rgba(0, 0, 0, 0.8);
+  --shadow-3d: 0 25px 60px -15px rgba(0, 0, 0, 0.85);
+  color-scheme: dark;
+}
+
+body[data-theme="dark"] {
+  background-image:
+    radial-gradient(100% 70% at 15% 0%, rgba(52, 211, 153, 0.14) 0%, transparent 60%),
+    radial-gradient(80% 60% at 85% 10%, rgba(56, 189, 248, 0.14) 0%, transparent 50%),
+    linear-gradient(175deg, #0b1120 0%, #0f172a 40%, #1e293b 100%) !important;
+}
+
+/* 2. Deep Navy Blue Theme */
 [data-theme="navy"], body[data-theme="navy"] {
   --void-950: #030a16;
   --void-900: #07152b;
@@ -2039,7 +2085,12 @@ a {
           </select>
         </div>
 
-        <!-- Triple Theme Toggle -->
+        <!-- 1-Click Dark / Light Mode Switch -->
+        <button class="btn-glass" style="padding:7px 12px;min-height:36px;font-size:12px;" onclick="patientController.toggleDarkMode()" id="modeToggleBtn" title="Toggle Dark / Light Mode">
+          <span>🌙 Dark</span>
+        </button>
+
+        <!-- Multi-Theme Selector -->
         <button class="btn-glass" style="padding:7px 12px;min-height:36px;font-size:12px" onclick="patientController.toggleThemeNext()" id="themeToggleBtn">
           <span>🌙 Emerald Night</span>
         </button>
@@ -2511,15 +2562,26 @@ a {
           </div>
         </div>
 
-        <!-- AI Prescription Scanner Banner -->
-        <div class="glass-panel" style="padding:22px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;background:linear-gradient(135deg, rgba(16,185,129,0.15), rgba(6,24,20,0.85));border-color:rgba(95,227,196,0.35);">
+        <!-- AI Prescription Scanner & Upload Banner -->
+        <input type="file" id="rxUploadFileInput" accept="image/*,application/pdf" capture="environment" onchange="patientController.handlePrescriptionUpload(event)" style="display:none">
+        <div class="glass-panel" style="padding:22px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;background:linear-gradient(135deg, rgba(16,185,129,0.18), rgba(6,24,20,0.85));border-color:rgba(95,227,196,0.35);">
           <div>
-            <h3 style="font-size:18px;color:#ffffff;margin:0 0 2px;">📷 AI Prescription Scanner (Gemini Multimodal OCR)</h3>
-            <p style="font-size:12.5px;color:var(--ink-dim);margin:0;">Upload or take a photo of doctor's handwritten Rx to extract medicines and calculate 80%+ Jan Aushadhi generic savings.</p>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="font-size:24px;">📷</span>
+              <h3 style="font-size:18px;color:#ffffff;margin:0 0 2px;">AI Prescription Scanner &amp; Digitizer (Gemini Multimodal OCR)</h3>
+            </div>
+            <p style="font-size:12.5px;color:var(--ink-dim);margin:4px 0 0;">
+              Upload or photograph doctor's handwritten prescription. AI automatically detects prescribed drugs, extracts active generic salts, and matches 80%+ Jan Aushadhi savings.
+            </p>
           </div>
-          <button class="auth-btn-primary" onclick="patientController.scanPrescriptionDemo()">
-            <span>📷 Scan Prescription Now →</span>
-          </button>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="auth-btn-primary" style="padding:10px 20px;font-size:13px;" onclick="patientController.triggerPrescriptionUpload()">
+              <span>📤 Upload Rx Photo / PDF</span>
+            </button>
+            <button class="btn-glass" style="padding:10px 18px;font-size:13px;background:rgba(255,255,255,0.08);" onclick="patientController.scanPrescriptionDemo()">
+              <span>⚡ Quick Scan Demo</span>
+            </button>
+          </div>
         </div>
         <div id="rxScanResultArea"></div>
 
@@ -2901,6 +2963,11 @@ function switchView(viewId) {
       patientController.renderAmbulanceHUD();
     } else if (viewId === 'home' && typeof patientController !== 'undefined') {
       patientController.init();
+    }
+
+    // Re-run deep translation on newly rendered view
+    if (window.i18n && typeof window.i18n.translateDOM === 'function') {
+      window.i18n.translateDOM();
     }
 
     // Trigger card stagger animation
