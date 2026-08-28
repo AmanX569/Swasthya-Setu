@@ -986,14 +986,20 @@
       const search = this.state.staffSearch.toLowerCase();
 
       let filteredUsers = this.data.users.filter(u => {
-        const matchesRole = filter === 'all' || u.role === filter;
+        let matchesRole = false;
+        if (filter === 'all') matchesRole = true;
+        else if (filter === 'new') matchesRole = Boolean(u.regDate === 'Today' || (u.regDate && u.regDate.includes('Today')) || u.isNew);
+        else matchesRole = u.role === filter;
+
         const matchesSearch = !search || 
           u.name.toLowerCase().includes(search) || 
           u.id.toLowerCase().includes(search) || 
-          u.phone.includes(search) || 
+          (u.phone && u.phone.includes(search)) || 
           (u.facility && u.facility.toLowerCase().includes(search));
         return matchesRole && matchesSearch;
       });
+
+      const newCount = this.data.users.filter(u => u.regDate === 'Today' || (u.regDate && u.regDate.includes('Today')) || u.isNew).length;
 
       container.innerHTML = `
         <div class="admin-section-header">
@@ -1002,6 +1008,7 @@
             <p style="font-size:12.5px;color:var(--muted);margin:0;">
               Manage credentialed doctors, frontline ASHA workers, registered citizens, and system leaders.
             </p>
+          </div>
           <div style="display:flex;gap:10px;align-items:center;">
             <button class="btn-glass sm" onclick="adminController.exportStaffToCSV()" style="font-size:12.5px;padding:8px 14px;">
               <span>📥 Export CSV Table</span>
@@ -1016,6 +1023,7 @@
         <div class="admin-toolbar">
           <div class="admin-filter-tabs">
             <button class="admin-filter-btn ${filter === 'all' ? 'active' : ''}" onclick="adminController.setStaffFilter('all')">All Users (${this.data.users.length})</button>
+            <button class="admin-filter-btn ${filter === 'new' ? 'active' : ''}" onclick="adminController.setStaffFilter('new')" style="color:#6ee7b7;font-weight:700;">✨ Newly Created (${newCount})</button>
             <button class="admin-filter-btn ${filter === 'doctor' ? 'active' : ''}" onclick="adminController.setStaffFilter('doctor')">🩺 Doctors (${this.data.users.filter(u=>u.role==='doctor').length})</button>
             <button class="admin-filter-btn ${filter === 'worker' ? 'active' : ''}" onclick="adminController.setStaffFilter('worker')">🤝 Field Workers (${this.data.users.filter(u=>u.role==='worker').length})</button>
             <button class="admin-filter-btn ${filter === 'patient' ? 'active' : ''}" onclick="adminController.setStaffFilter('patient')">🌾 Patients (${this.data.users.filter(u=>u.role==='patient').length})</button>
@@ -1043,13 +1051,18 @@
               </tr>
             </thead>
             <tbody>
-              ${filteredUsers.map(u => `
-                <tr>
+              ${filteredUsers.map(u => {
+                const isNewProfile = (u.regDate === 'Today' || (u.regDate && u.regDate.includes('Today')) || u.isNew);
+                return `
+                <tr style="${isNewProfile ? 'background:rgba(16,185,129,0.06);' : ''}">
                   <td>
                     <div style="display:flex;align-items:center;gap:10px;">
-                      <div class="auth-user-avatar" style="width:34px;height:34px;font-size:12px;">${u.name.split(' ').map(n=>n[0]).join('').slice(0,2)}</div>
+                      <div class="auth-user-avatar" style="width:34px;height:34px;font-size:12px;${isNewProfile ? 'border:2px solid #34d399;' : ''}">${u.name.split(' ').map(n=>n[0]).join('').slice(0,2)}</div>
                       <div>
-                        <strong style="color:#ffffff;font-size:13.5px;">${u.name}</strong>
+                        <div style="display:flex;align-items:center;gap:6px;">
+                          <strong style="color:#ffffff;font-size:13.5px;">${u.name}</strong>
+                          ${isNewProfile ? '<span class="status-pill good" style="font-size:9.5px;padding:1px 6px;letter-spacing:0.04em;">✨ NEW</span>' : ''}
+                        </div>
                         <small style="display:block;color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:10.5px;">${u.id}</small>
                       </div>
                     </div>
@@ -1070,7 +1083,7 @@
                       ● ${u.status}
                     </span>
                   </td>
-                  <td style="font-size:12px;color:var(--muted);">${u.regDate}</td>
+                  <td style="font-size:12px;color:${isNewProfile ? '#34d399;font-weight:700;' : 'var(--muted);'}">${u.regDate}</td>
                   <td style="text-align:right;">
                     <div style="display:inline-flex;gap:6px;">
                       <button class="btn-glass sm" onclick="adminController.viewUserDetails('${u.id}')">View</button>
@@ -1081,7 +1094,7 @@
                     </div>
                   </td>
                 </tr>
-              `).join('')}
+              `}).join('')}
               ${filteredUsers.length === 0 ? `
                 <tr>
                   <td colspan="7" style="text-align:center;padding:32px;color:var(--muted);">

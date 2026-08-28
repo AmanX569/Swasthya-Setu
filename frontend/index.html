@@ -2140,6 +2140,11 @@ a {
           <span>🌙 Emerald Night</span>
         </button>
 
+        <!-- Live Cloud Profiles & Directory Button -->
+        <button class="btn-glass" onclick="openCloudDirectoryModal()" style="min-height:36px;padding:7px 12px;font-size:12px;" title="View all registered healthcare profiles and citizen accounts">
+          <span>👥 Profiles Directory</span>
+        </button>
+
         <!-- Emergency Header Trigger -->
         <button class="btn-glass btn-danger" onclick="patientController.triggerAmbulanceDispatch()" style="min-height:38px;padding:7px 14px">
           <span>🚨 SOS 108</span>
@@ -2987,6 +2992,42 @@ a {
 </div>
 
 <!-- =========================================================
+   LIVE CLOUD PROFILES DIRECTORY MODAL (ALL NEW & EXISTING PROFILES)
+========================================================= -->
+<div class="modal-overlay" id="cloudDirectoryModal">
+  <div class="modal-card" style="max-width: 820px; max-height: 85vh; display:flex; flex-direction:column; overflow:hidden;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;border-bottom:1px solid var(--glass-border);padding-bottom:12px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:26px;">👥</span>
+        <div>
+          <h3 style="font-size:19px;color:#ffffff;margin:0;">Master Profiles &amp; Healthcare Directory</h3>
+          <small style="color:var(--primary-bright);">Real-time Cloud Database: Newly Registered, Doctors, ASHA Workers &amp; Patients</small>
+        </div>
+      </div>
+      <button onclick="closeCloudDirectoryModal()" style="font-size:20px;color:var(--muted);background:transparent;border:none;cursor:pointer;">✕</button>
+    </div>
+
+    <!-- Search & Filter Controls -->
+    <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;">
+      <input type="text" id="dirSearchInput" class="input-field" placeholder="🔍 Search name, mobile, role, or facility..." style="flex:1;min-width:200px;" oninput="renderCloudDirectory()">
+      <select id="dirRoleFilter" class="input-field" style="width:160px;" onchange="renderCloudDirectory()">
+        <option value="all">All Roles</option>
+        <option value="new">✨ Newly Created</option>
+        <option value="doctor">🩺 Doctors</option>
+        <option value="worker">🤝 Field Workers</option>
+        <option value="patient">🌾 Patients</option>
+        <option value="admin">👑 Admins</option>
+      </select>
+    </div>
+
+    <!-- Live Grid Cards of Profiles -->
+    <div id="dirProfileCardsGrid" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(340px, 1fr));gap:12px;overflow-y:auto;padding-right:4px;max-height:calc(85vh - 160px);">
+      <!-- Populated dynamically by renderCloudDirectory() -->
+    </div>
+  </div>
+</div>
+
+<!-- =========================================================
    FLOATING TOAST NOTIFICATION
 ========================================================= -->
 <div class="toast-bar" id="toastBar">
@@ -3398,6 +3439,99 @@ function renderFirebaseLogs() {
       <div><span style="color:#64748b;">[${l.timestamp}]</span> <strong style="color:#38bdf8;">[${l.type}]</strong> ${l.message}</div>
     `).join('');
   }
+}
+
+// Cloud Directory Modal Controller
+function openCloudDirectoryModal() {
+  const modal = document.getElementById('cloudDirectoryModal');
+  if (modal) {
+    modal.classList.add('open');
+    renderCloudDirectory();
+  }
+}
+
+function closeCloudDirectoryModal() {
+  const modal = document.getElementById('cloudDirectoryModal');
+  if (modal) modal.classList.remove('open');
+}
+
+function renderCloudDirectory() {
+  const grid = document.getElementById('dirProfileCardsGrid');
+  if (!grid) return;
+
+  const search = (document.getElementById('dirSearchInput') ? document.getElementById('dirSearchInput').value : '').toLowerCase();
+  const roleFilter = document.getElementById('dirRoleFilter') ? document.getElementById('dirRoleFilter').value : 'all';
+
+  let profiles = [];
+  if (window.adminController && window.adminController.data && Array.isArray(window.adminController.data.users)) {
+    profiles = [...window.adminController.data.users];
+  } else if (window.authService && typeof window.authService.getAccounts === 'function') {
+    profiles = window.authService.getAccounts().map(a => ({
+      id: a.userId,
+      name: a.name,
+      role: (a.roles && a.roles[0]) || 'patient',
+      phone: a.phone,
+      facility: a.facility || 'Kondapalli Community Grid',
+      status: 'Active',
+      regDate: 'Registered'
+    }));
+  }
+
+  // Filter profiles
+  let filtered = profiles.filter(p => {
+    let matchRole = false;
+    if (roleFilter === 'all') matchRole = true;
+    else if (roleFilter === 'new') matchRole = Boolean(p.regDate === 'Today' || (p.regDate && p.regDate.includes('Today')) || p.isNew);
+    else matchRole = (p.role === roleFilter || (p.roles && p.roles.includes(roleFilter)));
+
+    const matchSearch = !search ||
+      (p.name && p.name.toLowerCase().includes(search)) ||
+      (p.phone && p.phone.includes(search)) ||
+      (p.id && p.id.toLowerCase().includes(search)) ||
+      (p.facility && p.facility.toLowerCase().includes(search));
+    return matchRole && matchSearch;
+  });
+
+  if (!filtered.length) {
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:32px;color:var(--muted);">No matching profiles found in cloud database.</div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map(p => {
+    const isNew = (p.regDate === 'Today' || (p.regDate && p.regDate.includes('Today')) || p.isNew);
+    const roleEmoji = p.role === 'doctor' ? '🩺' : p.role === 'worker' ? '🤝' : p.role === 'admin' ? '👑' : '🌾';
+    return `
+      <div class="glass-panel" style="padding:16px;background:rgba(255,255,255,0.03);border-color:${isNew ? '#10b981' : 'var(--glass-border)'};display:flex;flex-direction:column;justify-content:space-between;">
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div class="auth-user-avatar" style="width:36px;height:36px;font-size:13px;${isNew ? 'border:2px solid #34d399;' : ''}">${p.name.split(' ').map(n=>n[0]).join('').slice(0,2)}</div>
+              <div>
+                <div style="display:flex;align-items:center;gap:6px;">
+                  <strong style="color:#ffffff;font-size:14px;display:block;">${p.name}</strong>
+                  ${isNew ? '<span class="status-pill good" style="font-size:9.5px;padding:1px 6px;">✨ NEW</span>' : ''}
+                </div>
+                <small style="color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:10.5px;">${p.id || 'UID-CLOUD'}</small>
+              </div>
+            </div>
+            <span class="auth-role-badge badge-${p.role || 'patient'}">${roleEmoji} ${(p.role || 'patient').toUpperCase()}</span>
+          </div>
+
+          <div style="font-size:12px;color:var(--ink-dim);margin:8px 0;line-height:1.5;">
+            <div>📍 <strong>Facility:</strong> ${p.facility || p.location || 'Kondapalli Community Grid'}</div>
+            <div>📞 <strong>Contact:</strong> +91 ${p.phone || '9800000000'}</div>
+            <div>📅 <strong>Registered:</strong> <span style="color:${isNew ? '#34d399;font-weight:700;' : 'inherit;'}">${p.regDate || 'Active'}</span></div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:6px;margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.06);">
+          <button class="btn-glass sm" style="flex:1;justify-content:center;" onclick="closeCloudDirectoryModal(); if(window.authUI) window.authUI.showPhoneLoginScreen('${p.phone}');">
+            <span>🔑 Login with +91 ${p.phone}</span>
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
 }
 
 async function testFirebasePing() {
