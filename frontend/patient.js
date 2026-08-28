@@ -231,6 +231,42 @@
       this.renderMedicationTracker();
       this.renderJanAushadhiCalculator();
       this.renderLiveHospitalBeds();
+      this.syncLivePatientDatabase();
+    }
+
+    syncLivePatientDatabase() {
+      const dbUrl = 'https://swasthya-setu-2b67d-default-rtdb.firebaseio.com';
+      fetch(`${dbUrl}/.json`)
+        .then(r => r.json())
+        .then(data => {
+          if (data && typeof data === 'object') {
+            if (data.patient_family_members) {
+              this.data.familyMembers = { ...this.data.familyMembers, ...data.patient_family_members };
+              this.renderFamilySelector();
+            }
+            if (data.patient_medications) {
+              const meds = Array.isArray(data.patient_medications) ? data.patient_medications : Object.values(data.patient_medications);
+              if (meds.length) {
+                this.data.medications = meds;
+                this.renderMedicationTracker();
+              }
+            }
+            if (data.hospital_bed_grid) {
+              this.renderLiveHospitalBeds();
+            }
+          }
+        })
+        .catch(() => {});
+
+      if (window.firebaseConfigManager && window.firebaseConfigManager.rtdb) {
+        window.firebaseConfigManager.rtdb.ref('patient_medications').on('value', snap => {
+          const val = snap.val();
+          if (val) {
+            this.data.medications = Array.isArray(val) ? val : Object.values(val);
+            this.renderMedicationTracker();
+          }
+        });
+      }
     }
 
     // -------------------------------------------------------------

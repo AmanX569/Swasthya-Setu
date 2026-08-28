@@ -146,25 +146,45 @@
     }
 
     init() {
-      this.renderWorkerWorkspace();
+      this.renderOverview();
+      this.syncLiveWorkerDatabase();
     }
 
-    switchTab(tabId) {
-      this.state.currentTab = tabId;
-      document.querySelectorAll('.worker-nav-tab').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.tab === tabId);
-      });
+    syncLiveWorkerDatabase() {
+      const dbUrl = 'https://swasthya-setu-2b67d-default-rtdb.firebaseio.com';
+      fetch(`${dbUrl}/.json`)
+        .then(r => r.json())
+        .then(data => {
+          if (data && typeof data === 'object') {
+            if (data.worker_anc_registry) {
+              const anc = Array.isArray(data.worker_anc_registry) ? data.worker_anc_registry : Object.values(data.worker_anc_registry);
+              if (anc.length) this.data.ancRegistry = anc;
+            }
+            if (data.worker_immunization_registry) {
+              const imm = Array.isArray(data.worker_immunization_registry) ? data.worker_immunization_registry : Object.values(data.worker_immunization_registry);
+              if (imm.length) this.data.immunizationRegistry = imm;
+            }
+            if (data.worker_home_visits) {
+              const vis = Array.isArray(data.worker_home_visits) ? data.worker_home_visits : Object.values(data.worker_home_visits);
+              if (vis.length) this.data.homeVisits = vis;
+            }
+            if (data.worker_stats) {
+              this.data.stats = { ...this.data.stats, ...data.worker_stats };
+              if (this.state.currentTab === 'overview') this.renderOverview();
+            }
+          }
+        })
+        .catch(() => {});
 
-      document.querySelectorAll('.worker-tab-pane').forEach(pane => {
-        pane.classList.toggle('active', pane.id === `worker-pane-${tabId}`);
-      });
-
-      if (tabId === 'overview') this.renderOverview();
-      else if (tabId === 'anc') this.renderANC();
-      else if (tabId === 'immunization') this.renderImmunization();
-      else if (tabId === 'visits') this.renderHomeVisits();
-      else if (tabId === 'vitals') this.renderVitalsEntry();
-      else if (tabId === 'sync') this.renderSyncQueue();
+      if (window.firebaseConfigManager && window.firebaseConfigManager.rtdb) {
+        window.firebaseConfigManager.rtdb.ref('worker_anc_registry').on('value', snap => {
+          const val = snap.val();
+          if (val) {
+            this.data.ancRegistry = Array.isArray(val) ? val : Object.values(val);
+            if (this.state.currentTab === 'anc') this.renderAncRegistry();
+          }
+        });
+      }
     }
 
     // -------------------------------------------------------------

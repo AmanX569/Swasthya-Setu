@@ -272,6 +272,41 @@
 
     init() {
       this.renderDoctorWorkspace();
+      this.syncLiveDoctorDatabase();
+    }
+
+    syncLiveDoctorDatabase() {
+      const dbUrl = 'https://swasthya-setu-2b67d-default-rtdb.firebaseio.com';
+      fetch(`${dbUrl}/.json`)
+        .then(r => r.json())
+        .then(data => {
+          if (data && typeof data === 'object') {
+            if (data.doctor_consultation_queue) {
+              const q = Array.isArray(data.doctor_consultation_queue) ? data.doctor_consultation_queue : Object.values(data.doctor_consultation_queue);
+              if (q.length) {
+                this.data.consultations = q;
+                if (this.state.currentTab === 'queue' || this.state.currentTab === 'overview') {
+                  this.switchTab(this.state.currentTab);
+                }
+              }
+            }
+            if (data.doctor_stats) {
+              this.data.stats = { ...this.data.stats, ...data.doctor_stats };
+              if (this.state.currentTab === 'overview') this.renderOverview();
+            }
+          }
+        })
+        .catch(() => {});
+
+      if (window.firebaseConfigManager && window.firebaseConfigManager.rtdb) {
+        window.firebaseConfigManager.rtdb.ref('doctor_consultation_queue').on('value', snap => {
+          const val = snap.val();
+          if (val) {
+            this.data.consultations = Array.isArray(val) ? val : Object.values(val);
+            this.switchTab(this.state.currentTab);
+          }
+        });
+      }
     }
 
     switchTab(tabId) {
