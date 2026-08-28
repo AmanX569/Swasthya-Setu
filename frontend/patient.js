@@ -23,60 +23,7 @@
     currentTheme: 'emerald',
 
     // Multi-Member Family Profiles
-    familyMembers: {
-      anitha: {
-        id: 'FAM-01',
-        name: 'Anitha K. (Self)',
-        role: 'Self · Mother',
-        age: 29,
-        gender: 'Female',
-        bloodGroup: 'O+',
-        abhaId: '14-2938-7710-4521',
-        conditions: ['Moderate Gestational Anaemia (Hb 9.2)', 'ANC 2nd Trimester (24 Wks)'],
-        avatar: 'AK',
-        assignedAsha: 'B. Saraswati (Ward 6 · +91 9848022334)',
-        emergencyContact: 'Ramu K. (Husband · +91 9848119988)'
-      },
-      baby_ravi: {
-        id: 'FAM-02',
-        name: 'Baby Ravi Teja',
-        role: 'Son · Infant',
-        age: '8 Months',
-        gender: 'Male',
-        bloodGroup: 'B+',
-        abhaId: '14-8841-9920-1123',
-        conditions: ['Mild Respiratory Wheeze', 'Immunization Due: MR-1 Vaccine'],
-        avatar: 'RT',
-        assignedAsha: 'B. Saraswati (Ward 6)',
-        emergencyContact: 'Anitha K. (Mother)'
-      },
-      ramu: {
-        id: 'FAM-03',
-        name: 'Ramu K.',
-        role: 'Husband · Farmer',
-        age: 34,
-        gender: 'Male',
-        bloodGroup: 'O+',
-        abhaId: '14-5512-8831-7764',
-        conditions: ['None (Healthy)', 'Annual Health Checkup Done'],
-        avatar: 'RK',
-        assignedAsha: 'B. Saraswati (Ward 6)',
-        emergencyContact: 'Anitha K. (Wife)'
-      },
-      saraswati: {
-        id: 'FAM-04',
-        name: 'Saraswati Devi',
-        role: 'Mother-in-law · Senior',
-        age: 58,
-        gender: 'Female',
-        bloodGroup: 'A+',
-        abhaId: '14-3390-1124-6682',
-        conditions: ['Type 2 Diabetes Mellitus', 'Essential Hypertension (BP 142/90)'],
-        avatar: 'SD',
-        assignedAsha: 'B. Saraswati (Ward 6)',
-        emergencyContact: 'Ramu K. (Son)'
-      }
-    },
+    familyMembers: {},
 
     // Pilot Village Configuration
     villages: {
@@ -152,13 +99,7 @@
     },
 
     // Daily Medication Schedule & Adherence Checklist
-    medications: [
-      { id: 'M1', slot: 'morning', name: 'Iron & Folic Acid (IFA)', dose: '100mg', time: '08:00 AM', instructions: 'Take with lemon water after breakfast', taken: true, brandName: 'Autrin (₹180/mo)', genericName: 'PMBJP Iron-Folic (₹32/mo)', savings: '₹148' },
-      { id: 'M2', slot: 'morning', name: 'Calcium Carbonate + Vit D3', dose: '500mg/250IU', time: '09:00 AM', instructions: 'Take after milk/breakfast', taken: true, brandName: 'Shelcal 500 (₹140/mo)', genericName: 'PMBJP Calcium (₹28/mo)', savings: '₹112' },
-      { id: 'M3', slot: 'afternoon', name: 'ORS Solution / Hydration Sachet', dose: '1 Sachet in 1L water', time: '01:30 PM', instructions: 'Sip throughout the afternoon', taken: false, brandName: 'Electral (₹65/mo)', genericName: 'PMBJP ORS (₹12/mo)', savings: '₹53' },
-      { id: 'M4', slot: 'evening', name: 'Pregnancy Vitamin B-Complex', dose: '1 Tablet', time: '06:00 PM', instructions: 'Take before evening tea', taken: false, brandName: 'Becosules (₹90/mo)', genericName: 'PMBJP B-Complex (₹18/mo)', savings: '₹72' },
-      { id: 'M5', slot: 'night', name: 'Iron Folic Acid Booster (If Advised)', dose: '100mg', time: '09:30 PM', instructions: 'Take after dinner with warm water', taken: false, brandName: 'Fefol (₹160/mo)', genericName: 'PMBJP IFA (₹30/mo)', savings: '₹130' }
-    ],
+    medications: [],
 
     // Jan Aushadhi Pharmacy Locations
     janAushadhiKendras: [
@@ -983,15 +924,15 @@
       const container = document.getElementById('dailyMedicationChecklist');
       if (!container) return;
 
-      const meds = this.data.medications;
+      const meds = this.data.medications || [];
       const takenCount = meds.filter(m => m.taken).length;
-      const progressPercent = Math.round((takenCount / meds.length) * 100);
+      const progressPercent = meds.length ? Math.round((takenCount / meds.length) * 100) : 0;
 
       container.innerHTML = `
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
           <div>
             <strong style="font-size:14px;color:#ffffff;">Today's Adherence Progress (${takenCount} of ${meds.length} Taken)</strong>
-            <small style="display:block;color:var(--muted);">Current Streak: 🔥 14 Days Compliant</small>
+            <small style="display:block;color:var(--muted);">Dose Adherence Tracker</small>
           </div>
           <span style="font-size:16px;font-weight:700;color:var(--auth-primary-bright);font-family:'IBM Plex Mono',monospace;">${progressPercent}%</span>
         </div>
@@ -1001,7 +942,7 @@
         </div>
 
         <div style="display:flex;flex-direction:column;gap:10px;">
-          ${meds.map(m => `
+          ${meds.length ? meds.map(m => `
             <div class="med-dose-item glass-panel ${m.taken ? 'dose-taken' : ''}" style="padding:12px 14px;border-radius:12px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="patientController.toggleDoseTaken('${m.id}')">
               <div style="display:flex;gap:12px;align-items:center;">
                 <input type="checkbox" ${m.taken ? 'checked' : ''} style="accent-color:var(--auth-primary-bright);width:18px;height:18px;cursor:pointer;" onclick="event.stopPropagation(); patientController.toggleDoseTaken('${m.id}')">
@@ -1014,7 +955,11 @@
                 ${m.taken ? '✓ Taken' : 'Pending'}
               </span>
             </div>
-          `).join('')}
+          `).join('') : `
+            <div style="text-align:center;padding:24px 16px;color:var(--muted);background:rgba(4,18,15,0.3);border-radius:12px;border:1px dashed var(--auth-border);">
+              No active daily medications logged yet. When a doctor writes an e-Prescription, doses will appear here automatically.
+            </div>
+          `}
         </div>
       `;
     }

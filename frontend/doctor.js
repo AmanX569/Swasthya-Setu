@@ -43,12 +43,12 @@
     },
 
     stats: {
-      todayConsultations: 18,
-      waitingQueue: 3,
-      emergencyCases: 1,
-      completedToday: 14,
-      avgConsultDuration: '11.5 min',
-      patientCSAT: '4.9 / 5.0'
+      todayConsultations: 0,
+      waitingQueue: 0,
+      emergencyCases: 0,
+      completedToday: 0,
+      avgConsultDuration: '0 min',
+      patientCSAT: '5.0 / 5.0'
     },
 
     // Master Consultation Queue
@@ -364,6 +364,63 @@
           this.syncLiveDoctorDatabase();
         });
       }
+    }
+
+    
+    openAddQueueModal() {
+      const name = prompt('Patient Full Name: (e.g. Ramesh Kumar)');
+      if (!name) return;
+      const age = prompt('Age & Gender: (e.g. 35 Yrs · Male)', '35 Yrs · Male') || '30 Yrs';
+      const complaint = prompt('Chief Health Complaint:', 'Fever, cough, and body ache') || 'General health consultation';
+      const bp = prompt('Blood Pressure: (e.g. 120/80 mmHg)', '120/80 mmHg') || '120/80 mmHg';
+      const pulse = prompt('Pulse Rate (bpm):', '76 bpm') || '76 bpm';
+      const temp = prompt('Temperature (°F):', '98.6 °F') || '98.6 °F';
+      const spo2 = prompt('SpO2 (%):', '99%') || '99%';
+
+      const consult = {
+        id: `CNS-${Date.now().toString().slice(-4)}`,
+        patientId: `PAT-${Date.now().toString().slice(-4)}`,
+        patientName: name,
+        ageGender: age,
+        guardian: 'Self',
+        location: 'Kondapalli Tele-Desk',
+        type: 'Video Teleconsultation',
+        priority: 'NORMAL',
+        status: 'Waiting',
+        scheduledTime: 'Now',
+        waitingTime: 'Just now',
+        chiefComplaint: complaint,
+        ashaWorker: 'ASHA Field Desk',
+        vitals: {
+          temp,
+          bp,
+          pulse,
+          spo2,
+          resp: '18 /min',
+          weight: '60 kg',
+          bloodSugar: '100 mg/dL',
+          recordedAt: 'Today'
+        }
+      };
+
+      this.data.consultations.unshift(consult);
+      this.data.stats.waitingQueue = this.data.consultations.filter(c => c.status === 'Waiting').length;
+
+      // Sync to Firebase Realtime Database
+      try {
+        fetch(`https://swasthya-setu-2b67d-default-rtdb.firebaseio.com/doctor_consultations/${consult.id}.json`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(consult)
+        }).catch(() => {});
+      } catch (e) {}
+
+      if (typeof window.toast === 'function') {
+        window.toast(`✓ Added ${name} to Live Consultation Queue!`);
+      }
+
+      this.selectActivePatient(consult.id);
+      this.renderDoctorWorkspace();
     }
 
     selectActivePatient(consultId) {

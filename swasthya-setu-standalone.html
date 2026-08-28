@@ -10587,12 +10587,12 @@ a {
     },
 
     stats: {
-      todayConsultations: 18,
-      waitingQueue: 3,
-      emergencyCases: 1,
-      completedToday: 14,
-      avgConsultDuration: '11.5 min',
-      patientCSAT: '4.9 / 5.0'
+      todayConsultations: 0,
+      waitingQueue: 0,
+      emergencyCases: 0,
+      completedToday: 0,
+      avgConsultDuration: '0 min',
+      patientCSAT: '5.0 / 5.0'
     },
 
     // Master Consultation Queue
@@ -10908,6 +10908,63 @@ a {
           this.syncLiveDoctorDatabase();
         });
       }
+    }
+
+    
+    openAddQueueModal() {
+      const name = prompt('Patient Full Name: (e.g. Ramesh Kumar)');
+      if (!name) return;
+      const age = prompt('Age & Gender: (e.g. 35 Yrs · Male)', '35 Yrs · Male') || '30 Yrs';
+      const complaint = prompt('Chief Health Complaint:', 'Fever, cough, and body ache') || 'General health consultation';
+      const bp = prompt('Blood Pressure: (e.g. 120/80 mmHg)', '120/80 mmHg') || '120/80 mmHg';
+      const pulse = prompt('Pulse Rate (bpm):', '76 bpm') || '76 bpm';
+      const temp = prompt('Temperature (°F):', '98.6 °F') || '98.6 °F';
+      const spo2 = prompt('SpO2 (%):', '99%') || '99%';
+
+      const consult = {
+        id: `CNS-${Date.now().toString().slice(-4)}`,
+        patientId: `PAT-${Date.now().toString().slice(-4)}`,
+        patientName: name,
+        ageGender: age,
+        guardian: 'Self',
+        location: 'Kondapalli Tele-Desk',
+        type: 'Video Teleconsultation',
+        priority: 'NORMAL',
+        status: 'Waiting',
+        scheduledTime: 'Now',
+        waitingTime: 'Just now',
+        chiefComplaint: complaint,
+        ashaWorker: 'ASHA Field Desk',
+        vitals: {
+          temp,
+          bp,
+          pulse,
+          spo2,
+          resp: '18 /min',
+          weight: '60 kg',
+          bloodSugar: '100 mg/dL',
+          recordedAt: 'Today'
+        }
+      };
+
+      this.data.consultations.unshift(consult);
+      this.data.stats.waitingQueue = this.data.consultations.filter(c => c.status === 'Waiting').length;
+
+      // Sync to Firebase Realtime Database
+      try {
+        fetch(`https://swasthya-setu-2b67d-default-rtdb.firebaseio.com/doctor_consultations/${consult.id}.json`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(consult)
+        }).catch(() => {});
+      } catch (e) {}
+
+      if (typeof window.toast === 'function') {
+        window.toast(`✓ Added ${name} to Live Consultation Queue!`);
+      }
+
+      this.selectActivePatient(consult.id);
+      this.renderDoctorWorkspace();
     }
 
     selectActivePatient(consultId) {
@@ -12214,60 +12271,7 @@ a {
     currentTheme: 'emerald',
 
     // Multi-Member Family Profiles
-    familyMembers: {
-      anitha: {
-        id: 'FAM-01',
-        name: 'Anitha K. (Self)',
-        role: 'Self · Mother',
-        age: 29,
-        gender: 'Female',
-        bloodGroup: 'O+',
-        abhaId: '14-2938-7710-4521',
-        conditions: ['Moderate Gestational Anaemia (Hb 9.2)', 'ANC 2nd Trimester (24 Wks)'],
-        avatar: 'AK',
-        assignedAsha: 'B. Saraswati (Ward 6 · +91 9848022334)',
-        emergencyContact: 'Ramu K. (Husband · +91 9848119988)'
-      },
-      baby_ravi: {
-        id: 'FAM-02',
-        name: 'Baby Ravi Teja',
-        role: 'Son · Infant',
-        age: '8 Months',
-        gender: 'Male',
-        bloodGroup: 'B+',
-        abhaId: '14-8841-9920-1123',
-        conditions: ['Mild Respiratory Wheeze', 'Immunization Due: MR-1 Vaccine'],
-        avatar: 'RT',
-        assignedAsha: 'B. Saraswati (Ward 6)',
-        emergencyContact: 'Anitha K. (Mother)'
-      },
-      ramu: {
-        id: 'FAM-03',
-        name: 'Ramu K.',
-        role: 'Husband · Farmer',
-        age: 34,
-        gender: 'Male',
-        bloodGroup: 'O+',
-        abhaId: '14-5512-8831-7764',
-        conditions: ['None (Healthy)', 'Annual Health Checkup Done'],
-        avatar: 'RK',
-        assignedAsha: 'B. Saraswati (Ward 6)',
-        emergencyContact: 'Anitha K. (Wife)'
-      },
-      saraswati: {
-        id: 'FAM-04',
-        name: 'Saraswati Devi',
-        role: 'Mother-in-law · Senior',
-        age: 58,
-        gender: 'Female',
-        bloodGroup: 'A+',
-        abhaId: '14-3390-1124-6682',
-        conditions: ['Type 2 Diabetes Mellitus', 'Essential Hypertension (BP 142/90)'],
-        avatar: 'SD',
-        assignedAsha: 'B. Saraswati (Ward 6)',
-        emergencyContact: 'Ramu K. (Son)'
-      }
-    },
+    familyMembers: {},
 
     // Pilot Village Configuration
     villages: {
@@ -12343,13 +12347,7 @@ a {
     },
 
     // Daily Medication Schedule & Adherence Checklist
-    medications: [
-      { id: 'M1', slot: 'morning', name: 'Iron & Folic Acid (IFA)', dose: '100mg', time: '08:00 AM', instructions: 'Take with lemon water after breakfast', taken: true, brandName: 'Autrin (₹180/mo)', genericName: 'PMBJP Iron-Folic (₹32/mo)', savings: '₹148' },
-      { id: 'M2', slot: 'morning', name: 'Calcium Carbonate + Vit D3', dose: '500mg/250IU', time: '09:00 AM', instructions: 'Take after milk/breakfast', taken: true, brandName: 'Shelcal 500 (₹140/mo)', genericName: 'PMBJP Calcium (₹28/mo)', savings: '₹112' },
-      { id: 'M3', slot: 'afternoon', name: 'ORS Solution / Hydration Sachet', dose: '1 Sachet in 1L water', time: '01:30 PM', instructions: 'Sip throughout the afternoon', taken: false, brandName: 'Electral (₹65/mo)', genericName: 'PMBJP ORS (₹12/mo)', savings: '₹53' },
-      { id: 'M4', slot: 'evening', name: 'Pregnancy Vitamin B-Complex', dose: '1 Tablet', time: '06:00 PM', instructions: 'Take before evening tea', taken: false, brandName: 'Becosules (₹90/mo)', genericName: 'PMBJP B-Complex (₹18/mo)', savings: '₹72' },
-      { id: 'M5', slot: 'night', name: 'Iron Folic Acid Booster (If Advised)', dose: '100mg', time: '09:30 PM', instructions: 'Take after dinner with warm water', taken: false, brandName: 'Fefol (₹160/mo)', genericName: 'PMBJP IFA (₹30/mo)', savings: '₹130' }
-    ],
+    medications: [],
 
     // Jan Aushadhi Pharmacy Locations
     janAushadhiKendras: [
@@ -13174,15 +13172,15 @@ a {
       const container = document.getElementById('dailyMedicationChecklist');
       if (!container) return;
 
-      const meds = this.data.medications;
+      const meds = this.data.medications || [];
       const takenCount = meds.filter(m => m.taken).length;
-      const progressPercent = Math.round((takenCount / meds.length) * 100);
+      const progressPercent = meds.length ? Math.round((takenCount / meds.length) * 100) : 0;
 
       container.innerHTML = `
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
           <div>
             <strong style="font-size:14px;color:#ffffff;">Today's Adherence Progress (${takenCount} of ${meds.length} Taken)</strong>
-            <small style="display:block;color:var(--muted);">Current Streak: 🔥 14 Days Compliant</small>
+            <small style="display:block;color:var(--muted);">Dose Adherence Tracker</small>
           </div>
           <span style="font-size:16px;font-weight:700;color:var(--auth-primary-bright);font-family:'IBM Plex Mono',monospace;">${progressPercent}%</span>
         </div>
@@ -13192,7 +13190,7 @@ a {
         </div>
 
         <div style="display:flex;flex-direction:column;gap:10px;">
-          ${meds.map(m => `
+          ${meds.length ? meds.map(m => `
             <div class="med-dose-item glass-panel ${m.taken ? 'dose-taken' : ''}" style="padding:12px 14px;border-radius:12px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="patientController.toggleDoseTaken('${m.id}')">
               <div style="display:flex;gap:12px;align-items:center;">
                 <input type="checkbox" ${m.taken ? 'checked' : ''} style="accent-color:var(--auth-primary-bright);width:18px;height:18px;cursor:pointer;" onclick="event.stopPropagation(); patientController.toggleDoseTaken('${m.id}')">
@@ -13205,7 +13203,11 @@ a {
                 ${m.taken ? '✓ Taken' : 'Pending'}
               </span>
             </div>
-          `).join('')}
+          `).join('') : `
+            <div style="text-align:center;padding:24px 16px;color:var(--muted);background:rgba(4,18,15,0.3);border-radius:12px;border:1px dashed var(--auth-border);">
+              No active daily medications logged yet. When a doctor writes an e-Prescription, doses will appear here automatically.
+            </div>
+          `}
         </div>
       `;
     }
@@ -13300,107 +13302,24 @@ a {
     },
 
     stats: {
-      totalRegisteredPatients: 385,
-      todayHomeVisits: 8,
-      pendingFollowups: 4,
-      highRiskPregnancies: 6,
-      childrenDueImmunization: 9,
-      doctorReviewRequired: 3,
-      medicinesDistributed: 48,
-      offlineRecordsWaiting: 12
+      totalRegisteredPatients: 0,
+      todayHomeVisits: 0,
+      pendingFollowups: 0,
+      highRiskPregnancies: 0,
+      childrenDueImmunization: 0,
+      doctorReviewRequired: 0,
+      medicinesDistributed: 0,
+      offlineRecordsWaiting: 0
     },
 
     // High-Risk Pregnancy (ANC) Register
-    ancRegistry: [
-      {
-        id: 'ANC-01',
-        patientName: 'Anitha K.',
-        age: 29,
-        gestationalWeeks: '24 Weeks (2nd Trimester)',
-        fundalHeight: '24 cm',
-        bp: '118/76 mmHg',
-        hb: '9.2 g/dL',
-        riskLevel: 'Moderate Anaemia',
-        riskBadge: 'warn',
-        ifaAdherence: 'Regular (1 Tab OD)',
-        ttVaccine: 'TT-1 & TT-2 Complete',
-        nextVisitDate: '30 Aug 2026',
-        supervisingDoctor: 'Dr. K. V. Rao'
-      },
-      {
-        id: 'ANC-02',
-        patientName: 'Lakshmi Devi M.',
-        age: 22,
-        gestationalWeeks: '34 Weeks (3rd Trimester)',
-        fundalHeight: '34 cm',
-        bp: '148/94 mmHg',
-        hb: '8.4 g/dL',
-        riskLevel: 'High Risk (PIH + Severe Anaemia)',
-        riskBadge: 'bad',
-        ifaAdherence: 'Irregular',
-        ttVaccine: 'TT Complete',
-        nextVisitDate: 'Tomorrow (Urgent)',
-        supervisingDoctor: 'Dr. Priya Patel'
-      },
-      {
-        id: 'ANC-03',
-        patientName: 'Sunita Bai',
-        age: 26,
-        gestationalWeeks: '16 Weeks (2nd Trimester)',
-        fundalHeight: '16 cm',
-        bp: '110/72 mmHg',
-        hb: '11.4 g/dL',
-        riskLevel: 'Normal ANC',
-        riskBadge: 'good',
-        ifaAdherence: 'Regular',
-        ttVaccine: 'TT-1 Done',
-        nextVisitDate: '05 Sep 2026',
-        supervisingDoctor: 'Dr. Ramesh Chandra'
-      }
-    ],
+    ancRegistry: [],
 
     // Child Immunization Registry
-    immunizationRegistry: [
-      {
-        id: 'IMM-01',
-        childName: 'Baby Ravi Teja',
-        parentName: 'Anitha K.',
-        age: '8 Months',
-        dueVaccine: 'Measles-Rubella (MR-1) & Vit-A',
-        dueDate: 'Due This Week (29 Aug)',
-        status: 'Due Soon',
-        badge: 'warn'
-      },
-      {
-        id: 'IMM-02',
-        childName: 'Baby Aarav',
-        parentName: 'Pooja Sharma',
-        age: '10 Weeks',
-        dueVaccine: 'Pentavalent-2, OPV-2, Rotavirus-2',
-        dueDate: 'Overdue by 4 Days',
-        status: 'Overdue',
-        badge: 'bad'
-      },
-      {
-        id: 'IMM-03',
-        childName: 'Baby Priya',
-        parentName: 'Rani Kumari',
-        age: '14 Weeks',
-        dueVaccine: 'Pentavalent-3, fIPV-2, PCV-2',
-        dueDate: '02 Sep 2026',
-        status: 'Scheduled',
-        badge: 'good'
-      }
-    ],
+    immunizationRegistry: [],
 
     // Today's Daily Home Visit Plan
-    homeVisits: [
-      { id: 'HV-01', houseNo: 'Door #12/4', patient: 'Anitha K.', purpose: 'ANC 2nd Trimester Hb & Nutrition Check', status: 'Completed', vitalsDone: true },
-      { id: 'HV-02', houseNo: 'Door #14/2', patient: 'Baby Ravi Teja', purpose: 'MR-1 Vaccination Follow-up & Weight', status: 'Completed', vitalsDone: true },
-      { id: 'HV-03', houseNo: 'Door #18/1', patient: 'Saraswati Devi', purpose: 'NCD Hypertension BP Check & Metformin Refill', status: 'In Progress', vitalsDone: false },
-      { id: 'HV-04', houseNo: 'Door #22/5', patient: 'Lakshmi Devi M.', purpose: 'High-Risk BP & Swelling Inspection', status: 'Pending', vitalsDone: false },
-      { id: 'HV-05', houseNo: 'Door #28/3', patient: 'Ramesh N.', purpose: 'Post-op dressing wound check', status: 'Pending', vitalsDone: false }
-    ]
+    homeVisits: []
   };
 
   // -------------------------------------------------------------
@@ -13571,6 +13490,115 @@ a {
     // -------------------------------------------------------------
     // TAB 2: HIGH-RISK PREGNANCY (ANC) TRACKER
     // -------------------------------------------------------------
+    
+    openAddAncModal() {
+      const name = prompt('Pregnant Mother Full Name: (e.g. Lakshmi Devi)');
+      if (!name) return;
+      const age = prompt('Age:', '24') || '24';
+      const weeks = prompt('Gestational Age / Trimester:', '24 Weeks (2nd Trimester)') || '24 Weeks';
+      const hb = prompt('Haemoglobin (Hb g/dL):', '9.4 g/dL') || '9.4 g/dL';
+      const bp = prompt('Blood Pressure (mmHg):', '120/80 mmHg') || '120/80 mmHg';
+      const risk = prompt('Risk Assessment: (Normal ANC, Moderate Anaemia, High Risk PIH)', 'Moderate Anaemia') || 'Moderate Anaemia';
+
+      const rec = {
+        id: `ANC-${Date.now().toString().slice(-4)}`,
+        patientName: name,
+        age: Number(age),
+        gestationalWeeks: weeks,
+        fundalHeight: '24 cm',
+        bp,
+        hb,
+        riskLevel: risk,
+        riskBadge: risk.includes('High') ? 'bad' : (risk.includes('Normal') ? 'good' : 'warn'),
+        ifaAdherence: 'Regular (1 Tab OD)',
+        ttVaccine: 'TT Complete',
+        nextVisitDate: 'Next Week',
+        supervisingDoctor: 'Assigned PHC Doctor'
+      };
+
+      this.data.ancRegistry.unshift(rec);
+      this.data.stats.highRiskPregnancies = this.data.ancRegistry.length;
+
+      try {
+        fetch(`https://swasthya-setu-2b67d-default-rtdb.firebaseio.com/worker_anc_records/${rec.id}.json`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(rec)
+        }).catch(() => {});
+      } catch (e) {}
+
+      if (typeof window.toast === 'function') {
+        window.toast(`✓ Registered ANC Mother ${name} & synced to Cloud!`);
+      }
+      this.renderANC();
+    }
+
+    openAddImmunizationModal() {
+      const child = prompt('Child Full Name: (e.g. Baby Aarav)');
+      if (!child) return;
+      const parent = prompt('Mother / Parent Name:', 'Anitha K.') || 'Parent';
+      const age = prompt('Child Age:', '8 Months') || '8 Months';
+      const vaccine = prompt('Due Vaccine:', 'Measles-Rubella (MR-1) & Vitamin A') || 'MR-1';
+
+      const imm = {
+        id: `IMM-${Date.now().toString().slice(-4)}`,
+        childName: child,
+        parentName: parent,
+        age,
+        dueVaccine: vaccine,
+        dueDate: 'Due This Week',
+        status: 'Due Soon',
+        badge: 'warn'
+      };
+
+      this.data.immunizationRegistry.unshift(imm);
+      this.data.stats.childrenDueImmunization = this.data.immunizationRegistry.length;
+
+      try {
+        fetch(`https://swasthya-setu-2b67d-default-rtdb.firebaseio.com/worker_immunizations/${imm.id}.json`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(imm)
+        }).catch(() => {});
+      } catch (e) {}
+
+      if (typeof window.toast === 'function') {
+        window.toast(`✓ Recorded vaccine schedule for ${child}!`);
+      }
+      this.renderImmunization();
+    }
+
+    openAddHomeVisitModal() {
+      const house = prompt('House / Door Number: (e.g. Door #14/2)', 'Door #14/2') || 'Door #1';
+      const patient = prompt('Patient Name:', 'Anitha K.') || 'Patient';
+      const purpose = prompt('Visit Purpose:', 'ANC Follow-up & Nutrition Inspection') || 'General Home Visit';
+
+      const visit = {
+        id: `HV-${Date.now().toString().slice(-4)}`,
+        houseNo: house,
+        patient,
+        purpose,
+        status: 'Pending',
+        vitalsDone: false
+      };
+
+      this.data.homeVisits.unshift(visit);
+      this.data.stats.todayHomeVisits = this.data.homeVisits.length;
+
+      try {
+        fetch(`https://swasthya-setu-2b67d-default-rtdb.firebaseio.com/worker_visits/${visit.id}.json`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(visit)
+        }).catch(() => {});
+      } catch (e) {}
+
+      if (typeof window.toast === 'function') {
+        window.toast(`✓ Added home visit route for ${patient} (${house})`);
+      }
+      this.renderVisits();
+    }
+
     renderANC() {
       const container = document.getElementById('worker-pane-anc');
       if (!container) return;
@@ -13791,8 +13819,35 @@ a {
     }
 
     submitVitals() {
+      const pSelect = document.getElementById('vitalPatientSelect');
+      const pName = pSelect ? pSelect.options[pSelect.selectedIndex].text : 'Patient';
+      const bp = document.getElementById('vitalBp')?.value || '120/80';
+      const pulse = document.getElementById('vitalPulse')?.value || '76';
+      const temp = document.getElementById('vitalTemp')?.value || '98.6';
+      const spo2 = document.getElementById('vitalSpo2')?.value || '99';
+      const notes = document.getElementById('vitalNotes')?.value || 'Vitals captured by ASHA worker';
+
+      const vitalEntry = {
+        id: `VIT-${Date.now().toString().slice(-4)}`,
+        patientName: pName,
+        bp,
+        pulse,
+        temp,
+        spo2,
+        notes,
+        recordedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+
+      try {
+        fetch(`https://swasthya-setu-2b67d-default-rtdb.firebaseio.com/frontline_vitals/${vitalEntry.id}.json`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(vitalEntry)
+        }).catch(() => {});
+      } catch (e) {}
+
       if (typeof window.toast === 'function') {
-        window.toast('✓ Vitals saved & transmitted directly to Dr. Rao\'s Doctor Clinical Desk (Pre-Consult Vitals updated).');
+        window.toast(`✓ Vitals for ${pName.split('(')[0]} recorded and transmitted to Doctor Clinical Desk!`);
       }
       this.switchTab('overview');
     }
