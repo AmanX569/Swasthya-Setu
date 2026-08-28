@@ -417,7 +417,7 @@
           roles: [selectedRole],
           activeRole: selectedRole,
           designation: extraInfo?.designation || ROLE_CONFIG[selectedRole].name,
-          facility: extraInfo?.facility || 'Kondapalli Community Health Grid',
+          facility: extraInfo?.facility || extraInfo?.village || 'Kondapalli Community Health Grid',
           email: extraInfo?.email || '',
           avatar: this.generateAvatar(name.trim()),
           registeredAt: new Date().toISOString(),
@@ -426,6 +426,74 @@
       }
 
       this.saveAccount(account);
+
+      // 1. Direct write to Firebase staff_registry
+      const cloudUser = {
+        id: account.userId,
+        name: account.name,
+        role: selectedRole,
+        phone: account.phone,
+        email: account.email || `${account.name.toLowerCase().replace(/[^a-z0-9]/g, '.')}@swasthyasetu.gov.in`,
+        facility: account.facility || (extraInfo && extraInfo.village) || 'Kondapalli Community Grid',
+        location: (extraInfo && extraInfo.village) || 'Krishna District',
+        status: 'Active',
+        regDate: 'Today',
+        verified: true,
+        abhaId: (extraInfo && extraInfo.abha) || '',
+        gender: (extraInfo && extraInfo.gender) || 'Not Specified',
+        age: (extraInfo && extraInfo.age) || 'Adult',
+        bloodGroup: (extraInfo && extraInfo.bloodGroup) || 'O+',
+        conditions: (extraInfo && extraInfo.conditions) || ['General Health Checkup Active'],
+        updatedAt: new Date().toISOString()
+      };
+
+      try {
+        fetch(`https://swasthya-setu-2b67d-default-rtdb.firebaseio.com/staff_registry/${account.userId}.json`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(cloudUser)
+        }).catch(() => {});
+      } catch (err) {}
+
+      // 2. If Patient, register as family member in patient_family_members
+      if (selectedRole === 'patient') {
+        const slug = account.name.toLowerCase().replace(/[^a-z0-9]/g, '_') || 'patient_self';
+        const patientFamilyRecord = {
+          id: account.userId,
+          name: `${account.name} (Self)`,
+          role: 'Self · Registered Citizen',
+          age: (extraInfo && extraInfo.age) ? Number(extraInfo.age) : 28,
+          gender: (extraInfo && extraInfo.gender) || 'Female',
+          bloodGroup: (extraInfo && extraInfo.bloodGroup) || 'O+',
+          abhaId: (extraInfo && extraInfo.abha) || `14-${Math.floor(1000+Math.random()*9000)}-${Math.floor(1000+Math.random()*9000)}-${Math.floor(1000+Math.random()*9000)}`,
+          conditions: (extraInfo && extraInfo.conditions) ? [extraInfo.conditions] : ['General Health Checkup Active'],
+          avatar: account.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase(),
+          assignedAsha: 'B. Saraswati (Ward 6 · Kondapalli)',
+          emergencyContact: (extraInfo && extraInfo.emergencyContact) || `${account.phone} (Self)`
+        };
+
+        try {
+          fetch(`https://swasthya-setu-2b67d-default-rtdb.firebaseio.com/patient_family_members/${slug}.json`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(patientFamilyRecord)
+          }).catch(() => {});
+        } catch (err) {}
+
+        if (typeof window !== 'undefined' && window.patientController && window.patientController.data) {
+          window.patientController.data.familyMembers[slug] = patientFamilyRecord;
+          window.patientController.data.currentFamilyMember = slug;
+          if (typeof window.patientController.renderFamilySelector === 'function') {
+            window.patientController.renderFamilySelector();
+          }
+        }
+      }
+
+      // 3. Update Admin in-memory registry
+      if (typeof window !== 'undefined' && window.adminController && window.adminController.data && Array.isArray(window.adminController.data.users)) {
+        window.adminController.data.users.unshift(cloudUser);
+      }
+
       return this.loginUser(account, selectedRole);
     }
 

@@ -158,11 +158,14 @@
       </div>
 
       <div class="auth-landing-actions">
-        <button class="auth-btn-primary" id="btnGetStarted" style="font-size:16px;padding:14px 34px;">
-          <span>Get Started →</span>
+        <button class="auth-btn-primary" id="btnGetStarted" style="font-size:14.5px;padding:14px 24px;">
+          <span>🔑 Log In (Existing User) →</span>
         </button>
-        <button class="auth-btn-danger" onclick="authUI.openEmergencyDirect()">
-          <span>🚨 Instant 108 Emergency SOS</span>
+        <button class="auth-btn-primary" style="font-size:14.5px;padding:14px 24px;background:linear-gradient(135deg, #06b6d4, #0891b2);border-color:#22d3ee;" onclick="authUI.showRegistrationScreen('')">
+          <span>🌾 Register as New Patient</span>
+        </button>
+        <button class="auth-btn-danger" onclick="authUI.openEmergencyDirect()" style="padding:14px 20px;">
+          <span>🚨 108 SOS</span>
         </button>
       </div>
     `;
@@ -208,6 +211,13 @@
           <button type="submit" class="auth-btn-primary" id="btnSendOtp" style="width:100%;justify-content:center;height:48px;margin-top:6px;">
             <span id="btnSendOtpText">Send OTP →</span>
           </button>
+
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:10px;border-top:1px solid rgba(220,252,243,0.1);">
+            <span style="font-size:12px;color:var(--muted);">New to Swasthya Setu?</span>
+            <button type="button" class="auth-link-btn" onclick="authUI.showRegistrationScreen(document.getElementById('authPhoneInput') ? document.getElementById('authPhoneInput').value : '')" style="color:#38bdf8;font-weight:700;">
+              ✨ Register New Patient Account →
+            </button>
+          </div>
         </form>
 
         <div class="auth-demo-helper">
@@ -623,25 +633,26 @@
     `;
   }
 
-  function showRegistrationScreen(phone) {
+  function showRegistrationScreen(phone = '') {
     const container = document.getElementById('authScreenContainer');
+    const initialPhone = phone || currentPhone || '';
 
     container.innerHTML = `
-      <div class="auth-modal-card" style="max-width:520px;">
-        <button class="auth-modal-close" onclick="authUI.showAccountNotFoundScreen('${phone}')" title="Back">✕</button>
+      <div class="auth-modal-card" style="max-width:560px;max-height:90vh;overflow-y:auto;">
+        <button class="auth-modal-close" onclick="authUI.showPhoneLoginScreen('${initialPhone}')" title="Back to Login">✕</button>
 
         <div class="auth-card-head">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
             <div class="auth-brand-logo" style="width:26px;height:26px;font-size:13px;">स</div>
-            <span style="font-size:11px;font-weight:700;letter-spacing:0.08em;color:var(--auth-primary-bright);">NEW USER ONBOARDING</span>
+            <span style="font-size:11px;font-weight:700;letter-spacing:0.08em;color:var(--auth-primary-bright);">NEW CITIZEN &amp; HEALTHCARE REGISTRATION</span>
           </div>
-          <h2 class="auth-card-title">Create Healthcare Account</h2>
-          <p class="auth-card-subtitle">Set up your profile for <strong style="color:#ffffff;">+91 ${phone}</strong></p>
+          <h2 class="auth-card-title">Register Healthcare Account</h2>
+          <p class="auth-card-subtitle">Create your digital ABHA-linked health card &amp; connect to rural healthcare network.</p>
         </div>
 
         <!-- Role Selection Tabs -->
-        <div class="auth-label"><span>Select Role to Register</span></div>
-        <div class="auth-reg-tabs">
+        <div class="auth-label"><span>Registering Account As:</span></div>
+        <div class="auth-reg-tabs" style="margin-bottom:14px;">
           <button type="button" class="auth-reg-tab active" data-role="patient" onclick="authUI.switchRegRole('patient')">
             🌾 Patient / Family
           </button>
@@ -649,14 +660,21 @@
             🩺 Doctor
           </button>
           <button type="button" class="auth-reg-tab" data-role="worker" onclick="authUI.switchRegRole('worker')">
-            🤝 Field Worker
+            🤝 ASHA Worker
           </button>
         </div>
 
-        <form id="regForm" onsubmit="event.preventDefault(); authUI.handleRegistration('${phone}');">
-          <div class="auth-input-group">
-            <label class="auth-label" for="regName"><span>Full Name *</span></label>
-            <input type="text" id="regName" class="auth-input" placeholder="e.g. Radhika Sharma" required autofocus>
+        <form id="regForm" onsubmit="event.preventDefault(); authUI.handleRegistration();">
+          <div style="display:grid;grid-template-columns:1.2fr 1fr;gap:10px;">
+            <div class="auth-input-group">
+              <label class="auth-label" for="regName"><span>Full Name *</span></label>
+              <input type="text" id="regName" class="auth-input" placeholder="e.g. Radhika Sharma" required autofocus>
+            </div>
+
+            <div class="auth-input-group">
+              <label class="auth-label" for="regPhone"><span>10-Digit Mobile *</span></label>
+              <input type="tel" id="regPhone" class="auth-input" placeholder="9876543210" pattern="[0-9]{10}" maxlength="10" value="${initialPhone}" required>
+            </div>
           </div>
 
           <div class="auth-input-group">
@@ -667,32 +685,86 @@
           <!-- Role-Specific Dynamic Fields -->
           <div id="regRoleFields">
             <!-- Patient Fields (Default) -->
-            <div class="auth-input-group">
-              <label class="auth-label" for="regAbha"><span>ABHA Health ID / Card (Optional)</span></label>
-              <input type="text" id="regAbha" class="auth-input" placeholder="14-digit ABHA Number (e.g. 14-8832-1920-4412)">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+              <div class="auth-input-group">
+                <label class="auth-label" for="regAge"><span>Age (Yrs) *</span></label>
+                <input type="number" id="regAge" class="auth-input" placeholder="28" min="1" max="120" value="28" required>
+              </div>
+
+              <div class="auth-input-group">
+                <label class="auth-label" for="regGender"><span>Gender *</span></label>
+                <select id="regGender" class="auth-input" required>
+                  <option value="Female">Female</option>
+                  <option value="Male">Male</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              <div class="auth-input-group">
+                <label class="auth-label" for="regBlood"><span>Blood Group</span></label>
+                <select id="regBlood" class="auth-input">
+                  <option value="O+">O+</option>
+                  <option value="A+">A+</option>
+                  <option value="B+">B+</option>
+                  <option value="AB+">AB+</option>
+                  <option value="O-">O-</option>
+                  <option value="A-">A-</option>
+                  <option value="B-">B-</option>
+                  <option value="AB-">AB-</option>
+                </select>
+              </div>
             </div>
+
             <div class="auth-input-group">
-              <label class="auth-label" for="regVillage"><span>Village / Sector</span></label>
-              <input type="text" id="regVillage" class="auth-input" placeholder="e.g. Kondapalli Village, Ward 4" value="Kondapalli Village">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <label class="auth-label" for="regAbha"><span>ABHA Health ID (Ayushman Bharat)</span></label>
+                <button type="button" class="auth-link-btn" onclick="authUI.generateRandomAbha()" style="font-size:11px;color:#38bdf8;">
+                  ⚡ Auto-Generate ABHA
+                </button>
+              </div>
+              <input type="text" id="regAbha" class="auth-input" placeholder="e.g. 14-8832-1920-4412" value="14-${Math.floor(1000+Math.random()*9000)}-${Math.floor(1000+Math.random()*9000)}-${Math.floor(1000+Math.random()*9000)}">
+            </div>
+
+            <div class="auth-input-group">
+              <label class="auth-label" for="regVillage"><span>Village / Gram Panchayat Location *</span></label>
+              <input type="text" id="regVillage" class="auth-input" placeholder="e.g. Kondapalli Gramam, Ward 6" value="Kondapalli Gramam, Ward 6" required>
+            </div>
+
+            <div class="auth-input-group">
+              <label class="auth-label" for="regConditions"><span>Health Condition / Special Care</span></label>
+              <select id="regConditions" class="auth-input">
+                <option value="General Health Checkup Active">General Citizen (Healthy)</option>
+                <option value="ANC Pregnancy (2nd Trimester)">🤰 ANC Pregnancy (2nd Trimester)</option>
+                <option value="ANC Pregnancy (3rd Trimester High Risk)">🤰 ANC Pregnancy (High Risk)</option>
+                <option value="Essential Hypertension / High BP">❤️ Hypertension / High BP</option>
+                <option value="Type 2 Diabetes Mellitus">🩸 Type 2 Diabetes Care</option>
+                <option value="Infant / Child Immunization Due">👶 Infant Immunization Track</option>
+                <option value="Senior Citizen Routine Monitoring">👴 Senior Citizen Chronic Care</option>
+              </select>
+            </div>
+
+            <div class="auth-input-group">
+              <label class="auth-label" for="regEmergency"><span>Emergency Contact &amp; Relation</span></label>
+              <input type="text" id="regEmergency" class="auth-input" placeholder="e.g. Ramu (Husband · 9848119988)" value="Family Member (+91 ${initialPhone})">
             </div>
           </div>
 
-          <!-- Admin Lockout Notice -->
-          <div class="auth-admin-lock-banner">
-            <span>🔒</span>
-            <div>
-              <strong>Looking for Admin Access?</strong> Public administrator registration is restricted. Admin privileges must be assigned by an authorized System Leader.
-            </div>
-          </div>
-
-          <button type="submit" class="auth-btn-primary" style="width:100%;justify-content:center;height:48px;margin-top:6px;">
-            <span>Complete Registration &amp; Enter Portal →</span>
+          <button type="submit" class="auth-btn-primary" style="width:100%;justify-content:center;height:48px;margin-top:10px;">
+            <span>💾 Complete Registration &amp; Enter Health Portal →</span>
           </button>
         </form>
       </div>
     `;
 
     window._selectedRegRole = 'patient';
+  }
+
+  function generateRandomAbha() {
+    const input = document.getElementById('regAbha');
+    if (input) {
+      input.value = `14-${Math.floor(1000+Math.random()*9000)}-${Math.floor(1000+Math.random()*9000)}-${Math.floor(1000+Math.random()*9000)}`;
+      showToast('Generated 14-digit Ayushman Bharat ABHA Health Number!', 'success');
+    }
   }
 
   function switchRegRole(role) {
@@ -706,13 +778,67 @@
 
     if (role === 'patient') {
       fieldsContainer.innerHTML = `
-        <div class="auth-input-group">
-          <label class="auth-label" for="regAbha"><span>ABHA Health ID / Card (Optional)</span></label>
-          <input type="text" id="regAbha" class="auth-input" placeholder="14-digit ABHA Number (e.g. 14-8832-1920-4412)">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+          <div class="auth-input-group">
+            <label class="auth-label" for="regAge"><span>Age (Yrs) *</span></label>
+            <input type="number" id="regAge" class="auth-input" placeholder="28" min="1" max="120" value="28" required>
+          </div>
+
+          <div class="auth-input-group">
+            <label class="auth-label" for="regGender"><span>Gender *</span></label>
+            <select id="regGender" class="auth-input" required>
+              <option value="Female">Female</option>
+              <option value="Male">Male</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          <div class="auth-input-group">
+            <label class="auth-label" for="regBlood"><span>Blood Group</span></label>
+            <select id="regBlood" class="auth-input">
+              <option value="O+">O+</option>
+              <option value="A+">A+</option>
+              <option value="B+">B+</option>
+              <option value="AB+">AB+</option>
+              <option value="O-">O-</option>
+              <option value="A-">A-</option>
+              <option value="B-">B-</option>
+              <option value="AB-">AB-</option>
+            </select>
+          </div>
         </div>
+
         <div class="auth-input-group">
-          <label class="auth-label" for="regVillage"><span>Village / Sector</span></label>
-          <input type="text" id="regVillage" class="auth-input" placeholder="e.g. Kondapalli Village, Ward 4" value="Kondapalli Village">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <label class="auth-label" for="regAbha"><span>ABHA Health ID (Ayushman Bharat)</span></label>
+            <button type="button" class="auth-link-btn" onclick="authUI.generateRandomAbha()" style="font-size:11px;color:#38bdf8;">
+              ⚡ Auto-Generate ABHA
+            </button>
+          </div>
+          <input type="text" id="regAbha" class="auth-input" placeholder="e.g. 14-8832-1920-4412" value="14-${Math.floor(1000+Math.random()*9000)}-${Math.floor(1000+Math.random()*9000)}-${Math.floor(1000+Math.random()*9000)}">
+        </div>
+
+        <div class="auth-input-group">
+          <label class="auth-label" for="regVillage"><span>Village / Gram Panchayat Location *</span></label>
+          <input type="text" id="regVillage" class="auth-input" placeholder="e.g. Kondapalli Gramam, Ward 6" value="Kondapalli Gramam, Ward 6" required>
+        </div>
+
+        <div class="auth-input-group">
+          <label class="auth-label" for="regConditions"><span>Health Condition / Special Care</span></label>
+          <select id="regConditions" class="auth-input">
+            <option value="General Health Checkup Active">General Citizen (Healthy)</option>
+            <option value="ANC Pregnancy (2nd Trimester)">🤰 ANC Pregnancy (2nd Trimester)</option>
+            <option value="ANC Pregnancy (3rd Trimester High Risk)">🤰 ANC Pregnancy (High Risk)</option>
+            <option value="Essential Hypertension / High BP">❤️ Hypertension / High BP</option>
+            <option value="Type 2 Diabetes Mellitus">🩸 Type 2 Diabetes Care</option>
+            <option value="Infant / Child Immunization Due">👶 Infant Immunization Track</option>
+            <option value="Senior Citizen Routine Monitoring">👴 Senior Citizen Chronic Care</option>
+          </select>
+        </div>
+
+        <div class="auth-input-group">
+          <label class="auth-label" for="regEmergency"><span>Emergency Contact &amp; Relation</span></label>
+          <input type="text" id="regEmergency" class="auth-input" placeholder="e.g. Ramu (Husband · 9848119988)">
         </div>
       `;
     } else if (role === 'doctor') {
@@ -748,9 +874,11 @@
     }
   }
 
-  function handleRegistration(phone) {
+  function handleRegistration() {
     const nameInput = document.getElementById('regName');
+    const phoneInput = document.getElementById('regPhone');
     const name = nameInput ? nameInput.value.trim() : '';
+    const phone = phoneInput ? phoneInput.value.trim().replace(/\D/g, '') : '';
     const email = document.getElementById('regEmail')?.value.trim() || '';
     const selectedRole = window._selectedRegRole || 'patient';
 
@@ -760,10 +888,21 @@
       return;
     }
 
+    if (!phone || phone.length !== 10) {
+      showToast('Please enter a valid 10-digit mobile number.', 'error');
+      if (phoneInput) phoneInput.focus();
+      return;
+    }
+
     let extraInfo = { email };
     if (selectedRole === 'patient') {
       extraInfo.abha = document.getElementById('regAbha')?.value.trim();
       extraInfo.village = document.getElementById('regVillage')?.value.trim();
+      extraInfo.age = document.getElementById('regAge')?.value.trim() || 28;
+      extraInfo.gender = document.getElementById('regGender')?.value || 'Female';
+      extraInfo.bloodGroup = document.getElementById('regBlood')?.value || 'O+';
+      extraInfo.conditions = document.getElementById('regConditions')?.value || 'General Health Checkup Active';
+      extraInfo.emergencyContact = document.getElementById('regEmergency')?.value.trim() || '';
       extraInfo.facility = 'Kondapalli PHC';
     } else if (selectedRole === 'doctor') {
       extraInfo.license = document.getElementById('regLicense')?.value.trim();
@@ -784,7 +923,7 @@
       });
 
       const roleMeta = authService.getRoleMetadata(selectedRole);
-      showToast(`Account registered successfully! Welcome to ${roleMeta.shortName} Portal.`, 'success');
+      showToast(`🎉 Registration Complete! Welcome ${name} to Swasthya Setu ${roleMeta.shortName} Portal.`, 'success');
 
       hideAuthOverlay();
       const defaultView = authService.getRoleDefaultView(selectedRole);
@@ -796,9 +935,6 @@
     }
   }
 
-  // -------------------------------------------------------------
-  // RBAC VIEW ACCESS CONTROL & UNAUTHORIZED MODAL
-  // -------------------------------------------------------------
   function checkViewAccess(targetView) {
     if (!authService.isAuthenticated()) {
       showPhoneLoginScreen();
@@ -1223,6 +1359,7 @@
     selectActiveRoleAndLogin,
     showAccountNotFoundScreen,
     showRegistrationScreen,
+    generateRandomAbha,
     switchRegRole,
     handleRegistration,
     checkViewAccess,
