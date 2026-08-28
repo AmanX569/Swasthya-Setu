@@ -186,6 +186,43 @@ body[data-theme="violet"] {
     linear-gradient(180deg, #07020d 0%, #0e041a 50%, #07020d 100%) !important;
 }
 
+/* 6. Emerald Night Theme (Forest & Healing Mint) */
+[data-theme="emerald"], body[data-theme="emerald"] {
+  --void-950: #04120f;
+  --void-900: #071f1a;
+  --void-850: #092822;
+  --void-800: #0d302a;
+  --void-700: #13423a;
+  --glass-1: rgba(220, 252, 243, 0.045);
+  --glass-2: rgba(220, 252, 243, 0.085);
+  --glass-3: rgba(220, 252, 243, 0.14);
+  --glass-4: rgba(220, 252, 243, 0.22);
+  --glass-border: rgba(220, 252, 243, 0.13);
+  --glass-border-strong: rgba(220, 252, 243, 0.28);
+  --glass-glow: rgba(95, 227, 196, 0.25);
+  --glass-specular: rgba(255, 255, 255, 0.55);
+  --rail-glass: rgba(4, 18, 15, 0.78);
+  --primary: #10b981;
+  --primary-dark: #064e3b;
+  --primary-bright: #34d399;
+  --primary-glow: rgba(52, 211, 153, 0.45);
+  --teal-cyan: #22d3ee;
+  --teal-glow: rgba(34, 211, 238, 0.35);
+  --ink: #f0fdf4;
+  --ink-dim: #cbd5e1;
+  --muted: #86a79e;
+  --line: rgba(220, 252, 243, 0.1);
+  color-scheme: dark;
+}
+
+body[data-theme="emerald"] {
+  background-image:
+    radial-gradient(100% 70% at 15% 0%, rgba(52, 211, 153, 0.14) 0%, transparent 60%),
+    radial-gradient(80% 60% at 85% 10%, rgba(34, 211, 238, 0.12) 0%, transparent 50%),
+    radial-gradient(60% 50% at 50% 90%, rgba(245, 158, 11, 0.08) 0%, transparent 60%),
+    linear-gradient(175deg, #04120f 0%, #071f1a 50%, #04120f 100%) !important;
+}
+
 /* 1. Classic Modern Dark Mode */
 [data-theme="dark"], body[data-theme="dark"] {
   --void-950: #0b1120;
@@ -4306,12 +4343,7 @@ a {
 
         <!-- Multi-Theme Selector -->
         <button class="btn-glass" style="padding:7px 12px;min-height:36px;font-size:12px" onclick="patientController.toggleThemeNext()" id="themeToggleBtn">
-          <span>🌙 Emerald Night</span>
-        </button>
-
-        <!-- Live Cloud Profiles & Directory Button -->
-        <button class="btn-glass" onclick="openCloudDirectoryModal()" style="min-height:36px;padding:7px 12px;font-size:12px;" title="View all registered healthcare profiles and citizen accounts">
-          <span>👥 Profiles Directory</span>
+          <span>💜 Dark Violet</span>
         </button>
 
         <!-- Emergency Header Trigger -->
@@ -9763,8 +9795,11 @@ a {
             </p>
           </div>
           <div style="display:flex;gap:10px;align-items:center;">
+            <button class="btn-glass sm" onclick="openCloudDirectoryModal()" style="font-size:12.5px;padding:8px 14px;">
+              <span>👥 Cloud Profiles Directory</span>
+            </button>
             <button class="btn-glass sm" onclick="adminController.exportStaffToCSV()" style="font-size:12.5px;padding:8px 14px;">
-              <span>📥 Export CSV Table</span>
+              <span>📥 Export CSV</span>
             </button>
             <button class="auth-btn-primary" onclick="adminController.openAddStaffModal()" style="font-size:13px;padding:8px 16px;">
               <span>+ Add Healthcare Staff</span>
@@ -12774,6 +12809,20 @@ a {
       }
     }
 
+    getThemeDisplayName(themeName) {
+      const themeLabels = {
+        'violet': '💜 Dark Violet',
+        'black': '⬛ Pure Black',
+        'dark': '🌙 Modern Dark',
+        'emerald': '🌿 Emerald Night',
+        'navy': '🌊 Deep Navy Blue',
+        'gov': '🏛️ Sarkari Blue & White',
+        'daylight': '☀️ Daylight Pearl',
+        'oled': '🌑 Midnight OLED'
+      };
+      return themeLabels[themeName] || themeName;
+    }
+
     toggleThemeNext() {
       const themes = ['violet', 'black', 'emerald', 'dark', 'navy', 'gov', 'daylight', 'oled'];
       const currentIndex = themes.indexOf(this.data.currentTheme);
@@ -12781,10 +12830,6 @@ a {
       this.setTheme(nextTheme);
       if (typeof window.toast === 'function') {
         window.toast(`Theme: ${this.getThemeDisplayName(nextTheme)}`);
-      }
-    };
-      if (typeof window.toast === 'function') {
-        window.toast(`🎨 Theme: ${themeLabels[themes[nextIdx]] || themes[nextIdx]}`);
       }
     }
 

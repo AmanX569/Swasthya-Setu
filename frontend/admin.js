@@ -1010,8 +1010,11 @@
             </p>
           </div>
           <div style="display:flex;gap:10px;align-items:center;">
+            <button class="btn-glass sm" onclick="openCloudDirectoryModal()" style="font-size:12.5px;padding:8px 14px;">
+              <span>👥 Cloud Profiles Directory</span>
+            </button>
             <button class="btn-glass sm" onclick="adminController.exportStaffToCSV()" style="font-size:12.5px;padding:8px 14px;">
-              <span>📥 Export CSV Table</span>
+              <span>📥 Export CSV</span>
             </button>
             <button class="auth-btn-primary" onclick="adminController.openAddStaffModal()" style="font-size:13px;padding:8px 16px;">
               <span>+ Add Healthcare Staff</span>

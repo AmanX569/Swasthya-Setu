@@ -308,6 +308,20 @@
       }
     }
 
+    getThemeDisplayName(themeName) {
+      const themeLabels = {
+        'violet': '💜 Dark Violet',
+        'black': '⬛ Pure Black',
+        'dark': '🌙 Modern Dark',
+        'emerald': '🌿 Emerald Night',
+        'navy': '🌊 Deep Navy Blue',
+        'gov': '🏛️ Sarkari Blue & White',
+        'daylight': '☀️ Daylight Pearl',
+        'oled': '🌑 Midnight OLED'
+      };
+      return themeLabels[themeName] || themeName;
+    }
+
     toggleThemeNext() {
       const themes = ['violet', 'black', 'emerald', 'dark', 'navy', 'gov', 'daylight', 'oled'];
       const currentIndex = themes.indexOf(this.data.currentTheme);
@@ -315,10 +329,6 @@
       this.setTheme(nextTheme);
       if (typeof window.toast === 'function') {
         window.toast(`Theme: ${this.getThemeDisplayName(nextTheme)}`);
-      }
-    };
-      if (typeof window.toast === 'function') {
-        window.toast(`🎨 Theme: ${themeLabels[themes[nextIdx]] || themes[nextIdx]}`);
       }
     }
 
