@@ -10,14 +10,16 @@
 (function(global) {
   'use strict';
 
-  // Default demo / placeholder config or read from localStorage
+  // Live Firebase Configuration for swasthya-setu-2b67d
   const DEFAULT_FIREBASE_CONFIG = {
-    apiKey: "AIzaSyDemoKeySwasthyaSetu1234567890",
-    authDomain: "swasthya-setu-care.firebaseapp.com",
-    projectId: "swasthya-setu-care",
-    storageBucket: "swasthya-setu-care.appspot.com",
-    messagingSenderId: "108200108200",
-    appId: "1:108200108200:web:abcdef1234567890"
+    apiKey: "AIzaSyBsBlQ5znzApGzjHxSIeR8S-dnqUr1sUao",
+    authDomain: "swasthya-setu-2b67d.firebaseapp.com",
+    projectId: "swasthya-setu-2b67d",
+    databaseURL: "https://swasthya-setu-2b67d-default-rtdb.firebaseio.com",
+    storageBucket: "swasthya-setu-2b67d.firebasestorage.app",
+    messagingSenderId: "803723371643",
+    appId: "1:803723371643:web:29c8b331ece078f9552ede",
+    measurementId: "G-SPRFZEECEY"
   };
 
   class FirebaseConfigManager {
