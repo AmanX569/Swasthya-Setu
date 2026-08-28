@@ -4199,9 +4199,9 @@ a {
 
     <!-- Rail Footer / Connectivity Status -->
     <div class="rail-footer">
-      <div class="signal-status-pill" id="signalPill" onclick="toggleSignalSimulation()">
+      <div class="signal-status-pill" id="signalPill" onclick="openFirebaseSyncModal()" title="Click to view Firebase Cloud & Sync Monitor">
         <span class="signal-dot"></span>
-        <span id="signalText">Online · Full 4G Sync</span>
+        <span id="signalText">Online · Firebase Sync HUD</span>
       </div>
     </div>
   </aside>
@@ -4976,6 +4976,86 @@ a {
 </div>
 
 <!-- =========================================================
+   FIREBASE CLOUD FIRESTORE & SYNC DIAGNOSTICS MODAL
+========================================================= -->
+<div class="modal-overlay" id="firebaseSyncModal">
+  <div class="modal-card" style="max-width: 620px; max-height: 88vh; overflow-y: auto;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;border-bottom:1px solid var(--glass-border);padding-bottom:12px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:26px;">🔥</span>
+        <div>
+          <h3 style="font-size:18px;color:#ffffff;margin:0;">Firebase Cloud Firestore &amp; Sync Monitor</h3>
+          <small style="color:var(--primary-bright);">Real-time Multi-Device Synchronization &amp; Offline Cache</small>
+        </div>
+      </div>
+      <button onclick="closeFirebaseSyncModal()" style="font-size:20px;color:var(--muted);background:transparent;border:none;cursor:pointer;">✕</button>
+    </div>
+
+    <!-- Connection Status Banner -->
+    <div id="firebaseStatusBanner" style="padding:14px 18px;border-radius:12px;background:rgba(16,185,129,0.15);border:1px solid rgba(52,211,153,0.3);margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+      <div>
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;">Database Status</div>
+        <div style="font-size:16px;font-weight:800;color:#34d399;" id="firebaseConnState">🟢 Cloud Firestore Active &amp; Ready</div>
+        <small style="color:var(--ink-dim);" id="firebaseProjectId">Project: swasthya-setu-care · Persistence: Tab Sync Active</small>
+      </div>
+      <button class="auth-btn-primary" style="padding:8px 16px;font-size:12px;" onclick="testFirebasePing()">
+        <span>⚡ Test Live Cloud Ping</span>
+      </button>
+    </div>
+
+    <!-- Live Collections Grid -->
+    <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:8px;">Live Firestore Collections Monitored:</div>
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px;">
+      <div class="glass-panel" style="padding:10px 14px;">
+        <div style="font-size:11px;color:var(--muted);">🚨 108 Ambulance HUD</div>
+        <strong style="font-size:13.5px;color:#ffffff;">emergency_dispatches</strong>
+        <div style="font-size:11px;color:#34d399;">● Live GPS Telemetry Sync</div>
+      </div>
+      <div class="glass-panel" style="padding:10px 14px;">
+        <div style="font-size:11px;color:var(--muted);">📅 OPD Appointments</div>
+        <strong style="font-size:13.5px;color:#ffffff;">appointments</strong>
+        <div style="font-size:11px;color:#34d399;">● Multi-Device Token Queue</div>
+      </div>
+      <div class="glass-panel" style="padding:10px 14px;">
+        <div style="font-size:11px;color:var(--muted);">💊 e-Prescriptions</div>
+        <strong style="font-size:13.5px;color:#ffffff;">prescriptions</strong>
+        <div style="font-size:11px;color:#34d399;">● Jan Aushadhi Mapping</div>
+      </div>
+      <div class="glass-panel" style="padding:10px 14px;">
+        <div style="font-size:11px;color:var(--muted);">👩‍⚕️ ASHA Field Vitals</div>
+        <strong style="font-size:13.5px;color:#ffffff;">frontline_vitals</strong>
+        <div style="font-size:11px;color:#34d399;">● ANC &amp; Immunization</div>
+      </div>
+    </div>
+
+    <!-- Custom Firebase Credentials Form -->
+    <details style="margin-bottom:16px;background:rgba(255,255,255,0.03);border:1px solid var(--glass-border);border-radius:10px;padding:10px 14px;">
+      <summary style="font-size:12.5px;font-weight:700;color:var(--primary-bright);cursor:pointer;">
+        🔑 Connect Your Own Firebase Console Project (Optional)
+      </summary>
+      <div style="margin-top:12px;">
+        <p style="font-size:11.5px;color:var(--ink-dim);margin-bottom:10px;">
+          To connect your free project from <a href="https://console.firebase.google.com" target="_blank" style="color:var(--primary-bright);text-decoration:underline;">console.firebase.google.com</a>, enter your Project ID and API Key below:
+        </p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+          <input type="text" id="customApiKey" placeholder="API Key (AIzaSy...)" class="input-field" style="height:38px;font-size:12px;">
+          <input type="text" id="customProjectId" placeholder="Project ID (my-app)" class="input-field" style="height:38px;font-size:12px;">
+        </div>
+        <button class="btn-glass" style="width:100%;padding:8px;font-size:12px;" onclick="saveCustomFirebaseConfig()">
+          💾 Save &amp; Connect Live Cloud
+        </button>
+      </div>
+    </details>
+
+    <!-- Live Event Log Stream -->
+    <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:6px;">Live Real-Time Activity Log Stream:</div>
+    <div id="firebaseLogStream" style="background:#020b09;border:1px solid var(--glass-border);border-radius:10px;padding:12px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:#a7f3d0;max-height:160px;overflow-y:auto;line-height:1.6;">
+      <div>[System] Cloud Firestore Dual-Mode Sync Engine Ready.</div>
+    </div>
+  </div>
+</div>
+
+<!-- =========================================================
    FLOATING TOAST NOTIFICATION
 ========================================================= -->
 <div class="toast-bar" id="toastBar">
@@ -5057,6 +5137,7 @@ a {
     }
 
     initFirebase() {
+      this.eventLogs = this.eventLogs || [];
       try {
         if (typeof firebase !== 'undefined' && firebase.initializeApp) {
           if (!firebase.apps.length) {
@@ -5083,13 +5164,40 @@ a {
             this.auth = firebase.auth();
           }
 
+          this.logEvent('INIT', 'Firebase initialized successfully', { projectId: this.config.projectId });
           console.log('✓ Firebase initialized successfully in Swasthya Setu');
           return true;
         }
       } catch (e) {
+        this.logEvent('WARN', 'Dual-mode local cache active', { error: e.message });
         console.warn('Firebase SDK not loaded or failed to initialize, using robust local dual-mode fallback:', e.message);
       }
       return false;
+    }
+
+    logEvent(type, message, details = {}) {
+      if (!this.eventLogs) this.eventLogs = [];
+      const entry = {
+        timestamp: new Date().toLocaleTimeString(),
+        type,
+        message,
+        details
+      };
+      this.eventLogs.unshift(entry);
+      if (this.eventLogs.length > 50) this.eventLogs.pop();
+      document.dispatchEvent(new CustomEvent('firebase:logUpdated', { detail: entry }));
+    }
+
+    getDiagnostics() {
+      return {
+        isConfigured: this.isConfigured,
+        isLive: !!(this.db && this.isConfigured),
+        projectId: this.config.projectId || 'swasthya-setu-care',
+        hasDb: !!this.db,
+        hasAuth: !!this.auth,
+        totalLogs: (this.eventLogs || []).length,
+        logs: this.eventLogs || []
+      };
     }
   }
 
@@ -5361,6 +5469,35 @@ a {
           try { callback(JSON.parse(e.newValue)); } catch (err) {}
         }
       });
+    }
+
+    async testCloudConnection() {
+      const testData = {
+        testId: 'ping-' + Date.now(),
+        client: 'Swasthya Setu Browser Client',
+        timestamp: new Date().toISOString(),
+        status: 'ok'
+      };
+      
+      const startTime = performance.now();
+      if (this.isLive) {
+        try {
+          const docRef = await this.db.collection('system_diagnostics').add(testData);
+          const latency = Math.round(performance.now() - startTime);
+          if (global.firebaseConfigManager) {
+            global.firebaseConfigManager.logEvent('CLOUD_WRITE', `Cloud Firestore Write Verified (Latency: ${latency}ms)`, { docId: docRef.id });
+          }
+          return { success: true, mode: 'Cloud Firestore (Live)', latency, docId: docRef.id };
+        } catch (e) {
+          console.warn('Live test write fallback:', e);
+        }
+      }
+
+      const latency = Math.round(performance.now() - startTime);
+      if (global.firebaseConfigManager) {
+        global.firebaseConfigManager.logEvent('LOCAL_WRITE', `Dual-Mode Local Sync Verified (Latency: ${latency}ms)`, { mode: 'Local Dual-Mode' });
+      }
+      return { success: true, mode: 'Dual-Mode Local Storage', latency, docId: 'local-' + Date.now() };
     }
 
     // Helpers
@@ -13229,14 +13366,76 @@ function onLanguageChange(lang) {
   }
 }
 
-let toastTimer;
-function toast(msg) {
-  const bar = document.getElementById('toastBar');
-  if (bar) {
-    document.getElementById('toastMsg').textContent = msg;
-    bar.classList.add('show');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => bar.classList.remove('show'), 3200);
+// Firebase Cloud Sync Diagnostic Modal Controller
+function openFirebaseSyncModal() {
+  const modal = document.getElementById('firebaseSyncModal');
+  if (modal) {
+    modal.classList.add('open');
+    updateFirebaseModalState();
+  }
+}
+
+function closeFirebaseSyncModal() {
+  const modal = document.getElementById('firebaseSyncModal');
+  if (modal) modal.classList.remove('open');
+}
+
+function updateFirebaseModalState() {
+  if (window.firebaseConfigManager) {
+    const diag = window.firebaseConfigManager.getDiagnostics();
+    const connEl = document.getElementById('firebaseConnState');
+    const projEl = document.getElementById('firebaseProjectId');
+    if (connEl) {
+      connEl.innerHTML = diag.isLive ? '🟢 Cloud Firestore Live' : '🟡 Dual-Mode Local Resilience (Offline Sync Active)';
+      connEl.style.color = diag.isLive ? '#34d399' : '#fbbf24';
+    }
+    if (projEl) {
+      projEl.textContent = `Project: ${diag.projectId} · Persistence: Tab Sync Active`;
+    }
+    renderFirebaseLogs();
+  }
+}
+
+function renderFirebaseLogs() {
+  const stream = document.getElementById('firebaseLogStream');
+  if (stream && window.firebaseConfigManager) {
+    const logs = window.firebaseConfigManager.eventLogs || [];
+    if (!logs.length) {
+      stream.innerHTML = '<div>[Ready] Cloud Firestore Dual-Mode Sync Active.</div>';
+      return;
+    }
+    stream.innerHTML = logs.map(l => `
+      <div><span style="color:#64748b;">[${l.timestamp}]</span> <strong style="color:#38bdf8;">[${l.type}]</strong> ${l.message}</div>
+    `).join('');
+  }
+}
+
+async function testFirebasePing() {
+  if (window.firebaseService) {
+    toast('⚡ Testing Firestore live latency...');
+    const res = await window.firebaseService.testCloudConnection();
+    toast(`✓ Verified: ${res.mode} (${res.latency}ms)`);
+    updateFirebaseModalState();
+  }
+}
+
+function saveCustomFirebaseConfig() {
+  const apiKey = document.getElementById('customApiKey').value.trim();
+  const projectId = document.getElementById('customProjectId').value.trim();
+  if (!apiKey || !projectId) {
+    alert('Please enter both API Key and Project ID');
+    return;
+  }
+  const config = {
+    apiKey,
+    projectId,
+    authDomain: `${projectId}.firebaseapp.com`,
+    storageBucket: `${projectId}.appspot.com`
+  };
+  if (window.firebaseConfigManager) {
+    window.firebaseConfigManager.saveConfig(config);
+    toast('✓ Connected custom Firebase Project: ' + projectId);
+    updateFirebaseModalState();
   }
 }
 

@@ -56,6 +56,7 @@
     }
 
     initFirebase() {
+      this.eventLogs = this.eventLogs || [];
       try {
         if (typeof firebase !== 'undefined' && firebase.initializeApp) {
           if (!firebase.apps.length) {
@@ -82,13 +83,40 @@
             this.auth = firebase.auth();
           }
 
+          this.logEvent('INIT', 'Firebase initialized successfully', { projectId: this.config.projectId });
           console.log('✓ Firebase initialized successfully in Swasthya Setu');
           return true;
         }
       } catch (e) {
+        this.logEvent('WARN', 'Dual-mode local cache active', { error: e.message });
         console.warn('Firebase SDK not loaded or failed to initialize, using robust local dual-mode fallback:', e.message);
       }
       return false;
+    }
+
+    logEvent(type, message, details = {}) {
+      if (!this.eventLogs) this.eventLogs = [];
+      const entry = {
+        timestamp: new Date().toLocaleTimeString(),
+        type,
+        message,
+        details
+      };
+      this.eventLogs.unshift(entry);
+      if (this.eventLogs.length > 50) this.eventLogs.pop();
+      document.dispatchEvent(new CustomEvent('firebase:logUpdated', { detail: entry }));
+    }
+
+    getDiagnostics() {
+      return {
+        isConfigured: this.isConfigured,
+        isLive: !!(this.db && this.isConfigured),
+        projectId: this.config.projectId || 'swasthya-setu-care',
+        hasDb: !!this.db,
+        hasAuth: !!this.auth,
+        totalLogs: (this.eventLogs || []).length,
+        logs: this.eventLogs || []
+      };
     }
   }
 
