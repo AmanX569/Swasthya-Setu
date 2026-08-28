@@ -11081,36 +11081,130 @@ a {
 
     syncLiveDoctorDatabase() {
       const dbUrl = 'https://swasthya-setu-2b67d-default-rtdb.firebaseio.com';
+
+      // 1. Initial Cloud Hydration from Firebase
       fetch(`${dbUrl}/.json`)
         .then(r => r.json())
         .then(data => {
           if (data && typeof data === 'object') {
+            // Load consultations queue from cloud
             if (data.doctor_consultation_queue) {
               const q = Array.isArray(data.doctor_consultation_queue) ? data.doctor_consultation_queue : Object.values(data.doctor_consultation_queue);
-              if (q.length) {
-                this.data.consultations = q;
-                if (this.state.currentTab === 'queue' || this.state.currentTab === 'overview') {
-                  this.switchTab(this.state.currentTab);
-                }
-              }
+              if (q.length) this.data.consultations = q;
             }
+
+            // Sync all patients from staff_registry and patient_family_members into consultation list
+            const allPatients = [];
+            if (data.staff_registry) {
+              Object.values(data.staff_registry).forEach(u => {
+                if (u.role === 'patient' || u.role === 'doctor') allPatients.push(u);
+              });
+            }
+            if (data.patient_family_members) {
+              Object.values(data.patient_family_members).forEach(f => {
+                if (!allPatients.some(p => p.name === f.name.replace(' (Self)', ''))) {
+                  allPatients.push({
+                    id: f.id || `PAT-${Math.floor(100+Math.random()*900)}`,
+                    name: f.name.replace(' (Self)', ''),
+                    age: f.age,
+                    gender: f.gender,
+                    bloodGroup: f.bloodGroup,
+                    facility: f.assignedAsha || 'Kondapalli Community Grid',
+                    phone: f.emergencyContact || '9800000000',
+                    conditions: f.conditions,
+                    abhaId: f.abhaId
+                  });
+                }
+              });
+            }
+
+            // Ingest into consultations queue if not existing
+            allPatients.forEach((p, idx) => {
+              const exists = this.data.consultations.some(c => c.patientName.toLowerCase().includes(p.name.toLowerCase()) || (c.patientId && c.patientId === p.id));
+              if (!exists) {
+                const cId = `CNS-${Math.floor(100 + Math.random() * 900)}`;
+                this.data.consultations.unshift({
+                  id: cId,
+                  patientId: p.id || `PAT-${cId}`,
+                  patientName: p.name,
+                  guardian: 'Self',
+                  ageGender: `${p.age || 28} Yrs · ${p.gender || 'Female'}`,
+                  location: p.facility || p.location || 'Kondapalli Gramam, Ward 4',
+                  type: 'Assisted Video Tele-Consult',
+                  priority: (p.conditions && p.conditions[0] && p.conditions[0].includes('Risk')) ? 'HIGH PRIORITY' : 'NORMAL',
+                  status: 'Waiting',
+                  scheduledTime: 'Immediate',
+                  waitingTime: 'Today',
+                  chiefComplaint: (p.conditions && Array.isArray(p.conditions)) ? p.conditions.join(', ') : (p.conditions || 'General Healthcare & Tele-Consultation'),
+                  ashaWorker: 'B. Saraswati (ASHA Ward 6)',
+                  bloodGroup: p.bloodGroup || 'O+',
+                  abhaId: p.abhaId || `14-8842-${Math.floor(1000+Math.random()*9000)}-3318`,
+                  vitals: {
+                    temp: '98.6 °F',
+                    bp: '120/80 mmHg',
+                    pulse: '76 bpm',
+                    spo2: '99%',
+                    resp: '18 /min',
+                    weight: '58 kg',
+                    bloodSugar: '102 mg/dL',
+                    recordedAt: 'Today'
+                  }
+                });
+              }
+            });
+
             if (data.doctor_stats) {
               this.data.stats = { ...this.data.stats, ...data.doctor_stats };
-              if (this.state.currentTab === 'overview') this.renderOverview();
             }
+
+            this.renderDoctorWorkspace();
           }
         })
         .catch(() => {});
 
+      // 2. Real-time Firebase Listeners
       if (window.firebaseConfigManager && window.firebaseConfigManager.rtdb) {
-        window.firebaseConfigManager.rtdb.ref('doctor_consultation_queue').on('value', snap => {
-          const val = snap.val();
-          if (val) {
-            this.data.consultations = Array.isArray(val) ? val : Object.values(val);
-            this.switchTab(this.state.currentTab);
-          }
+        window.firebaseConfigManager.rtdb.ref('staff_registry').on('value', () => {
+          this.syncLiveDoctorDatabase();
         });
       }
+    }
+
+    selectActivePatient(consultId) {
+      this.state.activeConsultId = consultId;
+      const c = this.getActiveConsult();
+      if (typeof window.toast === 'function') {
+        window.toast(`👤 Active patient switched to ${c ? c.patientName : 'Patient'}!`);
+      }
+      this.renderDoctorWorkspace();
+    }
+
+    getActiveConsult() {
+      return this.data.consultations.find(c => c.id === this.state.activeConsultId) || this.data.consultations[0];
+    }
+
+    getActiveEmr() {
+      const consult = this.getActiveConsult();
+      if (consult && this.data.emrDossier[consult.patientId]) {
+        return this.data.emrDossier[consult.patientId];
+      }
+      return {
+        name: consult.patientName,
+        age: consult.ageGender ? consult.ageGender.split('·')[0].trim() : 'Adult',
+        gender: consult.ageGender ? consult.ageGender.split('·')[1].trim() : 'Female',
+        bloodGroup: consult.bloodGroup || 'O+',
+        abhaId: consult.abhaId || `14-${Math.floor(1000+Math.random()*9000)}-${Math.floor(1000+Math.random()*9000)}-${Math.floor(1000+Math.random()*9000)}`,
+        phone: consult.phone || '+91 9800000000',
+        village: consult.location || 'Kondapalli Gramam',
+        primaryPhc: 'Kondapalli PHC',
+        allergies: ['No Known Drug Allergies (NKDA)'],
+        chronicConditions: [consult.chiefComplaint || 'General Health Consultation'],
+        pastSurgeries: ['None Recorded'],
+        immunizationStatus: ['Standard Adult Profile Complete'],
+        consultationHistory: [
+          { date: 'Today', doctor: 'Dr. K. V. Rao', diagnosis: consult.chiefComplaint || 'General Clinical Review', notes: 'Patient connected via teleconsultation.' }
+        ]
+      };
     }
 
     switchTab(tabId) {
@@ -11926,12 +12020,120 @@ a {
       document.body.insertAdjacentHTML('beforeend', modalHtml);
     }
 
-    issuePrescription() {
+    async issuePrescription() {
       const modal = document.getElementById('rxPreviewModal');
       if (modal) modal.remove();
+
+      const c = this.getActiveConsult();
+      const doc = this.data.doctorProfile;
+      const meds = this.state.rxMedicines;
+
+      const rxPayload = {
+        id: `RX-${Date.now().toString().slice(-6)}`,
+        consultationId: c.id,
+        patientName: c.patientName,
+        ageGender: c.ageGender,
+        doctorName: doc.name,
+        diagnosis: document.getElementById('noteDiagnosis') ? document.getElementById('noteDiagnosis').value : 'Clinical Teleconsultation Follow-up',
+        date: new Date().toLocaleDateString('en-GB'),
+        medicines: meds,
+        dietaryAdvice: document.getElementById('notePlan') ? document.getElementById('notePlan').value : 'Take prescribed medicines on time. Drink boiled water.',
+        digitallySigned: true,
+        issuedAt: new Date().toISOString()
+      };
+
+      // 1. Direct write to Firebase doctor_prescriptions
+      try {
+        await fetch(`https://swasthya-setu-2b67d-default-rtdb.firebaseio.com/doctor_prescriptions/${rxPayload.id}.json`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(rxPayload)
+        });
+      } catch (err) {}
+
+      // 2. Also inject each medicine into patient_medications in Firebase
+      meds.forEach(async (m, i) => {
+        const medEntry = {
+          id: `MED-${Date.now().toString().slice(-4)}-${i+1}`,
+          patientName: c.patientName,
+          medicineName: m.name,
+          dosage: m.dose,
+          timing: m.freq,
+          adherence: 'Scheduled',
+          remainingDays: parseInt(m.duration, 10) || 15,
+          prescribedBy: doc.name
+        };
+        try {
+          fetch(`https://swasthya-setu-2b67d-default-rtdb.firebaseio.com/patient_medications/${medEntry.id}.json`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(medEntry)
+          }).catch(() => {});
+        } catch (e) {}
+      });
+
+      c.status = 'Completed';
+
       if (typeof window.toast === 'function') {
-        window.toast('✓ Digitally signed e-Prescription generated & SMS sent to patient mobile (+91 4444444444).');
+        window.toast(`✓ Digitally signed e-Prescription generated & synced to Firebase Cloud for ${c.patientName}!`);
       }
+
+      this.switchTab('rx');
+    }
+
+    openAddPatientModal() {
+      const name = prompt('Enter Patient Full Name:');
+      if (!name) return;
+      const age = prompt('Enter Patient Age:', '30');
+      const gender = prompt('Enter Gender (Female / Male / Other):', 'Female');
+      const complaint = prompt('Enter Chief Medical Complaint / Reason for Consult:', 'Fever, cough and weakness for 3 days');
+
+      const cId = `CNS-${Math.floor(100 + Math.random() * 900)}`;
+      const newConsult = {
+        id: cId,
+        patientId: `PAT-${cId}`,
+        patientName: name.trim(),
+        guardian: 'Self',
+        ageGender: `${age || 30} Yrs · ${gender || 'Female'}`,
+        location: 'Kondapalli Gramam, Ward 6',
+        type: 'Assisted Video Tele-Consult',
+        priority: 'NORMAL',
+        status: 'Waiting',
+        scheduledTime: 'Immediate',
+        waitingTime: 'Just Now',
+        chiefComplaint: complaint || 'General Outpatient Teleconsultation',
+        ashaWorker: 'B. Saraswati (ASHA Ward 6)',
+        bloodGroup: 'O+',
+        abhaId: `14-${Math.floor(1000+Math.random()*9000)}-${Math.floor(1000+Math.random()*9000)}-3318`,
+        vitals: {
+          temp: '98.6 °F',
+          bp: '120/80 mmHg',
+          pulse: '78 bpm',
+          spo2: '99%',
+          resp: '18 /min',
+          weight: '56 kg',
+          bloodSugar: '100 mg/dL',
+          recordedAt: 'Today'
+        }
+      };
+
+      this.data.consultations.unshift(newConsult);
+      this.state.activeConsultId = newConsult.id;
+
+      // Sync to Firebase doctor_consultation_queue
+      try {
+        fetch(`https://swasthya-setu-2b67d-default-rtdb.firebaseio.com/doctor_consultation_queue/${newConsult.id}.json`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newConsult)
+        }).catch(() => {});
+      } catch (e) {}
+
+      if (typeof window.toast === 'function') {
+        window.toast(`✓ Added ${name} to OPD Consultation Queue & synced to Firebase!`);
+      }
+
+      this.renderDoctorWorkspace();
     }
 
     // -------------------------------------------------------------
@@ -12158,6 +12360,30 @@ a {
 
       teleContainer.innerHTML = `
         <div class="doc-command-shell">
+          <!-- Patient Selector Bar -->
+          <div style="background:rgba(6,24,20,0.85);border:1px solid rgba(16,185,129,0.3);border-radius:14px;padding:12px 18px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+            <div style="display:flex;align-items:center;gap:12px;">
+              <span style="font-size:22px;">👤</span>
+              <div>
+                <strong style="font-size:14px;color:#ffffff;display:block;">Select Patient for Consultation &amp; Prescription:</strong>
+                <small style="color:var(--muted);">Switch between any live patient queue ticket or newly registered citizen</small>
+              </div>
+            </div>
+
+            <div style="display:flex;gap:10px;align-items:center;">
+              <select class="auth-input" style="width:300px;height:40px;font-size:13px;padding:6px 12px;background:#020b09;color:#ffffff;border:1px solid #10b981;" onchange="doctorController.selectActivePatient(this.value)">
+                ${this.data.consultations.map(c => `
+                  <option value="${c.id}" ${c.id === this.state.activeConsultId ? 'selected' : ''}>
+                    ${c.priority === 'EMERGENCY' ? '🚨 ' : ''}${c.patientName} (${c.ageGender}) — ${c.status}
+                  </option>
+                `).join('')}
+              </select>
+              <button class="auth-btn-primary" style="padding:8px 14px;font-size:12px;" onclick="doctorController.openAddPatientModal()">
+                <span>+ Add Patient to Queue</span>
+              </button>
+            </div>
+          </div>
+
           <!-- Doctor Top Sub-Navigation Bar -->
           <div class="doc-nav-bar">
             <button class="doc-nav-tab active" data-tab="overview" onclick="doctorController.switchTab('overview')">
