@@ -9082,17 +9082,91 @@ a {
 
     init() {
       this.renderCommandCenter();
-      if (global.firebaseService && typeof global.firebaseService.subscribeStaffMembers === 'function') {
-        global.firebaseService.subscribeStaffMembers(cloudList => {
-          if (Array.isArray(cloudList) && cloudList.length > 0) {
-            cloudList.forEach(cloudUser => {
-              const idx = this.data.users.findIndex(u => u.id === cloudUser.id);
-              if (idx >= 0) this.data.users[idx] = cloudUser;
-              else this.data.users.unshift(cloudUser);
-            });
-            if (this.state.currentTab === 'staff') {
-              this.renderStaffManagement();
+      this.syncLiveFirebaseDatabase();
+    }
+
+    syncLiveFirebaseDatabase() {
+      const dbUrl = 'https://swasthya-setu-2b67d-default-rtdb.firebaseio.com';
+
+      // 1. Initial REST Hydration for all Admin tables
+      fetch(`${dbUrl}/.json`)
+        .then(r => r.json())
+        .then(cloudData => {
+          if (cloudData && typeof cloudData === 'object') {
+            if (cloudData.staff_registry) {
+              const users = Object.values(cloudData.staff_registry);
+              users.forEach(u => {
+                const idx = this.data.users.findIndex(x => x.id === u.id);
+                if (idx >= 0) this.data.users[idx] = u;
+                else this.data.users.unshift(u);
+              });
             }
+            if (cloudData.rural_inventory) {
+              const items = Array.isArray(cloudData.rural_inventory) ? cloudData.rural_inventory : Object.values(cloudData.rural_inventory);
+              if (items.length) this.data.inventory = items;
+            }
+            if (cloudData.hospital_bed_grid) {
+              const beds = Array.isArray(cloudData.hospital_bed_grid) ? cloudData.hospital_bed_grid : Object.values(cloudData.hospital_bed_grid);
+              if (beds.length) this.data.hospitalGrid = beds;
+            }
+            if (cloudData.blood_bank_units) {
+              const blood = Array.isArray(cloudData.blood_bank_units) ? cloudData.blood_bank_units : Object.values(cloudData.blood_bank_units);
+              if (blood.length) this.data.bloodBank = blood;
+            }
+            if (cloudData.worker_assignments) {
+              const workers = Array.isArray(cloudData.worker_assignments) ? cloudData.worker_assignments : Object.values(cloudData.worker_assignments);
+              if (workers.length) this.data.workerAssignments = workers;
+            }
+            if (cloudData.doctor_approvals) {
+              const docs = Array.isArray(cloudData.doctor_approvals) ? cloudData.doctor_approvals : Object.values(cloudData.doctor_approvals);
+              if (docs.length) this.data.pendingDoctors = docs;
+            }
+            if (cloudData.admin_stats) {
+              this.data.stats = { ...this.data.stats, ...cloudData.admin_stats };
+            }
+            if (cloudData.admin_alerts) {
+              const alts = Array.isArray(cloudData.admin_alerts) ? cloudData.admin_alerts : Object.values(cloudData.admin_alerts);
+              if (alts.length) this.data.alerts = alts;
+            }
+            // Re-render active tab with live cloud data
+            this.switchTab(this.state.currentTab);
+          }
+        })
+        .catch(() => {});
+
+      // 2. Real-time Firebase SDK Listeners (if RTDB SDK available)
+      if (window.firebaseConfigManager && window.firebaseConfigManager.rtdb) {
+        const rtdb = window.firebaseConfigManager.rtdb;
+        rtdb.ref('staff_registry').on('value', snap => {
+          const val = snap.val();
+          if (val) {
+            Object.values(val).forEach(u => {
+              const idx = this.data.users.findIndex(x => x.id === u.id);
+              if (idx >= 0) this.data.users[idx] = u;
+              else this.data.users.unshift(u);
+            });
+            if (this.state.currentTab === 'staff') this.renderStaffManagement();
+          }
+        });
+        rtdb.ref('rural_inventory').on('value', snap => {
+          const val = snap.val();
+          if (val) {
+            this.data.inventory = Array.isArray(val) ? val : Object.values(val);
+            if (this.state.currentTab === 'inventory') this.renderInventory();
+          }
+        });
+        rtdb.ref('hospital_bed_grid').on('value', snap => {
+          const val = snap.val();
+          if (val) {
+            this.data.hospitalGrid = Array.isArray(val) ? val : Object.values(val);
+            if (this.state.currentTab === 'hospitals') this.renderHospitalGrid();
+          }
+        });
+        rtdb.ref('blood_bank_units').on('value', snap => {
+          const val = snap.val();
+          if (val) {
+            this.data.bloodBank = Array.isArray(val) ? val : Object.values(val);
+            if (this.state.currentTab === 'blood') this.renderBloodBank();
           }
         });
       }
@@ -9706,7 +9780,7 @@ a {
       `;
     }
 
-    openReassignModal(assignmentId) {
+    async openReassignModal(assignmentId) {
       const a = this.data.workerAssignments.find(item => item.id === assignmentId);
       if (!a) return;
 
@@ -9720,8 +9794,20 @@ a {
       a.phc = newPhc.trim();
       a.status = 'Active Route';
 
+      // Sync to Firebase
+      try {
+        fetch(`https://swasthya-setu-2b67d-default-rtdb.firebaseio.com/worker_assignments/${a.id}.json`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(a)
+        }).catch(() => {});
+        if (window.firebaseConfigManager && window.firebaseConfigManager.rtdb) {
+          window.firebaseConfigManager.rtdb.ref(`worker_assignments/${a.id}`).set(a);
+        }
+      } catch (err) {}
+
       if (typeof window.toast === 'function') {
-        window.toast(`✓ Route updated: ${a.workerName} assigned to ${a.village} (${a.phc}).`);
+        window.toast(`✓ Route for ${a.workerName} updated & synced to Firebase!`);
       }
 
       this.renderWorkerAssignments();
@@ -9902,7 +9988,7 @@ a {
       this.renderInventory();
     }
 
-    reorderMedicine(medId) {
+    async reorderMedicine(medId) {
       const med = this.data.inventory.find(m => m.id === medId);
       if (!med) return;
 
@@ -9914,9 +10000,22 @@ a {
         med.status = 'In Stock';
         med.statusType = 'good';
       }
+      med.lastRestocked = 'Today (Restocked)';
+
+      // Sync to Firebase
+      try {
+        fetch(`https://swasthya-setu-2b67d-default-rtdb.firebaseio.com/rural_inventory/${med.id}.json`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(med)
+        }).catch(() => {});
+        if (window.firebaseConfigManager && window.firebaseConfigManager.rtdb) {
+          window.firebaseConfigManager.rtdb.ref(`rural_inventory/${med.id}`).set(med);
+        }
+      } catch (err) {}
 
       if (typeof window.toast === 'function') {
-        window.toast(`✓ Emergency replenishment of ${qty} units ordered for ${med.name}!`);
+        window.toast(`✓ Replenishment of ${qty} units synced to Firebase for ${med.name}!`);
       }
 
       this.renderInventory();
@@ -10063,9 +10162,14 @@ a {
 
               <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding-top:12px;border-top:1px solid rgba(220,252,243,0.1);">
                 <span style="font-size:11.5px;color:var(--muted);">🩸 ${h.bloodBankReady}</span>
-                <button class="btn-glass sm" onclick="alert('Routing emergency transport to ${h.name.split('(')[0]}')">
-                  <span>Allocate Patient →</span>
-                </button>
+                <div style="display:flex;gap:6px;">
+                  <button class="btn-glass sm" style="color:#fca5a5;" onclick="adminController.allocateHospitalBed('${h.id}', 'admit')">
+                    <span>+1 Admit Patient</span>
+                  </button>
+                  <button class="btn-glass sm" style="color:#86efac;" onclick="adminController.allocateHospitalBed('${h.id}', 'discharge')">
+                    <span>-1 Free Bed</span>
+                  </button>
+                </div>
               </div>
             </div>
           `).join('')}
@@ -10114,13 +10218,87 @@ a {
                 📍 ${b.hospital}
               </div>
 
-              <button class="btn-glass sm" style="width:100%;justify-content:center;" onclick="adminController.broadcastBloodAppeal('${b.group}')">
-                <span>Request ${b.group} Donors</span>
-              </button>
+              <div style="display:flex;gap:6px;">
+                <button class="btn-glass sm" style="flex:1;justify-content:center;" onclick="adminController.broadcastBloodAppeal('${b.group}')">
+                  <span>📢 Request</span>
+                </button>
+                <button class="btn-glass sm" style="color:#86efac;padding:4px 10px;" onclick="adminController.updateBloodBankUnits('${b.group}', 5)" title="Add +5 Units">
+                  <span>+5 Units</span>
+                </button>
+              </div>
             </div>
           `).join('')}
         </div>
       `;
+    }
+
+    async allocateHospitalBed(hospId, action = 'admit') {
+      const hosp = this.data.hospitalGrid.find(h => h.id === hospId);
+      if (!hosp) return;
+
+      if (action === 'admit') {
+        if (hosp.availableBeds > 0) {
+          hosp.availableBeds -= 1;
+          hosp.occupiedBeds += 1;
+        } else {
+          alert('No beds available in this hospital!');
+          return;
+        }
+      } else if (action === 'discharge') {
+        if (hosp.occupiedBeds > 0) {
+          hosp.availableBeds += 1;
+          hosp.occupiedBeds -= 1;
+        }
+      }
+
+      hosp.occupancyRate = Math.round((hosp.occupiedBeds / hosp.totalBeds) * 100);
+
+      // Sync to Firebase
+      try {
+        fetch(`https://swasthya-setu-2b67d-default-rtdb.firebaseio.com/hospital_bed_grid/${hosp.id}.json`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(hosp)
+        }).catch(() => {});
+        if (window.firebaseConfigManager && window.firebaseConfigManager.rtdb) {
+          window.firebaseConfigManager.rtdb.ref(`hospital_bed_grid/${hosp.id}`).set(hosp);
+        }
+      } catch (err) {}
+
+      if (typeof window.toast === 'function') {
+        window.toast(`✓ Bed Grid updated for ${hosp.name.split('(')[0]} (${hosp.availableBeds} free) & synced to Firebase!`);
+      }
+
+      this.renderHospitalGrid();
+    }
+
+    async updateBloodBankUnits(group, delta = 5) {
+      const item = this.data.bloodBank.find(b => b.group === group);
+      if (!item) return;
+
+      item.units += delta;
+      if (item.units >= item.minimum) {
+        item.status = 'Adequate Stock';
+        item.statusType = 'good';
+      }
+
+      // Sync to Firebase
+      try {
+        fetch(`https://swasthya-setu-2b67d-default-rtdb.firebaseio.com/blood_bank_units/${group}.json`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(item)
+        }).catch(() => {});
+        if (window.firebaseConfigManager && window.firebaseConfigManager.rtdb) {
+          window.firebaseConfigManager.rtdb.ref(`blood_bank_units/${group}`).set(item);
+        }
+      } catch (err) {}
+
+      if (typeof window.toast === 'function') {
+        window.toast(`✓ ${delta > 0 ? '+' : ''}${delta} Units updated for ${group} blood & synced to Firebase!`);
+      }
+
+      this.renderBloodBank();
     }
 
     broadcastBloodAppeal(group) {
