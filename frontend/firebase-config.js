@@ -83,6 +83,12 @@
             this.auth = firebase.auth();
           }
 
+          if (firebase.database) {
+            try {
+              this.rtdb = firebase.database();
+            } catch (err) {}
+          }
+
           this.logEvent('INIT', 'Firebase initialized successfully', { projectId: this.config.projectId });
           console.log('✓ Firebase initialized successfully in Swasthya Setu');
           return true;

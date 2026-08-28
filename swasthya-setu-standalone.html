@@ -13,9 +13,10 @@
 
 
 
-<!-- Firebase Cloud Firestore & Auth SDK (Compat v10) -->
+<!-- Firebase Cloud Firestore, Realtime Database & Auth SDK (Compat v10) -->
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 <style>
 /* =========================================================
@@ -5162,6 +5163,12 @@ a {
 
           if (firebase.auth) {
             this.auth = firebase.auth();
+          }
+
+          if (firebase.database) {
+            try {
+              this.rtdb = firebase.database();
+            } catch (err) {}
           }
 
           this.logEvent('INIT', 'Firebase initialized successfully', { projectId: this.config.projectId });
