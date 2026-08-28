@@ -700,6 +700,20 @@
 
     init() {
       this.renderCommandCenter();
+      if (global.firebaseService && typeof global.firebaseService.subscribeStaffMembers === 'function') {
+        global.firebaseService.subscribeStaffMembers(cloudList => {
+          if (Array.isArray(cloudList) && cloudList.length > 0) {
+            cloudList.forEach(cloudUser => {
+              const idx = this.data.users.findIndex(u => u.id === cloudUser.id);
+              if (idx >= 0) this.data.users[idx] = cloudUser;
+              else this.data.users.unshift(cloudUser);
+            });
+            if (this.state.currentTab === 'staff') {
+              this.renderStaffManagement();
+            }
+          }
+        });
+      }
     }
 
     switchTab(tabId) {
@@ -1036,10 +1050,10 @@
       alert(`📋 Healthcare User Profile:\n\nName: ${u.name}\nUser ID: ${u.id}\nRole: ${u.role.toUpperCase()}\nStatus: ${u.status}\nPhone: +91 ${u.phone}\nEmail: ${u.email}\nFacility: ${u.facility || u.location}\nSpecialization / Role: ${u.specialization || u.designation || 'N/A'}\nRegistration Date: ${u.regDate}`);
     }
 
-    openAddStaffModal() {
+    async openAddStaffModal() {
       const name = prompt('Enter Full Name of Healthcare Professional:');
       if (!name) return;
-      const role = prompt('Enter Role (doctor / worker / admin):', 'doctor');
+      const role = prompt('Enter Role (doctor / worker / admin / nurse):', 'doctor');
       if (!role) return;
       const phone = prompt('Enter 10-digit Mobile Number:', '9800000000');
       if (!phone) return;
@@ -1058,8 +1072,14 @@
       };
 
       this.data.users.unshift(newUser);
+
+      // Save directly to Firebase Realtime Database & Cloud Firestore
+      if (global.firebaseService && typeof global.firebaseService.saveStaffMember === 'function') {
+        await global.firebaseService.saveStaffMember(newUser);
+      }
+
       if (typeof window.toast === 'function') {
-        window.toast(`Added ${name} to ${role.toUpperCase()} staff roster.`);
+        window.toast(`✓ Added ${name} (${role.toUpperCase()}) & synced to Firebase!`);
       }
       this.renderStaffManagement();
     }

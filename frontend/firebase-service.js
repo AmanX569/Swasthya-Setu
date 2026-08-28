@@ -267,22 +267,76 @@
       return true;
     }
 
-    subscribeWebRTCRoom(roomId, callback) {
-      if (this.isLive) {
+    // -------------------------------------------------------------
+    // 6. ADMIN STAFF & USER MANAGEMENT
+    // -------------------------------------------------------------
+    async saveStaffMember(userData) {
+      const payload = {
+        ...userData,
+        updatedAt: new Date().toISOString()
+      };
+
+      // 1. Write to Firestore
+      if (this.db) {
         try {
-          const unsub = this.db.collection('telemed_rooms').doc(roomId).onSnapshot(doc => {
-            if (doc.exists) callback(doc.data());
-          });
+          await this.db.collection('staff_registry').doc(payload.id).set(payload);
+          if (global.firebaseConfigManager) {
+            global.firebaseConfigManager.logEvent('CLOUD_WRITE', `Saved Staff to Firestore: ${payload.name} (${payload.id})`);
+          }
+        } catch (e) {
+          console.warn('Firestore staff save error:', e);
+        }
+      }
+
+      // 2. Write to Realtime Database
+      if (this.rtdb) {
+        try {
+          await this.rtdb.ref('staff_registry/' + payload.id).set(payload);
+          if (global.firebaseConfigManager) {
+            global.firebaseConfigManager.logEvent('RTDB_WRITE', `Saved Staff to Realtime Database: ${payload.name} (${payload.id})`);
+          }
+        } catch (e) {
+          console.warn('RTDB staff save error:', e);
+        }
+      }
+
+      // 3. Local fallback
+      const saved = this.getLocalArray('swasthya_setu_staff_registry');
+      const idx = saved.findIndex(u => u.id === payload.id);
+      if (idx >= 0) saved[idx] = payload;
+      else saved.unshift(payload);
+      localStorage.setItem('swasthya_setu_staff_registry', JSON.stringify(saved));
+      return payload;
+    }
+
+    subscribeStaffMembers(callback) {
+      if (this.db) {
+        try {
+          const unsub = this.db.collection('staff_registry').onSnapshot(snapshot => {
+            if (!snapshot.empty) {
+              const list = [];
+              snapshot.forEach(doc => list.push({ id: doc.id, ...doc.data() }));
+              callback(list);
+            }
+          }, err => console.warn('Firestore staff listener error:', err));
           this.listeners.push(unsub);
-          return unsub;
         } catch (e) {}
       }
 
-      window.addEventListener('storage', (e) => {
-        if (e.key === `swasthya_setu_webrtc_${roomId}`) {
-          try { callback(JSON.parse(e.newValue)); } catch (err) {}
-        }
-      });
+      if (this.rtdb) {
+        try {
+          this.rtdb.ref('staff_registry').on('value', snapshot => {
+            const val = snapshot.val();
+            if (val) {
+              const list = Object.values(val);
+              callback(list);
+            }
+          });
+        } catch (e) {}
+      }
+
+      const local = this.getLocalArray('swasthya_setu_staff_registry');
+      if (local.length) callback(local);
     }
 
     async testCloudConnection() {
