@@ -1128,38 +1128,85 @@
       alert(`📋 Healthcare User Profile:\n\nName: ${u.name}\nUser ID: ${u.id}\nRole: ${u.role.toUpperCase()}\nStatus: ${u.status}\nPhone: +91 ${u.phone}\nEmail: ${u.email}\nFacility: ${u.facility || u.location}\nSpecialization / Role: ${u.specialization || u.designation || 'N/A'}\nRegistration Date: ${u.regDate}`);
     }
 
-    async openAddStaffModal() {
-      const name = prompt('Enter Full Name of Healthcare Professional:');
-      if (!name) return;
-      const role = prompt('Enter Role (doctor / worker / admin / nurse):', 'doctor');
-      if (!role) return;
-      const phone = prompt('Enter 10-digit Mobile Number:', '9800000000');
-      if (!phone) return;
+    openAddStaffModal() {
+      const modal = document.getElementById('addStaffModal');
+      if (modal) {
+        modal.classList.add('open');
+      } else {
+        const name = prompt('Enter Full Name of Healthcare Professional:');
+        if (!name) return;
+        const role = prompt('Enter Role (doctor / worker / admin / patient):', 'doctor');
+        if (!role) return;
+        const phone = prompt('Enter 10-digit Mobile Number:', '9800000000');
+        if (!phone) return;
+        this.createAndSaveStaff(name, role, phone, 'Kondapalli Community Grid');
+      }
+    }
 
+    async submitAddStaff(e) {
+      if (e) e.preventDefault();
+      const nameEl = document.getElementById('newStaffName');
+      const roleEl = document.getElementById('newStaffRole');
+      const phoneEl = document.getElementById('newStaffPhone');
+      const facilityEl = document.getElementById('newStaffFacility');
+
+      const name = nameEl ? nameEl.value.trim() : '';
+      const role = roleEl ? roleEl.value : 'doctor';
+      const phone = phoneEl ? phoneEl.value.trim() : '';
+      const facility = (facilityEl && facilityEl.value.trim()) || 'Kondapalli Community Grid';
+
+      if (!name || !phone) {
+        alert('Please fill in both name and mobile number.');
+        return;
+      }
+
+      await this.createAndSaveStaff(name, role, phone, facility);
+
+      // Close modal
+      const modal = document.getElementById('addStaffModal');
+      if (modal) modal.classList.remove('open');
+
+      if (nameEl) nameEl.value = '';
+      if (phoneEl) phoneEl.value = '';
+    }
+
+    async createAndSaveStaff(name, role, phone, facility) {
       const newUser = {
         id: `USR-${role.toUpperCase()}-${Math.floor(100 + Math.random() * 900)}`,
-        name: name.trim(),
+        name: name,
         role: role.toLowerCase(),
-        phone: phone.trim(),
-        email: `${name.toLowerCase().replace(/\s+/g, '.')}@swasthyasetu.gov.in`,
-        facility: 'Kondapalli Community Grid',
+        phone: phone,
+        email: `${name.toLowerCase().replace(/[^a-z0-9]/g, '.')}@swasthyasetu.gov.in`,
+        facility: facility,
         location: 'Krishna District',
         status: 'Active',
         regDate: 'Today',
-        verified: true
+        verified: true,
+        updatedAt: new Date().toISOString()
       };
 
       this.data.users.unshift(newUser);
 
-      // Save directly to Firebase Realtime Database & Cloud Firestore
-      if (global.firebaseService && typeof global.firebaseService.saveStaffMember === 'function') {
-        await global.firebaseService.saveStaffMember(newUser);
+      // Direct write to Firebase Realtime Database
+      try {
+        await fetch(`https://swasthya-setu-2b67d-default-rtdb.firebaseio.com/staff_registry/${newUser.id}.json`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newUser)
+        });
+        if (window.firebaseConfigManager && window.firebaseConfigManager.rtdb) {
+          window.firebaseConfigManager.rtdb.ref(`staff_registry/${newUser.id}`).set(newUser);
+        }
+      } catch (err) {
+        console.warn('Firebase staff write error:', err);
       }
 
       if (typeof window.toast === 'function') {
-        window.toast(`✓ Added ${name} (${role.toUpperCase()}) & synced to Firebase!`);
+        window.toast(`✓ Added ${name} (${role.toUpperCase()}) & synced live to Firebase!`);
       }
+
       this.renderStaffManagement();
+      return newUser;
     }
 
     exportStaffToCSV() {

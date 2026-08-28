@@ -2933,6 +2933,53 @@ a {
     <div id="firebaseLogStream" style="background:#020b09;border:1px solid var(--glass-border);border-radius:10px;padding:12px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:#a7f3d0;max-height:160px;overflow-y:auto;line-height:1.6;">
       <div>[System] Cloud Firestore Dual-Mode Sync Engine Ready.</div>
     </div>
+<!-- =========================================================
+   ADD HEALTHCARE STAFF MODAL (LIVE FIREBASE SYNC)
+========================================================= -->
+<div class="modal-overlay" id="addStaffModal">
+  <div class="modal-card" style="max-width: 520px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;border-bottom:1px solid var(--glass-border);padding-bottom:10px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:24px;">👨‍⚕️</span>
+        <div>
+          <h3 style="font-size:18px;color:#ffffff;margin:0;">Register Healthcare Professional</h3>
+          <small style="color:var(--primary-bright);">Real-time Firebase Cloud Registry Sync</small>
+        </div>
+      </div>
+      <button onclick="closeAddStaffModal()" style="font-size:20px;color:var(--muted);background:transparent;border:none;cursor:pointer;">✕</button>
+    </div>
+
+    <form onsubmit="adminController.submitAddStaff(event)" style="display:flex;flex-direction:column;gap:12px;">
+      <div class="input-group">
+        <label class="input-label">Full Name of Professional</label>
+        <input type="text" id="newStaffName" class="input-field" placeholder="e.g. Dr. Aaditya Raj" required autocomplete="off">
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div class="input-group">
+          <label class="input-label">Professional Role</label>
+          <select id="newStaffRole" class="input-field" required>
+            <option value="doctor">🩺 Doctor / Specialist</option>
+            <option value="worker">🤝 ASHA / ANM Frontline</option>
+            <option value="admin">👑 Administrator</option>
+            <option value="patient">🌾 Rural Citizen / Patient</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label class="input-label">Mobile Number</label>
+          <input type="tel" id="newStaffPhone" class="input-field" placeholder="e.g. 9876543210" pattern="[0-9]{10}" required autocomplete="off">
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label class="input-label">Assigned Facility / PHC Location</label>
+        <input type="text" id="newStaffFacility" class="input-field" placeholder="e.g. Kondapalli Primary Health Centre" value="Kondapalli Community Grid">
+      </div>
+
+      <button type="submit" class="auth-btn-primary" style="margin-top:10px;height:44px;font-size:14px;justify-content:center;">
+        <span>💾 Save &amp; Sync to Firebase Cloud</span>
+      </button>
+    </form>
   </div>
 </div>
 
@@ -3293,6 +3340,17 @@ function onLanguageChange(lang) {
   } else {
     toast(`Language changed to ${lang.toUpperCase()}`);
   }
+}
+
+// Add Staff Modal Controller
+function openAddStaffModal() {
+  const modal = document.getElementById('addStaffModal');
+  if (modal) modal.classList.add('open');
+}
+
+function closeAddStaffModal() {
+  const modal = document.getElementById('addStaffModal');
+  if (modal) modal.classList.remove('open');
 }
 
 // Firebase Cloud Sync Diagnostic Modal Controller

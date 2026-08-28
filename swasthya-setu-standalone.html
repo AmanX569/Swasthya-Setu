@@ -5053,6 +5053,53 @@ a {
     <div id="firebaseLogStream" style="background:#020b09;border:1px solid var(--glass-border);border-radius:10px;padding:12px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:#a7f3d0;max-height:160px;overflow-y:auto;line-height:1.6;">
       <div>[System] Cloud Firestore Dual-Mode Sync Engine Ready.</div>
     </div>
+<!-- =========================================================
+   ADD HEALTHCARE STAFF MODAL (LIVE FIREBASE SYNC)
+========================================================= -->
+<div class="modal-overlay" id="addStaffModal">
+  <div class="modal-card" style="max-width: 520px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;border-bottom:1px solid var(--glass-border);padding-bottom:10px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:24px;">👨‍⚕️</span>
+        <div>
+          <h3 style="font-size:18px;color:#ffffff;margin:0;">Register Healthcare Professional</h3>
+          <small style="color:var(--primary-bright);">Real-time Firebase Cloud Registry Sync</small>
+        </div>
+      </div>
+      <button onclick="closeAddStaffModal()" style="font-size:20px;color:var(--muted);background:transparent;border:none;cursor:pointer;">✕</button>
+    </div>
+
+    <form onsubmit="adminController.submitAddStaff(event)" style="display:flex;flex-direction:column;gap:12px;">
+      <div class="input-group">
+        <label class="input-label">Full Name of Professional</label>
+        <input type="text" id="newStaffName" class="input-field" placeholder="e.g. Dr. Aaditya Raj" required autocomplete="off">
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div class="input-group">
+          <label class="input-label">Professional Role</label>
+          <select id="newStaffRole" class="input-field" required>
+            <option value="doctor">🩺 Doctor / Specialist</option>
+            <option value="worker">🤝 ASHA / ANM Frontline</option>
+            <option value="admin">👑 Administrator</option>
+            <option value="patient">🌾 Rural Citizen / Patient</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label class="input-label">Mobile Number</label>
+          <input type="tel" id="newStaffPhone" class="input-field" placeholder="e.g. 9876543210" pattern="[0-9]{10}" required autocomplete="off">
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label class="input-label">Assigned Facility / PHC Location</label>
+        <input type="text" id="newStaffFacility" class="input-field" placeholder="e.g. Kondapalli Primary Health Centre" value="Kondapalli Community Grid">
+      </div>
+
+      <button type="submit" class="auth-btn-primary" style="margin-top:10px;height:44px;font-size:14px;justify-content:center;">
+        <span>💾 Save &amp; Sync to Firebase Cloud</span>
+      </button>
+    </form>
   </div>
 </div>
 
@@ -9510,38 +9557,85 @@ a {
       alert(`📋 Healthcare User Profile:\n\nName: ${u.name}\nUser ID: ${u.id}\nRole: ${u.role.toUpperCase()}\nStatus: ${u.status}\nPhone: +91 ${u.phone}\nEmail: ${u.email}\nFacility: ${u.facility || u.location}\nSpecialization / Role: ${u.specialization || u.designation || 'N/A'}\nRegistration Date: ${u.regDate}`);
     }
 
-    async openAddStaffModal() {
-      const name = prompt('Enter Full Name of Healthcare Professional:');
-      if (!name) return;
-      const role = prompt('Enter Role (doctor / worker / admin / nurse):', 'doctor');
-      if (!role) return;
-      const phone = prompt('Enter 10-digit Mobile Number:', '9800000000');
-      if (!phone) return;
+    openAddStaffModal() {
+      const modal = document.getElementById('addStaffModal');
+      if (modal) {
+        modal.classList.add('open');
+      } else {
+        const name = prompt('Enter Full Name of Healthcare Professional:');
+        if (!name) return;
+        const role = prompt('Enter Role (doctor / worker / admin / patient):', 'doctor');
+        if (!role) return;
+        const phone = prompt('Enter 10-digit Mobile Number:', '9800000000');
+        if (!phone) return;
+        this.createAndSaveStaff(name, role, phone, 'Kondapalli Community Grid');
+      }
+    }
 
+    async submitAddStaff(e) {
+      if (e) e.preventDefault();
+      const nameEl = document.getElementById('newStaffName');
+      const roleEl = document.getElementById('newStaffRole');
+      const phoneEl = document.getElementById('newStaffPhone');
+      const facilityEl = document.getElementById('newStaffFacility');
+
+      const name = nameEl ? nameEl.value.trim() : '';
+      const role = roleEl ? roleEl.value : 'doctor';
+      const phone = phoneEl ? phoneEl.value.trim() : '';
+      const facility = (facilityEl && facilityEl.value.trim()) || 'Kondapalli Community Grid';
+
+      if (!name || !phone) {
+        alert('Please fill in both name and mobile number.');
+        return;
+      }
+
+      await this.createAndSaveStaff(name, role, phone, facility);
+
+      // Close modal
+      const modal = document.getElementById('addStaffModal');
+      if (modal) modal.classList.remove('open');
+
+      if (nameEl) nameEl.value = '';
+      if (phoneEl) phoneEl.value = '';
+    }
+
+    async createAndSaveStaff(name, role, phone, facility) {
       const newUser = {
         id: `USR-${role.toUpperCase()}-${Math.floor(100 + Math.random() * 900)}`,
-        name: name.trim(),
+        name: name,
         role: role.toLowerCase(),
-        phone: phone.trim(),
-        email: `${name.toLowerCase().replace(/\s+/g, '.')}@swasthyasetu.gov.in`,
-        facility: 'Kondapalli Community Grid',
+        phone: phone,
+        email: `${name.toLowerCase().replace(/[^a-z0-9]/g, '.')}@swasthyasetu.gov.in`,
+        facility: facility,
         location: 'Krishna District',
         status: 'Active',
         regDate: 'Today',
-        verified: true
+        verified: true,
+        updatedAt: new Date().toISOString()
       };
 
       this.data.users.unshift(newUser);
 
-      // Save directly to Firebase Realtime Database & Cloud Firestore
-      if (global.firebaseService && typeof global.firebaseService.saveStaffMember === 'function') {
-        await global.firebaseService.saveStaffMember(newUser);
+      // Direct write to Firebase Realtime Database
+      try {
+        await fetch(`https://swasthya-setu-2b67d-default-rtdb.firebaseio.com/staff_registry/${newUser.id}.json`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newUser)
+        });
+        if (window.firebaseConfigManager && window.firebaseConfigManager.rtdb) {
+          window.firebaseConfigManager.rtdb.ref(`staff_registry/${newUser.id}`).set(newUser);
+        }
+      } catch (err) {
+        console.warn('Firebase staff write error:', err);
       }
 
       if (typeof window.toast === 'function') {
-        window.toast(`✓ Added ${name} (${role.toUpperCase()}) & synced to Firebase!`);
+        window.toast(`✓ Added ${name} (${role.toUpperCase()}) & synced live to Firebase!`);
       }
+
       this.renderStaffManagement();
+      return newUser;
     }
 
     exportStaffToCSV() {
@@ -13733,6 +13827,17 @@ function onLanguageChange(lang) {
   } else {
     toast(`Language changed to ${lang.toUpperCase()}`);
   }
+}
+
+// Add Staff Modal Controller
+function openAddStaffModal() {
+  const modal = document.getElementById('addStaffModal');
+  if (modal) modal.classList.add('open');
+}
+
+function closeAddStaffModal() {
+  const modal = document.getElementById('addStaffModal');
+  if (modal) modal.classList.remove('open');
 }
 
 // Firebase Cloud Sync Diagnostic Modal Controller
