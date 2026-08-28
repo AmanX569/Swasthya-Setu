@@ -22,8 +22,12 @@
       return global.firebaseConfigManager && global.firebaseConfigManager.db;
     }
 
+    get rtdb() {
+      return global.firebaseConfigManager && global.firebaseConfigManager.rtdb;
+    }
+
     get isLive() {
-      return !!(this.db && global.firebaseConfigManager && global.firebaseConfigManager.isConfigured);
+      return !!(global.firebaseConfigManager && global.firebaseConfigManager.isConfigured);
     }
 
     // -------------------------------------------------------------
@@ -45,18 +49,36 @@
         equipment: ['Oxygen Cylinder (Full)', 'AED Defibrillator', 'Pulse Oximeter', 'Stretcher Bed']
       };
 
-      if (this.isLive) {
+      // Write to Cloud Firestore
+      if (this.db) {
         try {
           const docRef = await this.db.collection('emergency_dispatches').add(payload);
-          return { id: docRef.id, ...payload };
+          payload.firestoreId = docRef.id;
+          if (global.firebaseConfigManager) {
+            global.firebaseConfigManager.logEvent('CLOUD_WRITE', `Dispatched 108 to Firestore: ${docRef.id}`);
+          }
         } catch (e) {
-          console.warn('Firestore write failed, saving to local state:', e);
+          console.warn('Firestore dispatch write:', e);
+        }
+      }
+
+      // Write to Realtime Database
+      if (this.rtdb) {
+        try {
+          const rtdbKey = 'sos_' + Date.now();
+          await this.rtdb.ref('emergency_dispatches/' + rtdbKey).set(payload);
+          payload.rtdbKey = rtdbKey;
+          if (global.firebaseConfigManager) {
+            global.firebaseConfigManager.logEvent('RTDB_WRITE', `Dispatched 108 to Realtime Database: ${rtdbKey}`);
+          }
+        } catch (e) {
+          console.warn('RTDB dispatch write:', e);
         }
       }
 
       // Local fallback
       localStorage.setItem('swasthya_setu_active_108', JSON.stringify(payload));
-      return { id: 'local-sos-' + Date.now(), ...payload };
+      return { id: payload.firestoreId || payload.rtdbKey || ('local-sos-' + Date.now()), ...payload };
     }
 
     subscribeAmbulanceHUD(callback) {
@@ -268,28 +290,47 @@
         testId: 'ping-' + Date.now(),
         client: 'Swasthya Setu Browser Client',
         timestamp: new Date().toISOString(),
-        status: 'ok'
+        status: 'online_connected',
+        testMessage: 'Live Ping from Swasthya Setu to Google Firebase Cloud'
       };
       
       const startTime = performance.now();
-      if (this.isLive) {
+      let wroteCloud = false;
+
+      // 1. Write to Firestore
+      if (this.db) {
         try {
           const docRef = await this.db.collection('system_diagnostics').add(testData);
-          const latency = Math.round(performance.now() - startTime);
+          wroteCloud = true;
           if (global.firebaseConfigManager) {
-            global.firebaseConfigManager.logEvent('CLOUD_WRITE', `Cloud Firestore Write Verified (Latency: ${latency}ms)`, { docId: docRef.id });
+            global.firebaseConfigManager.logEvent('CLOUD_WRITE', `Cloud Firestore Ping Saved: ${docRef.id}`);
           }
-          return { success: true, mode: 'Cloud Firestore (Live)', latency, docId: docRef.id };
         } catch (e) {
-          console.warn('Live test write fallback:', e);
+          console.warn('Firestore test write:', e);
+        }
+      }
+
+      // 2. Write to Realtime Database
+      if (this.rtdb) {
+        try {
+          const rtdbKey = 'ping_' + Date.now();
+          await this.rtdb.ref('system_diagnostics/' + rtdbKey).set(testData);
+          wroteCloud = true;
+          if (global.firebaseConfigManager) {
+            global.firebaseConfigManager.logEvent('RTDB_WRITE', `Realtime Database Ping Saved: ${rtdbKey}`);
+          }
+        } catch (e) {
+          console.warn('RTDB test write:', e);
         }
       }
 
       const latency = Math.round(performance.now() - startTime);
-      if (global.firebaseConfigManager) {
-        global.firebaseConfigManager.logEvent('LOCAL_WRITE', `Dual-Mode Local Sync Verified (Latency: ${latency}ms)`, { mode: 'Local Dual-Mode' });
-      }
-      return { success: true, mode: 'Dual-Mode Local Storage', latency, docId: 'local-' + Date.now() };
+      return {
+        success: true,
+        mode: wroteCloud ? 'Google Firebase Cloud (Live)' : 'Dual-Mode Local Storage',
+        latency,
+        docId: 'ping-' + Date.now()
+      };
     }
 
     // Helpers
