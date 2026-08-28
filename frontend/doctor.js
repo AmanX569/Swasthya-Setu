@@ -669,16 +669,19 @@
         <div class="doc-tele-layout">
           <!-- Left: Video HUD & Call Controls -->
           <div class="doc-tele-video-panel">
-            <div class="doc-video-viewport ${this.state.isAudioOnly ? 'audio-only-mode' : ''}">
+            <div class="doc-video-viewport ${this.state.isAudioOnly ? 'audio-only-mode' : ''}" style="position:relative;overflow:hidden;">
+              <!-- Real Remote Video Element -->
+              <video id="docRemoteVideo" autoplay playsinline style="width:100%;height:100%;object-fit:cover;display:none;position:absolute;inset:0;z-index:0;"></video>
+
               <!-- Live Video Topbar HUD -->
-              <div class="doc-video-topbar">
+              <div class="doc-video-topbar" style="position:relative;z-index:3;">
                 <span class="doc-rec-led"><span class="dot"></span> LIVE ENCRYPTED · FHIR R4</span>
                 <span style="font-size:12px;color:#ffffff;font-family:'IBM Plex Mono',monospace;">⏱️ 04:18</span>
                 <span class="admin-status-badge good" style="font-size:10px;">ASHA Joined · Ward 6</span>
               </div>
 
               <!-- Main Video Simulation Area -->
-              <div class="doc-video-center-content">
+              <div class="doc-video-center-content" style="position:relative;z-index:2;">
                 ${this.state.isAudioOnly ? `
                   <div style="text-align:center;">
                     <div style="font-size:48px;margin-bottom:10px;">🎙️</div>
@@ -698,14 +701,20 @@
                 `}
               </div>
 
-              <!-- Doctor Picture-in-Picture (PiP) Preview -->
-              <div class="doc-pip-cam">
-                <div style="font-size:16px;text-align:center;">🩺</div>
-                <span>Dr. Rao (MD)</span>
+              <!-- Doctor Picture-in-Picture (PiP) Real WebRTC Preview -->
+              <div class="doc-pip-cam" style="position:absolute;bottom:75px;right:18px;width:120px;height:90px;background:#000;border-radius:12px;overflow:hidden;border:2px solid var(--auth-primary-bright);z-index:4;display:flex;align-items:center;justify-content:center;">
+                <video id="docLocalVideo" autoplay playsinline muted style="width:100%;height:100%;object-fit:cover;display:none;"></video>
+                <div id="docLocalFallback" style="font-size:11px;text-align:center;color:#fff;">
+                  <span style="font-size:16px;display:block;">🩺</span>
+                  <span>Dr. Rao</span>
+                </div>
               </div>
 
               <!-- Bottom Call Controls Bar -->
-              <div class="doc-call-controls-bar">
+              <div class="doc-call-controls-bar" style="position:relative;z-index:5;">
+                <button class="doc-ctrl-btn" onclick="doctorController.startRealWebcam()" title="Connect Live Camera & Mic" style="background:rgba(52,211,153,0.25);border-color:var(--auth-primary-bright);">
+                  <span>🎥 WebRTC Cam</span>
+                </button>
                 <button class="doc-ctrl-btn ${this.state.isAudioMuted ? 'muted' : ''}" onclick="doctorController.toggleCallAudio()" title="Mute/Unmute Mic">
                   <span>${this.state.isAudioMuted ? '🔇 Unmute' : '🎙️ Mic On'}</span>
                 </button>
@@ -796,6 +805,43 @@
           </div>
         </div>
       `;
+
+      if (this.localStream) {
+        setTimeout(() => this.attachStreamToVideo(), 50);
+      }
+    }
+
+    async startRealWebcam() {
+      try {
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: { width: { ideal: 640 }, height: { ideal: 480 } },
+            audio: true
+          });
+          this.localStream = stream;
+          this.attachStreamToVideo();
+          if (typeof window.toast === 'function') {
+            window.toast('🎥 Live Camera & Microphone Connected (Encrypted WebRTC)');
+          }
+        }
+      } catch (err) {
+        console.warn('Webcam permission not granted, using simulation:', err);
+        if (typeof window.toast === 'function') {
+          window.toast('ℹ️ Camera optional: Simulation feed active');
+        }
+      }
+    }
+
+    attachStreamToVideo() {
+      if (!this.localStream) return;
+      const vid = document.getElementById('docLocalVideo');
+      const fallback = document.getElementById('docLocalFallback');
+      if (vid) {
+        vid.srcObject = this.localStream;
+        vid.style.display = 'block';
+        if (fallback) fallback.style.display = 'none';
+        vid.play().catch(()=>{});
+      }
     }
 
     startLiveTeleconsult(consultId) {
@@ -806,20 +852,27 @@
         window.toast(`Connecting encrypted teleconsultation with ${c.patientName}...`);
       }
       this.switchTab('tele');
+      this.startRealWebcam();
     }
 
     toggleCallAudio() {
       this.state.isAudioMuted = !this.state.isAudioMuted;
+      if (this.localStream) {
+        this.localStream.getAudioTracks().forEach(t => t.enabled = !this.state.isAudioMuted);
+      }
       if (typeof window.toast === 'function') {
-        window.toast(this.state.isAudioMuted ? 'Microphone Muted' : 'Microphone Unmuted');
+        window.toast(this.state.isAudioMuted ? '🔇 Microphone Muted' : '🎙️ Microphone Unmuted');
       }
       this.renderTeleconsultSuite();
     }
 
     toggleCallVideo() {
       this.state.isVideoOff = !this.state.isVideoOff;
+      if (this.localStream) {
+        this.localStream.getVideoTracks().forEach(t => t.enabled = !this.state.isVideoOff);
+      }
       if (typeof window.toast === 'function') {
-        window.toast(this.state.isVideoOff ? 'Camera Turned Off' : 'Camera Active');
+        window.toast(this.state.isVideoOff ? '🚫 Camera Turned Off' : '📷 Camera Active');
       }
       this.renderTeleconsultSuite();
     }

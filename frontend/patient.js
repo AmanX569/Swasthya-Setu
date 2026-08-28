@@ -357,6 +357,16 @@
       amb.status = 'dispatched';
       amb.etaSeconds = 522; // 08:42 min
 
+      if (global.firebaseService) {
+        global.firebaseService.dispatchAmbulance({
+          village: vil.name,
+          landmark: amb.selectedLandmark,
+          patientName: mem.name,
+          patientAbha: mem.abhaId,
+          emergencyContact: mem.emergencyContact
+        });
+      }
+
       if (typeof window.toast === 'function') {
         window.toast(`🚨 108 ALS Ambulance dispatched to ${vil.name} for ${mem.name}! Driver Ravi Shankar is en route.`);
       }
@@ -367,6 +377,18 @@
       // Switch view to SOS if not already there
       if (typeof window.switchView === 'function') {
         window.switchView('sos');
+      }
+    }
+
+    downloadAbhaCard() {
+      if (global.pdfGenerator) {
+        global.pdfGenerator.generateAbhaCard(this.data.currentFamilyMember);
+      }
+    }
+
+    downloadPrescriptionPDF() {
+      if (global.pdfGenerator) {
+        global.pdfGenerator.generatePrescriptionPDF();
       }
     }
 

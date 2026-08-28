@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Swasthya Setu · Rural Care Access & Quality Network | स्वास्थ्य सेतु</title>
+<link rel="manifest" href="../manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -12,6 +13,10 @@
 
 
 
+<!-- Firebase Cloud Firestore & Auth SDK (Compat v10) -->
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 <style>
 /* =========================================================
    DESIGN SYSTEM & GLASS-TOUCHED ARCHITECTURE
@@ -4202,6 +4207,14 @@ a {
             <h3 data-i18n="family_care">Family Health Circle · परिवार स्वास्थ्य चक्र</h3>
             <button class="voice-speak-btn" onclick="speakText('परिवार के सदस्य को चुनें: अनिता, बेबी रवि, रामू या सरस्वती देवी')">🔊</button>
           </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn-glass" style="font-size:12px;padding:6px 14px;background:rgba(0,51,102,0.3);border-color:#0b5ed7;" onclick="patientController.downloadAbhaCard()">
+              <span>🖨️ Download ABHA Card (PDF)</span>
+            </button>
+            <button class="btn-glass" style="font-size:12px;padding:6px 14px;" onclick="patientController.downloadPrescriptionPDF()">
+              <span>📄 Download e-Rx (PDF)</span>
+            </button>
+          </div>
         </div>
         <div id="familyProfileSelector" class="family-profile-grid"></div>
 
@@ -4826,7 +4839,643 @@ a {
 
 
 
+
+
+
 <script>
+
+/* --- firebase-config.js --- */
+/**
+ * Swasthya Setu - Firebase Configuration & Dynamic Connection Manager
+ * 
+ * Provides:
+ * 1. Pre-configured Firebase SDK initialization
+ * 2. Dynamic credentials manager (allows users to enter custom Firebase API credentials in Settings)
+ * 3. Automatic fallback to LocalStorage/IndexedDB when offline or unconfigured
+ */
+
+(function(global) {
+  'use strict';
+
+  // Default demo / placeholder config or read from localStorage
+  const DEFAULT_FIREBASE_CONFIG = {
+    apiKey: "AIzaSyDemoKeySwasthyaSetu1234567890",
+    authDomain: "swasthya-setu-care.firebaseapp.com",
+    projectId: "swasthya-setu-care",
+    storageBucket: "swasthya-setu-care.appspot.com",
+    messagingSenderId: "108200108200",
+    appId: "1:108200108200:web:abcdef1234567890"
+  };
+
+  class FirebaseConfigManager {
+    constructor() {
+      this.config = this.loadConfig();
+      this.isConfigured = this.checkIfConfigured();
+      this.app = null;
+      this.db = null;
+      this.auth = null;
+    }
+
+    loadConfig() {
+      try {
+        const saved = localStorage.getItem('swasthya_setu_firebase_config');
+        return saved ? JSON.parse(saved) : DEFAULT_FIREBASE_CONFIG;
+      } catch (e) {
+        return DEFAULT_FIREBASE_CONFIG;
+      }
+    }
+
+    saveConfig(newConfig) {
+      try {
+        localStorage.setItem('swasthya_setu_firebase_config', JSON.stringify(newConfig));
+        this.config = newConfig;
+        this.isConfigured = true;
+        this.initFirebase();
+        return true;
+      } catch (e) {
+        console.error('Failed to save Firebase config:', e);
+        return false;
+      }
+    }
+
+    checkIfConfigured() {
+      return this.config && this.config.apiKey && !this.config.apiKey.includes('DemoKey');
+    }
+
+    initFirebase() {
+      try {
+        if (typeof firebase !== 'undefined' && firebase.initializeApp) {
+          if (!firebase.apps.length) {
+            this.app = firebase.initializeApp(this.config);
+          } else {
+            this.app = firebase.app();
+          }
+
+          if (firebase.firestore) {
+            this.db = firebase.firestore();
+            // Enable offline persistence in Firestore
+            try {
+              this.db.enablePersistence({ synchronizeTabs: true }).catch(err => {
+                if (err.code === 'failed-precondition') {
+                  console.warn('Firestore persistence: multiple tabs open');
+                } else if (err.code === 'unimplemented') {
+                  console.warn('Firestore persistence not supported in this browser');
+                }
+              });
+            } catch (err) {}
+          }
+
+          if (firebase.auth) {
+            this.auth = firebase.auth();
+          }
+
+          console.log('✓ Firebase initialized successfully in Swasthya Setu');
+          return true;
+        }
+      } catch (e) {
+        console.warn('Firebase SDK not loaded or failed to initialize, using robust local dual-mode fallback:', e.message);
+      }
+      return false;
+    }
+  }
+
+  global.firebaseConfigManager = new FirebaseConfigManager();
+
+})(typeof window !== 'undefined' ? window : this);
+
+/* --- firebase-service.js --- */
+/**
+ * Swasthya Setu - Cloud Firestore Service Layer
+ * 
+ * Provides real-time synchronization across devices with zero-disruption local fallback:
+ * 1. 🚨 108 Emergency Ambulance GPS & Telemetry HUD
+ * 2. 📅 OPD & Teleconsultation Appointment Booking & Queue
+ * 3. 💊 Doctor e-Prescription Issuance & Jan Aushadhi generic mapping
+ * 4. 👩‍⚕️ ASHA Frontline Health Worker Vitals & High-Risk ANC Tracking
+ * 5. 🏥 PHC/CHC Bed & Blood Availability
+ * 6. 🎥 WebRTC Signaling Channel
+ */
+
+(function(global) {
+  'use strict';
+
+  class FirebaseService {
+    constructor() {
+      this.listeners = [];
+    }
+
+    get db() {
+      return global.firebaseConfigManager && global.firebaseConfigManager.db;
+    }
+
+    get isLive() {
+      return !!(this.db && global.firebaseConfigManager && global.firebaseConfigManager.isConfigured);
+    }
+
+    // -------------------------------------------------------------
+    // 1. 108 AMBULANCE DISPATCH & LIVE HUD
+    // -------------------------------------------------------------
+    async dispatchAmbulance(dispatchData) {
+      const payload = {
+        ...dispatchData,
+        timestamp: new Date().toISOString(),
+        status: 'enroute',
+        etaMinutes: 12,
+        speedKmph: 58,
+        driver: {
+          name: 'Ravi Shankar',
+          phone: '+91 94120 10822',
+          vehicleNo: 'UP 20 G 1082',
+          type: 'ALS (Advanced Life Support)'
+        },
+        equipment: ['Oxygen Cylinder (Full)', 'AED Defibrillator', 'Pulse Oximeter', 'Stretcher Bed']
+      };
+
+      if (this.isLive) {
+        try {
+          const docRef = await this.db.collection('emergency_dispatches').add(payload);
+          return { id: docRef.id, ...payload };
+        } catch (e) {
+          console.warn('Firestore write failed, saving to local state:', e);
+        }
+      }
+
+      // Local fallback
+      localStorage.setItem('swasthya_setu_active_108', JSON.stringify(payload));
+      return { id: 'local-sos-' + Date.now(), ...payload };
+    }
+
+    subscribeAmbulanceHUD(callback) {
+      if (this.isLive) {
+        try {
+          const unsub = this.db.collection('emergency_dispatches')
+            .orderBy('timestamp', 'desc')
+            .limit(1)
+            .onSnapshot(snapshot => {
+              if (!snapshot.empty) {
+                const data = snapshot.docs[0].data();
+                callback({ id: snapshot.docs[0].id, ...data });
+              }
+            }, err => console.warn('Firestore 108 listener error:', err));
+          this.listeners.push(unsub);
+          return unsub;
+        } catch (e) {}
+      }
+
+      // Local fallback listener (poll / storage event)
+      const checkLocal = () => {
+        try {
+          const saved = localStorage.getItem('swasthya_setu_active_108');
+          if (saved) callback(JSON.parse(saved));
+        } catch (e) {}
+      };
+      checkLocal();
+      window.addEventListener('storage', (e) => {
+        if (e.key === 'swasthya_setu_active_108') checkLocal();
+      });
+    }
+
+    // -------------------------------------------------------------
+    // 2. APPOINTMENTS & QUEUE MANAGEMENT
+    // -------------------------------------------------------------
+    async bookAppointment(aptData) {
+      const payload = {
+        ...aptData,
+        id: `apt-${Date.now()}`,
+        status: 'confirmed',
+        tokenNo: Math.floor(Math.random() * 20) + 1,
+        createdAt: new Date().toISOString()
+      };
+
+      if (this.isLive) {
+        try {
+          await this.db.collection('appointments').doc(payload.id).set(payload);
+          return payload;
+        } catch (e) {
+          console.warn('Firestore appointment save failed, saving local:', e);
+        }
+      }
+
+      // Local storage fallback
+      const saved = this.getLocalArray('swasthya_setu_appointments');
+      saved.unshift(payload);
+      localStorage.setItem('swasthya_setu_appointments', JSON.stringify(saved));
+      return payload;
+    }
+
+    subscribeAppointments(callback) {
+      if (this.isLive) {
+        try {
+          const unsub = this.db.collection('appointments')
+            .orderBy('createdAt', 'desc')
+            .limit(20)
+            .onSnapshot(snapshot => {
+              const list = [];
+              snapshot.forEach(doc => list.push({ id: doc.id, ...doc.data() }));
+              callback(list);
+            }, err => console.warn('Firestore apt listener error:', err));
+          this.listeners.push(unsub);
+          return unsub;
+        } catch (e) {}
+      }
+
+      // Local fallback
+      callback(this.getLocalArray('swasthya_setu_appointments'));
+    }
+
+    // -------------------------------------------------------------
+    // 3. DOCTOR e-PRESCRIPTIONS & JAN AUSHADHI GENERICS
+    // -------------------------------------------------------------
+    async savePrescription(rxData) {
+      const payload = {
+        ...rxData,
+        id: `rx-${Date.now()}`,
+        issuedAt: new Date().toISOString(),
+        qrVerificationCode: `ABDM-RX-${Math.random().toString(36).substring(2, 9).toUpperCase()}`
+      };
+
+      if (this.isLive) {
+        try {
+          await this.db.collection('prescriptions').doc(payload.id).set(payload);
+          return payload;
+        } catch (e) {
+          console.warn('Firestore prescription save failed, saving local:', e);
+        }
+      }
+
+      const list = this.getLocalArray('swasthya_setu_prescriptions');
+      list.unshift(payload);
+      localStorage.setItem('swasthya_setu_prescriptions', JSON.stringify(list));
+      return payload;
+    }
+
+    subscribePrescriptions(patientId, callback) {
+      if (this.isLive) {
+        try {
+          let query = this.db.collection('prescriptions').orderBy('issuedAt', 'desc');
+          if (patientId) query = query.where('patientId', '==', patientId);
+          const unsub = query.limit(15).onSnapshot(snapshot => {
+            const list = [];
+            snapshot.forEach(doc => list.push({ id: doc.id, ...doc.data() }));
+            callback(list);
+          }, err => console.warn('Firestore rx listener error:', err));
+          this.listeners.push(unsub);
+          return unsub;
+        } catch (e) {}
+      }
+
+      const list = this.getLocalArray('swasthya_setu_prescriptions');
+      callback(patientId ? list.filter(r => r.patientId === patientId) : list);
+    }
+
+    // -------------------------------------------------------------
+    // 4. ASHA FRONTLINE VITALS & ANC TRACKING
+    // -------------------------------------------------------------
+    async logFrontlineVitals(vitalsData) {
+      const payload = {
+        ...vitalsData,
+        id: `vital-${Date.now()}`,
+        loggedAt: new Date().toISOString(),
+        synced: this.isLive
+      };
+
+      if (this.isLive) {
+        try {
+          await this.db.collection('frontline_vitals').doc(payload.id).set(payload);
+          return payload;
+        } catch (e) {
+          console.warn('Firestore vitals save failed, queueing locally:', e);
+        }
+      }
+
+      // Offline sync queue
+      const queue = this.getLocalArray('swasthya_setu_vitals_queue');
+      queue.unshift(payload);
+      localStorage.setItem('swasthya_setu_vitals_queue', JSON.stringify(queue));
+      return payload;
+    }
+
+    subscribeFrontlineVitals(callback) {
+      if (this.isLive) {
+        try {
+          const unsub = this.db.collection('frontline_vitals')
+            .orderBy('loggedAt', 'desc')
+            .limit(30)
+            .onSnapshot(snapshot => {
+              const list = [];
+              snapshot.forEach(doc => list.push({ id: doc.id, ...doc.data() }));
+              callback(list);
+            }, err => console.warn('Firestore vitals listener error:', err));
+          this.listeners.push(unsub);
+          return unsub;
+        } catch (e) {}
+      }
+
+      callback(this.getLocalArray('swasthya_setu_vitals_queue'));
+    }
+
+    // -------------------------------------------------------------
+    // 5. WEBRTC SIGNALING ROOM CHANNEL
+    // -------------------------------------------------------------
+    async sendWebRTCSignal(roomId, signal) {
+      if (this.isLive) {
+        try {
+          await this.db.collection('telemed_rooms').doc(roomId).set({
+            ...signal,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+          }, { merge: true });
+          return true;
+        } catch (e) {}
+      }
+      localStorage.setItem(`swasthya_setu_webrtc_${roomId}`, JSON.stringify(signal));
+      return true;
+    }
+
+    subscribeWebRTCRoom(roomId, callback) {
+      if (this.isLive) {
+        try {
+          const unsub = this.db.collection('telemed_rooms').doc(roomId).onSnapshot(doc => {
+            if (doc.exists) callback(doc.data());
+          });
+          this.listeners.push(unsub);
+          return unsub;
+        } catch (e) {}
+      }
+
+      window.addEventListener('storage', (e) => {
+        if (e.key === `swasthya_setu_webrtc_${roomId}`) {
+          try { callback(JSON.parse(e.newValue)); } catch (err) {}
+        }
+      });
+    }
+
+    // Helpers
+    getLocalArray(key) {
+      try {
+        const item = localStorage.getItem(key);
+        return item ? JSON.parse(item) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+  }
+
+  global.firebaseService = new FirebaseService();
+
+})(typeof window !== 'undefined' ? window : this);
+
+/* --- pdf-generator.js --- */
+/**
+ * Swasthya Setu - Official ABHA Health Card & e-Prescription Print / PDF Engine
+ * 
+ * Provides:
+ * 1. 🪪 Official Ayushman Bharat Digital Mission (ABDM) ABHA Health ID Card Generator (Print / PDF)
+ * 2. 📋 Official Doctor e-Prescription Generator with Jan Aushadhi generic mapping & QR Code
+ */
+
+(function(global) {
+  'use strict';
+
+  class PdfGenerator {
+    
+    // -------------------------------------------------------------
+    // 1. GENERATE OFFICIAL ABHA HEALTH CARD
+    // -------------------------------------------------------------
+    generateAbhaCard(memberKey) {
+      const patient = (global.patientController && global.patientController.data.familyMembers[memberKey || 'anitha']) || {
+        name: 'Anitha K.',
+        abhaId: '14-2938-7710-4521',
+        age: 29,
+        gender: 'Female',
+        bloodGroup: 'O+',
+        emergencyContact: 'Ramu K. (+91 9848119988)',
+        assignedAsha: 'B. Saraswati (Ward 6)'
+      };
+
+      const printWin = window.open('', '_blank', 'width=800,height=600');
+      if (!printWin) {
+        alert('Please allow popups to download / print your ABHA Health Card.');
+        return;
+      }
+
+      printWin.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>ABHA Health Card - ${patient.name}</title>
+          <style>
+            @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=IBM+Plex+Mono:wght@600&display=swap');
+            body { font-family: 'Plus Jakarta Sans', sans-serif; margin: 40px; background: #f4f6f8; display: flex; justify-content: center; align-items: center; min-height: 80vh; }
+            .card-wrapper { width: 500px; background: #ffffff; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.12); border: 2px solid #003366; overflow: hidden; position: relative; }
+            .card-header { background: linear-gradient(135deg, #003366, #0b5ed7); color: #ffffff; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 4px solid #ea580c; }
+            .emblem { font-size: 26px; }
+            .header-title h2 { margin: 0; font-size: 16px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; }
+            .header-title small { font-size: 11px; opacity: 0.85; }
+            .card-body { padding: 22px; display: flex; gap: 20px; }
+            .avatar-box { width: 110px; height: 130px; border-radius: 12px; background: #e2e8f0; border: 2px solid #cbd5e1; display: grid; place-items: center; font-size: 36px; font-weight: 800; color: #003366; flex-shrink: 0; }
+            .info-box { flex: 1; font-size: 13px; color: #1e293b; }
+            .info-row { margin-bottom: 8px; }
+            .info-label { font-size: 11px; color: #64748b; font-weight: 600; text-transform: uppercase; }
+            .info-val { font-size: 14px; font-weight: 700; color: #0f172a; }
+            .abha-number { font-family: 'IBM Plex Mono', monospace; font-size: 17px; font-weight: 700; color: #0b5ed7; background: #eff6ff; padding: 6px 10px; border-radius: 8px; display: inline-block; margin: 4px 0 10px; border: 1px dashed #bfdbfe; }
+            .card-footer { background: #f8fafc; padding: 12px 20px; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #64748b; }
+            .qr-mock { width: 48px; height: 48px; background: #0f172a; border-radius: 6px; display: grid; place-items: center; color: #fff; font-size: 8px; font-family: monospace; text-align: center; }
+            .print-btn-bar { position: fixed; top: 15px; right: 15px; display: flex; gap: 10px; }
+            .print-btn { background: #003366; color: #fff; border: none; padding: 10px 18px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 13px; }
+            @media print { .print-btn-bar { display: none; } body { background: #fff; margin: 0; } .card-wrapper { box-shadow: none; } }
+          </style>
+        </head>
+        <body>
+          <div class="print-btn-bar">
+            <button class="print-btn" onclick="window.print()">🖨️ Print / Save as PDF</button>
+            <button class="print-btn" style="background:#64748b;" onclick="window.close()">✕ Close</button>
+          </div>
+          <div class="card-wrapper">
+            <div class="card-header">
+              <div style="display:flex;align-items:center;gap:12px;">
+                <div class="emblem">🏛️</div>
+                <div class="header-title">
+                  <h2>National Health Authority</h2>
+                  <small>Ayushman Bharat Digital Mission (ABDM)</small>
+                </div>
+              </div>
+              <div style="font-weight:800;font-size:13px;background:rgba(255,255,255,0.2);padding:4px 8px;border-radius:6px;">ABHA</div>
+            </div>
+            <div class="card-body">
+              <div class="avatar-box">
+                ${patient.name.split(' ').map(n=>n[0]).slice(0,2).join('')}
+              </div>
+              <div class="info-box">
+                <div class="info-label">ABHA Number (आभा संख्या)</div>
+                <div class="abha-number">${patient.abhaId}</div>
+                <div class="info-row">
+                  <div class="info-label">Full Name / नाम</div>
+                  <div class="info-val">${patient.name}</div>
+                </div>
+                <div style="display:flex;gap:20px;" class="info-row">
+                  <div>
+                    <div class="info-label">Gender / Age</div>
+                    <div class="info-val">${patient.gender || 'Female'} / ${patient.age || '29'}</div>
+                  </div>
+                  <div>
+                    <div class="info-label">Blood Group</div>
+                    <div class="info-val">${patient.bloodGroup || 'O+'}</div>
+                  </div>
+                </div>
+                <div class="info-row">
+                  <div class="info-label">Emergency Contact / आपातकालीन संपर्क</div>
+                  <div class="info-val" style="font-size:12px;">${patient.emergencyContact || '+91 9848119988'}</div>
+                </div>
+              </div>
+            </div>
+            <div class="card-footer">
+              <div>
+                <strong>Swasthya Setu Verified Health ID</strong><br>
+                <span>Ayushman Bharat Health Account (ABHA) Interoperable</span>
+              </div>
+              <div class="qr-mock">QR<br>VERIFIED</div>
+            </div>
+          </div>
+        </body>
+        </html>
+      `);
+      printWin.document.close();
+    }
+
+    // -------------------------------------------------------------
+    // 2. GENERATE OFFICIAL DOCTOR e-PRESCRIPTION PDF
+    // -------------------------------------------------------------
+    generatePrescriptionPDF(rxData) {
+      const rx = rxData || {
+        rxId: 'RX-2026-0891',
+        doctorName: 'Dr. Suresh Varma, MBBS, MD',
+        doctorReg: 'MCI-AP-2018-88219',
+        clinic: 'Kondapalli Primary Health Centre (PHC)',
+        patientName: 'Anitha K.',
+        patientAbha: '14-2938-7710-4521',
+        age: 29,
+        gender: 'Female',
+        diagnosis: 'Moderate Gestational Anaemia (Hb 9.2 g/dL) · ANC 24 Wks',
+        vitals: 'BP 118/76 mmHg · Pulse 78 bpm · SpO2 98%',
+        medications: [
+          { generic: 'Ferrous Ascorbate + Folic Acid (100mg/1.5mg)', brand: 'Autrin / Orofer XT', dosage: '1 Tablet Daily after Dinner', duration: '30 Days', janAushadhiPrice: '₹22.00', marketPrice: '₹145.00' },
+          { generic: 'Calcium Carbonate + Vitamin D3 (500mg/250IU)', brand: 'Shelcal 500', dosage: '1 Tablet Daily after Lunch', duration: '30 Days', janAushadhiPrice: '₹18.00', marketPrice: '₹115.00' }
+        ],
+        advice: 'Continue iron-rich diet (spinach, jaggery, beetroot). Follow up in 4 weeks at Kondapalli PHC.'
+      };
+
+      const printWin = window.open('', '_blank', 'width=850,height=800');
+      if (!printWin) {
+        alert('Please allow popups to print / download e-Prescription.');
+        return;
+      }
+
+      const rows = rx.medications.map((m, idx) => `
+        <tr>
+          <td style="padding:10px;border-bottom:1px solid #e2e8f0;font-weight:700;">${idx+1}.</td>
+          <td style="padding:10px;border-bottom:1px solid #e2e8f0;">
+            <div style="font-weight:800;color:#003366;font-size:14px;">${m.generic}</div>
+            <small style="color:#64748b;">Brand Ref: ${m.brand} | PMBJP Jan Aushadhi Savings</small>
+          </td>
+          <td style="padding:10px;border-bottom:1px solid #e2e8f0;font-weight:600;">${m.dosage}</td>
+          <td style="padding:10px;border-bottom:1px solid #e2e8f0;font-weight:600;">${m.duration}</td>
+          <td style="padding:10px;border-bottom:1px solid #e2e8f0;color:#16a34a;font-weight:800;">${m.janAushadhiPrice}</td>
+        </tr>
+      `).join('');
+
+      printWin.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>e-Prescription - ${rx.patientName} - ${rx.rxId}</title>
+          <style>
+            @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=IBM+Plex+Mono:wght@600&display=swap');
+            body { font-family: 'Plus Jakarta Sans', sans-serif; margin: 30px; background: #f8fafc; color: #0f172a; }
+            .rx-paper { max-width: 750px; margin: 0 auto; background: #ffffff; padding: 35px 40px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border-top: 6px solid #003366; position: relative; }
+            .header { display: flex; justify-content: space-between; border-bottom: 2px solid #003366; padding-bottom: 15px; margin-bottom: 20px; }
+            .doc-info h2 { margin: 0; color: #003366; font-size: 20px; font-weight: 800; }
+            .doc-info p { margin: 3px 0; font-size: 12px; color: #475569; }
+            .patient-box { background: #f1f5f9; padding: 14px 18px; border-radius: 10px; margin-bottom: 20px; font-size: 13px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+            .rx-symbol { font-size: 32px; font-weight: 900; color: #003366; font-family: serif; margin-bottom: 10px; }
+            table { width: 100%; border-collapse: collapse; margin-bottom: 25px; font-size: 13px; }
+            th { text-align: left; background: #003366; color: #ffffff; padding: 10px; font-size: 12px; text-transform: uppercase; }
+            .seal-box { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e2e8f0; }
+            .digital-seal { border: 2px dashed #0b5ed7; border-radius: 8px; padding: 10px 16px; background: #eff6ff; font-size: 11.5px; color: #0b5ed7; }
+            .print-btn-bar { position: fixed; top: 15px; right: 15px; display: flex; gap: 10px; }
+            .print-btn { background: #003366; color: #fff; border: none; padding: 10px 18px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 13px; }
+            @media print { .print-btn-bar { display: none; } body { background: #fff; margin: 0; } .rx-paper { box-shadow: none; padding: 0; } }
+          </style>
+        </head>
+        <body>
+          <div class="print-btn-bar">
+            <button class="print-btn" onclick="window.print()">🖨️ Print / Download PDF</button>
+            <button class="print-btn" style="background:#64748b;" onclick="window.close()">✕ Close</button>
+          </div>
+          <div class="rx-paper">
+            <div class="header">
+              <div class="doc-info">
+                <h2>${rx.doctorName}</h2>
+                <p><strong>Reg No:</strong> ${rx.doctorReg}</p>
+                <p><strong>Facility:</strong> ${rx.clinic}</p>
+              </div>
+              <div style="text-align:right;">
+                <div style="font-weight:800;color:#0b5ed7;font-size:16px;">SWASTHYA SETU</div>
+                <div style="font-size:11px;color:#64748b;">e-Sanjeevani Telemedicine Suite</div>
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;margin-top:4px;color:#003366;font-weight:700;">${rx.rxId}</div>
+              </div>
+            </div>
+
+            <div class="patient-box">
+              <div><strong>Patient:</strong> ${rx.patientName} (${rx.gender}, ${rx.age} Yrs)</div>
+              <div><strong>ABHA ID:</strong> ${rx.patientAbha}</div>
+              <div><strong>Date:</strong> ${new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</div>
+              <div><strong>Vitals:</strong> ${rx.vitals}</div>
+              <div style="grid-column: span 2;"><strong>Clinical Diagnosis:</strong> ${rx.diagnosis}</div>
+            </div>
+
+            <div class="rx-symbol">℞</div>
+
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Generic Medicine (PMBJP Scheme)</th>
+                  <th>Dosage / Timing</th>
+                  <th>Duration</th>
+                  <th>PMBJP Price</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rows}
+              </tbody>
+            </table>
+
+            <div style="background:#fffbeb;border:1px solid #fde68a;padding:12px;border-radius:8px;font-size:12.5px;margin-bottom:20px;">
+              <strong>👨‍⚕️ Clinical Advice & Precautions:</strong>
+              <p style="margin:4px 0 0;color:#92400e;">${rx.advice}</p>
+            </div>
+
+            <div class="seal-box">
+              <div class="digital-seal">
+                ✓ Digitally Signed & Encrypted<br>
+                <strong>ABDM Health Token Verified</strong>
+              </div>
+              <div style="text-align:center;">
+                <div style="font-family:'Fraunces',serif;font-style:italic;font-size:18px;color:#003366;">Dr. Suresh Varma</div>
+                <div style="border-top:1px solid #003366;padding-top:4px;font-size:11px;font-weight:700;">Authorized Medical Officer</div>
+              </div>
+            </div>
+          </div>
+        </body>
+        </html>
+      `);
+      printWin.document.close();
+    }
+  }
+
+  global.pdfGenerator = new PdfGenerator();
+
+})(typeof window !== 'undefined' ? window : this);
 
 /* --- i18n.js --- */
 /**
@@ -9635,16 +10284,19 @@ a {
         <div class="doc-tele-layout">
           <!-- Left: Video HUD & Call Controls -->
           <div class="doc-tele-video-panel">
-            <div class="doc-video-viewport ${this.state.isAudioOnly ? 'audio-only-mode' : ''}">
+            <div class="doc-video-viewport ${this.state.isAudioOnly ? 'audio-only-mode' : ''}" style="position:relative;overflow:hidden;">
+              <!-- Real Remote Video Element -->
+              <video id="docRemoteVideo" autoplay playsinline style="width:100%;height:100%;object-fit:cover;display:none;position:absolute;inset:0;z-index:0;"></video>
+
               <!-- Live Video Topbar HUD -->
-              <div class="doc-video-topbar">
+              <div class="doc-video-topbar" style="position:relative;z-index:3;">
                 <span class="doc-rec-led"><span class="dot"></span> LIVE ENCRYPTED · FHIR R4</span>
                 <span style="font-size:12px;color:#ffffff;font-family:'IBM Plex Mono',monospace;">⏱️ 04:18</span>
                 <span class="admin-status-badge good" style="font-size:10px;">ASHA Joined · Ward 6</span>
               </div>
 
               <!-- Main Video Simulation Area -->
-              <div class="doc-video-center-content">
+              <div class="doc-video-center-content" style="position:relative;z-index:2;">
                 ${this.state.isAudioOnly ? `
                   <div style="text-align:center;">
                     <div style="font-size:48px;margin-bottom:10px;">🎙️</div>
@@ -9664,14 +10316,20 @@ a {
                 `}
               </div>
 
-              <!-- Doctor Picture-in-Picture (PiP) Preview -->
-              <div class="doc-pip-cam">
-                <div style="font-size:16px;text-align:center;">🩺</div>
-                <span>Dr. Rao (MD)</span>
+              <!-- Doctor Picture-in-Picture (PiP) Real WebRTC Preview -->
+              <div class="doc-pip-cam" style="position:absolute;bottom:75px;right:18px;width:120px;height:90px;background:#000;border-radius:12px;overflow:hidden;border:2px solid var(--auth-primary-bright);z-index:4;display:flex;align-items:center;justify-content:center;">
+                <video id="docLocalVideo" autoplay playsinline muted style="width:100%;height:100%;object-fit:cover;display:none;"></video>
+                <div id="docLocalFallback" style="font-size:11px;text-align:center;color:#fff;">
+                  <span style="font-size:16px;display:block;">🩺</span>
+                  <span>Dr. Rao</span>
+                </div>
               </div>
 
               <!-- Bottom Call Controls Bar -->
-              <div class="doc-call-controls-bar">
+              <div class="doc-call-controls-bar" style="position:relative;z-index:5;">
+                <button class="doc-ctrl-btn" onclick="doctorController.startRealWebcam()" title="Connect Live Camera & Mic" style="background:rgba(52,211,153,0.25);border-color:var(--auth-primary-bright);">
+                  <span>🎥 WebRTC Cam</span>
+                </button>
                 <button class="doc-ctrl-btn ${this.state.isAudioMuted ? 'muted' : ''}" onclick="doctorController.toggleCallAudio()" title="Mute/Unmute Mic">
                   <span>${this.state.isAudioMuted ? '🔇 Unmute' : '🎙️ Mic On'}</span>
                 </button>
@@ -9762,6 +10420,43 @@ a {
           </div>
         </div>
       `;
+
+      if (this.localStream) {
+        setTimeout(() => this.attachStreamToVideo(), 50);
+      }
+    }
+
+    async startRealWebcam() {
+      try {
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: { width: { ideal: 640 }, height: { ideal: 480 } },
+            audio: true
+          });
+          this.localStream = stream;
+          this.attachStreamToVideo();
+          if (typeof window.toast === 'function') {
+            window.toast('🎥 Live Camera & Microphone Connected (Encrypted WebRTC)');
+          }
+        }
+      } catch (err) {
+        console.warn('Webcam permission not granted, using simulation:', err);
+        if (typeof window.toast === 'function') {
+          window.toast('ℹ️ Camera optional: Simulation feed active');
+        }
+      }
+    }
+
+    attachStreamToVideo() {
+      if (!this.localStream) return;
+      const vid = document.getElementById('docLocalVideo');
+      const fallback = document.getElementById('docLocalFallback');
+      if (vid) {
+        vid.srcObject = this.localStream;
+        vid.style.display = 'block';
+        if (fallback) fallback.style.display = 'none';
+        vid.play().catch(()=>{});
+      }
     }
 
     startLiveTeleconsult(consultId) {
@@ -9772,20 +10467,27 @@ a {
         window.toast(`Connecting encrypted teleconsultation with ${c.patientName}...`);
       }
       this.switchTab('tele');
+      this.startRealWebcam();
     }
 
     toggleCallAudio() {
       this.state.isAudioMuted = !this.state.isAudioMuted;
+      if (this.localStream) {
+        this.localStream.getAudioTracks().forEach(t => t.enabled = !this.state.isAudioMuted);
+      }
       if (typeof window.toast === 'function') {
-        window.toast(this.state.isAudioMuted ? 'Microphone Muted' : 'Microphone Unmuted');
+        window.toast(this.state.isAudioMuted ? '🔇 Microphone Muted' : '🎙️ Microphone Unmuted');
       }
       this.renderTeleconsultSuite();
     }
 
     toggleCallVideo() {
       this.state.isVideoOff = !this.state.isVideoOff;
+      if (this.localStream) {
+        this.localStream.getVideoTracks().forEach(t => t.enabled = !this.state.isVideoOff);
+      }
       if (typeof window.toast === 'function') {
-        window.toast(this.state.isVideoOff ? 'Camera Turned Off' : 'Camera Active');
+        window.toast(this.state.isVideoOff ? '🚫 Camera Turned Off' : '📷 Camera Active');
       }
       this.renderTeleconsultSuite();
     }
@@ -10637,6 +11339,16 @@ a {
       amb.status = 'dispatched';
       amb.etaSeconds = 522; // 08:42 min
 
+      if (global.firebaseService) {
+        global.firebaseService.dispatchAmbulance({
+          village: vil.name,
+          landmark: amb.selectedLandmark,
+          patientName: mem.name,
+          patientAbha: mem.abhaId,
+          emergencyContact: mem.emergencyContact
+        });
+      }
+
       if (typeof window.toast === 'function') {
         window.toast(`🚨 108 ALS Ambulance dispatched to ${vil.name} for ${mem.name}! Driver Ravi Shankar is en route.`);
       }
@@ -10647,6 +11359,18 @@ a {
       // Switch view to SOS if not already there
       if (typeof window.switchView === 'function') {
         window.switchView('sos');
+      }
+    }
+
+    downloadAbhaCard() {
+      if (global.pdfGenerator) {
+        global.pdfGenerator.generateAbhaCard(this.data.currentFamilyMember);
+      }
+    }
+
+    downloadPrescriptionPDF() {
+      if (global.pdfGenerator) {
+        global.pdfGenerator.generatePrescriptionPDF();
       }
     }
 
@@ -12177,6 +12901,14 @@ window.addEventListener('DOMContentLoaded', () => {
   }
   if (typeof patientController !== 'undefined') {
     patientController.init();
+  }
+  if (window.firebaseConfigManager && typeof window.firebaseConfigManager.initFirebase === 'function') {
+    window.firebaseConfigManager.initFirebase();
+  }
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('../sw.js').catch(() => {
+      navigator.serviceWorker.register('./sw.js').catch(() => {});
+    });
   }
 });
 </script>

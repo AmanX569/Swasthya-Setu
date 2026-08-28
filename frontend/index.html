@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Swasthya Setu · Rural Care Access & Quality Network | स्वास्थ्य सेतु</title>
+<link rel="manifest" href="../manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -12,6 +13,10 @@
 <link rel="stylesheet" href="doctor.css">
 <link rel="stylesheet" href="patient.css">
 <link rel="stylesheet" href="worker.css">
+<!-- Firebase Cloud Firestore & Auth SDK (Compat v10) -->
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 <style>
 /* =========================================================
    DESIGN SYSTEM & GLASS-TOUCHED ARCHITECTURE
@@ -2130,6 +2135,14 @@ a {
             <h3 data-i18n="family_care">Family Health Circle · परिवार स्वास्थ्य चक्र</h3>
             <button class="voice-speak-btn" onclick="speakText('परिवार के सदस्य को चुनें: अनिता, बेबी रवि, रामू या सरस्वती देवी')">🔊</button>
           </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn-glass" style="font-size:12px;padding:6px 14px;background:rgba(0,51,102,0.3);border-color:#0b5ed7;" onclick="patientController.downloadAbhaCard()">
+              <span>🖨️ Download ABHA Card (PDF)</span>
+            </button>
+            <button class="btn-glass" style="font-size:12px;padding:6px 14px;" onclick="patientController.downloadPrescriptionPDF()">
+              <span>📄 Download e-Rx (PDF)</span>
+            </button>
+          </div>
         </div>
         <div id="familyProfileSelector" class="family-profile-grid"></div>
 
@@ -2747,6 +2760,9 @@ a {
 <!-- =========================================================
    APPLICATION JAVASCRIPT LOGIC & 3D ANIMATION ENGINE
 ========================================================= -->
+<script src="firebase-config.js"></script>
+<script src="firebase-service.js"></script>
+<script src="pdf-generator.js"></script>
 <script src="i18n.js"></script>
 <script src="auth.js"></script>
 <script src="auth-ui.js"></script>
@@ -3106,6 +3122,14 @@ window.addEventListener('DOMContentLoaded', () => {
   }
   if (typeof patientController !== 'undefined') {
     patientController.init();
+  }
+  if (window.firebaseConfigManager && typeof window.firebaseConfigManager.initFirebase === 'function') {
+    window.firebaseConfigManager.initFirebase();
+  }
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('../sw.js').catch(() => {
+      navigator.serviceWorker.register('./sw.js').catch(() => {});
+    });
   }
 });
 </script>

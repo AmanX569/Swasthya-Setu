@@ -1,0 +1,49 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    // 1. User Profiles & Multi-Role RBAC
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && isOwner(userId);
+    }
+
+    // 2. Emergency 108 Dispatches & Telemetry
+    match /emergency_dispatches/{dispatchId} {
+      allow read: if true; // Public read for ambulance HUD in emergencies
+      allow create, update: if true;
+    }
+
+    // 3. Appointments & Queue
+    match /appointments/{appointmentId} {
+      allow read: if true;
+      allow create, update: if true;
+    }
+
+    // 4. Doctor e-Prescriptions
+    match /prescriptions/{prescriptionId} {
+      allow read: if true;
+      allow create, update: if true;
+    }
+
+    // 5. ASHA Frontline Vitals & ANC Tracker
+    match /frontline_vitals/{vitalId} {
+      allow read: if true;
+      allow create, update: if true;
+    }
+
+    // 6. WebRTC Teleconsultation Signaling Rooms
+    match /telemed_rooms/{roomId} {
+      allow read, write: if true;
+    }
+  }
+}
