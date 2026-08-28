@@ -928,10 +928,14 @@
             <p style="font-size:12.5px;color:var(--muted);margin:0;">
               Manage credentialed doctors, frontline ASHA workers, registered citizens, and system leaders.
             </p>
+          <div style="display:flex;gap:10px;align-items:center;">
+            <button class="btn-glass sm" onclick="adminController.exportStaffToCSV()" style="font-size:12.5px;padding:8px 14px;">
+              <span>📥 Export CSV Table</span>
+            </button>
+            <button class="auth-btn-primary" onclick="adminController.openAddStaffModal()" style="font-size:13px;padding:8px 16px;">
+              <span>+ Add Healthcare Staff</span>
+            </button>
           </div>
-          <button class="auth-btn-primary" onclick="adminController.openAddStaffModal()" style="font-size:13px;padding:8px 16px;">
-            <span>+ Add Healthcare Staff</span>
-          </button>
         </div>
 
         <!-- Filter & Search Toolbar -->
@@ -1082,6 +1086,33 @@
         window.toast(`✓ Added ${name} (${role.toUpperCase()}) & synced to Firebase!`);
       }
       this.renderStaffManagement();
+    }
+
+    exportStaffToCSV() {
+      const headers = ['User ID', 'Full Name', 'Role', 'Facility / Location', 'Contact Number', 'Email', 'Status', 'Registered Date'];
+      const rows = this.data.users.map(u => [
+        `"${u.id || ''}"`,
+        `"${u.name || ''}"`,
+        `"${(u.role || '').toUpperCase()}"`,
+        `"${u.facility || u.location || ''}"`,
+        `"+91 ${u.phone || ''}"`,
+        `"${u.email || ''}"`,
+        `"${u.status || 'Active'}"`,
+        `"${u.regDate || ''}"`
+      ]);
+
+      const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement('a');
+      link.setAttribute('href', encodedUri);
+      link.setAttribute('download', `Swasthya_Setu_Staff_Roster_${new Date().toISOString().slice(0, 10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      if (typeof window.toast === 'function') {
+        window.toast('📥 Downloaded Staff Roster CSV Table Spreadsheet!');
+      }
     }
 
     // -------------------------------------------------------------
