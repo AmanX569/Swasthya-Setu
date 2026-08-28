@@ -197,7 +197,67 @@
     getAccountByPhone(phone) {
       const cleanPhone = String(phone).replace(/\D/g, '');
       const accounts = this.getAccounts();
-      return accounts.find(a => a.phone === cleanPhone) || null;
+      const found = accounts.find(a => a.phone === cleanPhone);
+      if (found) return found;
+
+      // Check Admin Staff Registry
+      if (typeof window !== 'undefined' && window.adminController && window.adminController.data && window.adminController.data.users) {
+        const staff = window.adminController.data.users.find(u => String(u.phone).replace(/\D/g, '') === cleanPhone);
+        if (staff) {
+          const newAcct = {
+            userId: staff.id,
+            name: staff.name,
+            phone: cleanPhone,
+            roles: [staff.role.toLowerCase()],
+            activeRole: staff.role.toLowerCase(),
+            designation: staff.specialization || `${staff.role.toUpperCase()} · ${staff.facility || staff.location}`,
+            facility: staff.facility || staff.location || 'Kondapalli Community Grid',
+            email: staff.email || `${staff.name.toLowerCase().replace(/[^a-z0-9]/g, '.')}@swasthyasetu.gov.in`,
+            avatar: staff.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase()
+          };
+          this.saveAccount(newAcct);
+          return newAcct;
+        }
+      }
+
+      return null;
+    }
+
+    async findOrFetchAccount(phone) {
+      const cleanPhone = String(phone).replace(/\D/g, '');
+      let account = this.getAccountByPhone(cleanPhone);
+      if (account) return account;
+
+      // Fetch live from Firebase Realtime Database
+      try {
+        const res = await fetch('https://swasthya-setu-2b67d-default-rtdb.firebaseio.com/staff_registry.json');
+        if (res.ok) {
+          const data = await res.json();
+          if (data && typeof data === 'object') {
+            const list = Object.values(data);
+            const found = list.find(u => String(u.phone).replace(/\D/g, '') === cleanPhone);
+            if (found) {
+              const newAcct = {
+                userId: found.id || `USR-${found.role.toUpperCase()}-${Date.now().toString().slice(-4)}`,
+                name: found.name,
+                phone: cleanPhone,
+                roles: [found.role.toLowerCase()],
+                activeRole: found.role.toLowerCase(),
+                designation: found.specialization || `${found.role.toUpperCase()} · ${found.facility || found.location}`,
+                facility: found.facility || found.location || 'Kondapalli Community Grid',
+                email: found.email || `${found.name.toLowerCase().replace(/[^a-z0-9]/g, '.')}@swasthyasetu.gov.in`,
+                avatar: found.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase()
+              };
+              this.saveAccount(newAcct);
+              return newAcct;
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('Firebase auth lookup error:', err);
+      }
+
+      return null;
     }
 
     // -------------------------------------------------------------
@@ -215,8 +275,8 @@
         throw new Error('Please enter a valid 10-digit mobile number.');
       }
 
-      // Simulate network latency (400ms)
-      await new Promise(resolve => setTimeout(resolve, 400));
+      // Simulate network latency (300ms)
+      await new Promise(resolve => setTimeout(resolve, 300));
 
       const expiresAt = Date.now() + (5 * 60 * 1000); // 5 minutes validity
       pendingOtps.set(cleanPhone, {
@@ -225,7 +285,7 @@
         requestedAt: Date.now()
       });
 
-      const existing = this.getAccountByPhone(cleanPhone);
+      const existing = await this.findOrFetchAccount(cleanPhone);
 
       return {
         success: true,
@@ -265,7 +325,7 @@
 
       pendingOtps.delete(cleanPhone);
 
-      const account = this.getAccountByPhone(cleanPhone);
+      const account = await this.findOrFetchAccount(cleanPhone);
       return {
         success: true,
         account: account || null,

@@ -1201,6 +1201,21 @@
         console.warn('Firebase staff write error:', err);
       }
 
+      // Register into Auth Service for instant login
+      if (global.authService && typeof global.authService.saveAccount === 'function') {
+        global.authService.saveAccount({
+          userId: newUser.id,
+          name: newUser.name,
+          phone: newUser.phone,
+          roles: [newUser.role],
+          activeRole: newUser.role,
+          designation: `${newUser.role.toUpperCase()} · ${newUser.facility}`,
+          facility: newUser.facility,
+          email: newUser.email,
+          avatar: newUser.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase()
+        });
+      }
+
       if (typeof window.toast === 'function') {
         window.toast(`✓ Added ${name} (${role.toUpperCase()}) & synced live to Firebase!`);
       }
