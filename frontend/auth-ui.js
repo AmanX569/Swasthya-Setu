@@ -1041,12 +1041,18 @@
     }
 
     chipContainer.innerHTML = `
-      <div class="auth-user-chip" id="authUserChip" onclick="authUI.toggleProfileDropdown(event)">
-        <div class="auth-user-avatar">${user.avatar || 'U'}</div>
-        <div class="auth-user-details">
-          <span class="auth-user-name">${user.name.split(' ')[0]}</span>
-          <span class="auth-user-role-badge">${roleMeta.shortName}${isMultiRole ? ' ▾' : ''}</span>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <div class="auth-user-chip" id="authUserChip" onclick="authUI.toggleProfileDropdown(event)">
+          <div class="auth-user-avatar">${user.avatar || 'U'}</div>
+          <div class="auth-user-details">
+            <span class="auth-user-name">${user.name.split(' ')[0]}</span>
+            <span class="auth-user-role-badge">${roleMeta.shortName}${isMultiRole ? ' ▾' : ''}</span>
+          </div>
         </div>
+        <button class="btn-glass sm" onclick="authUI.handleLogout()" style="color:#f87171;min-height:34px;padding:6px 10px;font-size:11.5px;" title="Sign Out">
+          <span>🚪 Exit</span>
+        </button>
+      </div>
 
         <div class="auth-profile-dropdown" id="authProfileDropdown" onclick="event.stopPropagation()">
           <div class="auth-dropdown-user-header">
@@ -1103,10 +1109,12 @@
   }
 
   function handleLogout() {
-    closeProfileDropdown();
-    authService.logoutUser();
-    showToast('You have been logged out successfully.', 'info');
-    showLandingScreen();
+    if (confirm('Are you sure you want to sign out?')) {
+      closeProfileDropdown();
+      authService.logoutUser();
+      showToast('You have been logged out successfully.', 'info');
+      showLandingScreen();
+    }
   }
 
   function renderRoleBasedNavigation(activeRole) {
@@ -1164,16 +1172,16 @@
 
       mobileNavHtml = `
         <button class="mobile-nav-item active" onclick="switchView('dashboard'); if(window.adminController) adminController.switchTab('overview');">
-          <span class="mobile-icon">👑</span><span data-i18n="nav_admin_overview">Command</span>
+          <span class="mobile-icon">👑</span><span>Command</span>
         </button>
         <button class="mobile-nav-item" onclick="switchView('dashboard'); if(window.adminController) adminController.switchTab('staff');">
-          <span class="mobile-icon">👥</span><span data-i18n="nav_admin_staff">Staff</span>
-        </button>
-        <button class="mobile-nav-item" onclick="switchView('dashboard'); if(window.adminController) adminController.switchTab('heatmap');">
-          <span class="mobile-icon">🗺️</span><span data-i18n="nav_admin_heatmap">Outbreak</span>
+          <span class="mobile-icon">👥</span><span>Staff</span>
         </button>
         <button class="mobile-nav-item" onclick="switchView('dashboard'); if(window.adminController) adminController.switchTab('beds');">
-          <span class="mobile-icon">🏥</span><span data-i18n="nav_admin_beds">Beds</span>
+          <span class="mobile-icon">🏥</span><span>Beds</span>
+        </button>
+        <button class="mobile-nav-item" onclick="authUI.handleLogout()" style="color:#f87171;">
+          <span class="mobile-icon">🚪</span><span>Sign Out</span>
         </button>
       `;
 
@@ -1202,16 +1210,16 @@
 
       mobileNavHtml = `
         <button class="mobile-nav-item active" onclick="switchView('tele'); if(window.doctorController) doctorController.switchTab('overview');">
-          <span class="mobile-icon">🩺</span><span data-i18n="nav_doc_overview">Desk</span>
+          <span class="mobile-icon">🩺</span><span>Desk</span>
         </button>
         <button class="mobile-nav-item" onclick="switchView('tele'); if(window.doctorController) doctorController.switchTab('queue');">
-          <span class="mobile-icon">⏱️</span><span data-i18n="nav_doc_queue">Queue</span>
-        </button>
-        <button class="mobile-nav-item" onclick="switchView('tele'); if(window.doctorController) doctorController.switchTab('video');">
-          <span class="mobile-icon">🎥</span><span data-i18n="nav_doc_video">Tele</span>
+          <span class="mobile-icon">⏱️</span><span>Queue</span>
         </button>
         <button class="mobile-nav-item" onclick="switchView('tele'); if(window.doctorController) doctorController.switchTab('rx');">
-          <span class="mobile-icon">💊</span><span data-i18n="nav_doc_rx">Rx</span>
+          <span class="mobile-icon">💊</span><span>Rx</span>
+        </button>
+        <button class="mobile-nav-item" onclick="authUI.handleLogout()" style="color:#f87171;">
+          <span class="mobile-icon">🚪</span><span>Sign Out</span>
         </button>
       `;
 
@@ -1240,16 +1248,16 @@
 
       mobileNavHtml = `
         <button class="mobile-nav-item active" onclick="switchView('worker'); if(window.workerController) workerController.switchTab('overview');">
-          <span class="mobile-icon">🤝</span><span data-i18n="nav_worker_overview">Desk</span>
+          <span class="mobile-icon">🤝</span><span>Desk</span>
         </button>
         <button class="mobile-nav-item" onclick="switchView('worker'); if(window.workerController) workerController.switchTab('anc');">
-          <span class="mobile-icon">🤰</span><span data-i18n="nav_worker_anc">ANC</span>
-        </button>
-        <button class="mobile-nav-item" onclick="switchView('worker'); if(window.workerController) workerController.switchTab('immunizations');">
-          <span class="mobile-icon">👶</span><span data-i18n="nav_worker_uip">Vaccines</span>
+          <span class="mobile-icon">🤰</span><span>ANC</span>
         </button>
         <button class="mobile-nav-item" onclick="switchView('worker'); if(window.workerController) workerController.switchTab('visits');">
-          <span class="mobile-icon">🗺️</span><span data-i18n="nav_worker_visits">Visits</span>
+          <span class="mobile-icon">🗺️</span><span>Visits</span>
+        </button>
+        <button class="mobile-nav-item" onclick="authUI.handleLogout()" style="color:#f87171;">
+          <span class="mobile-icon">🚪</span><span>Sign Out</span>
         </button>
       `;
 
@@ -1287,19 +1295,19 @@
 
       mobileNavHtml = `
         <button class="mobile-nav-item active" onclick="switchView('home')">
-          <span class="mobile-icon">⌂</span><span data-i18n="nav_home">Home</span>
+          <span class="mobile-icon">⌂</span><span>Home</span>
         </button>
         <button class="mobile-nav-item" onclick="switchView('triage')">
-          <span class="mobile-icon">🩺</span><span data-i18n="nav_triage">Triage</span>
+          <span class="mobile-icon">🩺</span><span>Triage</span>
         </button>
         <button class="mobile-nav-item" onclick="switchView('sos')">
-          <span class="mobile-icon">🚨</span><span data-i18n="nav_sos">108 SOS</span>
+          <span class="mobile-icon">🚨</span><span>108 SOS</span>
         </button>
         <button class="mobile-nav-item" onclick="switchView('medicines')">
-          <span class="mobile-icon">💊</span><span data-i18n="nav_meds">Meds</span>
+          <span class="mobile-icon">💊</span><span>Meds</span>
         </button>
-        <button class="mobile-nav-item" onclick="switchView('records')">
-          <span class="mobile-icon">📋</span><span data-i18n="nav_records">ABHA</span>
+        <button class="mobile-nav-item" onclick="authUI.handleLogout()" style="color:#f87171;">
+          <span class="mobile-icon">🚪</span><span>Sign Out</span>
         </button>
       `;
     }

@@ -411,7 +411,14 @@
 
   class I18nEngine {
     constructor() {
-      this.currentLang = localStorage.getItem(STORAGE_KEY_LANG) || 'hi';
+      this.currentLang = localStorage.getItem(STORAGE_KEY_LANG) || 'en';
+      if (typeof document !== 'undefined') {
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', () => this.translateDOM());
+        } else {
+          setTimeout(() => this.translateDOM(), 0);
+        }
+      }
     }
 
     setLanguage(lang) {
