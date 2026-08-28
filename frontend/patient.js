@@ -286,6 +286,7 @@
       document.body.className = `theme-${themeName}`;
 
       const themeLabels = {
+        'violet': '💜 Dark Violet',
         'black': '⬛ Pure Black',
         'dark': '🌙 Modern Dark',
         'emerald': '🌿 Emerald Night',
@@ -308,18 +309,14 @@
     }
 
     toggleThemeNext() {
-      const themes = ['black', 'dark', 'emerald', 'navy', 'gov', 'daylight', 'oled'];
-      const nextIdx = (themes.indexOf(this.data.currentTheme) + 1) % themes.length;
-      this.setTheme(themes[nextIdx]);
-      const themeLabels = {
-        'black': 'Pure Black (AMOLED Pitch Black)',
-        'dark': 'Modern Dark Mode',
-        'emerald': 'Emerald Night',
-        'navy': 'Deep Navy Blue',
-        'gov': 'Sarkari Blue & White (Government Portal)',
-        'daylight': 'Daylight Pearl (High-Contrast Light)',
-        'oled': 'Midnight OLED'
-      };
+      const themes = ['violet', 'black', 'emerald', 'dark', 'navy', 'gov', 'daylight', 'oled'];
+      const currentIndex = themes.indexOf(this.data.currentTheme);
+      const nextTheme = themes[(currentIndex + 1) % themes.length];
+      this.setTheme(nextTheme);
+      if (typeof window.toast === 'function') {
+        window.toast(`Theme: ${this.getThemeDisplayName(nextTheme)}`);
+      }
+    };
       if (typeof window.toast === 'function') {
         window.toast(`🎨 Theme: ${themeLabels[themes[nextIdx]] || themes[nextIdx]}`);
       }

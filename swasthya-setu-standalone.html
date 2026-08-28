@@ -137,6 +137,55 @@ body[data-theme="black"] {
   background-image: none !important;
 }
 
+
+/* 5. Pure Dark Violet Theme (Ultra-Deep Midnight Neon Violet) */
+[data-theme="violet"], body[data-theme="violet"] {
+  --void-950: #07020d;
+  --void-900: #0e041a;
+  --void-850: #17072a;
+  --void-800: #230b3f;
+  --void-700: #3b1268;
+
+  --glass-1: rgba(168, 85, 247, 0.06);
+  --glass-2: rgba(168, 85, 247, 0.1);
+  --glass-3: rgba(168, 85, 247, 0.16);
+  --glass-4: rgba(168, 85, 247, 0.24);
+  --glass-border: rgba(168, 85, 247, 0.25);
+  --glass-border-strong: rgba(192, 132, 252, 0.45);
+  --glass-glow: rgba(168, 85, 247, 0.4);
+  --glass-specular: rgba(243, 232, 255, 0.7);
+  --rail-glass: rgba(7, 2, 13, 0.95);
+
+  --primary: #8b5cf6;
+  --primary-dark: #6d28d9;
+  --primary-bright: #c084fc;
+  --primary-glow: rgba(192, 132, 252, 0.55);
+  --teal-cyan: #e879f9;
+  --teal-glow: rgba(232, 121, 249, 0.45);
+
+  --accent: #f59e0b;
+  --accent-light: #fbbf24;
+  --accent-soft: rgba(245, 158, 11, 0.16);
+
+  --ink: #fdf4ff;
+  --ink-dim: #e9d5ff;
+  --muted: #a8a29e;
+  --line: rgba(168, 85, 247, 0.2);
+
+  --shadow-ambient: 0 10px 30px -10px rgba(0, 0, 0, 0.9);
+  --shadow-3d: 0 25px 60px -15px rgba(0, 0, 0, 0.95), 0 0 30px -5px rgba(168, 85, 247, 0.35);
+  color-scheme: dark;
+}
+
+body[data-theme="violet"] {
+  background: #07020d !important;
+  background-image:
+    radial-gradient(100% 70% at 15% 0%, rgba(168, 85, 247, 0.22) 0%, transparent 60%),
+    radial-gradient(80% 60% at 85% 10%, rgba(232, 121, 249, 0.18) 0%, transparent 50%),
+    radial-gradient(60% 50% at 50% 90%, rgba(109, 40, 217, 0.2) 0%, transparent 60%),
+    linear-gradient(180deg, #07020d 0%, #0e041a 50%, #07020d 100%) !important;
+}
+
 /* 1. Classic Modern Dark Mode */
 [data-theme="dark"], body[data-theme="dark"] {
   --void-950: #0b1120;
@@ -7145,41 +7194,7 @@ a {
         }).catch(() => {});
       } catch (err) {}
 
-      // 2. If Patient, register as family member in patient_family_members
-      if (selectedRole === 'patient') {
-        const slug = account.name.toLowerCase().replace(/[^a-z0-9]/g, '_') || 'patient_self';
-        const patientFamilyRecord = {
-          id: account.userId,
-          name: `${account.name} (Self)`,
-          role: 'Self · Registered Citizen',
-          age: (extraInfo && extraInfo.age) ? Number(extraInfo.age) : 28,
-          gender: (extraInfo && extraInfo.gender) || 'Female',
-          bloodGroup: (extraInfo && extraInfo.bloodGroup) || 'O+',
-          abhaId: (extraInfo && extraInfo.abha) || `14-${Math.floor(1000+Math.random()*9000)}-${Math.floor(1000+Math.random()*9000)}-${Math.floor(1000+Math.random()*9000)}`,
-          conditions: (extraInfo && extraInfo.conditions) ? [extraInfo.conditions] : ['General Health Checkup Active'],
-          avatar: account.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase(),
-          assignedAsha: 'B. Saraswati (Ward 6 · Kondapalli)',
-          emergencyContact: (extraInfo && extraInfo.emergencyContact) || `${account.phone} (Self)`
-        };
-
-        try {
-          fetch(`https://swasthya-setu-2b67d-default-rtdb.firebaseio.com/patient_family_members/${slug}.json`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(patientFamilyRecord)
-          }).catch(() => {});
-        } catch (err) {}
-
-        if (typeof window !== 'undefined' && window.patientController && window.patientController.data) {
-          window.patientController.data.familyMembers[slug] = patientFamilyRecord;
-          window.patientController.data.currentFamilyMember = slug;
-          if (typeof window.patientController.renderFamilySelector === 'function') {
-            window.patientController.renderFamilySelector();
-          }
-        }
-      }
-
-      // 3. Update Admin in-memory registry
+      // 2. Update Admin in-memory registry
       if (typeof window !== 'undefined' && window.adminController && window.adminController.data && Array.isArray(window.adminController.data.users)) {
         window.adminController.data.users.unshift(cloudUser);
       }
@@ -11481,17 +11496,36 @@ a {
       const c = this.getActiveConsult();
       const emr = this.getActiveEmr();
 
+      const vitals = (c && c.vitals) ? c.vitals : {
+        bp: '120/80 mmHg',
+        temp: '98.6 °F',
+        pulse: '76 bpm',
+        spo2: '99%',
+        bloodSugar: '102 mg/dL',
+        weight: '58 kg',
+        recordedAt: 'Today (Pre-consultation)'
+      };
+
       container.innerHTML = `
         <div class="admin-section-header">
           <div>
             <h3 style="font-size:20px;margin:0 0 4px;color:#ffffff;">📋 Pre-Consultation Summary &amp; Frontline Vitals</h3>
             <p style="font-size:12.5px;color:var(--muted);margin:0;">
-              Comprehensive clinical intake and objective vitals captured by ASHA worker prior to teleconsultation.
+              Objective clinical intake and vital observations for ${c.patientName}.
             </p>
           </div>
-          <button class="auth-btn-primary" onclick="doctorController.startLiveTeleconsult('${c.id}')">
-            <span>🎥 Begin Teleconsultation with ${c.patientName.split(' ')[0]} →</span>
-          </button>
+          <div style="display:flex;gap:10px;align-items:center;">
+            <select class="auth-input" style="width:260px;height:38px;font-size:12.5px;padding:4px 10px;background:#020b09;border:1px solid #10b981;color:#ffffff;" onchange="doctorController.selectActivePatient(this.value); doctorController.switchTab('preconsult');">
+              ${this.data.consultations.map(item => `
+                <option value="${item.id}" ${item.id === c.id ? 'selected' : ''}>
+                  ${item.patientName} (${item.ageGender})
+                </option>
+              `).join('')}
+            </select>
+            <button class="auth-btn-primary" onclick="doctorController.startLiveTeleconsult('${c.id}')">
+              <span>🎥 Begin Teleconsultation →</span>
+            </button>
+          </div>
         </div>
 
         <div style="display:grid;grid-template-columns:1.3fr 1fr;gap:20px;margin-top:16px;">
@@ -11500,10 +11534,10 @@ a {
             <div class="glass-panel" style="padding:22px;margin-bottom:18px;">
               <div style="display:flex;justify-content:space-between;align-items:flex-start;">
                 <div>
-                  <h4 style="font-size:18px;color:#ffffff;margin:0 0 4px;">${c.patientName} (${emr.age} Yrs · ${emr.gender})</h4>
-                  <span style="font-size:12px;color:var(--auth-primary-bright);font-family:'IBM Plex Mono',monospace;">ABHA ID: ${emr.abhaId}</span>
+                  <h4 style="font-size:18px;color:#ffffff;margin:0 0 4px;">${c.patientName} (${c.ageGender})</h4>
+                  <span style="font-size:12px;color:var(--auth-primary-bright);font-family:'IBM Plex Mono',monospace;">ABHA ID: ${c.abhaId || emr.abhaId || '14-8842-1092-3318'}</span>
                 </div>
-                <span class="admin-status-badge good">Blood: ${emr.bloodGroup}</span>
+                <span class="admin-status-badge good">Blood: ${c.bloodGroup || emr.bloodGroup || 'O+'}</span>
               </div>
 
               <div class="divider" style="margin:14px 0;"></div>
@@ -11512,42 +11546,42 @@ a {
                 <span style="font-size:12px;font-weight:700;color:var(--auth-primary-bright);">
                   🩺 Objective Vitals Recorded by Field Worker
                 </span>
-                <small style="color:var(--muted);">${c.vitals.recordedAt}</small>
+                <small style="color:var(--muted);">${vitals.recordedAt || 'Today'}</small>
               </div>
 
               <div class="doc-vitals-strip">
                 <div class="doc-vital-box">
                   <small>Blood Pressure</small>
-                  <strong>${c.vitals.bp}</strong>
+                  <strong>${vitals.bp || '120/80 mmHg'}</strong>
                 </div>
                 <div class="doc-vital-box">
                   <small>Temperature</small>
-                  <strong>${c.vitals.temp}</strong>
+                  <strong>${vitals.temp || '98.6 °F'}</strong>
                 </div>
                 <div class="doc-vital-box">
                   <small>Pulse (Heart Rate)</small>
-                  <strong>${c.vitals.pulse}</strong>
+                  <strong>${vitals.pulse || '76 bpm'}</strong>
                 </div>
                 <div class="doc-vital-box">
                   <small>SpO₂ Oxygen</small>
-                  <strong>${c.vitals.spo2}</strong>
+                  <strong>${vitals.spo2 || '99%'}</strong>
                 </div>
                 <div class="doc-vital-box">
-                  <small>Random Sugar</small>
-                  <strong>${c.vitals.bloodSugar}</strong>
+                  <small>Random Glucose</small>
+                  <strong>${vitals.bloodSugar || '102 mg/dL'}</strong>
                 </div>
                 <div class="doc-vital-box">
-                  <small>Weight</small>
-                  <strong>${c.vitals.weight}</strong>
+                  <small>Body Weight</small>
+                  <strong>${vitals.weight || '58 kg'}</strong>
                 </div>
               </div>
 
               <div style="margin-top:16px;padding:12px;background:rgba(4,18,15,0.5);border-radius:12px;">
                 <span style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;">Frontline Worker Clinical Field Notes:</span>
                 <p style="font-size:12.5px;color:var(--ink-dim);margin:6px 0 0;line-height:1.45;">
-                  "Patient attended Kondapalli sub-centre accompanied by family. Mild dizziness in the morning. Taking IFA tablets regularly. Foetal kick count normal. Teleconsultation initiated for Hb review and prescription renewal."
+                  "Patient ${c.patientName} (${c.ageGender}) presented at ${c.location}. Chief complaint: ${c.chiefComplaint}. Pre-consultation vitals recorded and verified. Case escalated for doctor teleconsultation and prescription."
                 </p>
-                <small style="display:block;margin-top:4px;color:var(--auth-primary-bright);">— ${c.ashaWorker}</small>
+                <small style="display:block;margin-top:4px;color:var(--auth-primary-bright);">— ${c.ashaWorker || 'Frontline Health Worker'}</small>
               </div>
             </div>
 
@@ -11555,13 +11589,13 @@ a {
             <div class="glass-panel" style="padding:22px;">
               <h4 style="font-size:15px;color:#ffffff;margin-bottom:12px;">⚠️ Clinical Risk Factors &amp; Allergies</h4>
               <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
-                ${emr.chronicConditions.map(cond => `<span class="tag warn">● ${cond}</span>`).join('')}
-                ${emr.allergies.map(al => `<span class="tag neutral">🛡️ ${al}</span>`).join('')}
+                ${(emr.chronicConditions || [c.chiefComplaint]).map(cond => `<span class="tag warn">● ${cond}</span>`).join('')}
+                ${(emr.allergies || ['No Known Allergies (NKDA)']).map(al => `<span class="tag neutral">🛡️ ${al}</span>`).join('')}
               </div>
 
-              <span style="font-size:11.5px;font-weight:700;color:var(--muted);text-transform:uppercase;">Immunization Record:</span>
+              <span style="font-size:11.5px;font-weight:700;color:var(--muted);text-transform:uppercase;">Immunization Status:</span>
               <div style="margin-top:6px;font-size:12.5px;color:#ffffff;">
-                ${emr.immunizationStatus.join(' · ')}
+                ${Array.isArray(emr.immunizationStatus) ? emr.immunizationStatus.join(' · ') : 'Standard Adult Profile Active'}
               </div>
             </div>
           </div>
@@ -11570,7 +11604,7 @@ a {
           <div class="glass-panel" style="padding:22px;">
             <h4 style="font-size:15px;color:#ffffff;margin-bottom:14px;">📜 Past Consultation History</h4>
             <div class="timeline" style="margin-left:4px;">
-              ${emr.consultationHistory.map(h => `
+              ${(emr.consultationHistory || [{ date: 'Today', doctor: 'Dr. K. V. Rao', diagnosis: c.chiefComplaint, notes: 'Initiated teleconsultation intake.' }]).map(h => `
                 <div class="timeline-item">
                   <div class="timeline-date">${h.date} · ${h.doctor}</div>
                   <div class="timeline-title">${h.diagnosis}</div>
@@ -12718,6 +12752,7 @@ a {
       document.body.className = `theme-${themeName}`;
 
       const themeLabels = {
+        'violet': '💜 Dark Violet',
         'black': '⬛ Pure Black',
         'dark': '🌙 Modern Dark',
         'emerald': '🌿 Emerald Night',
@@ -12740,18 +12775,14 @@ a {
     }
 
     toggleThemeNext() {
-      const themes = ['black', 'dark', 'emerald', 'navy', 'gov', 'daylight', 'oled'];
-      const nextIdx = (themes.indexOf(this.data.currentTheme) + 1) % themes.length;
-      this.setTheme(themes[nextIdx]);
-      const themeLabels = {
-        'black': 'Pure Black (AMOLED Pitch Black)',
-        'dark': 'Modern Dark Mode',
-        'emerald': 'Emerald Night',
-        'navy': 'Deep Navy Blue',
-        'gov': 'Sarkari Blue & White (Government Portal)',
-        'daylight': 'Daylight Pearl (High-Contrast Light)',
-        'oled': 'Midnight OLED'
-      };
+      const themes = ['violet', 'black', 'emerald', 'dark', 'navy', 'gov', 'daylight', 'oled'];
+      const currentIndex = themes.indexOf(this.data.currentTheme);
+      const nextTheme = themes[(currentIndex + 1) % themes.length];
+      this.setTheme(nextTheme);
+      if (typeof window.toast === 'function') {
+        window.toast(`Theme: ${this.getThemeDisplayName(nextTheme)}`);
+      }
+    };
       if (typeof window.toast === 'function') {
         window.toast(`🎨 Theme: ${themeLabels[themes[nextIdx]] || themes[nextIdx]}`);
       }

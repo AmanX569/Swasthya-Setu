@@ -137,6 +137,55 @@ body[data-theme="black"] {
   background-image: none !important;
 }
 
+
+/* 5. Pure Dark Violet Theme (Ultra-Deep Midnight Neon Violet) */
+[data-theme="violet"], body[data-theme="violet"] {
+  --void-950: #07020d;
+  --void-900: #0e041a;
+  --void-850: #17072a;
+  --void-800: #230b3f;
+  --void-700: #3b1268;
+
+  --glass-1: rgba(168, 85, 247, 0.06);
+  --glass-2: rgba(168, 85, 247, 0.1);
+  --glass-3: rgba(168, 85, 247, 0.16);
+  --glass-4: rgba(168, 85, 247, 0.24);
+  --glass-border: rgba(168, 85, 247, 0.25);
+  --glass-border-strong: rgba(192, 132, 252, 0.45);
+  --glass-glow: rgba(168, 85, 247, 0.4);
+  --glass-specular: rgba(243, 232, 255, 0.7);
+  --rail-glass: rgba(7, 2, 13, 0.95);
+
+  --primary: #8b5cf6;
+  --primary-dark: #6d28d9;
+  --primary-bright: #c084fc;
+  --primary-glow: rgba(192, 132, 252, 0.55);
+  --teal-cyan: #e879f9;
+  --teal-glow: rgba(232, 121, 249, 0.45);
+
+  --accent: #f59e0b;
+  --accent-light: #fbbf24;
+  --accent-soft: rgba(245, 158, 11, 0.16);
+
+  --ink: #fdf4ff;
+  --ink-dim: #e9d5ff;
+  --muted: #a8a29e;
+  --line: rgba(168, 85, 247, 0.2);
+
+  --shadow-ambient: 0 10px 30px -10px rgba(0, 0, 0, 0.9);
+  --shadow-3d: 0 25px 60px -15px rgba(0, 0, 0, 0.95), 0 0 30px -5px rgba(168, 85, 247, 0.35);
+  color-scheme: dark;
+}
+
+body[data-theme="violet"] {
+  background: #07020d !important;
+  background-image:
+    radial-gradient(100% 70% at 15% 0%, rgba(168, 85, 247, 0.22) 0%, transparent 60%),
+    radial-gradient(80% 60% at 85% 10%, rgba(232, 121, 249, 0.18) 0%, transparent 50%),
+    radial-gradient(60% 50% at 50% 90%, rgba(109, 40, 217, 0.2) 0%, transparent 60%),
+    linear-gradient(180deg, #07020d 0%, #0e041a 50%, #07020d 100%) !important;
+}
+
 /* 1. Classic Modern Dark Mode */
 [data-theme="dark"], body[data-theme="dark"] {
   --void-950: #0b1120;

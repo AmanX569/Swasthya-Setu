@@ -455,41 +455,7 @@
         }).catch(() => {});
       } catch (err) {}
 
-      // 2. If Patient, register as family member in patient_family_members
-      if (selectedRole === 'patient') {
-        const slug = account.name.toLowerCase().replace(/[^a-z0-9]/g, '_') || 'patient_self';
-        const patientFamilyRecord = {
-          id: account.userId,
-          name: `${account.name} (Self)`,
-          role: 'Self · Registered Citizen',
-          age: (extraInfo && extraInfo.age) ? Number(extraInfo.age) : 28,
-          gender: (extraInfo && extraInfo.gender) || 'Female',
-          bloodGroup: (extraInfo && extraInfo.bloodGroup) || 'O+',
-          abhaId: (extraInfo && extraInfo.abha) || `14-${Math.floor(1000+Math.random()*9000)}-${Math.floor(1000+Math.random()*9000)}-${Math.floor(1000+Math.random()*9000)}`,
-          conditions: (extraInfo && extraInfo.conditions) ? [extraInfo.conditions] : ['General Health Checkup Active'],
-          avatar: account.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase(),
-          assignedAsha: 'B. Saraswati (Ward 6 · Kondapalli)',
-          emergencyContact: (extraInfo && extraInfo.emergencyContact) || `${account.phone} (Self)`
-        };
-
-        try {
-          fetch(`https://swasthya-setu-2b67d-default-rtdb.firebaseio.com/patient_family_members/${slug}.json`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(patientFamilyRecord)
-          }).catch(() => {});
-        } catch (err) {}
-
-        if (typeof window !== 'undefined' && window.patientController && window.patientController.data) {
-          window.patientController.data.familyMembers[slug] = patientFamilyRecord;
-          window.patientController.data.currentFamilyMember = slug;
-          if (typeof window.patientController.renderFamilySelector === 'function') {
-            window.patientController.renderFamilySelector();
-          }
-        }
-      }
-
-      // 3. Update Admin in-memory registry
+      // 2. Update Admin in-memory registry
       if (typeof window !== 'undefined' && window.adminController && window.adminController.data && Array.isArray(window.adminController.data.users)) {
         window.adminController.data.users.unshift(cloudUser);
       }
