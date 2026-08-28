@@ -1150,23 +1150,32 @@
     if (activeRole === 'admin') {
       navHtml = `
         <div class="nav-group-title" data-i18n="nav_admin_desk">Admin Command · प्रशासन</div>
-        <button class="nav-btn active" data-view="dashboard" onclick="switchView('dashboard'); if(window.adminController) adminController.switchTab('overview');">
-          <span class="nav-icon">👑</span><span data-i18n="nav_admin_overview">Command Center</span>
+        <button class="nav-btn active" data-admin-tab="overview" onclick="switchView('dashboard'); if(window.adminController) adminController.switchTab('overview');">
+          <span class="nav-icon">📊</span><span data-i18n="nav_admin_overview">Command Dashboard</span>
         </button>
-        <button class="nav-btn" data-view="dashboard" onclick="switchView('dashboard'); if(window.adminController) adminController.switchTab('staff');">
-          <span class="nav-icon">👥</span><span data-i18n="nav_admin_staff">Staff &amp; Users</span>
+        <button class="nav-btn" data-admin-tab="staff" onclick="switchView('dashboard'); if(window.adminController) adminController.switchTab('staff');">
+          <span class="nav-icon">👥</span><span>Staff &amp; Users</span>
         </button>
-        <button class="nav-btn" data-view="dashboard" onclick="switchView('dashboard'); if(window.adminController) adminController.switchTab('approvals');">
-          <span class="nav-icon">🩺</span><span data-i18n="nav_admin_approvals">Doctor Approvals</span>
+        <button class="nav-btn" data-admin-tab="approvals" onclick="switchView('dashboard'); if(window.adminController) adminController.switchTab('approvals');">
+          <span class="nav-icon">🩺</span><span>Doctor Approvals</span>
         </button>
-        <button class="nav-btn" data-view="dashboard" onclick="switchView('dashboard'); if(window.adminController) adminController.switchTab('heatmap');">
-          <span class="nav-icon">🗺️</span><span data-i18n="nav_admin_heatmap">Outbreak Heatmap</span>
+        <button class="nav-btn" data-admin-tab="workers" onclick="switchView('dashboard'); if(window.adminController) adminController.switchTab('workers');">
+          <span class="nav-icon">🗺️</span><span>Worker Routes</span>
         </button>
-        <button class="nav-btn" data-view="dashboard" onclick="switchView('dashboard'); if(window.adminController) adminController.switchTab('supply');">
-          <span class="nav-icon">📦</span><span data-i18n="nav_admin_supply">Drug Supply</span>
+        <button class="nav-btn" data-admin-tab="disease" onclick="switchView('dashboard'); if(window.adminController) adminController.switchTab('disease');">
+          <span class="nav-icon">🦠</span><span>Disease Surveillance</span>
         </button>
-        <button class="nav-btn" data-view="dashboard" onclick="switchView('dashboard'); if(window.adminController) adminController.switchTab('beds');">
-          <span class="nav-icon">🏥</span><span data-i18n="nav_admin_beds">Bed Grid &amp; Blood</span>
+        <button class="nav-btn" data-admin-tab="inventory" onclick="switchView('dashboard'); if(window.adminController) adminController.switchTab('inventory');">
+          <span class="nav-icon">💊</span><span>Drug Supply</span>
+        </button>
+        <button class="nav-btn" data-admin-tab="hospitals" onclick="switchView('dashboard'); if(window.adminController) adminController.switchTab('hospitals');">
+          <span class="nav-icon">🏥</span><span>Hospital Bed Grid</span>
+        </button>
+        <button class="nav-btn" data-admin-tab="blood" onclick="switchView('dashboard'); if(window.adminController) adminController.switchTab('blood');">
+          <span class="nav-icon">🩸</span><span>Blood Bank</span>
+        </button>
+        <button class="nav-btn" data-admin-tab="analytics" onclick="switchView('dashboard'); if(window.adminController) adminController.switchTab('analytics');">
+          <span class="nav-icon">📈</span><span>Analytics &amp; Reports</span>
         </button>
       `;
 

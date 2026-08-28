@@ -3522,10 +3522,20 @@ function switchView(viewId) {
 
   // Update Nav Buttons
   document.querySelectorAll('.nav-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.view === viewId);
+    if (viewId === 'dashboard') {
+      const currentTab = (window.adminController && window.adminController.state) ? window.adminController.state.currentTab : 'overview';
+      const btnTab = btn.getAttribute('data-admin-tab');
+      if (btnTab) {
+        btn.classList.toggle('active', btnTab === currentTab);
+      } else {
+        btn.classList.toggle('active', btn.dataset.view === viewId);
+      }
+    } else {
+      btn.classList.toggle('active', btn.dataset.view === viewId);
+    }
   });
   document.querySelectorAll('.mobile-nav-item').forEach(btn => {
-    btn.classList.toggle('active', btn.getAttribute('onclick')?.includes(viewId));
+    btn.classList.toggle('active', Boolean(btn.getAttribute('onclick')?.includes(viewId)));
   });
 
   window.scrollTo({ top: 0, behavior: 'smooth' });

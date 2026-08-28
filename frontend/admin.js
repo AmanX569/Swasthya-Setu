@@ -32,60 +32,20 @@
 
   const adminData = {
     stats: {
-      totalPatients: '24,850',
-      totalDoctors: 142,
-      totalWorkers: 385,
-      pendingDoctorApprovals: 6,
-      activeConsultations: 48,
-      criticalMedicineShortages: 3,
-      totalHospitalBeds: 720,
-      availableHospitalBeds: 184,
-      avgWaitTimeMinutes: 14,
-      activeDiseaseAlerts: 4
+      totalPatients: 0,
+      totalDoctors: 0,
+      totalWorkers: 0,
+      totalAdmins: 0,
+      pendingDoctorApprovals: 0,
+      activeConsultations: 0,
+      criticalMedicineShortages: 0,
+      totalHospitalBeds: 0,
+      availableHospitalBeds: 0,
+      avgWaitTimeMinutes: 0,
+      activeDiseaseAlerts: 0
     },
 
-    alerts: [
-      {
-        id: 'alt-01',
-        type: 'critical',
-        category: 'Outbreak Detection',
-        title: 'Potential Dengue Outbreak Detected in Zone A',
-        location: 'Kondapalli Sector · Ward 4 & 6',
-        detail: 'Abnormal spike: +38% acute fever with thrombocytopenia reported in last 48 hours.',
-        timestamp: '18 mins ago',
-        actionLabel: 'Dispatch Rapid ASHA Squad'
-      },
-      {
-        id: 'alt-02',
-        type: 'critical',
-        category: 'ICU Capacity',
-        title: 'ICU Capacity Warning: Ibrahimpatnam CHC',
-        location: 'Ibrahimpatnam CHC',
-        detail: 'Only 1 of 8 ICU ventilator beds available. Trauma intake diverted to District Hospital.',
-        timestamp: '42 mins ago',
-        actionLabel: 'View Bed Grid'
-      },
-      {
-        id: 'alt-03',
-        type: 'warn',
-        category: 'Drug Supply',
-        title: 'Critical Stockout Risk: ORS & Insulin 40IU',
-        location: 'Rural Distribution Hub 3 (Kondapalli)',
-        detail: 'Buffer stock below 15% minimum threshold. 4 Sub-centres pending dispatch.',
-        timestamp: '1 hour ago',
-        actionLabel: 'Approve Emergency Stock Transfer'
-      },
-      {
-        id: 'alt-04',
-        type: 'warn',
-        category: 'Blood Bank',
-        title: 'O- Negative Blood Stock Deficit',
-        location: 'Vijayawada District Blood Bank',
-        detail: 'O- available units dropped to 2 (Minimum required: 10 units).',
-        timestamp: '2 hours ago',
-        actionLabel: 'Broadcast Donor Appeal'
-      }
-    ],
+    alerts: [],
 
     // User & Staff Roster
     users: [
@@ -267,124 +227,10 @@
     ],
 
     // Doctor Approvals Queue
-    pendingDoctors: [
-      {
-        id: 'DOC-APP-891',
-        name: 'Dr. Anand Verma',
-        phone: '9876543219',
-        email: 'anand.verma@medcare.in',
-        specialization: 'General Surgery & Trauma Care',
-        mciNumber: 'MCI-AP-2018-99412',
-        experience: '9 Years',
-        affiliatedHospital: 'Ibrahimpatnam CHC',
-        location: 'Krishna District',
-        qualification: 'MBBS, MS (General Surgery)',
-        documents: ['Medical Council Reg Certificate', 'Government ID (Aadhaar)', 'MBBS Degree Copy'],
-        appliedDate: '26 Aug 2026',
-        status: 'Pending Review'
-      },
-      {
-        id: 'DOC-APP-892',
-        name: 'Dr. Sneha Reddy',
-        phone: '9848123499',
-        email: 'dr.sneha.reddy@aiims.edu',
-        specialization: 'Pediatrics & Child Health',
-        mciNumber: 'MCI-TG-2020-44129',
-        experience: '6 Years',
-        affiliatedHospital: 'Kondapalli PHC',
-        location: 'Kondapalli Sector',
-        qualification: 'MBBS, DCH (Pediatrics)',
-        documents: ['State Medical Council Verified', 'NMC Good Standing', 'ID Proof'],
-        appliedDate: '27 Aug 2026',
-        status: 'Pending Review'
-      },
-      {
-        id: 'DOC-APP-893',
-        name: 'Dr. Farhan Akhtar',
-        phone: '9949887766',
-        email: 'dr.farhan@ruralhealth.org',
-        specialization: 'Pulmonology & Respiratory Medicine',
-        mciNumber: 'MCI-MH-2017-77218',
-        experience: '8 Years',
-        affiliatedHospital: 'Vijayawada District Hospital',
-        location: 'Vijayawada Rural',
-        qualification: 'MBBS, MD (Pulmonology)',
-        documents: ['Medical License Copy', 'Specialist Board Certification'],
-        appliedDate: '27 Aug 2026',
-        status: 'Pending Review'
-      },
-      {
-        id: 'DOC-APP-894',
-        name: 'Dr. Deepa Nair',
-        phone: '9440998811',
-        email: 'dr.deepa@telecare.org',
-        specialization: 'Dermatology & Infectious Diseases',
-        mciNumber: 'MCI-KL-2019-33812',
-        experience: '5 Years',
-        affiliatedHospital: 'Mylavaram Area Hospital',
-        location: 'Mylavaram Block',
-        qualification: 'MBBS, MD (Dermatology)',
-        documents: ['State Medical License', 'Clinical Experience Certificate'],
-        appliedDate: '28 Aug 2026',
-        status: 'Pending Review'
-      }
-    ],
+    pendingDoctors: [],
 
     // Field Worker Assignment Matrix
-    workerAssignments: [
-      {
-        id: 'WA-01',
-        workerId: 'USR-WRK-201',
-        workerName: 'B. Saraswati (ASHA)',
-        phone: '3333333333',
-        district: 'Krishna District',
-        block: 'Kondapalli Block',
-        village: 'Kondapalli Gramam (Ward 4, 5, 6)',
-        phc: 'Kondapalli PHC',
-        householdsAssigned: 142,
-        highRiskPatients: 14,
-        status: 'Active Route'
-      },
-      {
-        id: 'WA-02',
-        workerId: 'USR-WRK-202',
-        workerName: 'K. Nageswara Rao (ANM)',
-        phone: '9440123456',
-        district: 'Krishna District',
-        block: 'Ibrahimpatnam Block',
-        village: 'Guntupalli & Koturu Villages',
-        phc: 'Ibrahimpatnam CHC',
-        householdsAssigned: 210,
-        highRiskPatients: 26,
-        status: 'Active Route'
-      },
-      {
-        id: 'WA-03',
-        workerId: 'USR-WRK-203',
-        workerName: 'M. Lakshmi Devi (ASHA)',
-        phone: '9849223344',
-        district: 'Krishna District',
-        block: 'Mylavaram Block',
-        village: 'Chandrala & Velvadam Villages',
-        phc: 'Mylavaram Area Hospital',
-        householdsAssigned: 165,
-        highRiskPatients: 18,
-        status: 'Active Route'
-      },
-      {
-        id: 'WA-04',
-        workerId: 'USR-WRK-204',
-        workerName: 'R. Anjaneyulu (Field Health Worker)',
-        phone: '9490334455',
-        district: 'Krishna District',
-        block: 'Jaggaiahpeta Block',
-        village: 'Vedadri & Torraguntapalem',
-        phc: 'Jaggaiahpeta CHC',
-        householdsAssigned: 188,
-        highRiskPatients: 21,
-        status: 'Pending Reassignment'
-      }
-    ],
+    workerAssignments: [],
 
     // Disease Surveillance & Real-Time Outbreak Heatmap
     diseaseSurveillance: {
@@ -712,12 +558,7 @@
         .then(cloudData => {
           if (cloudData && typeof cloudData === 'object') {
             if (cloudData.staff_registry) {
-              const users = Object.values(cloudData.staff_registry);
-              users.forEach(u => {
-                const idx = this.data.users.findIndex(x => x.id === u.id);
-                if (idx >= 0) this.data.users[idx] = u;
-                else this.data.users.unshift(u);
-              });
+              this.data.users = Object.values(cloudData.staff_registry);
             }
             if (cloudData.rural_inventory) {
               const items = Array.isArray(cloudData.rural_inventory) ? cloudData.rural_inventory : Object.values(cloudData.rural_inventory);
@@ -739,33 +580,67 @@
               const docs = Array.isArray(cloudData.doctor_approvals) ? cloudData.doctor_approvals : Object.values(cloudData.doctor_approvals);
               if (docs.length) this.data.pendingDoctors = docs;
             }
-            if (cloudData.admin_stats) {
-              this.data.stats = { ...this.data.stats, ...cloudData.admin_stats };
+            if (cloudData.doctor_prescriptions) {
+              const rxs = Object.values(cloudData.doctor_prescriptions);
+              this.data.stats.activeConsultations = rxs.length;
+              this.data.analytics.totalConsultations = rxs.length;
             }
             if (cloudData.admin_alerts) {
               const alts = Array.isArray(cloudData.admin_alerts) ? cloudData.admin_alerts : Object.values(cloudData.admin_alerts);
               if (alts.length) this.data.alerts = alts;
             }
-            // Re-render active tab with live cloud data
-            this.switchTab(this.state.currentTab);
+
+            this.calculateLiveStats();
+            this.switchTab(this.state.currentTab || 'overview');
           }
         })
         .catch(() => {});
 
-      // 2. Real-time Firebase SDK Listeners (if RTDB SDK available)
+      // 2. Real-time Firebase SDK Listeners for Instant Live Updating
       if (window.firebaseConfigManager && window.firebaseConfigManager.rtdb) {
         const rtdb = window.firebaseConfigManager.rtdb;
+
         rtdb.ref('staff_registry').on('value', snap => {
           const val = snap.val();
           if (val) {
-            Object.values(val).forEach(u => {
-              const idx = this.data.users.findIndex(x => x.id === u.id);
-              if (idx >= 0) this.data.users[idx] = u;
-              else this.data.users.unshift(u);
-            });
-            if (this.state.currentTab === 'staff') this.renderStaffManagement();
+            this.data.users = Object.values(val);
+          } else {
+            this.data.users = [];
+          }
+          this.calculateLiveStats();
+          if (this.state.currentTab === 'staff') this.renderStaffManagement();
+          else if (this.state.currentTab === 'overview') this.renderOverview();
+        });
+
+        rtdb.ref('doctor_prescriptions').on('value', snap => {
+          const val = snap.val();
+          if (val) {
+            const count = Object.keys(val).length;
+            this.data.stats.activeConsultations = count;
+            this.data.analytics.totalConsultations = count;
+            if (this.state.currentTab === 'overview') this.renderOverview();
+            else if (this.state.currentTab === 'analytics') this.renderAnalytics();
           }
         });
+
+        rtdb.ref('doctor_approvals').on('value', snap => {
+          const val = snap.val();
+          if (val) {
+            this.data.pendingDoctors = Array.isArray(val) ? val : Object.values(val);
+            this.calculateLiveStats();
+            if (this.state.currentTab === 'approvals') this.renderDoctorApprovals();
+            else if (this.state.currentTab === 'overview') this.renderOverview();
+          }
+        });
+
+        rtdb.ref('worker_assignments').on('value', snap => {
+          const val = snap.val();
+          if (val) {
+            this.data.workerAssignments = Array.isArray(val) ? val : Object.values(val);
+            if (this.state.currentTab === 'workers') this.renderWorkerAssignments();
+          }
+        });
+
         rtdb.ref('rural_inventory').on('value', snap => {
           const val = snap.val();
           if (val) {
@@ -773,43 +648,86 @@
             if (this.state.currentTab === 'inventory') this.renderInventory();
           }
         });
+
         rtdb.ref('hospital_bed_grid').on('value', snap => {
           const val = snap.val();
           if (val) {
             this.data.hospitalGrid = Array.isArray(val) ? val : Object.values(val);
+            this.calculateLiveStats();
             if (this.state.currentTab === 'hospitals') this.renderHospitalGrid();
+            else if (this.state.currentTab === 'overview') this.renderOverview();
           }
         });
+
         rtdb.ref('blood_bank_units').on('value', snap => {
           const val = snap.val();
           if (val) {
             this.data.bloodBank = Array.isArray(val) ? val : Object.values(val);
             if (this.state.currentTab === 'blood') this.renderBloodBank();
+            else if (this.state.currentTab === 'overview') this.renderOverview();
           }
         });
       }
     }
 
     switchTab(tabId) {
-      this.state.currentTab = tabId;
-      document.querySelectorAll('.admin-nav-tab').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.tab === tabId);
+      // Map any aliases to standard tab IDs
+      const tabMap = {
+        'overview': 'overview',
+        'dashboard': 'overview',
+        'command': 'overview',
+        'staff': 'staff',
+        'users': 'staff',
+        'directory': 'staff',
+        'approvals': 'approvals',
+        'doctors': 'approvals',
+        'workers': 'workers',
+        'routes': 'workers',
+        'asha': 'workers',
+        'disease': 'disease',
+        'heatmap': 'disease',
+        'outbreak': 'disease',
+        'surveillance': 'disease',
+        'inventory': 'inventory',
+        'supply': 'inventory',
+        'drugs': 'inventory',
+        'hospitals': 'hospitals',
+        'beds': 'hospitals',
+        'capacity': 'hospitals',
+        'blood': 'blood',
+        'bloodbank': 'blood',
+        'analytics': 'analytics',
+        'reports': 'analytics'
+      };
+
+      const normalizedTab = tabMap[tabId] || 'overview';
+      this.state.currentTab = normalizedTab;
+
+      // Update active highlight on left vertical sidebar buttons
+      document.querySelectorAll('#roleDynamicNavContainer .nav-btn, .sidebar-rail .nav-btn').forEach(btn => {
+        const btnTab = btn.getAttribute('data-admin-tab');
+        if (btnTab) {
+          btn.classList.toggle('active', btnTab === normalizedTab);
+        }
       });
 
+      // Update active content pane
       document.querySelectorAll('.admin-tab-pane').forEach(pane => {
-        pane.classList.toggle('active', pane.id === `admin-pane-${tabId}`);
+        pane.classList.toggle('active', pane.id === `admin-pane-${normalizedTab}`);
       });
+
+      this.calculateLiveStats();
 
       // Render tab content on switch
-      if (tabId === 'overview') this.renderOverview();
-      else if (tabId === 'staff') this.renderStaffManagement();
-      else if (tabId === 'approvals') this.renderDoctorApprovals();
-      else if (tabId === 'workers') this.renderWorkerAssignments();
-      else if (tabId === 'disease') this.renderDiseaseSurveillance();
-      else if (tabId === 'inventory') this.renderInventory();
-      else if (tabId === 'analytics') this.renderAnalytics();
-      else if (tabId === 'hospitals') this.renderHospitalGrid();
-      else if (tabId === 'blood') this.renderBloodBank();
+      if (normalizedTab === 'overview') this.renderOverview();
+      else if (normalizedTab === 'staff') this.renderStaffManagement();
+      else if (normalizedTab === 'approvals') this.renderDoctorApprovals();
+      else if (normalizedTab === 'workers') this.renderWorkerAssignments();
+      else if (normalizedTab === 'disease') this.renderDiseaseSurveillance();
+      else if (normalizedTab === 'inventory') this.renderInventory();
+      else if (normalizedTab === 'analytics') this.renderAnalytics();
+      else if (normalizedTab === 'hospitals') this.renderHospitalGrid();
+      else if (normalizedTab === 'blood') this.renderBloodBank();
     }
 
     // -------------------------------------------------------------
@@ -2006,42 +1924,39 @@
     // -------------------------------------------------------------
     // MAIN MASTER MOUNT
     // -------------------------------------------------------------
+    calculateLiveStats() {
+      const users = this.data.users || [];
+      const patients = users.filter(u => u.role === 'patient' || (u.roles && u.roles.includes('patient')));
+      const doctors = users.filter(u => u.role === 'doctor' || (u.roles && u.roles.includes('doctor')));
+      const workers = users.filter(u => u.role === 'worker' || (u.roles && u.roles.includes('worker')));
+      const admins = users.filter(u => u.role === 'admin' || (u.roles && u.roles.includes('admin')));
+      const pendingDocs = this.data.pendingDoctors ? this.data.pendingDoctors.filter(d => d.status === 'Pending Review') : [];
+
+      this.data.stats.totalPatients = patients.length;
+      this.data.stats.totalDoctors = doctors.length;
+      this.data.stats.totalWorkers = workers.length;
+      this.data.stats.totalAdmins = admins.length;
+      this.data.stats.pendingDoctorApprovals = pendingDocs.length;
+      this.data.stats.activeDiseaseAlerts = this.data.alerts ? this.data.alerts.length : 0;
+      
+      if (this.data.hospitalGrid && this.data.hospitalGrid.length) {
+        this.data.stats.totalHospitalBeds = this.data.hospitalGrid.reduce((sum, h) => sum + (h.totalBeds || 0), 0);
+        this.data.stats.availableHospitalBeds = this.data.hospitalGrid.reduce((sum, h) => sum + (h.availableBeds || 0), 0);
+      } else {
+        this.data.stats.totalHospitalBeds = 0;
+        this.data.stats.availableHospitalBeds = 0;
+      }
+    }
+
     renderCommandCenter() {
       const mainDashboard = document.getElementById('view-dashboard');
       if (!mainDashboard) return;
 
+      this.calculateLiveStats();
+
       mainDashboard.innerHTML = `
         <div class="admin-command-shell">
-          <!-- Command Bar Navigation Tabs -->
-          <div class="admin-nav-bar">
-            <button class="admin-nav-tab active" data-tab="overview" onclick="adminController.switchTab('overview')">
-              <span>📊 Command Dashboard</span>
-            </button>
-            <button class="admin-nav-tab" data-tab="staff" onclick="adminController.switchTab('staff')">
-              <span>👥 Staff &amp; Users</span>
-            </button>
-            <button class="admin-nav-tab" data-tab="approvals" onclick="adminController.switchTab('approvals')">
-              <span>🩺 Doctor Approvals (${this.data.pendingDoctors.filter(d=>d.status==='Pending Review').length})</span>
-            </button>
-            <button class="admin-nav-tab" data-tab="workers" onclick="adminController.switchTab('workers')">
-              <span>🗺️ Worker Routes</span>
-            </button>
-            <button class="admin-nav-tab" data-tab="disease" onclick="adminController.switchTab('disease')">
-              <span>🦠 Disease Surveillance</span>
-            </button>
-            <button class="admin-nav-tab" data-tab="inventory" onclick="adminController.switchTab('inventory')">
-              <span>💊 Drug Supply</span>
-            </button>
-            <button class="admin-nav-tab" data-tab="analytics" onclick="adminController.switchTab('analytics')">
-              <span>📈 Analytics</span>
-            </button>
-            <button class="admin-nav-tab" data-tab="hospitals" onclick="adminController.switchTab('hospitals')">
-              <span>🏥 Bed Grid</span>
-            </button>
-            <button class="admin-nav-tab" data-tab="blood" onclick="adminController.switchTab('blood')">
-              <span>🩸 Blood Bank</span>
-            </button>
-          </div>
+          <!-- Horizontal tabs completely removed as requested. Navigation is managed exclusively via the Left Sidebar Column -->
 
           <!-- Tab Content Panes -->
           <div class="admin-tab-pane active" id="admin-pane-overview"></div>
@@ -2056,8 +1971,8 @@
         </div>
       `;
 
-      // Render initial overview tab
-      this.renderOverview();
+      // Render initial tab
+      this.switchTab(this.state.currentTab || 'overview');
     }
   }
 
