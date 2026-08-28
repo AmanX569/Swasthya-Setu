@@ -33,5 +33,9 @@ html = html.replace('<script>', '<script>\n' + inlinedJs + '\n');
 const outPath = 'C:/Users/grani/OneDrive/Desktop/Swasthya-setu/swasthya-setu-standalone.html';
 fs.writeFileSync(outPath, html, 'utf8');
 
+const rootIndex = 'C:/Users/grani/OneDrive/Desktop/Swasthya-setu/index.html';
+fs.writeFileSync(rootIndex, html, 'utf8');
+
 console.log('✓ Successfully created 100% standalone single HTML file at:', outPath);
+console.log('✓ Successfully synced root index.html for GitHub Pages / Cloud Hosting');
 console.log('File size:', (html.length / 1024).toFixed(1), 'KB');

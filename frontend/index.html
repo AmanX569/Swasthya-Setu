@@ -2114,6 +2114,250 @@ a {
     gap: 8px;
   }
 }
+
+/* =========================================================
+   COMPREHENSIVE MOBILE APP-GRADE RESPONSIVENESS (< 900px & < 540px)
+   ========================================================= */
+@media (max-width: 900px) {
+  html, body {
+    overflow-x: hidden;
+    width: 100%;
+  }
+
+  .app-layout {
+    grid-template-columns: 1fr !important;
+  }
+
+  .sidebar-rail {
+    display: none !important;
+  }
+
+  .mobile-bottom-nav {
+    display: flex !important;
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 62px !important;
+    background: rgba(7, 2, 13, 0.96) !important;
+    backdrop-filter: blur(24px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+    border-top: 1px solid var(--glass-border) !important;
+    z-index: 999 !important;
+    justify-content: space-around !important;
+    align-items: center !important;
+    padding: 0 4px calc(4px + env(safe-area-inset-bottom, 0px)) !important;
+    box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.7) !important;
+  }
+
+  .mobile-nav-item {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 2px !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    color: var(--muted) !important;
+    padding: 6px 8px !important;
+    border-radius: 10px !important;
+    flex: 1 !important;
+    text-align: center !important;
+    cursor: pointer !important;
+  }
+
+  .mobile-nav-item.active {
+    color: var(--primary-bright) !important;
+  }
+
+  .mobile-nav-item .mobile-icon, .mobile-nav-item .mob-icon {
+    font-size: 19px !important;
+  }
+
+  .content-stage {
+    padding: 12px 12px 90px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+  }
+
+  /* Responsive Topbar on Mobile */
+  .top-appbar {
+    padding: 10px 12px !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+
+  .top-title-area {
+    width: 100% !important;
+    margin-bottom: 2px !important;
+  }
+
+  .top-heading {
+    font-size: 17px !important;
+  }
+
+  .top-eyebrow {
+    font-size: 10px !important;
+  }
+
+  .topbar-actions {
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+    padding-bottom: 4px !important;
+    gap: 6px !important;
+  }
+
+  .topbar-actions::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .topbar-actions button, .topbar-actions .glass-dropdown {
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+  }
+
+  /* Horizontal Scrollable Tabs in Doctor and Admin Portals */
+  .doc-nav-bar, .admin-nav-bar, .admin-filter-tabs, .portal-tabs, .auth-reg-tabs {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+    gap: 6px !important;
+    padding: 4px !important;
+    border-radius: 12px !important;
+    margin-bottom: 12px !important;
+  }
+
+  .doc-nav-bar::-webkit-scrollbar, .admin-nav-bar::-webkit-scrollbar, .admin-filter-tabs::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .doc-nav-tab, .admin-nav-tab, .admin-filter-btn, .portal-tab-btn, .auth-reg-tab {
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+    font-size: 12px !important;
+    padding: 8px 12px !important;
+  }
+
+  /* Doctor Teleconsult Layout Stack */
+  .doc-tele-layout {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+
+  /* Grids & Cards */
+  .grid-4, .grid-3 {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+  }
+
+  .admin-kpi-grid, .doc-kpi-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+  }
+
+  .doc-vitals-strip {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 8px !important;
+  }
+
+  .doc-vital-box {
+    padding: 10px 8px !important;
+    text-align: center !important;
+  }
+
+  .doc-vital-box strong {
+    font-size: 13px !important;
+  }
+
+  .portal-container {
+    grid-template-columns: 1fr !important;
+    gap: 20px !important;
+  }
+
+  .stepped-pathway {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  /* Tables Overflow Wrap */
+  .glass-panel {
+    border-radius: 16px !important;
+  }
+
+  .admin-table, .glass-table {
+    display: block !important;
+    overflow-x: auto !important;
+    width: 100% !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+}
+
+@media (max-width: 540px) {
+  .grid-4, .grid-3, .grid-2, .stepped-pathway {
+    grid-template-columns: 1fr !important;
+  }
+
+  .admin-kpi-grid, .doc-kpi-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .doc-vitals-strip {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .auth-hero-title {
+    font-size: 28px !important;
+  }
+
+  .auth-roles-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .auth-landing-actions {
+    flex-direction: column !important;
+    width: 100% !important;
+  }
+
+  .auth-btn-primary, .auth-btn-danger {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  .auth-modal-card, .modal-card {
+    width: 95vw !important;
+    padding: 18px 14px !important;
+    border-radius: 18px !important;
+    box-sizing: border-box !important;
+  }
+
+  .auth-card-title {
+    font-size: 20px !important;
+  }
+
+  /* Patient Header Spotlight */
+  .doc-spotlight-card {
+    padding: 16px !important;
+  }
+
+  .doc-patient-avatar {
+    width: 44px !important;
+    height: 44px !important;
+    font-size: 16px !important;
+  }
+
+  /* Rx Medicines Table */
+  .rx-medicine-row div[style*="grid-template-columns"] {
+    grid-template-columns: 1fr !important;
+    gap: 6px !important;
+  }
+}
+
 </style>
 </head>
 <body data-theme="emerald">
