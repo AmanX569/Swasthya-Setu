@@ -34,7 +34,14 @@
     loadConfig() {
       try {
         const saved = localStorage.getItem('swasthya_setu_firebase_config');
-        return saved ? JSON.parse(saved) : DEFAULT_FIREBASE_CONFIG;
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed && parsed.apiKey && !parsed.apiKey.includes('DemoKey') && parsed.projectId === 'swasthya-setu-2b67d') {
+            return parsed;
+          }
+        }
+        localStorage.setItem('swasthya_setu_firebase_config', JSON.stringify(DEFAULT_FIREBASE_CONFIG));
+        return DEFAULT_FIREBASE_CONFIG;
       } catch (e) {
         return DEFAULT_FIREBASE_CONFIG;
       }
