@@ -124,49 +124,7 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-}
-
-/* Mobile-Optimized Scrollable Role Switcher */
-.role-switcher-wrapper {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-}
-.role-switcher-wrapper::-webkit-scrollbar {
-  display: none;
-}
-
-.role-switcher {
-  display: flex;
-  background: rgba(0, 0, 0, 0.05);
-  padding: 4px;
-  border-radius: 12px;
-  border: 1px solid var(--glass-border);
-  gap: 4px;
-  white-space: nowrap;
-}
-
-[data-theme="black"] .role-switcher,
-[data-theme="navy"] .role-switcher {
-  background: rgba(255, 255, 255, 0.06);
-}
-
-.role-btn {
-  padding: 8px 14px;
-  border-radius: 8px;
-  border: none;
-  background: transparent;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--ink-dim);
   cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.role-btn.active {
-  background: var(--primary);
-  color: #ffffff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
 }
 
 .top-controls {
@@ -309,6 +267,24 @@ body {
 
 .admin-table td strong {
   color: var(--ink) !important;
+}
+
+/* Portal Role Cards */
+.portal-card {
+  background: var(--glass-2);
+  border: 1.5px solid var(--glass-border);
+  border-radius: 18px;
+  padding: 22px;
+  box-shadow: var(--shadow-panel);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.portal-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
 }
 
 /* Modals */
@@ -2519,7 +2495,7 @@ body {
 
 <!-- TOP APPBAR -->
 <header class="top-appbar">
-  <div class="brand-title">
+  <div class="brand-title" onclick="doLogout()">
     <span>🇮🇳</span>
     <div>
       <span data-i18n="app_title">Swasthya Setu</span>
@@ -2527,14 +2503,14 @@ body {
     </div>
   </div>
 
-  <!-- ROLE SWITCHER -->
-  <div class="role-switcher-wrapper">
-    <nav class="role-switcher">
-      <button class="role-btn active" id="roleBtnPatient" onclick="switchRole('patient')" data-i18n="role_patient">🌾 Citizen</button>
-      <button class="role-btn" id="roleBtnDoctor" onclick="switchRole('doctor')" data-i18n="role_doctor">🩺 Doctor</button>
-      <button class="role-btn" id="roleBtnWorker" onclick="switchRole('worker')" data-i18n="role_worker">🤝 ASHA</button>
-      <button class="role-btn" id="roleBtnAdmin" onclick="switchRole('admin')" data-i18n="role_admin">👑 Admin</button>
-    </nav>
+  <!-- ACTIVE SESSION BADGE & LOGOUT BUTTON (SHOWN WHEN LOGGED IN) -->
+  <div id="sessionHeaderControls" style="display:none;align-items:center;gap:8px;flex-wrap:wrap;">
+    <span id="activeUserBadge" class="badge" style="background:rgba(2,132,199,0.15);color:var(--primary-bright);padding:6px 12px;border-radius:12px;font-size:13px;font-weight:700;border:1px solid var(--glass-border);">
+      🌾 Ramesh Kumar
+    </span>
+    <button class="btn-glass" style="padding:6px 12px;font-size:12px;color:#ef4444;font-weight:700;" onclick="doLogout()" data-i18n="btn_logout">
+      🚪 Log Out / Change Portal
+    </button>
   </div>
 
   <!-- CONTROLS -->
@@ -2562,9 +2538,108 @@ body {
 <main class="main-container">
 
   <!-- =========================================================
+       0. GATEWAY LOGIN PORTAL (SHOWN WHEN NOT LOGGED IN)
+       ========================================================= -->
+  <section id="viewLogin">
+    <div style="text-align:center;max-width:760px;margin:20px auto 30px;">
+      <span style="font-size:42px;display:block;margin-bottom:6px;">🏥</span>
+      <h1 style="font-size:26px;color:var(--primary-bright);font-weight:800;margin-bottom:6px;" data-i18n="portal_welcome">Welcome to Swasthya Setu</h1>
+      <p style="font-size:14px;color:var(--muted);" data-i18n="portal_subline">Select your respected portal below for dedicated healthcare access:</p>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));gap:16px;margin-bottom:30px;">
+      
+      <!-- 1. CITIZEN PORTAL CARD -->
+      <div class="portal-card">
+        <div>
+          <div style="width:52px;height:52px;background:rgba(22,163,74,0.15);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:12px;">
+            🌾
+          </div>
+          <h2 style="font-size:18px;color:var(--ink);margin-bottom:6px;font-weight:700;" data-i18n="login_patient_title">Citizen / Patient Portal</h2>
+          <p style="font-size:13px;color:var(--ink-dim);line-height:1.5;margin-bottom:14px;" data-i18n="login_patient_desc">
+            Digital ABHA Card, 108 Emergency SOS, Jan Aushadhi generic medicines, symptom triage & family health.
+          </p>
+        </div>
+        <div>
+          <button class="auth-btn-primary" style="width:100%;padding:10px;background:#16a34a;border-color:#15803d;margin-bottom:6px;" onclick="doLogin('patient')">
+            <span data-i18n="btn_enter_portal">Enter Patient Portal</span> →
+          </button>
+          <button class="btn-glass" style="width:100%;padding:8px;font-size:12px;" onclick="doLogin('patient')">
+            <span data-i18n="btn_quick_access">⚡ 1-Tap Quick Access</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 2. DOCTOR PORTAL CARD -->
+      <div class="portal-card">
+        <div>
+          <div style="width:52px;height:52px;background:rgba(2,132,199,0.15);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:12px;">
+            🩺
+          </div>
+          <h2 style="font-size:18px;color:var(--ink);margin-bottom:6px;font-weight:700;" data-i18n="login_doctor_title">Doctor Clinical Portal</h2>
+          <p style="font-size:13px;color:var(--ink-dim);line-height:1.5;margin-bottom:14px;" data-i18n="login_doctor_desc">
+            Teleconsultation OPD queue, diagnostic vitals review & instant electronic prescriptions.
+          </p>
+        </div>
+        <div>
+          <button class="auth-btn-primary" style="width:100%;padding:10px;background:#0284c7;border-color:#0369a1;margin-bottom:6px;" onclick="doLogin('doctor')">
+            <span data-i18n="btn_enter_portal">Enter Doctor Portal</span> →
+          </button>
+          <button class="btn-glass" style="width:100%;padding:8px;font-size:12px;" onclick="doLogin('doctor')">
+            <span data-i18n="btn_quick_access">⚡ Login as Dr. Priya</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 3. ASHA PORTAL CARD -->
+      <div class="portal-card">
+        <div>
+          <div style="width:52px;height:52px;background:rgba(217,119,6,0.15);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:12px;">
+            🤝
+          </div>
+          <h2 style="font-size:18px;color:var(--ink);margin-bottom:6px;font-weight:700;" data-i18n="login_worker_title">ASHA Frontline Portal</h2>
+          <p style="font-size:13px;color:var(--ink-dim);line-height:1.5;margin-bottom:14px;" data-i18n="login_worker_desc">
+            Maternal ANC register, child universal immunization (UIP) & daily village home visits.
+          </p>
+        </div>
+        <div>
+          <button class="auth-btn-primary" style="width:100%;padding:10px;background:#d97706;border-color:#b45309;margin-bottom:6px;" onclick="doLogin('worker')">
+            <span data-i18n="btn_enter_portal">Enter ASHA Portal</span> →
+          </button>
+          <button class="btn-glass" style="width:100%;padding:8px;font-size:12px;" onclick="doLogin('worker')">
+            <span data-i18n="btn_quick_access">⚡ Login as Lakshmi Didi</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 4. ADMIN PORTAL CARD -->
+      <div class="portal-card">
+        <div>
+          <div style="width:52px;height:52px;background:rgba(219,39,119,0.15);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:12px;">
+            👑
+          </div>
+          <h2 style="font-size:18px;color:var(--ink);margin-bottom:6px;font-weight:700;" data-i18n="login_admin_title">Health Admin Portal</h2>
+          <p style="font-size:13px;color:var(--ink-dim);line-height:1.5;margin-bottom:14px;" data-i18n="login_admin_desc">
+            Hospital bed grid, blood bank stock, healthcare staff registry & drug inventory control.
+          </p>
+        </div>
+        <div>
+          <button class="auth-btn-primary" style="width:100%;padding:10px;background:#db2777;border-color:#be185d;margin-bottom:6px;" onclick="doLogin('admin')">
+            <span data-i18n="btn_enter_portal">Enter Admin Portal</span> →
+          </button>
+          <button class="btn-glass" style="width:100%;padding:8px;font-size:12px;" onclick="doLogin('admin')">
+            <span data-i18n="btn_quick_access">⚡ Login as Admin</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- =========================================================
        1. CITIZEN / PATIENT HUB
        ========================================================= -->
-  <section id="viewPatient">
+  <section id="viewPatient" style="display:none;">
     <!-- 108 SOS BANNER -->
     <div style="background:linear-gradient(135deg, #dc2626, #b91c1c);color:#ffffff;border-radius:16px;padding:14px 18px;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;box-shadow:0 8px 24px rgba(220,38,38,0.25);">
       <div>
@@ -2588,7 +2663,7 @@ body {
       <div id="abhaCardContainer"></div>
     </div>
 
-    <!-- VISUAL AI SYMPTOM TRIAGE (DYNAMIC PURE VERNACULAR GRID) -->
+    <!-- VISUAL AI SYMPTOM TRIAGE -->
     <div class="glass-panel">
       <div class="panel-header">
         <h2 class="panel-title" data-i18n="triage_title">🩺 Visual AI Symptom Triage</h2>
@@ -3026,7 +3101,7 @@ body {
 /**
  * =========================================================
  * SWASTHYA SETU - UNIFIED CLIENT-SIDE REACTIVE STORE (store.js)
- * 100% Standalone, Zero-Backend, Offline-First Data Engine
+ * Standalone Zero-Backend Store with Session & Auth Management
  * =========================================================
  */
 
@@ -3036,9 +3111,15 @@ body {
   const STORAGE_KEY = 'swasthya_setu_v3_store';
 
   const DEFAULT_INITIAL_STATE = {
-    activeRole: 'patient',
     currentLanguage: 'en',
     currentTheme: 'classic',
+
+    // Session / Auth state (defaults to login page if not logged in)
+    session: {
+      isLoggedIn: false,
+      role: null, // 'patient' | 'doctor' | 'worker' | 'admin'
+      user: null
+    },
 
     currentUser: {
       id: 'USR-PAT-001',
@@ -3182,9 +3263,31 @@ body {
       });
     }
 
-    setActiveRole(role) {
-      this.state.activeRole = role;
+    // Auth & Session
+    login(role, userDetails) {
+      this.state.session = {
+        isLoggedIn: true,
+        role: role,
+        user: userDetails || this.getDefaultUserForRole(role)
+      };
       this.saveState();
+    }
+
+    logout() {
+      this.state.session = {
+        isLoggedIn: false,
+        role: null,
+        user: null
+      };
+      this.saveState();
+    }
+
+    getDefaultUserForRole(role) {
+      if (role === 'patient') return this.state.currentUser;
+      if (role === 'doctor') return this.state.staff.find(s => s.role === 'doctor') || { name: 'Dr. Priya Sharma', regNo: 'MCI-AP-48912' };
+      if (role === 'worker') return this.state.staff.find(s => s.role === 'worker') || { name: 'Lakshmi Didi', regNo: 'ASHA-AP-094' };
+      if (role === 'admin') return this.state.staff.find(s => s.role === 'admin') || { name: 'S. K. Nambiar', regNo: 'DHO-AP-001' };
+      return { name: 'User' };
     }
 
     setLanguage(lang) {
@@ -3197,6 +3300,7 @@ body {
       this.saveState();
     }
 
+    // Family Member methods
     addFamilyMember(member) {
       const id = 'FAM-' + String(Date.now()).slice(-4);
       const abha = member.abhaId || `14-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}`;
@@ -3211,6 +3315,7 @@ body {
       this.saveState();
     }
 
+    // Staff methods
     addStaff(staffMember) {
       const prefix = staffMember.role === 'doctor' ? 'DOC' : staffMember.role === 'worker' ? 'ASH' : 'ADM';
       const id = `${prefix}-${String(Date.now()).slice(-4)}`;
@@ -3233,6 +3338,7 @@ body {
       this.saveState();
     }
 
+    // Queue & Prescriptions
     addToQueue(item) {
       const tokenNum = String(this.state.consultQueue.length + 1).padStart(2, '0');
       const newItem = {
@@ -3265,6 +3371,7 @@ body {
       this.saveState();
     }
 
+    // ASHA Maternal, Immunization, Visits
     addAncRecord(record) {
       const newRec = {
         id: 'ANC-' + String(Date.now()).slice(-4),
@@ -3314,6 +3421,7 @@ body {
       }
     }
 
+    // Beds, Blood & Medicines
     updateBedCount(hospId, type, delta) {
       const hosp = this.state.hospitals.find(h => h.id === hospId);
       if (hosp) {
@@ -3351,7 +3459,7 @@ body {
 /**
  * =========================================================
  * SWASTHYA SETU - COMPLETE MULTILINGUAL TRANSLATION ENGINE (i18n.js)
- * 100% Pure Vernacular Translation for All UI, Symptoms & Medicines
+ * 100% Pure Vernacular Translation for All UI, Portal Gateway & Medicines
  * =========================================================
  */
 
@@ -3364,6 +3472,20 @@ body {
     en: {
       app_title: 'Swasthya Setu',
       app_tagline: 'Rural Healthcare Grid',
+      portal_welcome: 'Welcome to Swasthya Setu',
+      portal_subline: 'Select your respected portal below for dedicated healthcare access:',
+      login_patient_title: 'Citizen / Patient Portal',
+      login_patient_desc: 'Digital ABHA Card, 108 Emergency SOS, Jan Aushadhi generic medicines, symptom triage & family health.',
+      login_doctor_title: 'Doctor Clinical Portal',
+      login_doctor_desc: 'Teleconsultation OPD queue, diagnostic vitals review & instant electronic prescriptions.',
+      login_worker_title: 'ASHA Frontline Portal',
+      login_worker_desc: 'Maternal ANC register, child universal immunization (UIP) & daily village home visits.',
+      login_admin_title: 'Health Admin Portal',
+      login_admin_desc: 'Hospital bed grid, blood bank stock, healthcare staff registry & drug inventory control.',
+      btn_enter_portal: 'Enter Portal',
+      btn_quick_access: '⚡ 1-Tap Quick Access',
+      btn_logout: '🚪 Log Out / Change Portal',
+      logged_in_as: 'Active Session',
       role_patient: '🌾 Citizen',
       role_doctor: '🩺 Doctor',
       role_worker: '🤝 ASHA',
@@ -3446,6 +3568,20 @@ body {
     hi: {
       app_title: 'स्वास्थ्य सेतु',
       app_tagline: 'ग्रामीण स्वास्थ्य ग्रिड',
+      portal_welcome: 'स्वास्थ्य सेतु में आपका स्वागत है',
+      portal_subline: 'सेवाओं का उपयोग करने के लिए नीचे अपना संबंधित पोर्टल चुनें:',
+      login_patient_title: 'नागरिक / मरीज पोर्टल',
+      login_patient_desc: 'डिजिटल आभा कार्ड, 108 आपातकालीन सेवा, जन औषधि दवाइयां, लक्षण जांच व परिवार स्वास्थ्य।',
+      login_doctor_title: 'चिकित्सक ओपीडी पोर्टल',
+      login_doctor_desc: 'लाइव मरीज कतार, वाइटल्स जांच और त्वरित डिजिटल ई-पर्चा निर्माण।',
+      login_worker_title: 'आशा दीदी फील्ड पोर्टल',
+      login_worker_desc: 'गर्भवती महिला (ANC) रजिस्टर, शिशु टीकाकरण (UIP) और गांव के दैनिक घरेलू दौरे।',
+      login_admin_title: 'जिला स्वास्थ्य प्रशासन पोर्टल',
+      login_admin_desc: 'अस्पताल बेड ग्रिड, ब्लड बैंक स्टॉक, स्वास्थ्य कर्मचारी प्रबंधन और दवा भंडार।',
+      btn_enter_portal: 'पोर्टल में प्रवेश करें',
+      btn_quick_access: '⚡ 1-टैप सीधा प्रवेश',
+      btn_logout: '🚪 लॉग आउट / पोर्टल बदलें',
+      logged_in_as: 'सक्रिय सत्र',
       role_patient: '🌾 नागरिक',
       role_doctor: '🩺 डॉक्टर',
       role_worker: '🤝 आशा',
@@ -3528,6 +3664,20 @@ body {
     te: {
       app_title: 'స్వాస్థ్య సేతు',
       app_tagline: 'గ్రామీణ ఆరోగ్య గ్రిడ్',
+      portal_welcome: 'స్వాస్థ్య సేతుకు స్వాగతం',
+      portal_subline: 'సేవలను పొందడానికి క్రింద మీ సంబంధిత పోర్టల్‌ను ఎంచుకోండి:',
+      login_patient_title: 'పౌరుడు / రోగి పోర్టల్',
+      login_patient_desc: 'డిజిటల్ ఆభా కార్డు, 108 ఎమర్జెన్సీ, జన్ ఔషధి మందులు & లక్షణాల తనిఖీ.',
+      login_doctor_title: 'వైద్యుల క్లినికల్ పోర్టల్',
+      login_doctor_desc: 'ఓపీడీ రోగుల క్యూ మరియు తక్షణ డిజిటల్ ప్రిస్క్రిప్షన్లు.',
+      login_worker_title: 'ఆశా ఫ్రంట్‌లైన్ పోర్టల్',
+      login_worker_desc: 'గర్భిణీ స్త్రీల రికార్డు, శిశు టీకాలు & గ్రామ గృహ సందర్శనలు.',
+      login_admin_title: 'ఆరోగ్య పరిపాలనా పోర్టల్',
+      login_admin_desc: 'ఆసుపత్రి బెడ్ల వివరాలు, బ్లడ్ బ్యాంక్ మరియు మందుల నిల్వ.',
+      btn_enter_portal: 'పోర్టల్‌లోకి ప్రవేశించండి',
+      btn_quick_access: '⚡ 1-ట్యాప్ ప్రత్యక్ష ప్రవేశం',
+      btn_logout: '🚪 లాగ్ అవుట్ / మార్చండి',
+      logged_in_as: 'యాక్టివ్ సెషన్',
       role_patient: '🌾 పౌరుడు',
       role_doctor: '🩺 డాక్టర్',
       role_worker: '🤝 ఆశా',
@@ -3610,6 +3760,20 @@ body {
     ta: {
       app_title: 'சுவஸ்த்யா சேது',
       app_tagline: 'கிராமப்புற சுகாதார கட்டமைப்பு',
+      portal_welcome: 'சுவஸ்த்யா சேதுவுக்கு நல்வரவு',
+      portal_subline: 'சேவைகளைப் பெற கீழே உள்ள உங்கள் போர்ட்டலைத் தேர்வு செய்யவும்:',
+      login_patient_title: 'நோயாளி / குடிமக்கள் போர்டல்',
+      login_patient_desc: 'டிஜிட்டல் ஆபா அட்டை, 108 அவசர உதவி, ஜன் ஔஷதி மருந்துகள் & குடும்ப நலன்.',
+      login_doctor_title: 'மருத்துவர் மருத்துவ போர்டல்',
+      login_doctor_desc: 'நோயாளி வரிசை மேலாண்மை & உடனடி மின்-மருத்துவ சீட்டு.',
+      login_worker_title: 'ஆஷா களப்பணி போர்டல்',
+      login_worker_desc: 'கர்ப்பிணி பெண்கள் பதிவேடு, குழந்தை தடுப்பூசி & கிராம களப்பணிகள்.',
+      login_admin_title: 'சுகாதார நிர்வாக போர்டல்',
+      login_admin_desc: 'மருத்துவமனை படுக்கை வசதி, ரத்த வங்கி & பணியாளர் பட்டியல்.',
+      btn_enter_portal: 'உள்நுழையவும்',
+      btn_quick_access: '⚡ உடனடி உள்நுழைவு',
+      btn_logout: '🚪 வெளியேறு / மாற்று',
+      logged_in_as: 'செயலில் உள்ள அமர்வு',
       role_patient: '🌾 நோயாளி',
       role_doctor: '🩺 மருத்துவர்',
       role_worker: '🤝 ஆஷா',
@@ -3692,6 +3856,20 @@ body {
     mr: {
       app_title: 'स्वास्थ्य सेतू',
       app_tagline: 'ग्रामीण आरोग्य ग्रिड',
+      portal_welcome: 'स्वास्थ्य सेतू मध्ये आपले स्वागत आहे',
+      portal_subline: 'आरोग्य सेवा मिळवण्यासाठी खालीलपैकी आपले पोर्टल निवडा:',
+      login_patient_title: 'नागरिक / रुग्ण पोर्टल',
+      login_patient_desc: 'डिजिटल आभा कार्ड, 108 रुग्णवाहिका, जन औषधी औषधे व कुटुंब आरोग्य.',
+      login_doctor_title: 'डॉक्टर क्लिनिकल पोर्टल',
+      login_doctor_desc: 'ओपीडी रुग्ण रांग, निदान व त्वरित डिजिटल ई-प्रिस्क्रिप्शन.',
+      login_worker_title: 'आशा सेविका पोर्टल',
+      login_worker_desc: 'गरोदर माता नोंद, बाल लसीकरण व दैनंदिन आरोग्य भेटी.',
+      login_admin_title: 'आरोग्य प्रशासन पोर्टल',
+      login_admin_desc: 'रुग्णालय बेड व्यवस्था, रक्त साठा व कर्मचारी यादी.',
+      btn_enter_portal: 'पोर्टलमध्ये प्रवेश करा',
+      btn_quick_access: '⚡ थेट प्रवेश',
+      btn_logout: '🚪 लॉग आउट / पोर्टल बदला',
+      logged_in_as: 'सक्रिय सत्र',
       role_patient: '🌾 नागरिक',
       role_doctor: '🩺 डॉक्टर',
       role_worker: '🤝 आशा',
@@ -3774,6 +3952,20 @@ body {
     bn: {
       app_title: 'স্বাস্থ্য সেতু',
       app_tagline: 'গ্রামীণ স্বাস্থ্যসেবা গ্রিড',
+      portal_welcome: 'স্বাস্থ্য সেতুতে স্বাগতম',
+      portal_subline: 'স্বাস্থ্যসেবা পেতে নিচে আপনার নিজস্ব পোর্টাল নির্বাচন করুন:',
+      login_patient_title: 'নাগরিক / রোগী পোর্টাল',
+      login_patient_desc: 'ডিজিটাল আভা কার্ড, ১০৮ জরুরি সেবা, জন ঔষধি ওষুধ ও পারিবারিক স্বাস্থ্য।',
+      login_doctor_title: 'ডাক্তার ক্লিনিক্যাল পোর্টাল',
+      login_doctor_desc: 'ওপিডি রোগী তালিকা ও তাৎক্ষণিক ডিজিটাল প্রেসক্রিপশন।',
+      login_worker_title: 'আশা কর্মী পোর্টাল',
+      login_worker_desc: 'গর্ভবতী মায়ের রেকর্ড, শিশু টিকাদান ও বাড়ি পরিদর্শন।',
+      login_admin_title: 'স্বাস্থ্য প্রশাসন পোর্টাল',
+      login_admin_desc: 'হাসপাতাল বেড তথ্য, ব্লাড ব্যাংক ও কর্মী ব্যবস্থাপনা।',
+      btn_enter_portal: 'প্রবেশ করুন',
+      btn_quick_access: '⚡ সরাসরি প্রবেশ',
+      btn_logout: '🚪 লগ আউট / পরিবর্তন',
+      logged_in_as: 'সক্রিয় সেশন',
       role_patient: '🌾 নাগরিক',
       role_doctor: '🩺 ডাক্তার',
       role_worker: '🤝 আশা',
@@ -3856,6 +4048,20 @@ body {
     kn: {
       app_title: 'ಸ್ವಾಸ್ಥ್ಯ ಸೇತು',
       app_tagline: 'ಗ್ರಾಮೀಣ ಆರೋಗ್ಯ ಜಾಲ',
+      portal_welcome: 'ಸ್ವಾಸ್ಥ್ಯ ಸೇತುಗೆ ಸುಸ್ವಾಗತ',
+      portal_subline: 'ಸೇವೆಗಳನ್ನು ಪಡೆಯಲು ಕೆಳಗೆ ನಿಮ್ಮ ಸಂಬಂಧಿತ ಪೋರ್ಟಲ್ ಆಯ್ಕೆಮಾಡಿ:',
+      login_patient_title: 'ನಾಗರಿಕ / ರೋಗಿ ಪೋರ್ಟಲ್',
+      login_patient_desc: 'ಡಿಜಿಟಲ್ ಆಭಾ ಕಾರ್ಡ್, 108 ತುರ್ತು ಸೇವೆ, ಜನ ಔಷಧಿ ಮಾತ್ರೆಗಳು & ಕುಟುಂಬ ಆರೋಗ್ಯ.',
+      login_doctor_title: 'ವೈದ್ಯರ ಕ್ಲಿನಿಕಲ್ ಪೋರ್ಟಲ್',
+      login_doctor_desc: 'ರೋಗಿಗಳ ಸರತಿ ಸಾಲು ನಿರ್ವಹಣೆ & ತಕ್ಷಣದ ಡಿಜಿಟಲ್ ಇ-ಪ್ರಿಸ್ಕ್ರಿಪ್ಷನ್.',
+      login_worker_title: 'ಆಶಾ ಕ್ಷೇತ್ರ ಪೋರ್ಟಲ್',
+      login_worker_desc: 'ಗರ್ಭಿಣಿಯರ ದಾಖಲೆ, ಮಕ್ಕಳ ಲಸಿಕೆ & ಗ್ರಾಮ ಭೇಟಿಗಳು.',
+      login_admin_title: 'ಆರೋಗ್ಯ ಆಡಳಿತ ಪೋರ್ಟಲ್',
+      login_admin_desc: 'ಆಸ್ಪತ್ರೆ ಬೆಡ್ ಲಭ್ಯತೆ, ರಕ್ತನಿಧಿ & ಸಿಬ್ಬಂದಿ ಪಟ್ಟಿ.',
+      btn_enter_portal: 'ಪ್ರವೇಶಿಸಿ',
+      btn_quick_access: '⚡ ನೇರ ಪ್ರವೇಶ',
+      btn_logout: '🚪 ಲಾಗ್ ಔಟ್ / ಬದಲಾಯಿಸಿ',
+      logged_in_as: 'ಸಕ್ರಿಯ ಸೆಷನ್',
       role_patient: '🌾 ನಾಗರಿಕ',
       role_doctor: '🩺 ವೈದ್ಯರು',
       role_worker: '🤝 ಆಶಾ',
@@ -3966,7 +4172,10 @@ body {
 
       this.applyTranslations(lang);
 
-      // Re-render all modules in the newly selected language
+      // Re-render all views in the selected language
+      if (typeof window.renderActivePortalView === 'function') {
+        window.renderActivePortalView();
+      }
       if (global.patientController) global.patientController.renderAll();
       if (global.doctorController) global.doctorController.init();
       if (global.workerController) global.workerController.renderAll();
@@ -5003,26 +5212,76 @@ body {
 })(typeof window !== 'undefined' ? window : this);
 
 
-// Switch Active Role Tab
-function switchRole(role) {
-  const roles = ['patient', 'doctor', 'worker', 'admin'];
-  roles.forEach(r => {
-    const view = document.getElementById('view' + r.charAt(0).toUpperCase() + r.slice(1));
-    const btn = document.getElementById('roleBtn' + r.charAt(0).toUpperCase() + r.slice(1));
-    if (view) view.style.display = (r === role) ? 'block' : 'none';
-    if (btn) {
-      if (r === role) btn.classList.add('active');
-      else btn.classList.remove('active');
-    }
+// Authentication / Login Flow
+function doLogin(role) {
+  if (window.appStore) {
+    window.appStore.login(role);
+  }
+  renderActivePortalView();
+  if (typeof window.toast === 'function') {
+    const roleNames = {
+      patient: '🌾 Citizen Portal',
+      doctor: '🩺 Doctor Portal',
+      worker: '🤝 ASHA Frontline Portal',
+      admin: '👑 Health Admin Portal'
+    };
+    window.toast('✓ Logged in to ' + (roleNames[role] || role));
+  }
+}
+
+function doLogout() {
+  if (window.appStore) {
+    window.appStore.logout();
+  }
+  renderActivePortalView();
+  if (typeof window.toast === 'function') {
+    window.toast('🚪 Logged out to Gateway Portal');
+  }
+}
+
+// Render active portal view based on store session
+function renderActivePortalView() {
+  const session = window.appStore ? window.appStore.getState().session : { isLoggedIn: false };
+  const views = ['Login', 'Patient', 'Doctor', 'Worker', 'Admin'];
+
+  if (!session || !session.isLoggedIn) {
+    // Show login gateway
+    views.forEach(v => {
+      const el = document.getElementById('view' + v);
+      if (el) el.style.display = (v === 'Login') ? 'block' : 'none';
+    });
+    const headerControls = document.getElementById('sessionHeaderControls');
+    if (headerControls) headerControls.style.display = 'none';
+    return;
+  }
+
+  // User is logged in to a specific role
+  const role = session.role;
+  const activeViewName = role.charAt(0).toUpperCase() + role.slice(1);
+
+  views.forEach(v => {
+    const el = document.getElementById('view' + v);
+    if (el) el.style.display = (v === activeViewName) ? 'block' : 'none';
   });
 
-  if (window.appStore) window.appStore.setActiveRole(role);
+  // Show Header Active User Badge & Logout Button
+  const headerControls = document.getElementById('sessionHeaderControls');
+  const userBadge = document.getElementById('activeUserBadge');
+  if (headerControls && userBadge) {
+    headerControls.style.display = 'flex';
+    const user = session.user || {};
+    const roleIcons = { patient: '🌾', doctor: '🩺', worker: '🤝', admin: '👑' };
+    userBadge.textContent = (roleIcons[role] || '👤') + ' ' + (user.name || 'User');
+  }
 
+  // Trigger component renderers
   if (role === 'patient' && window.patientController) window.patientController.renderAll();
-  if (role === 'doctor' && window.doctorController) window.doctorController.renderConsultQueue();
+  if (role === 'doctor' && window.doctorController) window.doctorController.init();
   if (role === 'worker' && window.workerController) window.workerController.renderAll();
   if (role === 'admin' && window.adminController) window.adminController.renderAll();
 }
+
+window.renderActivePortalView = renderActivePortalView;
 
 // 3 Glass Themes Cycle: Classic -> Black -> Navy -> Classic
 function cycleTheme() {
@@ -5056,10 +5315,7 @@ window.toast = function(msg) {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-  if (window.patientController) window.patientController.init();
-  if (window.doctorController) window.doctorController.init();
-  if (window.workerController) window.workerController.init();
-  if (window.adminController) window.adminController.init();
+  renderActivePortalView();
 });
 </script>
 

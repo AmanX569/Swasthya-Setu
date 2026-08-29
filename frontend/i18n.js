@@ -1,7 +1,7 @@
 /**
  * =========================================================
  * SWASTHYA SETU - COMPLETE MULTILINGUAL TRANSLATION ENGINE (i18n.js)
- * 100% Pure Vernacular Translation for All UI, Symptoms & Medicines
+ * 100% Pure Vernacular Translation for All UI, Portal Gateway & Medicines
  * =========================================================
  */
 
@@ -14,6 +14,20 @@
     en: {
       app_title: 'Swasthya Setu',
       app_tagline: 'Rural Healthcare Grid',
+      portal_welcome: 'Welcome to Swasthya Setu',
+      portal_subline: 'Select your respected portal below for dedicated healthcare access:',
+      login_patient_title: 'Citizen / Patient Portal',
+      login_patient_desc: 'Digital ABHA Card, 108 Emergency SOS, Jan Aushadhi generic medicines, symptom triage & family health.',
+      login_doctor_title: 'Doctor Clinical Portal',
+      login_doctor_desc: 'Teleconsultation OPD queue, diagnostic vitals review & instant electronic prescriptions.',
+      login_worker_title: 'ASHA Frontline Portal',
+      login_worker_desc: 'Maternal ANC register, child universal immunization (UIP) & daily village home visits.',
+      login_admin_title: 'Health Admin Portal',
+      login_admin_desc: 'Hospital bed grid, blood bank stock, healthcare staff registry & drug inventory control.',
+      btn_enter_portal: 'Enter Portal',
+      btn_quick_access: '⚡ 1-Tap Quick Access',
+      btn_logout: '🚪 Log Out / Change Portal',
+      logged_in_as: 'Active Session',
       role_patient: '🌾 Citizen',
       role_doctor: '🩺 Doctor',
       role_worker: '🤝 ASHA',
@@ -96,6 +110,20 @@
     hi: {
       app_title: 'स्वास्थ्य सेतु',
       app_tagline: 'ग्रामीण स्वास्थ्य ग्रिड',
+      portal_welcome: 'स्वास्थ्य सेतु में आपका स्वागत है',
+      portal_subline: 'सेवाओं का उपयोग करने के लिए नीचे अपना संबंधित पोर्टल चुनें:',
+      login_patient_title: 'नागरिक / मरीज पोर्टल',
+      login_patient_desc: 'डिजिटल आभा कार्ड, 108 आपातकालीन सेवा, जन औषधि दवाइयां, लक्षण जांच व परिवार स्वास्थ्य।',
+      login_doctor_title: 'चिकित्सक ओपीडी पोर्टल',
+      login_doctor_desc: 'लाइव मरीज कतार, वाइटल्स जांच और त्वरित डिजिटल ई-पर्चा निर्माण।',
+      login_worker_title: 'आशा दीदी फील्ड पोर्टल',
+      login_worker_desc: 'गर्भवती महिला (ANC) रजिस्टर, शिशु टीकाकरण (UIP) और गांव के दैनिक घरेलू दौरे।',
+      login_admin_title: 'जिला स्वास्थ्य प्रशासन पोर्टल',
+      login_admin_desc: 'अस्पताल बेड ग्रिड, ब्लड बैंक स्टॉक, स्वास्थ्य कर्मचारी प्रबंधन और दवा भंडार।',
+      btn_enter_portal: 'पोर्टल में प्रवेश करें',
+      btn_quick_access: '⚡ 1-टैप सीधा प्रवेश',
+      btn_logout: '🚪 लॉग आउट / पोर्टल बदलें',
+      logged_in_as: 'सक्रिय सत्र',
       role_patient: '🌾 नागरिक',
       role_doctor: '🩺 डॉक्टर',
       role_worker: '🤝 आशा',
@@ -178,6 +206,20 @@
     te: {
       app_title: 'స్వాస్థ్య సేతు',
       app_tagline: 'గ్రామీణ ఆరోగ్య గ్రిడ్',
+      portal_welcome: 'స్వాస్థ్య సేతుకు స్వాగతం',
+      portal_subline: 'సేవలను పొందడానికి క్రింద మీ సంబంధిత పోర్టల్‌ను ఎంచుకోండి:',
+      login_patient_title: 'పౌరుడు / రోగి పోర్టల్',
+      login_patient_desc: 'డిజిటల్ ఆభా కార్డు, 108 ఎమర్జెన్సీ, జన్ ఔషధి మందులు & లక్షణాల తనిఖీ.',
+      login_doctor_title: 'వైద్యుల క్లినికల్ పోర్టల్',
+      login_doctor_desc: 'ఓపీడీ రోగుల క్యూ మరియు తక్షణ డిజిటల్ ప్రిస్క్రిప్షన్లు.',
+      login_worker_title: 'ఆశా ఫ్రంట్‌లైన్ పోర్టల్',
+      login_worker_desc: 'గర్భిణీ స్త్రీల రికార్డు, శిశు టీకాలు & గ్రామ గృహ సందర్శనలు.',
+      login_admin_title: 'ఆరోగ్య పరిపాలనా పోర్టల్',
+      login_admin_desc: 'ఆసుపత్రి బెడ్ల వివరాలు, బ్లడ్ బ్యాంక్ మరియు మందుల నిల్వ.',
+      btn_enter_portal: 'పోర్టల్‌లోకి ప్రవేశించండి',
+      btn_quick_access: '⚡ 1-ట్యాప్ ప్రత్యక్ష ప్రవేశం',
+      btn_logout: '🚪 లాగ్ అవుట్ / మార్చండి',
+      logged_in_as: 'యాక్టివ్ సెషన్',
       role_patient: '🌾 పౌరుడు',
       role_doctor: '🩺 డాక్టర్',
       role_worker: '🤝 ఆశా',
@@ -260,6 +302,20 @@
     ta: {
       app_title: 'சுவஸ்த்யா சேது',
       app_tagline: 'கிராமப்புற சுகாதார கட்டமைப்பு',
+      portal_welcome: 'சுவஸ்த்யா சேதுவுக்கு நல்வரவு',
+      portal_subline: 'சேவைகளைப் பெற கீழே உள்ள உங்கள் போர்ட்டலைத் தேர்வு செய்யவும்:',
+      login_patient_title: 'நோயாளி / குடிமக்கள் போர்டல்',
+      login_patient_desc: 'டிஜிட்டல் ஆபா அட்டை, 108 அவசர உதவி, ஜன் ஔஷதி மருந்துகள் & குடும்ப நலன்.',
+      login_doctor_title: 'மருத்துவர் மருத்துவ போர்டல்',
+      login_doctor_desc: 'நோயாளி வரிசை மேலாண்மை & உடனடி மின்-மருத்துவ சீட்டு.',
+      login_worker_title: 'ஆஷா களப்பணி போர்டல்',
+      login_worker_desc: 'கர்ப்பிணி பெண்கள் பதிவேடு, குழந்தை தடுப்பூசி & கிராம களப்பணிகள்.',
+      login_admin_title: 'சுகாதார நிர்வாக போர்டல்',
+      login_admin_desc: 'மருத்துவமனை படுக்கை வசதி, ரத்த வங்கி & பணியாளர் பட்டியல்.',
+      btn_enter_portal: 'உள்நுழையவும்',
+      btn_quick_access: '⚡ உடனடி உள்நுழைவு',
+      btn_logout: '🚪 வெளியேறு / மாற்று',
+      logged_in_as: 'செயலில் உள்ள அமர்வு',
       role_patient: '🌾 நோயாளி',
       role_doctor: '🩺 மருத்துவர்',
       role_worker: '🤝 ஆஷா',
@@ -342,6 +398,20 @@
     mr: {
       app_title: 'स्वास्थ्य सेतू',
       app_tagline: 'ग्रामीण आरोग्य ग्रिड',
+      portal_welcome: 'स्वास्थ्य सेतू मध्ये आपले स्वागत आहे',
+      portal_subline: 'आरोग्य सेवा मिळवण्यासाठी खालीलपैकी आपले पोर्टल निवडा:',
+      login_patient_title: 'नागरिक / रुग्ण पोर्टल',
+      login_patient_desc: 'डिजिटल आभा कार्ड, 108 रुग्णवाहिका, जन औषधी औषधे व कुटुंब आरोग्य.',
+      login_doctor_title: 'डॉक्टर क्लिनिकल पोर्टल',
+      login_doctor_desc: 'ओपीडी रुग्ण रांग, निदान व त्वरित डिजिटल ई-प्रिस्क्रिप्शन.',
+      login_worker_title: 'आशा सेविका पोर्टल',
+      login_worker_desc: 'गरोदर माता नोंद, बाल लसीकरण व दैनंदिन आरोग्य भेटी.',
+      login_admin_title: 'आरोग्य प्रशासन पोर्टल',
+      login_admin_desc: 'रुग्णालय बेड व्यवस्था, रक्त साठा व कर्मचारी यादी.',
+      btn_enter_portal: 'पोर्टलमध्ये प्रवेश करा',
+      btn_quick_access: '⚡ थेट प्रवेश',
+      btn_logout: '🚪 लॉग आउट / पोर्टल बदला',
+      logged_in_as: 'सक्रिय सत्र',
       role_patient: '🌾 नागरिक',
       role_doctor: '🩺 डॉक्टर',
       role_worker: '🤝 आशा',
@@ -424,6 +494,20 @@
     bn: {
       app_title: 'স্বাস্থ্য সেতু',
       app_tagline: 'গ্রামীণ স্বাস্থ্যসেবা গ্রিড',
+      portal_welcome: 'স্বাস্থ্য সেতুতে স্বাগতম',
+      portal_subline: 'স্বাস্থ্যসেবা পেতে নিচে আপনার নিজস্ব পোর্টাল নির্বাচন করুন:',
+      login_patient_title: 'নাগরিক / রোগী পোর্টাল',
+      login_patient_desc: 'ডিজিটাল আভা কার্ড, ১০৮ জরুরি সেবা, জন ঔষধি ওষুধ ও পারিবারিক স্বাস্থ্য।',
+      login_doctor_title: 'ডাক্তার ক্লিনিক্যাল পোর্টাল',
+      login_doctor_desc: 'ওপিডি রোগী তালিকা ও তাৎক্ষণিক ডিজিটাল প্রেসক্রিপশন।',
+      login_worker_title: 'আশা কর্মী পোর্টাল',
+      login_worker_desc: 'গর্ভবতী মায়ের রেকর্ড, শিশু টিকাদান ও বাড়ি পরিদর্শন।',
+      login_admin_title: 'স্বাস্থ্য প্রশাসন পোর্টাল',
+      login_admin_desc: 'হাসপাতাল বেড তথ্য, ব্লাড ব্যাংক ও কর্মী ব্যবস্থাপনা।',
+      btn_enter_portal: 'প্রবেশ করুন',
+      btn_quick_access: '⚡ সরাসরি প্রবেশ',
+      btn_logout: '🚪 লগ আউট / পরিবর্তন',
+      logged_in_as: 'সক্রিয় সেশন',
       role_patient: '🌾 নাগরিক',
       role_doctor: '🩺 ডাক্তার',
       role_worker: '🤝 আশা',
@@ -506,6 +590,20 @@
     kn: {
       app_title: 'ಸ್ವಾಸ್ಥ್ಯ ಸೇತು',
       app_tagline: 'ಗ್ರಾಮೀಣ ಆರೋಗ್ಯ ಜಾಲ',
+      portal_welcome: 'ಸ್ವಾಸ್ಥ್ಯ ಸೇತುಗೆ ಸುಸ್ವಾಗತ',
+      portal_subline: 'ಸೇವೆಗಳನ್ನು ಪಡೆಯಲು ಕೆಳಗೆ ನಿಮ್ಮ ಸಂಬಂಧಿತ ಪೋರ್ಟಲ್ ಆಯ್ಕೆಮಾಡಿ:',
+      login_patient_title: 'ನಾಗರಿಕ / ರೋಗಿ ಪೋರ್ಟಲ್',
+      login_patient_desc: 'ಡಿಜಿಟಲ್ ಆಭಾ ಕಾರ್ಡ್, 108 ತುರ್ತು ಸೇವೆ, ಜನ ಔಷಧಿ ಮಾತ್ರೆಗಳು & ಕುಟುಂಬ ಆರೋಗ್ಯ.',
+      login_doctor_title: 'ವೈದ್ಯರ ಕ್ಲಿನಿಕಲ್ ಪೋರ್ಟಲ್',
+      login_doctor_desc: 'ರೋಗಿಗಳ ಸರತಿ ಸಾಲು ನಿರ್ವಹಣೆ & ತಕ್ಷಣದ ಡಿಜಿಟಲ್ ಇ-ಪ್ರಿಸ್ಕ್ರಿಪ್ಷನ್.',
+      login_worker_title: 'ಆಶಾ ಕ್ಷೇತ್ರ ಪೋರ್ಟಲ್',
+      login_worker_desc: 'ಗರ್ಭಿಣಿಯರ ದಾಖಲೆ, ಮಕ್ಕಳ ಲಸಿಕೆ & ಗ್ರಾಮ ಭೇಟಿಗಳು.',
+      login_admin_title: 'ಆರೋಗ್ಯ ಆಡಳಿತ ಪೋರ್ಟಲ್',
+      login_admin_desc: 'ಆಸ್ಪತ್ರೆ ಬೆಡ್ ಲಭ್ಯತೆ, ರಕ್ತನಿಧಿ & ಸಿಬ್ಬಂದಿ ಪಟ್ಟಿ.',
+      btn_enter_portal: 'ಪ್ರವೇಶಿಸಿ',
+      btn_quick_access: '⚡ ನೇರ ಪ್ರವೇಶ',
+      btn_logout: '🚪 ಲಾಗ್ ಔಟ್ / ಬದಲಾಯಿಸಿ',
+      logged_in_as: 'ಸಕ್ರಿಯ ಸೆಷನ್',
       role_patient: '🌾 ನಾಗರಿಕ',
       role_doctor: '🩺 ವೈದ್ಯರು',
       role_worker: '🤝 ಆಶಾ',
@@ -616,7 +714,10 @@
 
       this.applyTranslations(lang);
 
-      // Re-render all modules in the newly selected language
+      // Re-render all views in the selected language
+      if (typeof window.renderActivePortalView === 'function') {
+        window.renderActivePortalView();
+      }
       if (global.patientController) global.patientController.renderAll();
       if (global.doctorController) global.doctorController.init();
       if (global.workerController) global.workerController.renderAll();

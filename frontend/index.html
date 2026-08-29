@@ -124,49 +124,7 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-}
-
-/* Mobile-Optimized Scrollable Role Switcher */
-.role-switcher-wrapper {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-}
-.role-switcher-wrapper::-webkit-scrollbar {
-  display: none;
-}
-
-.role-switcher {
-  display: flex;
-  background: rgba(0, 0, 0, 0.05);
-  padding: 4px;
-  border-radius: 12px;
-  border: 1px solid var(--glass-border);
-  gap: 4px;
-  white-space: nowrap;
-}
-
-[data-theme="black"] .role-switcher,
-[data-theme="navy"] .role-switcher {
-  background: rgba(255, 255, 255, 0.06);
-}
-
-.role-btn {
-  padding: 8px 14px;
-  border-radius: 8px;
-  border: none;
-  background: transparent;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--ink-dim);
   cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.role-btn.active {
-  background: var(--primary);
-  color: #ffffff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
 }
 
 .top-controls {
@@ -311,6 +269,24 @@ body {
   color: var(--ink) !important;
 }
 
+/* Portal Role Cards */
+.portal-card {
+  background: var(--glass-2);
+  border: 1.5px solid var(--glass-border);
+  border-radius: 18px;
+  padding: 22px;
+  box-shadow: var(--shadow-panel);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.portal-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
 /* Modals */
 .modal-overlay {
   position: fixed;
@@ -358,7 +334,7 @@ body {
 
 <!-- TOP APPBAR -->
 <header class="top-appbar">
-  <div class="brand-title">
+  <div class="brand-title" onclick="doLogout()">
     <span>🇮🇳</span>
     <div>
       <span data-i18n="app_title">Swasthya Setu</span>
@@ -366,14 +342,14 @@ body {
     </div>
   </div>
 
-  <!-- ROLE SWITCHER -->
-  <div class="role-switcher-wrapper">
-    <nav class="role-switcher">
-      <button class="role-btn active" id="roleBtnPatient" onclick="switchRole('patient')" data-i18n="role_patient">🌾 Citizen</button>
-      <button class="role-btn" id="roleBtnDoctor" onclick="switchRole('doctor')" data-i18n="role_doctor">🩺 Doctor</button>
-      <button class="role-btn" id="roleBtnWorker" onclick="switchRole('worker')" data-i18n="role_worker">🤝 ASHA</button>
-      <button class="role-btn" id="roleBtnAdmin" onclick="switchRole('admin')" data-i18n="role_admin">👑 Admin</button>
-    </nav>
+  <!-- ACTIVE SESSION BADGE & LOGOUT BUTTON (SHOWN WHEN LOGGED IN) -->
+  <div id="sessionHeaderControls" style="display:none;align-items:center;gap:8px;flex-wrap:wrap;">
+    <span id="activeUserBadge" class="badge" style="background:rgba(2,132,199,0.15);color:var(--primary-bright);padding:6px 12px;border-radius:12px;font-size:13px;font-weight:700;border:1px solid var(--glass-border);">
+      🌾 Ramesh Kumar
+    </span>
+    <button class="btn-glass" style="padding:6px 12px;font-size:12px;color:#ef4444;font-weight:700;" onclick="doLogout()" data-i18n="btn_logout">
+      🚪 Log Out / Change Portal
+    </button>
   </div>
 
   <!-- CONTROLS -->
@@ -401,9 +377,108 @@ body {
 <main class="main-container">
 
   <!-- =========================================================
+       0. GATEWAY LOGIN PORTAL (SHOWN WHEN NOT LOGGED IN)
+       ========================================================= -->
+  <section id="viewLogin">
+    <div style="text-align:center;max-width:760px;margin:20px auto 30px;">
+      <span style="font-size:42px;display:block;margin-bottom:6px;">🏥</span>
+      <h1 style="font-size:26px;color:var(--primary-bright);font-weight:800;margin-bottom:6px;" data-i18n="portal_welcome">Welcome to Swasthya Setu</h1>
+      <p style="font-size:14px;color:var(--muted);" data-i18n="portal_subline">Select your respected portal below for dedicated healthcare access:</p>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));gap:16px;margin-bottom:30px;">
+      
+      <!-- 1. CITIZEN PORTAL CARD -->
+      <div class="portal-card">
+        <div>
+          <div style="width:52px;height:52px;background:rgba(22,163,74,0.15);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:12px;">
+            🌾
+          </div>
+          <h2 style="font-size:18px;color:var(--ink);margin-bottom:6px;font-weight:700;" data-i18n="login_patient_title">Citizen / Patient Portal</h2>
+          <p style="font-size:13px;color:var(--ink-dim);line-height:1.5;margin-bottom:14px;" data-i18n="login_patient_desc">
+            Digital ABHA Card, 108 Emergency SOS, Jan Aushadhi generic medicines, symptom triage & family health.
+          </p>
+        </div>
+        <div>
+          <button class="auth-btn-primary" style="width:100%;padding:10px;background:#16a34a;border-color:#15803d;margin-bottom:6px;" onclick="doLogin('patient')">
+            <span data-i18n="btn_enter_portal">Enter Patient Portal</span> →
+          </button>
+          <button class="btn-glass" style="width:100%;padding:8px;font-size:12px;" onclick="doLogin('patient')">
+            <span data-i18n="btn_quick_access">⚡ 1-Tap Quick Access</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 2. DOCTOR PORTAL CARD -->
+      <div class="portal-card">
+        <div>
+          <div style="width:52px;height:52px;background:rgba(2,132,199,0.15);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:12px;">
+            🩺
+          </div>
+          <h2 style="font-size:18px;color:var(--ink);margin-bottom:6px;font-weight:700;" data-i18n="login_doctor_title">Doctor Clinical Portal</h2>
+          <p style="font-size:13px;color:var(--ink-dim);line-height:1.5;margin-bottom:14px;" data-i18n="login_doctor_desc">
+            Teleconsultation OPD queue, diagnostic vitals review & instant electronic prescriptions.
+          </p>
+        </div>
+        <div>
+          <button class="auth-btn-primary" style="width:100%;padding:10px;background:#0284c7;border-color:#0369a1;margin-bottom:6px;" onclick="doLogin('doctor')">
+            <span data-i18n="btn_enter_portal">Enter Doctor Portal</span> →
+          </button>
+          <button class="btn-glass" style="width:100%;padding:8px;font-size:12px;" onclick="doLogin('doctor')">
+            <span data-i18n="btn_quick_access">⚡ Login as Dr. Priya</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 3. ASHA PORTAL CARD -->
+      <div class="portal-card">
+        <div>
+          <div style="width:52px;height:52px;background:rgba(217,119,6,0.15);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:12px;">
+            🤝
+          </div>
+          <h2 style="font-size:18px;color:var(--ink);margin-bottom:6px;font-weight:700;" data-i18n="login_worker_title">ASHA Frontline Portal</h2>
+          <p style="font-size:13px;color:var(--ink-dim);line-height:1.5;margin-bottom:14px;" data-i18n="login_worker_desc">
+            Maternal ANC register, child universal immunization (UIP) & daily village home visits.
+          </p>
+        </div>
+        <div>
+          <button class="auth-btn-primary" style="width:100%;padding:10px;background:#d97706;border-color:#b45309;margin-bottom:6px;" onclick="doLogin('worker')">
+            <span data-i18n="btn_enter_portal">Enter ASHA Portal</span> →
+          </button>
+          <button class="btn-glass" style="width:100%;padding:8px;font-size:12px;" onclick="doLogin('worker')">
+            <span data-i18n="btn_quick_access">⚡ Login as Lakshmi Didi</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 4. ADMIN PORTAL CARD -->
+      <div class="portal-card">
+        <div>
+          <div style="width:52px;height:52px;background:rgba(219,39,119,0.15);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:12px;">
+            👑
+          </div>
+          <h2 style="font-size:18px;color:var(--ink);margin-bottom:6px;font-weight:700;" data-i18n="login_admin_title">Health Admin Portal</h2>
+          <p style="font-size:13px;color:var(--ink-dim);line-height:1.5;margin-bottom:14px;" data-i18n="login_admin_desc">
+            Hospital bed grid, blood bank stock, healthcare staff registry & drug inventory control.
+          </p>
+        </div>
+        <div>
+          <button class="auth-btn-primary" style="width:100%;padding:10px;background:#db2777;border-color:#be185d;margin-bottom:6px;" onclick="doLogin('admin')">
+            <span data-i18n="btn_enter_portal">Enter Admin Portal</span> →
+          </button>
+          <button class="btn-glass" style="width:100%;padding:8px;font-size:12px;" onclick="doLogin('admin')">
+            <span data-i18n="btn_quick_access">⚡ Login as Admin</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- =========================================================
        1. CITIZEN / PATIENT HUB
        ========================================================= -->
-  <section id="viewPatient">
+  <section id="viewPatient" style="display:none;">
     <!-- 108 SOS BANNER -->
     <div style="background:linear-gradient(135deg, #dc2626, #b91c1c);color:#ffffff;border-radius:16px;padding:14px 18px;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;box-shadow:0 8px 24px rgba(220,38,38,0.25);">
       <div>
@@ -427,7 +502,7 @@ body {
       <div id="abhaCardContainer"></div>
     </div>
 
-    <!-- VISUAL AI SYMPTOM TRIAGE (DYNAMIC PURE VERNACULAR GRID) -->
+    <!-- VISUAL AI SYMPTOM TRIAGE -->
     <div class="glass-panel">
       <div class="panel-header">
         <h2 class="panel-title" data-i18n="triage_title">🩺 Visual AI Symptom Triage</h2>
@@ -860,26 +935,76 @@ body {
 <script src="admin.js"></script>
 
 <script>
-// Switch Active Role Tab
-function switchRole(role) {
-  const roles = ['patient', 'doctor', 'worker', 'admin'];
-  roles.forEach(r => {
-    const view = document.getElementById('view' + r.charAt(0).toUpperCase() + r.slice(1));
-    const btn = document.getElementById('roleBtn' + r.charAt(0).toUpperCase() + r.slice(1));
-    if (view) view.style.display = (r === role) ? 'block' : 'none';
-    if (btn) {
-      if (r === role) btn.classList.add('active');
-      else btn.classList.remove('active');
-    }
+// Authentication / Login Flow
+function doLogin(role) {
+  if (window.appStore) {
+    window.appStore.login(role);
+  }
+  renderActivePortalView();
+  if (typeof window.toast === 'function') {
+    const roleNames = {
+      patient: '🌾 Citizen Portal',
+      doctor: '🩺 Doctor Portal',
+      worker: '🤝 ASHA Frontline Portal',
+      admin: '👑 Health Admin Portal'
+    };
+    window.toast('✓ Logged in to ' + (roleNames[role] || role));
+  }
+}
+
+function doLogout() {
+  if (window.appStore) {
+    window.appStore.logout();
+  }
+  renderActivePortalView();
+  if (typeof window.toast === 'function') {
+    window.toast('🚪 Logged out to Gateway Portal');
+  }
+}
+
+// Render active portal view based on store session
+function renderActivePortalView() {
+  const session = window.appStore ? window.appStore.getState().session : { isLoggedIn: false };
+  const views = ['Login', 'Patient', 'Doctor', 'Worker', 'Admin'];
+
+  if (!session || !session.isLoggedIn) {
+    // Show login gateway
+    views.forEach(v => {
+      const el = document.getElementById('view' + v);
+      if (el) el.style.display = (v === 'Login') ? 'block' : 'none';
+    });
+    const headerControls = document.getElementById('sessionHeaderControls');
+    if (headerControls) headerControls.style.display = 'none';
+    return;
+  }
+
+  // User is logged in to a specific role
+  const role = session.role;
+  const activeViewName = role.charAt(0).toUpperCase() + role.slice(1);
+
+  views.forEach(v => {
+    const el = document.getElementById('view' + v);
+    if (el) el.style.display = (v === activeViewName) ? 'block' : 'none';
   });
 
-  if (window.appStore) window.appStore.setActiveRole(role);
+  // Show Header Active User Badge & Logout Button
+  const headerControls = document.getElementById('sessionHeaderControls');
+  const userBadge = document.getElementById('activeUserBadge');
+  if (headerControls && userBadge) {
+    headerControls.style.display = 'flex';
+    const user = session.user || {};
+    const roleIcons = { patient: '🌾', doctor: '🩺', worker: '🤝', admin: '👑' };
+    userBadge.textContent = (roleIcons[role] || '👤') + ' ' + (user.name || 'User');
+  }
 
+  // Trigger component renderers
   if (role === 'patient' && window.patientController) window.patientController.renderAll();
-  if (role === 'doctor' && window.doctorController) window.doctorController.renderConsultQueue();
+  if (role === 'doctor' && window.doctorController) window.doctorController.init();
   if (role === 'worker' && window.workerController) window.workerController.renderAll();
   if (role === 'admin' && window.adminController) window.adminController.renderAll();
 }
+
+window.renderActivePortalView = renderActivePortalView;
 
 // 3 Glass Themes Cycle: Classic -> Black -> Navy -> Classic
 function cycleTheme() {
@@ -913,10 +1038,7 @@ window.toast = function(msg) {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-  if (window.patientController) window.patientController.init();
-  if (window.doctorController) window.doctorController.init();
-  if (window.workerController) window.workerController.init();
-  if (window.adminController) window.adminController.init();
+  renderActivePortalView();
 });
 </script>
 

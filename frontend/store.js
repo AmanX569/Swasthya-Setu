@@ -1,7 +1,7 @@
 /**
  * =========================================================
  * SWASTHYA SETU - UNIFIED CLIENT-SIDE REACTIVE STORE (store.js)
- * 100% Standalone, Zero-Backend, Offline-First Data Engine
+ * Standalone Zero-Backend Store with Session & Auth Management
  * =========================================================
  */
 
@@ -11,9 +11,15 @@
   const STORAGE_KEY = 'swasthya_setu_v3_store';
 
   const DEFAULT_INITIAL_STATE = {
-    activeRole: 'patient',
     currentLanguage: 'en',
     currentTheme: 'classic',
+
+    // Session / Auth state (defaults to login page if not logged in)
+    session: {
+      isLoggedIn: false,
+      role: null, // 'patient' | 'doctor' | 'worker' | 'admin'
+      user: null
+    },
 
     currentUser: {
       id: 'USR-PAT-001',
@@ -157,9 +163,31 @@
       });
     }
 
-    setActiveRole(role) {
-      this.state.activeRole = role;
+    // Auth & Session
+    login(role, userDetails) {
+      this.state.session = {
+        isLoggedIn: true,
+        role: role,
+        user: userDetails || this.getDefaultUserForRole(role)
+      };
       this.saveState();
+    }
+
+    logout() {
+      this.state.session = {
+        isLoggedIn: false,
+        role: null,
+        user: null
+      };
+      this.saveState();
+    }
+
+    getDefaultUserForRole(role) {
+      if (role === 'patient') return this.state.currentUser;
+      if (role === 'doctor') return this.state.staff.find(s => s.role === 'doctor') || { name: 'Dr. Priya Sharma', regNo: 'MCI-AP-48912' };
+      if (role === 'worker') return this.state.staff.find(s => s.role === 'worker') || { name: 'Lakshmi Didi', regNo: 'ASHA-AP-094' };
+      if (role === 'admin') return this.state.staff.find(s => s.role === 'admin') || { name: 'S. K. Nambiar', regNo: 'DHO-AP-001' };
+      return { name: 'User' };
     }
 
     setLanguage(lang) {
@@ -172,6 +200,7 @@
       this.saveState();
     }
 
+    // Family Member methods
     addFamilyMember(member) {
       const id = 'FAM-' + String(Date.now()).slice(-4);
       const abha = member.abhaId || `14-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}`;
@@ -186,6 +215,7 @@
       this.saveState();
     }
 
+    // Staff methods
     addStaff(staffMember) {
       const prefix = staffMember.role === 'doctor' ? 'DOC' : staffMember.role === 'worker' ? 'ASH' : 'ADM';
       const id = `${prefix}-${String(Date.now()).slice(-4)}`;
@@ -208,6 +238,7 @@
       this.saveState();
     }
 
+    // Queue & Prescriptions
     addToQueue(item) {
       const tokenNum = String(this.state.consultQueue.length + 1).padStart(2, '0');
       const newItem = {
@@ -240,6 +271,7 @@
       this.saveState();
     }
 
+    // ASHA Maternal, Immunization, Visits
     addAncRecord(record) {
       const newRec = {
         id: 'ANC-' + String(Date.now()).slice(-4),
@@ -289,6 +321,7 @@
       }
     }
 
+    // Beds, Blood & Medicines
     updateBedCount(hospId, type, delta) {
       const hosp = this.state.hospitals.find(h => h.id === hospId);
       if (hosp) {
