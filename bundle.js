@@ -17,7 +17,7 @@ for (const f of cssFiles) {
 html = html.replace('</head>', '<style>\n' + inlinedCss + '\n</style>\n</head>');
 
 // Inline JS files
-const jsFiles = ['firebase-config.js', 'firebase-service.js', 'pdf-generator.js', 'i18n.js', 'auth.js', 'auth-ui.js', 'admin.js', 'doctor.js', 'patient.js', 'worker.js'];
+const jsFiles = ['store.js', 'i18n.js', 'patient.js', 'doctor.js', 'worker.js', 'admin.js'];
 let inlinedJs = '';
 for (const f of jsFiles) {
   const jsPath = path.join(baseDir, f);

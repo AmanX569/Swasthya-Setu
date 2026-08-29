@@ -1,698 +1,141 @@
 /**
- * Swasthya Setu - Field Worker (ASHA / Frontline Staff) Portal Controller
- * 
- * Provides:
- * 1. Frontline ASHA Dashboard KPIs (Registered Patients, Today Visits, High-Risk ANC, Immunizations, Offline Sync)
- * 2. High-Risk Pregnancy (ANC) Monitoring Matrix
- * 3. Child Immunization Registry & Due Scheduler
- * 4. Daily Home Visit Schedule & Geographic Route Planner
- * 5. Frontline Vital Capture & Doctor Teleconsult Escalation
- * 6. Offline-First Sync Queue Simulator
+ * =========================================================
+ * SWASTHYA SETU - ASHA FRONTLINE WORKER HUB (worker.js)
+ * 100% Standalone ANC, UIP & Village Home Visit Tracker
+ * =========================================================
  */
 
 (function(global) {
   'use strict';
 
-  const workerState = {
-    currentTab: 'overview', // 'overview', 'anc', 'immunization', 'visits', 'vitals', 'sync'
-    offlineCount: 12,
-    isSyncing: false
-  };
-
-  const workerData = {
-    workerProfile: {
-      id: 'USR-WRK-101',
-      name: 'B. Saraswati (ASHA Didi)',
-      role: 'Accredited Social Health Activist (ASHA)',
-      badgeNumber: 'ASHA-AP-KOND-042',
-      assignedWard: 'Ward 6 & Sub-Centre Area',
-      village: 'Kondapalli Gramam',
-      supervisingPhc: 'Kondapalli PHC (Dr. K. V. Rao)',
-      phone: '3333333333',
-      avatar: 'BS'
-    },
-
-    stats: {
-      totalRegisteredPatients: 0,
-      todayHomeVisits: 0,
-      pendingFollowups: 0,
-      highRiskPregnancies: 0,
-      childrenDueImmunization: 0,
-      doctorReviewRequired: 0,
-      medicinesDistributed: 0,
-      offlineRecordsWaiting: 0
-    },
-
-    // High-Risk Pregnancy (ANC) Register
-    ancRegistry: [],
-
-    // Child Immunization Registry
-    immunizationRegistry: [],
-
-    // Today's Daily Home Visit Plan
-    homeVisits: []
-  };
-
-  // -------------------------------------------------------------
-  // CONTROLLER CLASS
-  // -------------------------------------------------------------
   class WorkerController {
     constructor() {
-      this.data = workerData;
-      this.state = workerState;
+      this.store = global.appStore;
     }
 
     init() {
-      this.renderOverview();
-      this.syncLiveWorkerDatabase();
-    }
-
-    syncLiveWorkerDatabase() {
-      const dbUrl = 'https://swasthya-setu-2b67d-default-rtdb.firebaseio.com';
-      fetch(`${dbUrl}/.json`)
-        .then(r => r.json())
-        .then(data => {
-          if (data && typeof data === 'object') {
-            if (data.worker_anc_registry) {
-              const anc = Array.isArray(data.worker_anc_registry) ? data.worker_anc_registry : Object.values(data.worker_anc_registry);
-              if (anc.length) this.data.ancRegistry = anc;
-            }
-            if (data.worker_immunization_registry) {
-              const imm = Array.isArray(data.worker_immunization_registry) ? data.worker_immunization_registry : Object.values(data.worker_immunization_registry);
-              if (imm.length) this.data.immunizationRegistry = imm;
-            }
-            if (data.worker_home_visits) {
-              const vis = Array.isArray(data.worker_home_visits) ? data.worker_home_visits : Object.values(data.worker_home_visits);
-              if (vis.length) this.data.homeVisits = vis;
-            }
-            if (data.worker_stats) {
-              this.data.stats = { ...this.data.stats, ...data.worker_stats };
-              if (this.state.currentTab === 'overview') this.renderOverview();
-            }
-          }
-        })
-        .catch(() => {});
-
-      if (window.firebaseConfigManager && window.firebaseConfigManager.rtdb) {
-        window.firebaseConfigManager.rtdb.ref('worker_anc_registry').on('value', snap => {
-          const val = snap.val();
-          if (val) {
-            this.data.ancRegistry = Array.isArray(val) ? val : Object.values(val);
-            if (this.state.currentTab === 'anc') this.renderAncRegistry();
-          }
-        });
+      this.renderAll();
+      if (this.store) {
+        this.store.subscribe(() => this.renderAll());
       }
     }
 
-    // -------------------------------------------------------------
-    // TAB 1: WORKER DASHBOARD OVERVIEW
-    // -------------------------------------------------------------
-    renderOverview() {
-      const container = document.getElementById('worker-pane-overview');
-      if (!container) return;
-
-      const s = this.data.stats;
-      const w = this.data.workerProfile;
-
-      container.innerHTML = `
-        <!-- ASHA Profile Header Banner -->
-        <div class="glass-panel" style="padding:22px;margin-bottom:20px;background:linear-gradient(135deg, rgba(245,158,11,0.15), rgba(6,24,20,0.85));border-color:rgba(245,158,11,0.35);">
-          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;">
-            <div style="display:flex;align-items:center;gap:16px;">
-              <div class="worker-avatar">${w.avatar}</div>
-              <div>
-                <h3 style="font-size:20px;color:#ffffff;margin:0 0 2px;">${w.name}</h3>
-                <div style="font-size:12.5px;color:#fde68a;">${w.role} · ${w.assignedWard}</div>
-                <small style="color:var(--muted);">${w.village} · Supervising: ${w.supervisingPhc}</small>
-              </div>
-            </div>
-            <div style="display:flex;gap:10px;">
-              <button class="btn-glass sm" onclick="workerController.switchTab('sync')">
-                <span>📶 Offline Records (${this.state.offlineCount})</span>
-              </button>
-              <button class="auth-btn-primary" style="padding:8px 18px;font-size:12px;" onclick="workerController.switchTab('vitals')">
-                <span>+ Record Patient Vitals →</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- 8 Core Frontline KPIs Grid -->
-        <div class="worker-kpi-grid">
-          <div class="doc-kpi-card" onclick="workerController.switchTab('visits')">
-            <span class="kpi-icon" style="background:rgba(16,185,129,0.15);color:#10b981;">👥</span>
-            <div>
-              <div class="kpi-label">Registered Patients</div>
-              <div class="kpi-val">${s.totalRegisteredPatients}</div>
-              <div class="kpi-delta good">Ward 6 Coverage: 98%</div>
-            </div>
-          </div>
-
-          <div class="doc-kpi-card" onclick="workerController.switchTab('visits')">
-            <span class="kpi-icon" style="background:rgba(245,158,11,0.15);color:#f59e0b;">🏠</span>
-            <div>
-              <div class="kpi-label">Today's Home Visits</div>
-              <div class="kpi-val" style="color:#fde68a;">${s.todayHomeVisits} Visits</div>
-              <div class="kpi-delta good">2 Done · 3 Pending</div>
-            </div>
-          </div>
-
-          <div class="doc-kpi-card" onclick="workerController.switchTab('anc')" style="border-color:rgba(239,68,68,0.35);">
-            <span class="kpi-icon" style="background:rgba(239,68,68,0.15);color:#ef4444;">🤰</span>
-            <div>
-              <div class="kpi-label">High-Risk Pregnancies</div>
-              <div class="kpi-val" style="color:#f87171;">${s.highRiskPregnancies} Cases</div>
-              <div class="kpi-delta bad">1 Urgent BP Alert</div>
-            </div>
-          </div>
-
-          <div class="doc-kpi-card" onclick="workerController.switchTab('immunization')">
-            <span class="kpi-icon" style="background:rgba(6,182,212,0.15);color:#06b6d4;">👶</span>
-            <div>
-              <div class="kpi-label">Due Immunizations</div>
-              <div class="kpi-val" style="color:#67e8f9;">${s.childrenDueImmunization} Due</div>
-              <div class="kpi-delta warn">1 Overdue MR-1</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Today's Priority Action Queue -->
-        <div style="display:grid;grid-template-columns:1.2fr 1fr;gap:18px;margin-top:20px;">
-          <div class="glass-panel" style="padding:20px;">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-              <h4 style="font-size:16px;color:#ffffff;margin:0;">🏠 Today's Household Visit Schedule</h4>
-              <button class="btn-glass sm" onclick="workerController.switchTab('visits')">View Route Map</button>
-            </div>
-
-            <div style="display:flex;flex-direction:column;gap:10px;">
-              ${this.data.homeVisits.slice(0, 3).map(v => `
-                <div class="glass-panel" style="padding:12px 14px;display:flex;justify-content:space-between;align-items:center;">
-                  <div>
-                    <strong style="font-size:13.5px;color:#ffffff;">${v.houseNo} · ${v.patient}</strong>
-                    <small style="display:block;color:var(--muted);">${v.purpose}</small>
-                  </div>
-                  <span class="admin-status-badge ${v.status === 'Completed' ? 'good' : (v.status === 'In Progress' ? 'warn' : 'neutral')}">
-                    ${v.status}
-                  </span>
-                </div>
-              `).join('')}
-            </div>
-          </div>
-
-          <!-- Doctor Teleconsult Assistance -->
-          <div class="glass-panel" style="padding:20px;">
-            <h4 style="font-size:16px;color:#ffffff;margin-bottom:8px;">🩺 Teleconsultation Facilitator</h4>
-            <p style="font-size:12.5px;color:var(--ink-dim);margin:0 0 14px;line-height:1.45;">
-              You are assigned as the local Telugu/Hindi language interpreter for Dr. K. V. Rao's tele-OPD queue.
-            </p>
-            <div style="padding:12px;background:rgba(4,18,15,0.5);border-radius:12px;margin-bottom:14px;">
-              <strong style="color:var(--auth-primary-bright);font-size:12px;display:block;">Next Video Consultation:</strong>
-              <div style="font-size:13px;color:#ffffff;margin-top:2px;">Anitha K. (ANC Review)</div>
-              <small style="color:var(--muted);">Kondapalli Kiosk · Today 10:30 AM</small>
-            </div>
-            <button class="auth-btn-primary" style="width:100%;justify-content:center;" onclick="if(typeof switchView==='function') switchView('tele')">
-              <span>🎥 Join Doctor Tele-Desk Bridge →</span>
-            </button>
-          </div>
-        </div>
-      `;
+    renderAll() {
+      this.renderAncRecords();
+      this.renderImmunizations();
+      this.renderHomeVisits();
     }
 
-    // -------------------------------------------------------------
-    // TAB 2: HIGH-RISK PREGNANCY (ANC) TRACKER
-    // -------------------------------------------------------------
-    
-    openAddAncModal() {
-      const name = prompt('Pregnant Mother Full Name: (e.g. Lakshmi Devi)');
-      if (!name) return;
-      const age = prompt('Age:', '24') || '24';
-      const weeks = prompt('Gestational Age / Trimester:', '24 Weeks (2nd Trimester)') || '24 Weeks';
-      const hb = prompt('Haemoglobin (Hb g/dL):', '9.4 g/dL') || '9.4 g/dL';
-      const bp = prompt('Blood Pressure (mmHg):', '120/80 mmHg') || '120/80 mmHg';
-      const risk = prompt('Risk Assessment: (Normal ANC, Moderate Anaemia, High Risk PIH)', 'Moderate Anaemia') || 'Moderate Anaemia';
+    renderAncRecords() {
+      const el = document.getElementById('ashaAncTableBody');
+      if (!el || !this.store) return;
+      const ancs = this.store.getState().ancRecords || [];
 
-      const rec = {
-        id: `ANC-${Date.now().toString().slice(-4)}`,
-        patientName: name,
-        age: Number(age),
-        gestationalWeeks: weeks,
-        fundalHeight: '24 cm',
+      if (!ancs.length) {
+        el.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:20px;color:#64748b;">No pregnant mothers registered. Tap "+ Register Pregnant Mother" above.</td></tr>`;
+        return;
+      }
+
+      el.innerHTML = ancs.map(a => `
+        <tr>
+          <td><strong style="color:#0f172a;">${a.motherName}</strong></td>
+          <td>${a.husbandName || '—'}</td>
+          <td>${a.village}</td>
+          <td>${a.weeks} Wks (EDD: ${a.edd})</td>
+          <td>BP: ${a.bp} | Hb: ${a.hb}</td>
+          <td>
+            <span class="badge" style="background:${a.riskLevel.includes('High') ? '#fee2e2' : '#dcfce7'};color:${a.riskLevel.includes('High') ? '#dc2626' : '#16a34a'};padding:4px 8px;border-radius:12px;font-size:11px;font-weight:700;">
+              ${a.riskLevel}
+            </span>
+          </td>
+          <td>${a.nextVisit}</td>
+        </tr>
+      `).join('');
+    }
+
+    openAddAncModal() {
+      const m = document.getElementById('addAncModal');
+      if (m) m.style.display = 'flex';
+    }
+
+    closeAddAncModal() {
+      const m = document.getElementById('addAncModal');
+      if (m) m.style.display = 'none';
+    }
+
+    submitAddAnc(e) {
+      if (e) e.preventDefault();
+      const motherName = document.getElementById('ancMotherName').value.trim();
+      const husbandName = document.getElementById('ancHusbandName').value.trim();
+      const village = document.getElementById('ancVillage').value.trim();
+      const weeks = parseInt(document.getElementById('ancWeeks').value, 10) || 12;
+      const bp = document.getElementById('ancBp').value.trim() || '110/70';
+      const hb = document.getElementById('ancHb').value.trim() || '11.0 g/dL';
+      const riskLevel = document.getElementById('ancRisk').value;
+
+      if (!motherName) {
+        alert('Please enter mother name');
+        return;
+      }
+
+      this.store.addAncRecord({
+        motherName,
+        husbandName,
+        village: village || 'Kondapalli Sector',
+        weeks,
+        edd: new Date(Date.now() + 180 * 86400000).toISOString().split('T')[0],
         bp,
         hb,
-        riskLevel: risk,
-        riskBadge: risk.includes('High') ? 'bad' : (risk.includes('Normal') ? 'good' : 'warn'),
-        ifaAdherence: 'Regular (1 Tab OD)',
-        ttVaccine: 'TT Complete',
-        nextVisitDate: 'Next Week',
-        supervisingDoctor: 'Assigned PHC Doctor'
-      };
+        ifaCount: 90,
+        riskLevel,
+        nextVisit: new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0]
+      });
 
-      this.data.ancRegistry.unshift(rec);
-      this.data.stats.highRiskPregnancies = this.data.ancRegistry.length;
-
-      try {
-        fetch(`https://swasthya-setu-2b67d-default-rtdb.firebaseio.com/worker_anc_records/${rec.id}.json`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(rec)
-        }).catch(() => {});
-      } catch (e) {}
-
-      if (typeof window.toast === 'function') {
-        window.toast(`✓ Registered ANC Mother ${name} & synced to Cloud!`);
-      }
-      this.renderANC();
+      this.closeAddAncModal();
+      if (typeof window.toast === 'function') window.toast('✓ Registered ' + motherName + ' in Maternal ANC Register');
     }
 
-    openAddImmunizationModal() {
-      const child = prompt('Child Full Name: (e.g. Baby Aarav)');
-      if (!child) return;
-      const parent = prompt('Mother / Parent Name:', 'Anitha K.') || 'Parent';
-      const age = prompt('Child Age:', '8 Months') || '8 Months';
-      const vaccine = prompt('Due Vaccine:', 'Measles-Rubella (MR-1) & Vitamin A') || 'MR-1';
+    renderImmunizations() {
+      const el = document.getElementById('ashaUipTableBody');
+      if (!el || !this.store) return;
+      const uips = this.store.getState().immunizations || [];
 
-      const imm = {
-        id: `IMM-${Date.now().toString().slice(-4)}`,
-        childName: child,
-        parentName: parent,
-        age,
-        dueVaccine: vaccine,
-        dueDate: 'Due This Week',
-        status: 'Due Soon',
-        badge: 'warn'
-      };
-
-      this.data.immunizationRegistry.unshift(imm);
-      this.data.stats.childrenDueImmunization = this.data.immunizationRegistry.length;
-
-      try {
-        fetch(`https://swasthya-setu-2b67d-default-rtdb.firebaseio.com/worker_immunizations/${imm.id}.json`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(imm)
-        }).catch(() => {});
-      } catch (e) {}
-
-      if (typeof window.toast === 'function') {
-        window.toast(`✓ Recorded vaccine schedule for ${child}!`);
-      }
-      this.renderImmunization();
+      el.innerHTML = uips.map(u => `
+        <tr>
+          <td><strong style="color:#0f172a;">${u.childName}</strong></td>
+          <td>${u.parentName}</td>
+          <td>${u.dob} (${u.gender})</td>
+          <td>${u.lastVaccine}</td>
+          <td><strong style="color:#0052cc;">${u.nextDue}</strong></td>
+          <td><span class="badge" style="background:#e0f2fe;color:#0052cc;padding:4px 8px;border-radius:12px;font-size:11px;font-weight:600;">${u.status}</span></td>
+        </tr>
+      `).join('');
     }
 
-    openAddHomeVisitModal() {
-      const house = prompt('House / Door Number: (e.g. Door #14/2)', 'Door #14/2') || 'Door #1';
-      const patient = prompt('Patient Name:', 'Anitha K.') || 'Patient';
-      const purpose = prompt('Visit Purpose:', 'ANC Follow-up & Nutrition Inspection') || 'General Home Visit';
-
-      const visit = {
-        id: `HV-${Date.now().toString().slice(-4)}`,
-        houseNo: house,
-        patient,
-        purpose,
-        status: 'Pending',
-        vitalsDone: false
-      };
-
-      this.data.homeVisits.unshift(visit);
-      this.data.stats.todayHomeVisits = this.data.homeVisits.length;
-
-      try {
-        fetch(`https://swasthya-setu-2b67d-default-rtdb.firebaseio.com/worker_visits/${visit.id}.json`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(visit)
-        }).catch(() => {});
-      } catch (e) {}
-
-      if (typeof window.toast === 'function') {
-        window.toast(`✓ Added home visit route for ${patient} (${house})`);
-      }
-      this.renderVisits();
-    }
-
-    renderANC() {
-      const container = document.getElementById('worker-pane-anc');
-      if (!container) return;
-
-      container.innerHTML = `
-        <div class="admin-section-header">
-          <div>
-            <h3 style="font-size:20px;margin:0 0 4px;color:#ffffff;">🤰 High-Risk Antenatal Care (ANC) Matrix</h3>
-            <p style="font-size:12.5px;color:var(--muted);margin:0;">
-              Tracking pregnant mothers across Ward 6 for early detection of anaemia, hypertension, and high-risk delivery factors.
-            </p>
-          </div>
-        </div>
-
-        <div style="display:flex;flex-direction:column;gap:12px;margin-top:16px;">
-          ${this.data.ancRegistry.map(m => `
-            <div class="glass-panel card-3d" style="padding:20px;border-left:4px solid ${m.riskBadge === 'bad' ? '#ef4444' : (m.riskBadge === 'warn' ? '#f59e0b' : '#10b981')};">
-              <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;">
-                <div>
-                  <div style="display:flex;align-items:center;gap:8px;">
-                    <strong style="font-size:16px;color:#ffffff;">${m.patientName} (${m.age} Yrs)</strong>
-                    <span class="admin-status-badge ${m.riskBadge}">${m.riskLevel}</span>
-                  </div>
-                  <small style="color:var(--muted);">${m.gestationalWeeks} · Fundal: ${m.fundalHeight}</small>
-                </div>
-                <div style="text-align:right;">
-                  <span style="font-size:12px;color:var(--auth-primary-bright);font-weight:700;">Next Visit: ${m.nextVisitDate}</span>
-                  <small style="display:block;color:var(--muted);">Doctor: ${m.supervisingDoctor}</small>
-                </div>
-              </div>
-
-              <div class="doc-vitals-strip" style="grid-template-columns:repeat(4, 1fr);margin:14px 0 10px;">
-                <div class="doc-vital-box">
-                  <small>Blood Pressure</small>
-                  <strong>${m.bp}</strong>
-                </div>
-                <div class="doc-vital-box">
-                  <small>Hemoglobin (Hb)</small>
-                  <strong style="color:${parseFloat(m.hb) < 10 ? '#f87171' : '#4ade80'};">${m.hb}</strong>
-                </div>
-                <div class="doc-vital-box">
-                  <small>IFA Tablet Adherence</small>
-                  <strong>${m.ifaAdherence}</strong>
-                </div>
-                <div class="doc-vital-box">
-                  <small>Tetanus Toxoid</small>
-                  <strong>${m.ttVaccine}</strong>
-                </div>
-              </div>
-
-              <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:10px;">
-                <button class="btn-glass sm" onclick="workerController.switchTab('vitals')">✏️ Record New Vitals</button>
-                <button class="auth-btn-primary" style="padding:6px 14px;font-size:12px;" onclick="if(typeof toast==='function') toast('Escalated ${m.patientName} to Dr. K. V. Rao tele-consultation queue.')">
-                  <span>🚨 Escalate to Tele-Desk</span>
-                </button>
-              </div>
-            </div>
-          `).join('')}
-        </div>
-      `;
-    }
-
-    // -------------------------------------------------------------
-    // TAB 3: CHILD IMMUNIZATION REGISTRY
-    // -------------------------------------------------------------
-    renderImmunization() {
-      const container = document.getElementById('worker-pane-immunization');
-      if (!container) return;
-
-      container.innerHTML = `
-        <div class="admin-section-header">
-          <div>
-            <h3 style="font-size:20px;margin:0 0 4px;color:#ffffff;">👶 Child Immunization Registry &amp; Due Scheduler</h3>
-            <p style="font-size:12.5px;color:var(--muted);margin:0;">
-              Universal Immunization Programme (UIP) tracking for infants and toddlers in Ward 6.
-            </p>
-          </div>
-        </div>
-
-        <div style="display:flex;flex-direction:column;gap:12px;margin-top:16px;">
-          ${this.data.immunizationRegistry.map(c => `
-            <div class="glass-panel" style="padding:18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;">
-              <div style="display:flex;gap:14px;align-items:center;">
-                <div class="worker-avatar" style="background:rgba(6,182,212,0.2);color:#67e8f9;">👶</div>
-                <div>
-                  <strong style="font-size:15px;color:#ffffff;">${c.childName} (${c.age})</strong>
-                  <div style="font-size:12px;color:var(--muted);">Mother/Guardian: ${c.parentName}</div>
-                  <small style="color:var(--auth-primary-bright);font-weight:700;">Due Vaccine: ${c.dueVaccine}</small>
-                </div>
-              </div>
-
-              <div style="display:flex;align-items:center;gap:12px;">
-                <span class="admin-status-badge ${c.badge}">${c.status} (${c.dueDate})</span>
-                <button class="auth-btn-primary" style="padding:6px 14px;font-size:12px;" onclick="if(typeof toast==='function') toast('✓ Marked ${c.dueVaccine} as administered for ${c.childName}. UIP record updated.')">
-                  <span>✓ Mark Administered</span>
-                </button>
-              </div>
-            </div>
-          `).join('')}
-        </div>
-      `;
-    }
-
-    // -------------------------------------------------------------
-    // TAB 4: DAILY HOME VISIT PLANNER
-    // -------------------------------------------------------------
     renderHomeVisits() {
-      const container = document.getElementById('worker-pane-visits');
-      if (!container) return;
+      const el = document.getElementById('ashaVisitsList');
+      if (!el || !this.store) return;
+      const visits = this.store.getState().homeVisits || [];
 
-      container.innerHTML = `
-        <div class="admin-section-header">
+      el.innerHTML = visits.map(v => `
+        <div style="background:#ffffff;border:1.5px solid #cbd5e1;border-radius:12px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;">
           <div>
-            <h3 style="font-size:20px;margin:0 0 4px;color:#ffffff;">🗺️ Daily Home Visit Schedule &amp; Street Route</h3>
-            <p style="font-size:12.5px;color:var(--muted);margin:0;">
-              Sequential geographic visit plan across Kondapalli Ward 6 households.
-            </p>
+            <strong style="color:#0f172a;font-size:15px;display:block;">${v.household}</strong>
+            <small style="color:#0052cc;font-weight:700;">Priority: ${v.priority}</small>
+            <p style="font-size:13px;color:#475569;margin-top:2px;">Task: ${v.task}</p>
           </div>
-        </div>
-
-        <div style="display:flex;flex-direction:column;gap:12px;margin-top:16px;">
-          ${this.data.homeVisits.map(v => `
-            <div class="glass-panel" style="padding:16px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
-              <div>
-                <div style="display:flex;align-items:center;gap:8px;">
-                  <strong style="font-size:15px;color:#ffffff;">${v.houseNo} · ${v.patient}</strong>
-                  <span class="admin-status-badge ${v.status === 'Completed' ? 'good' : (v.status === 'In Progress' ? 'warn' : 'neutral')}">
-                    ${v.status}
-                  </span>
-                </div>
-                <small style="color:var(--muted);">${v.purpose}</small>
-              </div>
-
-              <div style="display:flex;gap:8px;">
-                <button class="btn-glass sm" onclick="workerController.switchTab('vitals')">🩺 Capture Vitals</button>
-                <button class="auth-btn-primary" style="padding:6px 12px;font-size:12px;" onclick="v.status='Completed'; workerController.renderHomeVisits(); if(typeof toast==='function') toast('✓ Home visit marked as completed.')">
-                  <span>✓ Complete Visit</span>
-                </button>
-              </div>
-            </div>
-          `).join('')}
-        </div>
-      `;
-    }
-
-    // -------------------------------------------------------------
-    // TAB 5: FRONTLINE VITAL CAPTURE
-    // -------------------------------------------------------------
-    renderVitalsEntry() {
-      const container = document.getElementById('worker-pane-vitals');
-      if (!container) return;
-
-      container.innerHTML = `
-        <div class="admin-section-header">
-          <div>
-            <h3 style="font-size:20px;margin:0 0 4px;color:#ffffff;">🩺 Frontline Vital Entry &amp; Doctor Desk Sync</h3>
-            <p style="font-size:12.5px;color:var(--muted);margin:0;">
-              Record objective physiological parameters using your portable sub-centre tele-kit and push directly to Dr. Rao's Clinical Desk.
-            </p>
-          </div>
-        </div>
-
-        <div class="glass-panel" style="padding:24px;margin-top:16px;max-width:720px;">
-          <form onsubmit="event.preventDefault(); workerController.submitVitals();">
-            <div class="auth-input-group">
-              <label class="auth-label"><span>Select Patient</span></label>
-              <select class="auth-input" id="vitalPatient">
-                <option value="PAT-301">Anitha K. (29F · Ward 6 · Kondapalli)</option>
-                <option value="PAT-901">Baby Ravi Teja (8Mo · Ward 6)</option>
-                <option value="PAT-302">Suresh B. (54M · Hypertension)</option>
-                <option value="PAT-305">Saraswati Devi (58F · Diabetes)</option>
-              </select>
-            </div>
-
-            <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:12px;margin-bottom:14px;">
-              <div class="auth-input-group" style="margin:0;">
-                <label class="auth-label"><span>Blood Pressure (mmHg)</span></label>
-                <input type="text" class="auth-input" id="vitalBp" value="118/76">
-              </div>
-              <div class="auth-input-group" style="margin:0;">
-                <label class="auth-label"><span>Pulse Rate (bpm)</span></label>
-                <input type="number" class="auth-input" id="vitalPulse" value="78">
-              </div>
-              <div class="auth-input-group" style="margin:0;">
-                <label class="auth-label"><span>Body Temp (°F)</span></label>
-                <input type="text" class="auth-input" id="vitalTemp" value="98.6">
-              </div>
-            </div>
-
-            <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:12px;margin-bottom:14px;">
-              <div class="auth-input-group" style="margin:0;">
-                <label class="auth-label"><span>SpO₂ Oxygen (%)</span></label>
-                <input type="number" class="auth-input" id="vitalSpo2" value="99">
-              </div>
-              <div class="auth-input-group" style="margin:0;">
-                <label class="auth-label"><span>Random Glucose (mg/dL)</span></label>
-                <input type="number" class="auth-input" id="vitalGlucose" value="104">
-              </div>
-              <div class="auth-input-group" style="margin:0;">
-                <label class="auth-label"><span>Weight (kg)</span></label>
-                <input type="text" class="auth-input" id="vitalWeight" value="58.4">
-              </div>
-            </div>
-
-            <div class="auth-input-group">
-              <label class="auth-label"><span>Frontline Clinical Field Notes</span></label>
-              <textarea class="auth-input" id="vitalNotes" style="height:60px;resize:vertical;">Patient reports mild dizziness in the morning. Taking IFA tablets regularly. Foetal movement confirmed active.</textarea>
-            </div>
-
-            <div style="display:flex;gap:10px;margin-top:18px;">
-              <button type="submit" class="auth-btn-primary" style="flex:1.4;justify-content:center;">
-                <span>💾 Save &amp; Push to Doctor Tele-Desk →</span>
-              </button>
-            </div>
-          </form>
-        </div>
-      `;
-    }
-
-    submitVitals() {
-      const pSelect = document.getElementById('vitalPatientSelect');
-      const pName = pSelect ? pSelect.options[pSelect.selectedIndex].text : 'Patient';
-      const bp = document.getElementById('vitalBp')?.value || '120/80';
-      const pulse = document.getElementById('vitalPulse')?.value || '76';
-      const temp = document.getElementById('vitalTemp')?.value || '98.6';
-      const spo2 = document.getElementById('vitalSpo2')?.value || '99';
-      const notes = document.getElementById('vitalNotes')?.value || 'Vitals captured by ASHA worker';
-
-      const vitalEntry = {
-        id: `VIT-${Date.now().toString().slice(-4)}`,
-        patientName: pName,
-        bp,
-        pulse,
-        temp,
-        spo2,
-        notes,
-        recordedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      };
-
-      try {
-        fetch(`https://swasthya-setu-2b67d-default-rtdb.firebaseio.com/frontline_vitals/${vitalEntry.id}.json`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(vitalEntry)
-        }).catch(() => {});
-      } catch (e) {}
-
-      if (typeof window.toast === 'function') {
-        window.toast(`✓ Vitals for ${pName.split('(')[0]} recorded and transmitted to Doctor Clinical Desk!`);
-      }
-      this.switchTab('overview');
-    }
-
-    // -------------------------------------------------------------
-    // TAB 6: OFFLINE-FIRST SYNC QUEUE
-    // -------------------------------------------------------------
-    renderSyncQueue() {
-      const container = document.getElementById('worker-pane-sync');
-      if (!container) return;
-
-      container.innerHTML = `
-        <div class="admin-section-header">
-          <div>
-            <h3 style="font-size:20px;margin:0 0 4px;color:#ffffff;">📶 Offline-First Local Sync Queue</h3>
-            <p style="font-size:12.5px;color:var(--muted);margin:0;">
-              Encrypted offline records stored locally on your device during low-connectivity home visits.
-            </p>
-          </div>
-          <button class="auth-btn-primary" onclick="workerController.syncAllRecords()">
-            <span>${this.state.isSyncing ? '⏳ Syncing...' : '🔄 Sync All Records Now'}</span>
+          <button class="btn-glass" style="padding:8px 14px;font-size:12px;background:${v.status === 'Completed' ? '#16a34a' : '#f1f5f9'};color:${v.status === 'Completed' ? '#ffffff' : '#0f172a'};" onclick="workerController.toggleVisit('${v.id}')">
+            ${v.status === 'Completed' ? '✓ Completed' : 'Mark Done'}
           </button>
         </div>
-
-        <div class="glass-panel" style="padding:22px;margin-top:16px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-            <div>
-              <strong style="font-size:15px;color:#ffffff;">Pending Offline Sync: ${this.state.offlineCount} Records</strong>
-              <small style="display:block;color:var(--muted);">All records encrypted with AES-256 in device storage</small>
-            </div>
-            <span class="admin-status-badge ${this.state.offlineCount > 0 ? 'warn' : 'good'}">
-              ${this.state.offlineCount > 0 ? 'Pending Network Sync' : 'All Records Synced'}
-            </span>
-          </div>
-
-          <div style="display:flex;flex-direction:column;gap:8px;">
-            <div class="glass-panel" style="padding:10px 14px;font-size:12.5px;display:flex;justify-content:space-between;">
-              <span>ANC Visit Form · Anitha K. (Hb 9.2)</span>
-              <small style="color:#fde68a;">Buffered 2h ago</small>
-            </div>
-            <div class="glass-panel" style="padding:10px 14px;font-size:12.5px;display:flex;justify-content:space-between;">
-              <span>Child Immunization · Baby Ravi (Weight 7.8kg)</span>
-              <small style="color:#fde68a;">Buffered 1h ago</small>
-            </div>
-            <div class="glass-panel" style="padding:10px 14px;font-size:12.5px;display:flex;justify-content:space-between;">
-              <span>NCD Screening Survey · Saraswati Devi (BP 142/90)</span>
-              <small style="color:#fde68a;">Buffered 35m ago</small>
-            </div>
-          </div>
-        </div>
-      `;
+      `).join('');
     }
 
-    syncAllRecords() {
-      this.state.isSyncing = true;
-      this.renderSyncQueue();
-
-      setTimeout(() => {
-        this.state.isSyncing = false;
-        this.state.offlineCount = 0;
-        this.data.stats.offlineRecordsWaiting = 0;
-        if (typeof window.toast === 'function') {
-          window.toast('✓ All 12 offline records successfully synchronized to the Bharat Health Grid cloud.');
-        }
-        this.renderSyncQueue();
-      }, 900);
-    }
-
-    // -------------------------------------------------------------
-    // MASTER WORKER RENDER
-    // -------------------------------------------------------------
-    renderWorkerWorkspace() {
-      const container = document.getElementById('view-worker');
-      if (!container) return;
-
-      container.innerHTML = `
-        <div class="worker-command-shell">
-          <!-- Worker Sub-Navigation Bar -->
-          <div class="worker-nav-bar">
-            <button class="worker-nav-tab active" data-tab="overview" onclick="workerController.switchTab('overview')">
-              <span>📊 ASHA Overview</span>
-            </button>
-            <button class="worker-nav-tab" data-tab="anc" onclick="workerController.switchTab('anc')">
-              <span>🤰 High-Risk ANC (6)</span>
-            </button>
-            <button class="worker-nav-tab" data-tab="immunization" onclick="workerController.switchTab('immunization')">
-              <span>👶 Child Immunization (9)</span>
-            </button>
-            <button class="worker-nav-tab" data-tab="visits" onclick="workerController.switchTab('visits')">
-              <span>🏠 Daily Home Visits</span>
-            </button>
-            <button class="worker-nav-tab" data-tab="vitals" onclick="workerController.switchTab('vitals')">
-              <span>🩺 Capture Vitals</span>
-            </button>
-            <button class="worker-nav-tab" data-tab="sync" onclick="workerController.switchTab('sync')">
-              <span>📶 Offline Sync (${this.state.offlineCount})</span>
-            </button>
-          </div>
-
-          <!-- Worker Panes -->
-          <div class="worker-tab-pane active" id="worker-pane-overview"></div>
-          <div class="worker-tab-pane" id="worker-pane-anc"></div>
-          <div class="worker-tab-pane" id="worker-pane-immunization"></div>
-          <div class="worker-tab-pane" id="worker-pane-visits"></div>
-          <div class="worker-tab-pane" id="worker-pane-vitals"></div>
-          <div class="worker-tab-pane" id="worker-pane-sync"></div>
-        </div>
-      `;
-
-      this.renderOverview();
+    toggleVisit(id) {
+      this.store.toggleHomeVisit(id);
     }
   }
 
-  // Export singleton
   global.workerController = new WorkerController();
 
 })(typeof window !== 'undefined' ? window : this);
