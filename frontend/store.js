@@ -169,125 +169,118 @@
       });
     }
 
-        // Multi-Role & Password-Protected Authentication Resolver
+            // Multi-Role & Mobile-Number Authentication Resolver
     verifyAndLogin(role, credentials = {}) {
       const inputId = (credentials.id || credentials.phone || credentials.abhaId || '').trim();
       const inputPass = (credentials.password || credentials.passcode || credentials.pin || credentials.otp || '').trim();
 
-      // Normalize digits
       const digitsOnly = inputId.replace(/\D/g, '');
 
-      // 1. Search in Staff (Doctors, ASHA Workers, Admins)
+      // 1. Find all matching Staff members (Admin, Doctor, Worker) by Phone or ID
       const matchingStaff = this.state.staff.filter(s => {
         const sId = (s.id || '').toLowerCase();
         const sPhone = (s.phone || '').replace(/\D/g, '');
         const sReg = (s.regNo || '').toLowerCase();
-        const matchesIdentity = sId === inputId.toLowerCase() || (digitsOnly && sPhone === digitsOnly) || sReg === inputId.toLowerCase();
-        return matchesIdentity;
+        return (sId === inputId.toLowerCase()) || 
+               (digitsOnly && sPhone && (sPhone === digitsOnly || sPhone.slice(-10) === digitsOnly.slice(-10))) || 
+               (sReg === inputId.toLowerCase());
       });
 
-      // 2. Search in Patient Profile / Profiles
-      const isPatientMatch = (
-        (this.state.currentUser && this.state.currentUser.phone && digitsOnly && this.state.currentUser.phone.replace(/\D/g, '') === digitsOnly) ||
-        (this.state.currentUser && this.state.currentUser.abhaId && this.state.currentUser.abhaId === inputId) ||
-        role === 'patient'
+      // 2. Find matching Citizen / Patient by Phone or ABHA
+      const isPatientPhoneMatch = (
+        (this.state.currentUser && this.state.currentUser.phone && digitsOnly && this.state.currentUser.phone.replace(/\D/g, '').slice(-10) === digitsOnly.slice(-10)) ||
+        (this.state.currentUser && this.state.currentUser.abhaId && this.state.currentUser.abhaId === inputId)
       );
 
-      // Collect all available roles for this identity
+      // Collect all available roles for this phone/ID
       const availableRoles = [];
       matchingStaff.forEach(s => {
         if (!availableRoles.some(r => r.role === s.role)) {
-          availableRoles.push({ role: s.role, user: s, label: s.name });
+          availableRoles.push({ role: s.role, user: s, label: s.name + ' (' + s.role.toUpperCase() + ')' });
         }
       });
-      if (isPatientMatch && !availableRoles.some(r => r.role === 'patient')) {
-        availableRoles.push({
-          role: 'patient',
-          user: this.state.currentUser || { name: 'Citizen', phone: inputId, abhaId: '14-8921-4402-9912' },
-          label: this.state.currentUser ? this.state.currentUser.name : 'Citizen Patient'
-        });
+
+      if (isPatientPhoneMatch || (matchingStaff.length === 0 && role === 'patient')) {
+        const patUser = this.state.currentUser || { name: 'Citizen Patient', phone: inputId, abhaId: '14-8921-4402-9912' };
+        if (!availableRoles.some(r => r.role === 'patient')) {
+          availableRoles.push({ role: 'patient', user: patUser, label: patUser.name + ' (CITIZEN)' });
+        }
       }
 
-      // If user did not specify a role or if multi-role detected and no direct role passed
+      // If multiple roles found and user hasn't explicitly chosen one yet
       if (!role && availableRoles.length > 1) {
         return { multiRole: true, availableRoles };
       }
 
       const targetRole = role || (availableRoles[0] ? availableRoles[0].role : 'patient');
 
-      // Authenticate chosen role
+      // 3. Authenticate Patient
       if (targetRole === 'patient') {
-        let name = this.state.currentUser ? this.state.currentUser.name : 'Citizen Patient';
-        let phone = digitsOnly.length >= 10 ? digitsOnly.slice(-10) : (this.state.currentUser ? this.state.currentUser.phone : '9876543210');
-        let abhaId = inputId.includes('-') ? inputId : (this.state.currentUser ? this.state.currentUser.abhaId : '14-8921-4402-9912');
-
-        const user = {
+        const patUser = this.state.currentUser || {
           id: 'USR-PAT-' + String(Date.now()).slice(-4),
-          name: name,
-          phone: phone,
-          abhaId: abhaId,
-          village: (this.state.currentUser && this.state.currentUser.village) || 'Kondapalli Sub-Centre, Ward 4',
-          age: (this.state.currentUser && this.state.currentUser.age) || 38,
-          gender: (this.state.currentUser && this.state.currentUser.gender) || 'Male',
-          bloodGroup: (this.state.currentUser && this.state.currentUser.bloodGroup) || 'O+',
+          name: 'Citizen Patient',
+          phone: digitsOnly || '9876543210',
+          abhaId: inputId.includes('-') ? inputId : '14-8921-4402-9912',
+          village: 'Kondapalli Sub-Centre, Ward 4',
+          age: 38,
+          gender: 'Male',
+          bloodGroup: 'O+',
           password: inputPass || '123456'
         };
 
-        this.state.currentUser = user;
-        this.state.session = { isLoggedIn: true, role: 'patient', user };
+        this.state.currentUser = patUser;
+        this.state.session = { isLoggedIn: true, role: 'patient', user: patUser };
         this.saveState();
-        return { success: true, user, availableRoles };
+        return { success: true, user: patUser, availableRoles };
       }
 
-      // Authenticate Staff role
-      const staffMember = matchingStaff.find(s => s.role === targetRole) || matchingStaff[0] || this.state.staff.find(s => s.role === targetRole);
+      // 4. Authenticate Staff (Admin, Doctor, ASHA)
+      const staffMember = matchingStaff.find(s => s.role === targetRole) || 
+                          matchingStaff[0] || 
+                          this.state.staff.find(s => s.role === targetRole);
 
       if (staffMember) {
-        // Password verification (forgiving for demo if empty, strict if present)
-        if (inputPass && staffMember.password && staffMember.password !== inputPass && staffMember.pin !== inputPass && inputPass !== 'doc@123' && inputPass !== 'asha@123' && inputPass !== 'admin@123') {
-          // Allow login if matches default role pass
-        }
-
-        this.state.session = { isLoggedIn: true, role: targetRole, user: staffMember };
+        this.state.session = { isLoggedIn: true, role: staffMember.role, user: staffMember };
         this.saveState();
         return { success: true, user: staffMember, availableRoles };
       }
 
-      return { success: false, message: 'Invalid credentials or role not found.' };
+      return { success: false, message: 'No account found with this Mobile Number or ID.' };
     }
 
-    // Change Password for Active User
+    // Change Password for Active User (Instant Local & Cloud Sync)
     changeActiveUserPassword(newPassword) {
-      if (!this.state.session || !this.state.session.user) return { success: false, message: 'No active session' };
+      if (!this.state.session || !this.state.session.user) {
+        return { success: false, message: 'No active user session found.' };
+      }
+
       const currentRole = this.state.session.role;
-      const user = this.state.session.user;
+      const activeUser = this.state.session.user;
+
+      activeUser.password = newPassword;
+      activeUser.pin = newPassword;
 
       if (currentRole === 'patient') {
-        user.password = newPassword;
         if (this.state.currentUser) this.state.currentUser.password = newPassword;
         this.saveState();
         if (global.supabaseService && global.supabaseService.isOnline) {
-          global.supabaseService.updateProfilePassword(user.phone, newPassword);
+          global.supabaseService.updateProfilePassword(activeUser.phone || activeUser.abhaId, newPassword);
         }
-        return { success: true };
       } else {
-        // Staff Member
-        const staffObj = this.state.staff.find(s => s.id === user.id || s.phone === user.phone);
+        const staffObj = this.state.staff.find(s => s.id === activeUser.id || s.phone === activeUser.phone);
         if (staffObj) {
           staffObj.password = newPassword;
           staffObj.pin = newPassword;
         }
-        user.password = newPassword;
-        user.pin = newPassword;
         this.saveState();
         if (global.supabaseService && global.supabaseService.isOnline) {
-          global.supabaseService.updateStaffPassword(user.id, newPassword);
+          global.supabaseService.updateStaffPassword(activeUser.id, newPassword);
         }
-        return { success: true };
       }
+
+      return { success: true };
     }
 
-    // Admin Provisions New Staff
     provisionStaffMember(role, data) {
       const prefix = role === 'doctor' ? 'DOC' : role === 'worker' ? 'ASH' : 'ADM';
       const staffCode = `${prefix}-${Math.floor(100 + Math.random() * 900)}`;

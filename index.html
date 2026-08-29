@@ -2677,8 +2677,8 @@ body {
 
       <form onsubmit="handleStaffAuth(event, 'doctor')">
         <div style="margin-bottom:12px;">
-          <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">Doctor Employee ID or MCI Registration No. *</label>
-          <input type="text" id="docInputId" class="input-field" placeholder="e.g. DOC-101 or MCI-AP-48912" value="" placeholder="e.g. DOC-101 or Registered Phone" required>
+          <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">Mobile Number, Doctor ID, or MCI Reg No. *</label>
+          <input type="text" id="docInputId" class="input-field" placeholder="e.g. DOC-101 or MCI-AP-48912" value="" placeholder="e.g. 9811122233 or DOC-101" required>
         </div>
 
         <div style="margin-bottom:16px;">
@@ -2708,8 +2708,8 @@ body {
 
       <form onsubmit="handleStaffAuth(event, 'worker')">
         <div style="margin-bottom:12px;">
-          <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">ASHA Worker ID or Registered Phone *</label>
-          <input type="text" id="workerInputId" class="input-field" placeholder="e.g. ASH-201 or 9833344455" value="" placeholder="e.g. ASH-201 or Registered Phone" required>
+          <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">Mobile Number or ASHA Worker ID *</label>
+          <input type="text" id="workerInputId" class="input-field" placeholder="e.g. ASH-201 or 9833344455" value="" placeholder="e.g. 9833344455 or ASH-201" required>
         </div>
 
         <div style="margin-bottom:16px;">
@@ -2739,8 +2739,8 @@ body {
 
       <form onsubmit="handleStaffAuth(event, 'admin')">
         <div style="margin-bottom:12px;">
-          <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">District Officer ID or Designation *</label>
-          <input type="text" id="adminInputId" class="input-field" placeholder="e.g. ADM-001 or DHO-AP-001" value="" placeholder="e.g. ADM-001 or Registered Phone" required>
+          <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">Mobile Number or District Officer ID *</label>
+          <input type="text" id="adminInputId" class="input-field" placeholder="e.g. ADM-001 or DHO-AP-001" value="" placeholder="e.g. 9855566677 or ADM-001" required>
         </div>
 
         <div style="margin-bottom:16px;">
@@ -3753,6 +3753,197 @@ body {
 <!-- TOAST -->
 <div id="toast"></div>
 
+
+<!-- =========================================================
+     PATIENT / CITIZEN EXCLUSIVE SELF-REGISTRATION MODAL
+     ========================================================= -->
+<div id="registrationModal" class="modal-overlay">
+  <div class="modal-card" style="max-width:520px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:28px;">🌾</span>
+        <div>
+          <h3 style="color:var(--ink);font-size:18px;font-weight:800;">Citizen & Patient Registration</h3>
+          <small style="color:var(--muted);">National Digital Health Mission (ABDM) ABHA Card Creation</small>
+        </div>
+      </div>
+      <button onclick="closeRegistrationModal()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;">✕</button>
+    </div>
+
+    <form id="regFormPatient" onsubmit="submitPatientRegistration(event)">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Full Name (मरीज का नाम) *</label>
+          <input type="text" id="regPatName" class="input-field" placeholder="e.g. Ramesh Kumar" required>
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Mobile Number (मोबाइल नं.) *</label>
+          <input type="tel" id="regPatPhone" class="input-field" placeholder="e.g. 9876543210" maxlength="10" required>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px;">
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Age (उम्र) *</label>
+          <input type="number" id="regPatAge" class="input-field" placeholder="35" min="1" max="120" required>
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Gender (लिंग) *</label>
+          <select id="regPatGender" class="input-field" style="height:44px;" required>
+            <option value="Male">Male (पुरुष)</option>
+            <option value="Female">Female (महिला)</option>
+            <option value="Other">Other (अन्य)</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Blood Group *</label>
+          <select id="regPatBlood" class="input-field" style="height:44px;" required>
+            <option value="O+">O+</option>
+            <option value="A+">A+</option>
+            <option value="B+">B+</option>
+            <option value="AB+">AB+</option>
+            <option value="O-">O-</option>
+            <option value="A-">A-</option>
+            <option value="B-">B-</option>
+            <option value="AB-">AB-</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="margin-bottom:12px;">
+        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Village / Sub-Centre Ward (ग्राम / वार्ड) *</label>
+        <input type="text" id="regPatVillage" class="input-field" placeholder="e.g. Kondapalli Sub-Centre, Ward 4" required>
+      </div>
+
+      <div style="margin-bottom:14px;">
+        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Create Account Password or Security PIN *</label>
+        <input type="password" id="regPatPassword" class="input-field" placeholder="Create your private password or PIN" required>
+      </div>
+
+      <div style="background:rgba(22,163,74,0.1);border:1px dashed #16a34a;border-radius:10px;padding:10px;margin-bottom:16px;font-size:12px;color:var(--ink);">
+        ✨ An official <strong>14-digit Ayushman Bharat ABHA Health Card</strong> will be generated automatically and saved to your cloud profile.
+      </div>
+
+      <button type="submit" class="auth-btn-primary" style="width:100%;padding:12px;background:#16a34a;border-color:#15803d;font-size:15px;cursor:pointer;">
+        ✓ Register & Generate ABHA Card
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- =========================================================
+     MULTI-ROLE PORTAL SELECTION MODAL
+     ========================================================= -->
+<div id="roleChooserModal" class="modal-overlay">
+  <div class="modal-card" style="max-width:460px;text-align:center;">
+    <div style="font-size:36px;margin-bottom:8px;">🔄</div>
+    <h3 style="color:var(--ink);font-size:18px;font-weight:800;margin-bottom:6px;">Multiple Portals Found</h3>
+    <p style="color:var(--muted);font-size:13px;margin-bottom:18px;">Your mobile number is registered for multiple healthcare roles. Select which portal you wish to enter:</p>
+    <div id="roleChooserButtons" style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;"></div>
+    <button type="button" class="btn-glass" onclick="closeRoleChooserModal()" style="width:100%;">Cancel</button>
+  </div>
+</div>
+
+<!-- =========================================================
+     ADMIN STAFF PROVISIONING MODAL
+     ========================================================= -->
+<div id="provisionStaffModal" class="modal-overlay">
+  <div class="modal-card" style="max-width:520px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:28px;">👑</span>
+        <div>
+          <h3 style="color:var(--ink);font-size:18px;font-weight:800;">Provision Healthcare Personnel</h3>
+          <small style="color:var(--muted);">Create Doctor, ASHA Worker, or Admin with Temporary Credentials</small>
+        </div>
+      </div>
+      <button onclick="adminController.closeProvisionStaffModal()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;">✕</button>
+    </div>
+
+    <form onsubmit="adminController.submitProvisionStaff(event)">
+      <div style="margin-bottom:12px;">
+        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Select Role *</label>
+        <select id="provStaffRole" class="input-field" style="height:44px;" required>
+          <option value="doctor">🩺 Medical Officer / Doctor (MBBS/MD)</option>
+          <option value="worker">🤝 ASHA / ANM Frontline Field Worker</option>
+          <option value="admin">👑 Health Administrator (District HQ)</option>
+        </select>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Full Name *</label>
+          <input type="text" id="provStaffName" class="input-field" placeholder="e.g. Dr. Rajesh Verma" required>
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Official Mobile Number *</label>
+          <input type="tel" id="provStaffPhone" class="input-field" placeholder="e.g. 9822233344" maxlength="10" required>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">License / Registration ID *</label>
+          <input type="text" id="provStaffRegNo" class="input-field" placeholder="e.g. MCI-AP-31209">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Assigned Hospital / Sector *</label>
+          <input type="text" id="provStaffLocation" class="input-field" placeholder="e.g. Ibrahimpatnam CHC">
+        </div>
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Set Initial Temporary Password / PIN *</label>
+        <input type="password" id="provStaffPassword" class="input-field" placeholder="e.g. doc@123" required>
+        <small style="color:var(--muted);display:block;margin-top:3px;">Staff member can change this to a private password upon logging in.</small>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;gap:8px;">
+        <button type="button" class="btn-glass" onclick="adminController.closeProvisionStaffModal()">Cancel</button>
+        <button type="submit" class="auth-btn-primary" style="background:#db2777;border-color:#be185d;">✓ Provision & Save to Cloud</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- =========================================================
+     PRIVACY PASSWORD CHANGE MODAL
+     ========================================================= -->
+<div id="changePasswordModal" class="modal-overlay">
+  <div class="modal-card" style="max-width:440px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:26px;">🔑</span>
+        <div>
+          <h3 style="color:var(--ink);font-size:17px;font-weight:800;">Change Account Password</h3>
+          <small style="color:var(--muted);">Update your private security credentials</small>
+        </div>
+      </div>
+      <button onclick="closeChangePasswordModal()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;">✕</button>
+    </div>
+
+    <form onsubmit="submitChangePassword(event)">
+      <div style="margin-bottom:12px;">
+        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">New Password / PIN *</label>
+        <input type="password" id="newAccountPassword" class="input-field" placeholder="Enter new private password" required>
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Confirm New Password *</label>
+        <input type="password" id="confirmAccountPassword" class="input-field" placeholder="Re-enter new password" required>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;gap:8px;">
+        <button type="button" class="btn-glass" onclick="closeChangePasswordModal()">Cancel</button>
+        <button type="submit" class="auth-btn-primary" style="background:#16a34a;border-color:#15803d;">✓ Update Password</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
 <script>
 
 /* ==================== supabase-config.js ==================== */
@@ -4415,125 +4606,118 @@ body {
       });
     }
 
-        // Multi-Role & Password-Protected Authentication Resolver
+            // Multi-Role & Mobile-Number Authentication Resolver
     verifyAndLogin(role, credentials = {}) {
       const inputId = (credentials.id || credentials.phone || credentials.abhaId || '').trim();
       const inputPass = (credentials.password || credentials.passcode || credentials.pin || credentials.otp || '').trim();
 
-      // Normalize digits
       const digitsOnly = inputId.replace(/\D/g, '');
 
-      // 1. Search in Staff (Doctors, ASHA Workers, Admins)
+      // 1. Find all matching Staff members (Admin, Doctor, Worker) by Phone or ID
       const matchingStaff = this.state.staff.filter(s => {
         const sId = (s.id || '').toLowerCase();
         const sPhone = (s.phone || '').replace(/\D/g, '');
         const sReg = (s.regNo || '').toLowerCase();
-        const matchesIdentity = sId === inputId.toLowerCase() || (digitsOnly && sPhone === digitsOnly) || sReg === inputId.toLowerCase();
-        return matchesIdentity;
+        return (sId === inputId.toLowerCase()) || 
+               (digitsOnly && sPhone && (sPhone === digitsOnly || sPhone.slice(-10) === digitsOnly.slice(-10))) || 
+               (sReg === inputId.toLowerCase());
       });
 
-      // 2. Search in Patient Profile / Profiles
-      const isPatientMatch = (
-        (this.state.currentUser && this.state.currentUser.phone && digitsOnly && this.state.currentUser.phone.replace(/\D/g, '') === digitsOnly) ||
-        (this.state.currentUser && this.state.currentUser.abhaId && this.state.currentUser.abhaId === inputId) ||
-        role === 'patient'
+      // 2. Find matching Citizen / Patient by Phone or ABHA
+      const isPatientPhoneMatch = (
+        (this.state.currentUser && this.state.currentUser.phone && digitsOnly && this.state.currentUser.phone.replace(/\D/g, '').slice(-10) === digitsOnly.slice(-10)) ||
+        (this.state.currentUser && this.state.currentUser.abhaId && this.state.currentUser.abhaId === inputId)
       );
 
-      // Collect all available roles for this identity
+      // Collect all available roles for this phone/ID
       const availableRoles = [];
       matchingStaff.forEach(s => {
         if (!availableRoles.some(r => r.role === s.role)) {
-          availableRoles.push({ role: s.role, user: s, label: s.name });
+          availableRoles.push({ role: s.role, user: s, label: s.name + ' (' + s.role.toUpperCase() + ')' });
         }
       });
-      if (isPatientMatch && !availableRoles.some(r => r.role === 'patient')) {
-        availableRoles.push({
-          role: 'patient',
-          user: this.state.currentUser || { name: 'Citizen', phone: inputId, abhaId: '14-8921-4402-9912' },
-          label: this.state.currentUser ? this.state.currentUser.name : 'Citizen Patient'
-        });
+
+      if (isPatientPhoneMatch || (matchingStaff.length === 0 && role === 'patient')) {
+        const patUser = this.state.currentUser || { name: 'Citizen Patient', phone: inputId, abhaId: '14-8921-4402-9912' };
+        if (!availableRoles.some(r => r.role === 'patient')) {
+          availableRoles.push({ role: 'patient', user: patUser, label: patUser.name + ' (CITIZEN)' });
+        }
       }
 
-      // If user did not specify a role or if multi-role detected and no direct role passed
+      // If multiple roles found and user hasn't explicitly chosen one yet
       if (!role && availableRoles.length > 1) {
         return { multiRole: true, availableRoles };
       }
 
       const targetRole = role || (availableRoles[0] ? availableRoles[0].role : 'patient');
 
-      // Authenticate chosen role
+      // 3. Authenticate Patient
       if (targetRole === 'patient') {
-        let name = this.state.currentUser ? this.state.currentUser.name : 'Citizen Patient';
-        let phone = digitsOnly.length >= 10 ? digitsOnly.slice(-10) : (this.state.currentUser ? this.state.currentUser.phone : '9876543210');
-        let abhaId = inputId.includes('-') ? inputId : (this.state.currentUser ? this.state.currentUser.abhaId : '14-8921-4402-9912');
-
-        const user = {
+        const patUser = this.state.currentUser || {
           id: 'USR-PAT-' + String(Date.now()).slice(-4),
-          name: name,
-          phone: phone,
-          abhaId: abhaId,
-          village: (this.state.currentUser && this.state.currentUser.village) || 'Kondapalli Sub-Centre, Ward 4',
-          age: (this.state.currentUser && this.state.currentUser.age) || 38,
-          gender: (this.state.currentUser && this.state.currentUser.gender) || 'Male',
-          bloodGroup: (this.state.currentUser && this.state.currentUser.bloodGroup) || 'O+',
+          name: 'Citizen Patient',
+          phone: digitsOnly || '9876543210',
+          abhaId: inputId.includes('-') ? inputId : '14-8921-4402-9912',
+          village: 'Kondapalli Sub-Centre, Ward 4',
+          age: 38,
+          gender: 'Male',
+          bloodGroup: 'O+',
           password: inputPass || '123456'
         };
 
-        this.state.currentUser = user;
-        this.state.session = { isLoggedIn: true, role: 'patient', user };
+        this.state.currentUser = patUser;
+        this.state.session = { isLoggedIn: true, role: 'patient', user: patUser };
         this.saveState();
-        return { success: true, user, availableRoles };
+        return { success: true, user: patUser, availableRoles };
       }
 
-      // Authenticate Staff role
-      const staffMember = matchingStaff.find(s => s.role === targetRole) || matchingStaff[0] || this.state.staff.find(s => s.role === targetRole);
+      // 4. Authenticate Staff (Admin, Doctor, ASHA)
+      const staffMember = matchingStaff.find(s => s.role === targetRole) || 
+                          matchingStaff[0] || 
+                          this.state.staff.find(s => s.role === targetRole);
 
       if (staffMember) {
-        // Password verification (forgiving for demo if empty, strict if present)
-        if (inputPass && staffMember.password && staffMember.password !== inputPass && staffMember.pin !== inputPass && inputPass !== 'doc@123' && inputPass !== 'asha@123' && inputPass !== 'admin@123') {
-          // Allow login if matches default role pass
-        }
-
-        this.state.session = { isLoggedIn: true, role: targetRole, user: staffMember };
+        this.state.session = { isLoggedIn: true, role: staffMember.role, user: staffMember };
         this.saveState();
         return { success: true, user: staffMember, availableRoles };
       }
 
-      return { success: false, message: 'Invalid credentials or role not found.' };
+      return { success: false, message: 'No account found with this Mobile Number or ID.' };
     }
 
-    // Change Password for Active User
+    // Change Password for Active User (Instant Local & Cloud Sync)
     changeActiveUserPassword(newPassword) {
-      if (!this.state.session || !this.state.session.user) return { success: false, message: 'No active session' };
+      if (!this.state.session || !this.state.session.user) {
+        return { success: false, message: 'No active user session found.' };
+      }
+
       const currentRole = this.state.session.role;
-      const user = this.state.session.user;
+      const activeUser = this.state.session.user;
+
+      activeUser.password = newPassword;
+      activeUser.pin = newPassword;
 
       if (currentRole === 'patient') {
-        user.password = newPassword;
         if (this.state.currentUser) this.state.currentUser.password = newPassword;
         this.saveState();
         if (global.supabaseService && global.supabaseService.isOnline) {
-          global.supabaseService.updateProfilePassword(user.phone, newPassword);
+          global.supabaseService.updateProfilePassword(activeUser.phone || activeUser.abhaId, newPassword);
         }
-        return { success: true };
       } else {
-        // Staff Member
-        const staffObj = this.state.staff.find(s => s.id === user.id || s.phone === user.phone);
+        const staffObj = this.state.staff.find(s => s.id === activeUser.id || s.phone === activeUser.phone);
         if (staffObj) {
           staffObj.password = newPassword;
           staffObj.pin = newPassword;
         }
-        user.password = newPassword;
-        user.pin = newPassword;
         this.saveState();
         if (global.supabaseService && global.supabaseService.isOnline) {
-          global.supabaseService.updateStaffPassword(user.id, newPassword);
+          global.supabaseService.updateStaffPassword(activeUser.id, newPassword);
         }
-        return { success: true };
       }
+
+      return { success: true };
     }
 
-    // Admin Provisions New Staff
     provisionStaffMember(role, data) {
       const prefix = role === 'doctor' ? 'DOC' : role === 'worker' ? 'ASH' : 'ADM';
       const staffCode = `${prefix}-${Math.floor(100 + Math.random() * 900)}`;
@@ -7457,7 +7641,6 @@ body {
 
 
 <script>
-
 function openSupabaseSettingsModal() {
   const m = document.getElementById('supabaseSettingsModal');
   const urlEl = document.getElementById('inputSupabaseUrl');
@@ -7476,12 +7659,10 @@ function handleSaveSupabaseCredentials(e) {
   if (e) e.preventDefault();
   const url = document.getElementById('inputSupabaseUrl').value.trim();
   const anonKey = document.getElementById('inputSupabaseAnonKey').value.trim();
-
   if (!url || !anonKey) {
     alert('Please enter both Supabase URL and Anon Key');
     return;
   }
-
   if (window.SUPABASE_CONFIG) {
     window.SUPABASE_CONFIG.saveCredentials(url, anonKey);
     closeSupabaseSettingsModal();
@@ -7503,11 +7684,9 @@ function handleClearSupabaseCredentials() {
   }
 }
 
-
 function openRegistrationModal() {
   const m = document.getElementById('registrationModal');
   if (m) m.style.display = 'flex';
-  switchRegTab('patient');
 }
 
 function closeRegistrationModal() {
@@ -7515,90 +7694,102 @@ function closeRegistrationModal() {
   if (m) m.style.display = 'none';
 }
 
-function switchRegTab(role) {
-  const roles = ['patient', 'doctor', 'worker', 'admin'];
-  roles.forEach(r => {
-    const btn = document.getElementById('regTab' + r.charAt(0).toUpperCase() + r.slice(1));
-    const form = document.getElementById('regForm' + r.charAt(0).toUpperCase() + r.slice(1));
-    if (btn) {
-      if (r === role) btn.classList.add('active');
-      else btn.classList.remove('active');
-    }
-    if (form) {
-      form.style.display = (r === role) ? 'block' : 'none';
-    }
-  });
+function openChangePasswordModal() {
+  const m = document.getElementById('changePasswordModal');
+  const p1 = document.getElementById('newAccountPassword');
+  const p2 = document.getElementById('confirmAccountPassword');
+  if (p1) p1.value = '';
+  if (p2) p2.value = '';
+  if (m) m.style.display = 'flex';
 }
 
-function submitRegistration(e, role) {
+function closeChangePasswordModal() {
+  const m = document.getElementById('changePasswordModal');
+  if (m) m.style.display = 'none';
+}
+
+function submitChangePassword(e) {
   if (e) e.preventDefault();
+  const p1 = document.getElementById('newAccountPassword').value.trim();
+  const p2 = document.getElementById('confirmAccountPassword').value.trim();
 
-  if (!window.appStore) return;
+  if (!p1) {
+    alert('Please enter a new password');
+    return;
+  }
+  if (p1 !== p2) {
+    alert('Passwords do not match. Please re-enter.');
+    return;
+  }
 
-  if (role === 'patient') {
-    const name = document.getElementById('regPatName').value.trim();
-    const phone = document.getElementById('regPatPhone').value.trim();
-    const age = parseInt(document.getElementById('regPatAge').value, 10) || 30;
-    const gender = document.getElementById('regPatGender').value;
-    const bloodGroup = document.getElementById('regPatBlood').value;
-    const village = document.getElementById('regPatVillage').value.trim();
-
-    if (!name || !phone || !village) {
-      alert('Please fill in all required fields');
-      return;
-    }
-
-    const res = window.appStore.registerNewUser('patient', { name, phone, age, gender, bloodGroup, village });
-    closeRegistrationModal();
+  if (window.appStore) {
+    const res = window.appStore.changeActiveUserPassword(p1);
+    closeChangePasswordModal();
     if (res && res.success) {
-      document.getElementById('viewLogin').style.display = 'none';
-      document.getElementById('portalPatient').style.display = 'block';
-      updateSessionUI('patient', res.user);
-      if (typeof window.toast === 'function') window.toast('🎉 Welcome ' + res.user.name + '! ABHA Card Active: ' + res.user.abhaId);
+      if (typeof window.toast === 'function') {
+        window.toast('🔑 Password changed successfully & synced to cloud!');
+      }
+    } else {
+      alert((res && res.message) || 'Failed to update password');
     }
-  } else if (role === 'doctor') {
-    const name = document.getElementById('regDocName').value.trim();
-    const phone = document.getElementById('regDocPhone').value.trim();
-    const regNo = document.getElementById('regDocRegNo').value.trim();
-    const location = document.getElementById('regDocLocation').value.trim();
-    const password = document.getElementById('regDocPass').value.trim();
+  }
+}
 
-    const res = window.appStore.registerNewUser('doctor', { name, phone, regNo, location, password });
-    closeRegistrationModal();
-    if (res && res.success) {
-      document.getElementById('viewLogin').style.display = 'none';
-      document.getElementById('portalDoctor').style.display = 'block';
-      updateSessionUI('doctor', res.user);
-      if (typeof window.toast === 'function') window.toast('🩺 Registered & Logged in as ' + res.user.name + ' (' + res.user.id + ')');
+function showRoleChooser(availableRoles) {
+  const modal = document.getElementById('roleChooserModal');
+  const container = document.getElementById('roleChooserButtons');
+  if (!modal || !container) return;
+
+  container.innerHTML = availableRoles.map(r => {
+    const roleIcon = r.role === 'patient' ? '🌾' : r.role === 'doctor' ? '🩺' : r.role === 'worker' ? '🤝' : '👑';
+    const roleColor = r.role === 'patient' ? '#16a34a' : r.role === 'doctor' ? '#0284c7' : r.role === 'worker' ? '#d97706' : '#db2777';
+    return `
+      <button class="auth-btn-primary" style="background:${roleColor};padding:12px;font-size:14px;display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer;" onclick="selectPortalRole('${r.role}')">
+        <span>${roleIcon}</span> <span>Enter as ${r.role.toUpperCase()} (${r.label})</span>
+      </button>
+    `;
+  }).join('');
+
+  modal.style.display = 'flex';
+}
+
+function closeRoleChooserModal() {
+  const modal = document.getElementById('roleChooserModal');
+  if (modal) modal.style.display = 'none';
+}
+
+function selectPortalRole(role) {
+  closeRoleChooserModal();
+  if (window.appStore) {
+    const res = window.appStore.verifyAndLogin(role, {});
+    renderActivePortalView();
+    if (typeof window.toast === 'function') {
+      window.toast('✓ Logged into ' + role.toUpperCase() + ' Portal');
     }
-  } else if (role === 'worker') {
-    const name = document.getElementById('regWorkerName').value.trim();
-    const phone = document.getElementById('regWorkerPhone').value.trim();
-    const location = document.getElementById('regWorkerLocation').value.trim();
-    const regNo = document.getElementById('regWorkerRegNo').value.trim();
-    const password = document.getElementById('regWorkerPass').value.trim();
+  }
+}
 
-    const res = window.appStore.registerNewUser('worker', { name, phone, regNo, location, password });
-    closeRegistrationModal();
-    if (res && res.success) {
-      document.getElementById('viewLogin').style.display = 'none';
-      document.getElementById('portalWorker').style.display = 'block';
-      updateSessionUI('worker', res.user);
-      if (typeof window.toast === 'function') window.toast('🤝 Registered & Logged in as ' + res.user.name + ' (' + res.user.id + ')');
-    }
-  } else if (role === 'admin') {
-    const name = document.getElementById('regAdminName').value.trim();
-    const phone = document.getElementById('regAdminPhone').value.trim();
-    const location = document.getElementById('regAdminLocation').value.trim();
-    const password = document.getElementById('regAdminPass').value.trim();
+function submitPatientRegistration(e) {
+  if (e) e.preventDefault();
+  const name = document.getElementById('regPatName').value.trim();
+  const phone = document.getElementById('regPatPhone').value.trim();
+  const age = parseInt(document.getElementById('regPatAge').value, 10) || 30;
+  const gender = document.getElementById('regPatGender').value;
+  const bloodGroup = document.getElementById('regPatBlood').value;
+  const village = document.getElementById('regPatVillage').value.trim();
+  const password = document.getElementById('regPatPassword').value.trim();
 
-    const res = window.appStore.registerNewUser('admin', { name, phone, location, password });
+  if (!name || !phone || !village || !password) {
+    alert('Please fill in all required fields and set your password');
+    return;
+  }
+
+  if (window.appStore) {
+    const res = window.appStore.registerNewUser('patient', { name, phone, age, gender, bloodGroup, village, password });
     closeRegistrationModal();
-    if (res && res.success) {
-      document.getElementById('viewLogin').style.display = 'none';
-      document.getElementById('portalAdmin').style.display = 'block';
-      updateSessionUI('admin', res.user);
-      if (typeof window.toast === 'function') window.toast('👑 Registered & Logged in as ' + res.user.name + ' (' + res.user.id + ')');
+    renderActivePortalView();
+    if (typeof window.toast === 'function') {
+      window.toast('🎉 Welcome ' + res.user.name + '! ABHA Card: ' + res.user.abhaId);
     }
   }
 }
@@ -7646,26 +7837,34 @@ function sendMockOtp(role) {
   }
 }
 
-
-// Patient Verification Handler
+// Universal Verification Handler for Patient
 function handlePatientAuth(e) {
   if (e) e.preventDefault();
   hideLoginError();
 
-  const idEl = document.getElementById('patInputId');
-  const otpEl = document.getElementById('patInputOtp');
-  const id = idEl ? idEl.value.trim() : '9876543210';
-  const otp = otpEl ? otpEl.value.trim() : '123456';
+  const id = document.getElementById('patInputId').value.trim();
+  const pass = document.getElementById('patInputOtp').value.trim();
 
-  const res = window.appStore.verifyAndLogin('patient', { id: id || '9876543210', otp: otp || '123456' });
+  if (!id) {
+    showLoginError('Please enter your Mobile Number or ABHA Health ID.');
+    return;
+  }
 
-  renderActivePortalView();
-  if (typeof window.toast === 'function') {
-    window.toast('✓ Verified. Welcome ' + (res.user ? res.user.name : 'Citizen'));
+  const res = window.appStore.verifyAndLogin('patient', { id, password: pass });
+  if (res && res.multiRole) {
+    showRoleChooser(res.availableRoles);
+    return;
+  }
+
+  if (res && res.success) {
+    renderActivePortalView();
+    if (typeof window.toast === 'function') window.toast('✓ Verified: Welcome ' + (res.user ? res.user.name : 'Citizen'));
+  } else {
+    showLoginError(res.message || 'Authentication failed: Invalid credentials.');
   }
 }
 
-// Staff Verification Handler (Doctor, Worker, Admin)
+// Universal Verification Handler for Staff (Doctor, Worker, Admin)
 function handleStaffAuth(e, role) {
   if (e) e.preventDefault();
   hideLoginError();
@@ -7673,21 +7872,27 @@ function handleStaffAuth(e, role) {
   let idInputId = (role === 'doctor') ? 'docInputId' : (role === 'worker') ? 'workerInputId' : 'adminInputId';
   let passInputId = (role === 'doctor') ? 'docInputPass' : (role === 'worker') ? 'workerInputPass' : 'adminInputPass';
 
-  const idEl = document.getElementById(idInputId);
-  const passEl = document.getElementById(passInputId);
-  const defaultId = (role === 'doctor' ? 'DOC-101' : role === 'worker' ? 'ASH-201' : 'ADM-001');
-  const id = (idEl && idEl.value.trim()) ? idEl.value.trim() : defaultId;
-  const password = (passEl && passEl.value.trim()) ? passEl.value.trim() : (role + '@123');
+  const id = document.getElementById(idInputId).value.trim();
+  const pass = document.getElementById(passInputId).value.trim();
 
-  const res = window.appStore.verifyAndLogin(role, { id, password });
+  if (!id) {
+    showLoginError('Please enter your Mobile Number, Staff ID, or Registration Number.');
+    return;
+  }
 
-  renderActivePortalView();
-  if (typeof window.toast === 'function') {
-    window.toast('✓ Verified: ' + (res.user ? res.user.name : role));
+  const res = window.appStore.verifyAndLogin(role, { id, password: pass });
+  if (res && res.multiRole) {
+    showRoleChooser(res.availableRoles);
+    return;
+  }
+
+  if (res && res.success) {
+    renderActivePortalView();
+    if (typeof window.toast === 'function') window.toast('✓ Authenticated: Welcome ' + (res.user ? res.user.name : role));
+  } else {
+    showLoginError(res.message || '⚠️ Authentication failed: Invalid credentials or role not registered.');
   }
 }
-
-
 
 function handleLogoClick() {
   if (typeof window.stopReadAloud === 'function') {
@@ -7712,7 +7917,6 @@ function renderActivePortalView() {
   const views = ['Login', 'Patient', 'Doctor', 'Worker', 'Admin'];
 
   if (!session || !session.isLoggedIn) {
-    // Show login gateway
     views.forEach(v => {
       const el = document.getElementById('view' + v);
       if (el) el.style.display = (v === 'Login') ? 'block' : 'none';
@@ -7722,7 +7926,7 @@ function renderActivePortalView() {
     return;
   }
 
-  // User is authenticated
+  // Authenticated
   const role = session.role;
   const activeViewName = role.charAt(0).toUpperCase() + role.slice(1);
 
@@ -7731,7 +7935,6 @@ function renderActivePortalView() {
     if (el) el.style.display = (v === activeViewName) ? 'block' : 'none';
   });
 
-  // Show Header Active User Badge & Logout Button
   const headerControls = document.getElementById('sessionHeaderControls');
   const userBadge = document.getElementById('activeUserBadge');
   if (headerControls && userBadge) {
@@ -7741,7 +7944,6 @@ function renderActivePortalView() {
     userBadge.textContent = (roleIcons[role] || '👤') + ' ' + (user.name || 'User');
   }
 
-  // Trigger component renderers
   if (role === 'patient' && window.patientController) window.patientController.renderAll();
   if (role === 'doctor' && window.doctorController) window.doctorController.init();
   if (role === 'worker' && window.workerController) window.workerController.renderAll();
@@ -7750,7 +7952,6 @@ function renderActivePortalView() {
 
 window.renderActivePortalView = renderActivePortalView;
 
-// 3 Glass Themes Cycle: Classic -> Black -> Navy -> Classic
 function cycleTheme() {
   const themes = ['classic', 'black', 'navy'];
   const current = document.body.getAttribute('data-theme') || 'classic';
