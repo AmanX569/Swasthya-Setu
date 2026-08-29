@@ -1,7 +1,7 @@
 /**
  * =========================================================
  * SWASTHYA SETU - CITIZEN / PATIENT HUB (patient.js)
- * Pure Language Localization & High-Contrast Glass Support
+ * 100% Pure Language Localization for Symptoms, Medicines & Doses
  * =========================================================
  */
 
@@ -28,12 +28,37 @@
       this.renderAbhaCard();
       this.renderFamilyCircle();
       this.renderDailyMedications();
+      this.renderTriageButtons();
       this.renderLiveHospitals();
       this.renderLiveBloodBank();
     }
 
     // -------------------------------------------------------------
-    // 1. ABHA CARD RENDER & PRINT
+    // 1. DYNAMIC SYMPTOM TRIAGE BUTTONS (PURE LOCAL LANGUAGE)
+    // -------------------------------------------------------------
+    renderTriageButtons() {
+      const container = document.getElementById('symptomButtonsGrid');
+      if (!container) return;
+
+      const symptoms = [
+        { id: 'fever', icon: '🌡️', key: 'sym_fever', defaultName: 'High Fever' },
+        { id: 'snakebite', icon: '🐍', key: 'sym_snakebite', defaultName: 'Snake Bite' },
+        { id: 'diarrhea', icon: '💧', key: 'sym_diarrhea', defaultName: 'Diarrhea' },
+        { id: 'pregnancy', icon: '🤰', key: 'sym_pregnancy', defaultName: 'Pregnancy Pain' },
+        { id: 'chestpain', icon: '🫀', key: 'sym_chestpain', defaultName: 'Chest Pain' },
+        { id: 'breathing', icon: '😮‍💨', key: 'sym_breathing', defaultName: 'Breathing Difficulty' }
+      ];
+
+      container.innerHTML = symptoms.map(s => `
+        <button class="btn-glass" style="padding:14px 8px;text-align:center;font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;" onclick="patientController.triageSymptom('${s.id}')">
+          <div style="font-size:28px;margin-bottom:6px;">${s.icon}</div>
+          <span style="font-size:13px;color:var(--ink);line-height:1.2;">${this.t(s.key, s.defaultName)}</span>
+        </button>
+      `).join('');
+    }
+
+    // -------------------------------------------------------------
+    // 2. ABHA CARD RENDER & PRINT
     // -------------------------------------------------------------
     renderAbhaCard() {
       const el = document.getElementById('abhaCardContainer');
@@ -96,7 +121,7 @@
     }
 
     // -------------------------------------------------------------
-    // 2. 1-TAP 108 EMERGENCY SOS
+    // 3. 1-TAP 108 EMERGENCY SOS
     // -------------------------------------------------------------
     triggerSos() {
       const user = this.store.getState().currentUser;
@@ -110,7 +135,7 @@
     }
 
     // -------------------------------------------------------------
-    // 3. AUDIO-VISUAL SYMPTOM TRIAGE
+    // 4. AUDIO-VISUAL SYMPTOM TRIAGE
     // -------------------------------------------------------------
     triageSymptom(type) {
       const triageData = {
@@ -185,7 +210,7 @@
     }
 
     // -------------------------------------------------------------
-    // 4. FAMILY HEALTH CIRCLE
+    // 5. FAMILY HEALTH CIRCLE
     // -------------------------------------------------------------
     renderFamilyCircle() {
       const el = document.getElementById('familyMembersList');
@@ -250,7 +275,7 @@
     }
 
     // -------------------------------------------------------------
-    // 5. JAN AUSHADHI MEDICINE TRACKER & SAVINGS (TRANSLATED)
+    // 6. JAN AUSHADHI MEDICINE TRACKER & SAVINGS (100% TRANSLATED)
     // -------------------------------------------------------------
     renderDailyMedications() {
       const el = document.getElementById('dailyMedsList');
@@ -258,23 +283,27 @@
       const meds = this.store.getState().dailyMedications || [];
 
       const medKeyMap = {
-        'MED-01': 'med_paracetamol',
-        'MED-02': 'med_calcium',
-        'MED-03': 'med_ifa'
+        'MED-01': { key: 'med_paracetamol', amount: '26', defaultName: 'Paracetamol 650mg (Jan Aushadhi)' },
+        'MED-02': { key: 'med_calcium', amount: '45', defaultName: 'Calcium + Vit D3 (Jan Aushadhi)' },
+        'MED-03': { key: 'med_ifa', amount: '30', defaultName: 'Iron & Folic Acid IFA (Govt PHC)' }
       };
 
+      const savedWord = this.t('saved_text', 'saved');
+      const morningLabel = this.t('dose_morning', '☀️ Morning');
+      const noonLabel = this.t('dose_noon', '🌤️ Noon');
+      const nightLabel = this.t('dose_night', '🌙 Night');
+      const takenLabel = this.t('dose_taken', '✓ Taken');
+
       el.innerHTML = meds.map(m => {
-        const localizedName = this.t(medKeyMap[m.id], m.name);
-        const morningLabel = this.t('dose_morning', '☀️ Morning');
-        const noonLabel = this.t('dose_noon', '🌤️ Noon');
-        const nightLabel = this.t('dose_night', '🌙 Night');
-        const takenLabel = this.t('dose_taken', '✓ Taken');
+        const meta = medKeyMap[m.id] || { key: '', amount: '25', defaultName: m.name };
+        const localizedName = this.t(meta.key, meta.defaultName);
+        const savingText = `💰 ₹${meta.amount} ${savedWord}`;
 
         return `
           <div style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:14px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;box-shadow:var(--shadow-panel);">
             <div>
               <strong style="color:var(--ink);font-size:15px;display:block;">${localizedName}</strong>
-              <small style="color:#16a34a;font-weight:700;">💰 ${m.saving}</small>
+              <small style="color:#16a34a;font-weight:700;">${savingText}</small>
             </div>
             <div style="display:flex;gap:8px;">
               ${m.morning ? `
@@ -303,7 +332,7 @@
     }
 
     // -------------------------------------------------------------
-    // 6. LIVE HOSPITAL BEDS & BLOOD BANK
+    // 7. LIVE HOSPITAL BEDS & BLOOD BANK
     // -------------------------------------------------------------
     renderLiveHospitals() {
       const el = document.getElementById('hospitalBedsList');
