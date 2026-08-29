@@ -107,6 +107,9 @@
     removeStaff(id) {
       if (confirm('Are you sure you want to remove this staff member?')) {
         this.store.deleteStaff(id);
+        this.renderStaff();
+        this.renderStats();
+        if (typeof window.toast === 'function') window.toast('✓ Removed staff member in real-time');
       }
     }
 

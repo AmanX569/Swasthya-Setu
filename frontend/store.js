@@ -251,6 +251,57 @@
       this.saveState();
     }
 
+    // Universal Multi-Role Registration
+    registerNewUser(role, data) {
+      if (role === 'patient') {
+        const abhaId = data.abhaId || `14-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}`;
+        const newPatient = {
+          id: 'USR-PAT-' + String(Date.now()).slice(-4),
+          abhaId: abhaId,
+          name: data.name || 'Citizen',
+          phone: data.phone || '9876543210',
+          age: parseInt(data.age, 10) || 30,
+          gender: data.gender || 'Male',
+          village: data.village || 'Kondapalli Ward',
+          bloodGroup: data.bloodGroup || 'O+',
+          role: 'patient'
+        };
+
+        this.state.currentUser = newPatient;
+        this.state.session = { isLoggedIn: true, role: 'patient', user: newPatient };
+        this.saveState();
+
+        if (global.supabaseService && global.supabaseService.isOnline) {
+          global.supabaseService.insertProfile(newPatient);
+        }
+        return { success: true, user: newPatient };
+      } else {
+        // Staff Registration (Doctor, Worker, Admin)
+        const prefix = role === 'doctor' ? 'DOC' : role === 'worker' ? 'ASH' : 'ADM';
+        const staffCode = `${prefix}-${Math.floor(100 + Math.random() * 900)}`;
+        const newStaff = {
+          id: staffCode,
+          name: data.name || 'Healthcare Professional',
+          role: role,
+          phone: data.phone || '9876543210',
+          location: data.location || 'Kondapalli Health Centre',
+          status: 'Active Online',
+          regNo: data.regNo || `${prefix}-AP-${Math.floor(1000 + Math.random() * 9000)}`,
+          password: data.password || (role + '@123'),
+          pin: data.pin || '1234'
+        };
+
+        this.state.staff.unshift(newStaff);
+        this.state.session = { isLoggedIn: true, role: role, user: newStaff };
+        this.saveState();
+
+        if (global.supabaseService && global.supabaseService.isOnline) {
+          global.supabaseService.insertStaff(newStaff);
+        }
+        return { success: true, user: newStaff };
+      }
+    }
+
     // Family Member methods
     addFamilyMember(member) {
       const id = 'FAM-' + String(Date.now()).slice(-4);
@@ -292,6 +343,13 @@
     deleteStaff(id) {
       this.state.staff = this.state.staff.filter(s => s.id !== id);
       this.saveState();
+      if (global.supabaseService && global.supabaseService.isOnline) {
+        global.supabaseService.deleteStaff(id);
+      }
+      if (global.adminController) {
+        if (typeof global.adminController.renderStaff === 'function') global.adminController.renderStaff();
+        if (typeof global.adminController.renderStats === 'function') global.adminController.renderStats();
+      }
     }
 
     // Queue & Prescriptions

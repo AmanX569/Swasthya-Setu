@@ -2765,6 +2765,14 @@ body {
       </div>
     </div>
 
+  
+    <!-- NEW USER REGISTRATION TRIGGER -->
+    <div style="text-align:center;max-width:580px;margin:20px auto 10px;">
+      <button type="button" class="btn-glass" onclick="openRegistrationModal()" style="width:100%;padding:14px;font-size:14px;font-weight:700;background:rgba(2,132,199,0.12);border:1.5px dashed var(--primary-bright);color:var(--primary-bright);cursor:pointer;border-radius:12px;display:flex;align-items:center;justify-content:center;gap:8px;">
+        <span>📝</span> <span>New User? Register & Create ABHA / Healthcare Account</span>
+      </button>
+    </div>
+
   </section>
 
   <!-- =========================================================
@@ -3382,6 +3390,194 @@ body {
   </div>
 </div>
 
+
+<!-- =========================================================
+     MULTI-ROLE NEW USER REGISTRATION MODAL
+     ========================================================= -->
+<div id="registrationModal" class="modal-overlay">
+  <div class="modal-card" style="max-width:580px;">
+    
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:28px;">📝</span>
+        <div>
+          <h3 style="color:var(--ink);font-size:18px;font-weight:800;">New User Registration</h3>
+          <small style="color:var(--muted);">National Digital Health Mission (ABDM) Integration</small>
+        </div>
+      </div>
+      <button onclick="closeRegistrationModal()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;">✕</button>
+    </div>
+
+    <!-- ROLE TABS IN REGISTRATION -->
+    <div style="display:grid;grid-template-columns:repeat(4, 1fr);gap:6px;margin-bottom:16px;">
+      <button type="button" class="auth-tab-btn active" id="regTabPatient" onclick="switchRegTab('patient')">
+        <span style="font-size:16px;">🌾</span> <span style="font-size:12px;">Citizen</span>
+      </button>
+      <button type="button" class="auth-tab-btn" id="regTabDoctor" onclick="switchRegTab('doctor')">
+        <span style="font-size:16px;">🩺</span> <span style="font-size:12px;">Doctor</span>
+      </button>
+      <button type="button" class="auth-tab-btn" id="regTabWorker" onclick="switchRegTab('worker')">
+        <span style="font-size:16px;">🤝</span> <span style="font-size:12px;">ASHA</span>
+      </button>
+      <button type="button" class="auth-tab-btn" id="regTabAdmin" onclick="switchRegTab('admin')">
+        <span style="font-size:16px;">👑</span> <span style="font-size:12px;">Admin</span>
+      </button>
+    </div>
+
+    <!-- 1. CITIZEN REGISTRATION FORM -->
+    <form id="regFormPatient" onsubmit="submitRegistration(event, 'patient')">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Full Name (मरीज का नाम) *</label>
+          <input type="text" id="regPatName" class="input-field" placeholder="e.g. Ramesh Kumar" required>
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Mobile Number (मोबाइल नं.) *</label>
+          <input type="tel" id="regPatPhone" class="input-field" placeholder="e.g. 9876543210" maxlength="10" required>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px;">
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Age (उम्र) *</label>
+          <input type="number" id="regPatAge" class="input-field" placeholder="35" min="1" max="120" required>
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Gender (लिंग) *</label>
+          <select id="regPatGender" class="input-field" style="height:44px;" required>
+            <option value="Male">Male (पुरुष)</option>
+            <option value="Female">Female (महिला)</option>
+            <option value="Other">Other (अन्य)</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Blood Group *</label>
+          <select id="regPatBlood" class="input-field" style="height:44px;" required>
+            <option value="O+">O+</option>
+            <option value="A+">A+</option>
+            <option value="B+">B+</option>
+            <option value="AB+">AB+</option>
+            <option value="O-">O-</option>
+            <option value="A-">A-</option>
+            <option value="B-">B-</option>
+            <option value="AB-">AB-</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="margin-bottom:14px;">
+        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Village / Sub-Centre Ward (ग्राम / वार्ड) *</label>
+        <input type="text" id="regPatVillage" class="input-field" placeholder="e.g. Kondapalli Sub-Centre, Ward 4" required>
+      </div>
+
+      <div style="background:rgba(22,163,74,0.1);border:1px dashed #16a34a;border-radius:10px;padding:10px;margin-bottom:16px;font-size:12px;color:var(--ink);">
+        ✨ An official <strong>14-digit Ayushman Bharat ABHA Health Card</strong> will be generated automatically and saved to the cloud.
+      </div>
+
+      <button type="submit" class="auth-btn-primary" style="width:100%;padding:12px;background:#16a34a;border-color:#15803d;font-size:15px;cursor:pointer;">
+        ✓ Register & Generate ABHA Card
+      </button>
+    </form>
+
+    <!-- 2. DOCTOR REGISTRATION FORM -->
+    <form id="regFormDoctor" onsubmit="submitRegistration(event, 'doctor')" style="display:none;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Doctor Full Name *</label>
+          <input type="text" id="regDocName" class="input-field" placeholder="e.g. Dr. Priya Sharma" required>
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Mobile Number *</label>
+          <input type="tel" id="regDocPhone" class="input-field" placeholder="e.g. 9811122233" maxlength="10" required>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">MCI / State Council Reg No. *</label>
+          <input type="text" id="regDocRegNo" class="input-field" placeholder="e.g. MCI-AP-48912" required>
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Hospital / PHC Location *</label>
+          <input type="text" id="regDocLocation" class="input-field" placeholder="e.g. Kondapalli PHC" required>
+        </div>
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Create Clinical Password *</label>
+        <input type="password" id="regDocPass" class="input-field" placeholder="Create password" required>
+      </div>
+
+      <button type="submit" class="auth-btn-primary" style="width:100%;padding:12px;background:#0284c7;border-color:#0369a1;font-size:15px;cursor:pointer;">
+        🩺 Register Medical Officer Account
+      </button>
+    </form>
+
+    <!-- 3. ASHA WORKER REGISTRATION FORM -->
+    <form id="regFormWorker" onsubmit="submitRegistration(event, 'worker')" style="display:none;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">ASHA / ANM Full Name *</label>
+          <input type="text" id="regWorkerName" class="input-field" placeholder="e.g. Lakshmi Didi" required>
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Mobile Number *</label>
+          <input type="tel" id="regWorkerPhone" class="input-field" placeholder="e.g. 9833344455" maxlength="10" required>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Worker Sector / Village Area *</label>
+          <input type="text" id="regWorkerLocation" class="input-field" placeholder="e.g. Sector 4, Kondapalli" required>
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">ASHA / ANM Reg ID *</label>
+          <input type="text" id="regWorkerRegNo" class="input-field" placeholder="e.g. ASHA-AP-094" required>
+        </div>
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Set 4-Digit Passcode / PIN *</label>
+        <input type="password" id="regWorkerPass" class="input-field" placeholder="e.g. 1234" required>
+      </div>
+
+      <button type="submit" class="auth-btn-primary" style="width:100%;padding:12px;background:#d97706;border-color:#b45309;font-size:15px;cursor:pointer;">
+        🤝 Register Frontline ASHA Account
+      </button>
+    </form>
+
+    <!-- 4. HEALTH ADMIN REGISTRATION FORM -->
+    <form id="regFormAdmin" onsubmit="submitRegistration(event, 'admin')" style="display:none;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Officer Full Name *</label>
+          <input type="text" id="regAdminName" class="input-field" placeholder="e.g. S. K. Nambiar" required>
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Official Phone Number *</label>
+          <input type="tel" id="regAdminPhone" class="input-field" placeholder="e.g. 9855566677" maxlength="10" required>
+        </div>
+      </div>
+
+      <div style="margin-bottom:12px;">
+        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Department / District Headquarters *</label>
+        <input type="text" id="regAdminLocation" class="input-field" placeholder="e.g. District HQ, Vijayawada" required>
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Set Admin Master Password *</label>
+        <input type="password" id="regAdminPass" class="input-field" placeholder="Create master password" required>
+      </div>
+
+      <button type="submit" class="auth-btn-primary" style="width:100%;padding:12px;background:#db2777;border-color:#be185d;font-size:15px;cursor:pointer;">
+        👑 Register Health Admin Account
+      </button>
+    </form>
+
+  </div>
+</div>
+
 <!-- TOAST -->
 <div id="toast"></div>
 
@@ -3794,6 +3990,25 @@ body {
       }]);
     }
 
+    async deleteStaff(staffCode) {
+      if (!this.client) return;
+      return await this.client.from('staff').delete().eq('staff_code', staffCode);
+    }
+
+    async insertProfile(p) {
+      if (!this.client) return;
+      return await this.client.from('profiles').insert([{
+        abha_id: p.abhaId,
+        phone: p.phone,
+        name: p.name,
+        age: p.age,
+        gender: p.gender,
+        village: p.village,
+        blood_group: p.bloodGroup,
+        role: p.role || 'patient'
+      }]);
+    }
+
     async insertStaff(s) {
       if (!this.client) return;
       return await this.client.from('staff').insert([{
@@ -4087,6 +4302,57 @@ body {
       this.saveState();
     }
 
+    // Universal Multi-Role Registration
+    registerNewUser(role, data) {
+      if (role === 'patient') {
+        const abhaId = data.abhaId || `14-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}`;
+        const newPatient = {
+          id: 'USR-PAT-' + String(Date.now()).slice(-4),
+          abhaId: abhaId,
+          name: data.name || 'Citizen',
+          phone: data.phone || '9876543210',
+          age: parseInt(data.age, 10) || 30,
+          gender: data.gender || 'Male',
+          village: data.village || 'Kondapalli Ward',
+          bloodGroup: data.bloodGroup || 'O+',
+          role: 'patient'
+        };
+
+        this.state.currentUser = newPatient;
+        this.state.session = { isLoggedIn: true, role: 'patient', user: newPatient };
+        this.saveState();
+
+        if (global.supabaseService && global.supabaseService.isOnline) {
+          global.supabaseService.insertProfile(newPatient);
+        }
+        return { success: true, user: newPatient };
+      } else {
+        // Staff Registration (Doctor, Worker, Admin)
+        const prefix = role === 'doctor' ? 'DOC' : role === 'worker' ? 'ASH' : 'ADM';
+        const staffCode = `${prefix}-${Math.floor(100 + Math.random() * 900)}`;
+        const newStaff = {
+          id: staffCode,
+          name: data.name || 'Healthcare Professional',
+          role: role,
+          phone: data.phone || '9876543210',
+          location: data.location || 'Kondapalli Health Centre',
+          status: 'Active Online',
+          regNo: data.regNo || `${prefix}-AP-${Math.floor(1000 + Math.random() * 9000)}`,
+          password: data.password || (role + '@123'),
+          pin: data.pin || '1234'
+        };
+
+        this.state.staff.unshift(newStaff);
+        this.state.session = { isLoggedIn: true, role: role, user: newStaff };
+        this.saveState();
+
+        if (global.supabaseService && global.supabaseService.isOnline) {
+          global.supabaseService.insertStaff(newStaff);
+        }
+        return { success: true, user: newStaff };
+      }
+    }
+
     // Family Member methods
     addFamilyMember(member) {
       const id = 'FAM-' + String(Date.now()).slice(-4);
@@ -4128,6 +4394,13 @@ body {
     deleteStaff(id) {
       this.state.staff = this.state.staff.filter(s => s.id !== id);
       this.saveState();
+      if (global.supabaseService && global.supabaseService.isOnline) {
+        global.supabaseService.deleteStaff(id);
+      }
+      if (global.adminController) {
+        if (typeof global.adminController.renderStaff === 'function') global.adminController.renderStaff();
+        if (typeof global.adminController.renderStats === 'function') global.adminController.renderStats();
+      }
     }
 
     // Queue & Prescriptions
@@ -6699,6 +6972,9 @@ body {
     removeStaff(id) {
       if (confirm('Are you sure you want to remove this staff member?')) {
         this.store.deleteStaff(id);
+        this.renderStaff();
+        this.renderStats();
+        if (typeof window.toast === 'function') window.toast('✓ Removed staff member in real-time');
       }
     }
 
@@ -6901,6 +7177,106 @@ function handleClearSupabaseCredentials() {
       if (typeof window.toast === 'function') {
         window.toast('⚙️ Supabase Disconnected');
       }
+    }
+  }
+}
+
+
+function openRegistrationModal() {
+  const m = document.getElementById('registrationModal');
+  if (m) m.style.display = 'flex';
+  switchRegTab('patient');
+}
+
+function closeRegistrationModal() {
+  const m = document.getElementById('registrationModal');
+  if (m) m.style.display = 'none';
+}
+
+function switchRegTab(role) {
+  const roles = ['patient', 'doctor', 'worker', 'admin'];
+  roles.forEach(r => {
+    const btn = document.getElementById('regTab' + r.charAt(0).toUpperCase() + r.slice(1));
+    const form = document.getElementById('regForm' + r.charAt(0).toUpperCase() + r.slice(1));
+    if (btn) {
+      if (r === role) btn.classList.add('active');
+      else btn.classList.remove('active');
+    }
+    if (form) {
+      form.style.display = (r === role) ? 'block' : 'none';
+    }
+  });
+}
+
+function submitRegistration(e, role) {
+  if (e) e.preventDefault();
+
+  if (!window.appStore) return;
+
+  if (role === 'patient') {
+    const name = document.getElementById('regPatName').value.trim();
+    const phone = document.getElementById('regPatPhone').value.trim();
+    const age = parseInt(document.getElementById('regPatAge').value, 10) || 30;
+    const gender = document.getElementById('regPatGender').value;
+    const bloodGroup = document.getElementById('regPatBlood').value;
+    const village = document.getElementById('regPatVillage').value.trim();
+
+    if (!name || !phone || !village) {
+      alert('Please fill in all required fields');
+      return;
+    }
+
+    const res = window.appStore.registerNewUser('patient', { name, phone, age, gender, bloodGroup, village });
+    closeRegistrationModal();
+    if (res && res.success) {
+      document.getElementById('viewLogin').style.display = 'none';
+      document.getElementById('portalPatient').style.display = 'block';
+      updateSessionUI('patient', res.user);
+      if (typeof window.toast === 'function') window.toast('🎉 Welcome ' + res.user.name + '! ABHA Card Active: ' + res.user.abhaId);
+    }
+  } else if (role === 'doctor') {
+    const name = document.getElementById('regDocName').value.trim();
+    const phone = document.getElementById('regDocPhone').value.trim();
+    const regNo = document.getElementById('regDocRegNo').value.trim();
+    const location = document.getElementById('regDocLocation').value.trim();
+    const password = document.getElementById('regDocPass').value.trim();
+
+    const res = window.appStore.registerNewUser('doctor', { name, phone, regNo, location, password });
+    closeRegistrationModal();
+    if (res && res.success) {
+      document.getElementById('viewLogin').style.display = 'none';
+      document.getElementById('portalDoctor').style.display = 'block';
+      updateSessionUI('doctor', res.user);
+      if (typeof window.toast === 'function') window.toast('🩺 Registered & Logged in as ' + res.user.name + ' (' + res.user.id + ')');
+    }
+  } else if (role === 'worker') {
+    const name = document.getElementById('regWorkerName').value.trim();
+    const phone = document.getElementById('regWorkerPhone').value.trim();
+    const location = document.getElementById('regWorkerLocation').value.trim();
+    const regNo = document.getElementById('regWorkerRegNo').value.trim();
+    const password = document.getElementById('regWorkerPass').value.trim();
+
+    const res = window.appStore.registerNewUser('worker', { name, phone, regNo, location, password });
+    closeRegistrationModal();
+    if (res && res.success) {
+      document.getElementById('viewLogin').style.display = 'none';
+      document.getElementById('portalWorker').style.display = 'block';
+      updateSessionUI('worker', res.user);
+      if (typeof window.toast === 'function') window.toast('🤝 Registered & Logged in as ' + res.user.name + ' (' + res.user.id + ')');
+    }
+  } else if (role === 'admin') {
+    const name = document.getElementById('regAdminName').value.trim();
+    const phone = document.getElementById('regAdminPhone').value.trim();
+    const location = document.getElementById('regAdminLocation').value.trim();
+    const password = document.getElementById('regAdminPass').value.trim();
+
+    const res = window.appStore.registerNewUser('admin', { name, phone, location, password });
+    closeRegistrationModal();
+    if (res && res.success) {
+      document.getElementById('viewLogin').style.display = 'none';
+      document.getElementById('portalAdmin').style.display = 'block';
+      updateSessionUI('admin', res.user);
+      if (typeof window.toast === 'function') window.toast('👑 Registered & Logged in as ' + res.user.name + ' (' + res.user.id + ')');
     }
   }
 }

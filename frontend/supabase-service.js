@@ -352,6 +352,25 @@
       }]);
     }
 
+    async deleteStaff(staffCode) {
+      if (!this.client) return;
+      return await this.client.from('staff').delete().eq('staff_code', staffCode);
+    }
+
+    async insertProfile(p) {
+      if (!this.client) return;
+      return await this.client.from('profiles').insert([{
+        abha_id: p.abhaId,
+        phone: p.phone,
+        name: p.name,
+        age: p.age,
+        gender: p.gender,
+        village: p.village,
+        blood_group: p.bloodGroup,
+        role: p.role || 'patient'
+      }]);
+    }
+
     async insertStaff(s) {
       if (!this.client) return;
       return await this.client.from('staff').insert([{
