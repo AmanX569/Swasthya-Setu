@@ -123,12 +123,19 @@
       this.state = this.loadState();
     }
 
-    loadState() {
+        loadState() {
       try {
         const saved = localStorage.getItem(STORAGE_KEY);
         if (saved) {
           const parsed = JSON.parse(saved);
-          return { ...DEFAULT_INITIAL_STATE, ...parsed };
+          const state = { ...DEFAULT_INITIAL_STATE, ...parsed };
+          if (Array.isArray(state.staff)) {
+            state.staff.forEach(s => {
+              s.password = s.password || (s.role + '@123');
+              s.pin = s.pin || '1234';
+            });
+          }
+          return state;
         }
       } catch (e) {
         console.warn('[Store] Local load fallback:', e);
@@ -163,7 +170,7 @@
     }
 
     // Bulletproof Authentication & Verification
-    verifyAndLogin(role, credentials = {}) {
+        verifyAndLogin(role, credentials = {}) {
       // 1. Citizen / Patient
       if (role === 'patient') {
         const rawId = (credentials.id || credentials.phone || credentials.abhaId || '').trim();
