@@ -3,22 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-<title>Swasthya Setu · Rural Care Access Network | स्वास्थ्य सेतु</title>
+<title>Swasthya Setu · Rural Healthcare Grid</title>
 <link rel="manifest" href="./manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
 /* =========================================================
-   3 OPTIMIZED GLASS THEMES (CLASSIC · BLACK · NAVY)
+   3 OPTIMIZED HIGH-CONTRAST GLASS THEMES (CLASSIC · BLACK · NAVY)
    ========================================================= */
 
-/* 1. CLASSIC WHITE & ROYAL BLUE GLASS (DEFAULT) */
+/* 1. CLASSIC WHITE & ROYAL BLUE (DEFAULT) */
 :root, [data-theme="classic"], body[data-theme="classic"], body:not([data-theme="black"]):not([data-theme="navy"]) {
   --void-950: #f1f5f9;
   --void-900: #e2e8f0;
-  --glass-1: rgba(255, 255, 255, 0.85);
-  --glass-2: rgba(255, 255, 255, 0.95);
+  --glass-1: rgba(255, 255, 255, 0.88);
+  --glass-2: #ffffff;
   --glass-border: rgba(203, 213, 225, 0.85);
   --primary: #0052cc;
   --primary-dark: #003d99;
@@ -28,30 +28,30 @@
   --ink-dim: #334155;
   --muted: #64748b;
   --line: #e2e8f0;
-  --topbar-bg: rgba(255, 255, 255, 0.92);
+  --topbar-bg: rgba(255, 255, 255, 0.94);
   --body-bg: #f1f5f9;
   --shadow-panel: 0 4px 20px rgba(0, 51, 102, 0.05);
   color-scheme: light;
 }
 
-/* 2. PURE BLACK GLASS (AMOLED PITCH BLACK) */
+/* 2. PURE BLACK GLASS (AMOLED 100% PITCH BLACK) */
 [data-theme="black"], body[data-theme="black"] {
   --void-950: #000000;
   --void-900: #0a0a0a;
-  --glass-1: rgba(18, 18, 18, 0.78);
-  --glass-2: rgba(26, 26, 26, 0.9);
-  --glass-border: rgba(255, 255, 255, 0.14);
+  --glass-1: rgba(22, 22, 22, 0.85);
+  --glass-2: rgba(30, 30, 30, 0.95);
+  --glass-border: rgba(255, 255, 255, 0.16);
   --primary: #10b981;
   --primary-dark: #064e3b;
   --primary-bright: #34d399;
   --accent: #f59e0b;
   --ink: #ffffff;
-  --ink-dim: #cbd5e1;
+  --ink-dim: #e2e8f0;
   --muted: #94a3b8;
-  --line: rgba(255, 255, 255, 0.1);
-  --topbar-bg: rgba(0, 0, 0, 0.92);
+  --line: rgba(255, 255, 255, 0.12);
+  --topbar-bg: rgba(0, 0, 0, 0.94);
   --body-bg: #000000;
-  --shadow-panel: 0 8px 32px rgba(0, 0, 0, 0.8);
+  --shadow-panel: 0 8px 32px rgba(0, 0, 0, 0.85);
   color-scheme: dark;
 }
 
@@ -59,20 +59,20 @@
 [data-theme="navy"], body[data-theme="navy"] {
   --void-950: #030a16;
   --void-900: #07152b;
-  --glass-1: rgba(12, 33, 64, 0.72);
-  --glass-2: rgba(16, 42, 80, 0.85);
-  --glass-border: rgba(56, 189, 248, 0.25);
+  --glass-1: rgba(14, 38, 74, 0.8);
+  --glass-2: rgba(20, 50, 95, 0.92);
+  --glass-border: rgba(56, 189, 248, 0.28);
   --primary: #0284c7;
   --primary-dark: #0369a1;
   --primary-bright: #38bdf8;
   --accent: #f59e0b;
   --ink: #f8fafc;
-  --ink-dim: #cbd5e1;
+  --ink-dim: #e2e8f0;
   --muted: #94a3b8;
-  --line: rgba(56, 189, 248, 0.15);
-  --topbar-bg: rgba(3, 10, 22, 0.92);
+  --line: rgba(56, 189, 248, 0.18);
+  --topbar-bg: rgba(3, 10, 22, 0.94);
   --body-bg: #030a16;
-  --shadow-panel: 0 8px 32px rgba(0, 0, 0, 0.65);
+  --shadow-panel: 0 8px 32px rgba(0, 0, 0, 0.7);
   color-scheme: dark;
 }
 
@@ -120,7 +120,7 @@ body {
   font-family: 'Fraunces', Georgia, serif;
   font-size: 19px;
   font-weight: 800;
-  color: var(--primary);
+  color: var(--primary-bright);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -166,7 +166,7 @@ body {
 .role-btn.active {
   background: var(--primary);
   color: #ffffff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
 }
 
 .top-controls {
@@ -217,7 +217,7 @@ body {
 .panel-title {
   font-size: 17px;
   font-weight: 700;
-  color: var(--primary);
+  color: var(--primary-bright);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -254,7 +254,7 @@ body {
 }
 
 .btn-glass:hover {
-  filter: brightness(1.05);
+  filter: brightness(1.08);
 }
 
 .input-field {
@@ -269,8 +269,8 @@ body {
 }
 
 .input-field:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.2);
+  border-color: var(--primary-bright);
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.25);
 }
 
 .table-responsive {
@@ -287,7 +287,7 @@ body {
 
 .admin-table th {
   background: rgba(0, 0, 0, 0.04);
-  color: var(--primary);
+  color: var(--primary-bright);
   font-weight: 700;
   text-align: left;
   padding: 10px 12px;
@@ -297,7 +297,7 @@ body {
 
 [data-theme="black"] .admin-table th,
 [data-theme="navy"] .admin-table th {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .admin-table td {
@@ -305,6 +305,10 @@ body {
   border-bottom: 1px solid var(--line);
   font-size: 13px;
   color: var(--ink);
+}
+
+.admin-table td strong {
+  color: var(--ink) !important;
 }
 
 /* Modals */
@@ -330,7 +334,7 @@ body {
   padding: 22px;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
 }
 
 /* Toast */
@@ -344,7 +348,7 @@ body {
   border-radius: 12px;
   font-size: 13px;
   font-weight: 600;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
   z-index: 100000;
   display: none;
 }
@@ -384,8 +388,8 @@ body {
       <option value="kn">ಕನ್ನಡ (Kannada)</option>
     </select>
 
-    <button class="btn-glass" onclick="cycleTheme()" id="themeToggleBtn" data-i18n="btn_theme">
-      🏛️ Classic
+    <button class="btn-glass" onclick="cycleTheme()" id="themeToggleBtn" data-i18n="theme_classic">
+      🏛️ Classic (White & Blue)
     </button>
 
     <button class="auth-btn-primary" style="background:#dc2626;border-color:#b91c1c;padding:8px 14px;" onclick="patientController.triggerSos()" data-i18n="btn_sos">
@@ -404,18 +408,18 @@ body {
     <div style="background:linear-gradient(135deg, #dc2626, #b91c1c);color:#ffffff;border-radius:16px;padding:14px 18px;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;box-shadow:0 8px 24px rgba(220,38,38,0.25);">
       <div>
         <strong style="font-size:15px;display:block;" data-i18n="emergency_banner">🚑 Immediate 108 Ambulance SOS — Tap to Call or Send GPS</strong>
-        <small style="opacity:0.9;font-size:12px;">Direct connection to nearest Rural Emergency Dispatch</small>
+        <small style="opacity:0.9;font-size:12px;" data-i18n="emergency_subline">Direct connection to nearest Rural Emergency Dispatch Hub</small>
       </div>
       <div style="display:flex;gap:8px;">
-        <a href="tel:108" class="btn-glass" style="background:#ffffff;color:#dc2626;font-weight:700;padding:6px 14px;">📞 Call 108</a>
-        <button class="btn-glass" style="background:rgba(255,255,255,0.2);color:#ffffff;border-color:rgba(255,255,255,0.4);" onclick="patientController.triggerSos()">📍 GPS SOS</button>
+        <a href="tel:108" class="btn-glass" style="background:#ffffff;color:#dc2626;font-weight:700;padding:6px 14px;" data-i18n="btn_call_108">📞 Call 108</a>
+        <button class="btn-glass" style="background:rgba(255,255,255,0.2);color:#ffffff;border-color:rgba(255,255,255,0.4);" onclick="patientController.triggerSos()" data-i18n="btn_gps_sos">📍 GPS SOS</button>
       </div>
     </div>
 
     <!-- DIGITAL ABHA HEALTH CARD -->
     <div class="glass-panel">
       <div class="panel-header">
-        <h2 class="panel-title" data-i18n="abha_title">🆔 Digital ABHA Health Card (आयुष्मान कार्ड)</h2>
+        <h2 class="panel-title" data-i18n="abha_title">🆔 Digital ABHA Health Card</h2>
       </div>
       <p style="color:var(--muted);font-size:13px;margin-bottom:14px;" data-i18n="abha_desc">
         Your government health identity card. Keep it handy for free consultations and hospital visits.
@@ -426,7 +430,7 @@ body {
     <!-- VISUAL AI SYMPTOM TRIAGE -->
     <div class="glass-panel">
       <div class="panel-header">
-        <h2 class="panel-title" data-i18n="triage_title">🩺 Visual AI Symptom Triage (लक्षण जांच)</h2>
+        <h2 class="panel-title" data-i18n="triage_title">🩺 Visual AI Symptom Triage</h2>
       </div>
       <p style="color:var(--muted);font-size:13px;margin-bottom:14px;" data-i18n="triage_subtitle">
         Tap your symptom for instant first-aid guidance & emergency advice:
@@ -434,27 +438,27 @@ body {
       <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(130px, 1fr));gap:10px;">
         <button class="btn-glass" style="padding:14px 8px;text-align:center;font-weight:700;" onclick="patientController.triageSymptom('fever')">
           <div style="font-size:28px;margin-bottom:4px;">🌡️</div>
-          High Fever<br><small style="color:var(--muted);font-size:11px;">तेज बुखार</small>
+          <span data-i18n="sym_fever">High Fever</span>
         </button>
         <button class="btn-glass" style="padding:14px 8px;text-align:center;font-weight:700;" onclick="patientController.triageSymptom('snakebite')">
           <div style="font-size:28px;margin-bottom:4px;">🐍</div>
-          Snake Bite<br><small style="color:var(--muted);font-size:11px;">सांप काटना</small>
+          <span data-i18n="sym_snakebite">Snake Bite</span>
         </button>
         <button class="btn-glass" style="padding:14px 8px;text-align:center;font-weight:700;" onclick="patientController.triageSymptom('diarrhea')">
           <div style="font-size:28px;margin-bottom:4px;">💧</div>
-          Diarrhea<br><small style="color:var(--muted);font-size:11px;">दस्त व उल्टी</small>
+          <span data-i18n="sym_diarrhea">Diarrhea</span>
         </button>
         <button class="btn-glass" style="padding:14px 8px;text-align:center;font-weight:700;" onclick="patientController.triageSymptom('pregnancy')">
           <div style="font-size:28px;margin-bottom:4px;">🤰</div>
-          Pregnancy<br><small style="color:var(--muted);font-size:11px;">प्रसव दर्द</small>
+          <span data-i18n="sym_pregnancy">Pregnancy Pain</span>
         </button>
         <button class="btn-glass" style="padding:14px 8px;text-align:center;font-weight:700;" onclick="patientController.triageSymptom('chestpain')">
           <div style="font-size:28px;margin-bottom:4px;">🫀</div>
-          Chest Pain<br><small style="color:var(--muted);font-size:11px;">छाती में दर्द</small>
+          <span data-i18n="sym_chestpain">Chest Pain</span>
         </button>
         <button class="btn-glass" style="padding:14px 8px;text-align:center;font-weight:700;" onclick="patientController.triageSymptom('breathing')">
           <div style="font-size:28px;margin-bottom:4px;">😮‍💨</div>
-          Breathing<br><small style="color:var(--muted);font-size:11px;">सांस तकलीफ</small>
+          <span data-i18n="sym_breathing">Breathing Difficulty</span>
         </button>
       </div>
       <div id="triageResultContainer"></div>
@@ -474,7 +478,7 @@ body {
     <!-- FAMILY HEALTH CIRCLE -->
     <div class="glass-panel">
       <div class="panel-header">
-        <h2 class="panel-title" data-i18n="family_title">👨‍👩‍👧 Family Health Circle (परिवार स्वास्थ्य चक्र)</h2>
+        <h2 class="panel-title" data-i18n="family_title">👨‍👩‍👧 Family Health Circle</h2>
         <button class="auth-btn-primary" style="padding:6px 12px;font-size:12px;" onclick="patientController.openAddFamilyModal()" data-i18n="btn_add_family">
           + Add Member
         </button>
@@ -488,7 +492,7 @@ body {
         <h2 class="panel-title" data-i18n="hospitals_title">🏥 Live Hospital Beds & Blood Bank Near You</h2>
       </div>
       <div id="hospitalBedsList"></div>
-      <h3 style="font-size:14px;color:var(--primary);margin:16px 0 10px;">🩸 Blood Bank Live Availability (All Groups)</h3>
+      <h3 style="font-size:14px;color:var(--primary-bright);margin:16px 0 10px;" data-i18n="blood_title">🩸 Blood Bank Live Availability (All Groups)</h3>
       <div id="bloodBankGrid" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(95px, 1fr));gap:8px;"></div>
     </div>
   </section>
@@ -499,8 +503,8 @@ body {
   <section id="viewDoctor" style="display:none;">
     <div class="glass-panel">
       <div class="panel-header">
-        <h2 class="panel-title" data-i18n="doc_queue_title">📋 Live Teleconsultation Queue (ओपीडी कतार)</h2>
-        <button class="auth-btn-primary" style="padding:6px 12px;font-size:12px;" onclick="doctorController.openAddQueueModal()">
+        <h2 class="panel-title" data-i18n="doc_queue_title">📋 Live Teleconsultation Queue</h2>
+        <button class="auth-btn-primary" style="padding:6px 12px;font-size:12px;" onclick="doctorController.openAddQueueModal()" data-i18n="btn_add_walkin">
           + Add Patient
         </button>
       </div>
@@ -537,7 +541,7 @@ body {
     <div class="glass-panel">
       <div class="panel-header">
         <h2 class="panel-title" data-i18n="asha_anc_title">🤰 High-Risk Maternal Health Register (ANC)</h2>
-        <button class="auth-btn-primary" style="padding:6px 12px;font-size:12px;" onclick="workerController.openAddAncModal()">
+        <button class="auth-btn-primary" style="padding:6px 12px;font-size:12px;" onclick="workerController.openAddAncModal()" data-i18n="btn_add_anc">
           + Register Mother
         </button>
       </div>
@@ -561,7 +565,7 @@ body {
 
     <div class="glass-panel">
       <div class="panel-header">
-        <h2 class="panel-title" data-i18n="asha_uip_title">💉 Child Immunization Tracker (UIP टीका)</h2>
+        <h2 class="panel-title" data-i18n="asha_uip_title">💉 Child Immunization Tracker (UIP)</h2>
       </div>
       <div class="table-responsive">
         <table class="admin-table">
@@ -598,19 +602,19 @@ body {
       </div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(160px, 1fr));gap:10px;text-align:center;">
         <div style="background:var(--glass-2);border:1px solid var(--glass-border);padding:14px;border-radius:12px;">
-          <small style="color:var(--muted);font-weight:700;font-size:12px;">Active Staff</small>
-          <strong id="kpiTotalStaff" style="font-size:24px;color:var(--primary);display:block;margin-top:2px;">0</strong>
+          <small style="color:var(--muted);font-weight:700;font-size:12px;" data-i18n="kpi_staff">Active Staff</small>
+          <strong id="kpiTotalStaff" style="font-size:24px;color:var(--primary-bright);display:block;margin-top:2px;">0</strong>
         </div>
         <div style="background:var(--glass-2);border:1px solid var(--glass-border);padding:14px;border-radius:12px;">
-          <small style="color:var(--muted);font-weight:700;font-size:12px;">Queue Count</small>
+          <small style="color:var(--muted);font-weight:700;font-size:12px;" data-i18n="kpi_queue">Queue Count</small>
           <strong id="kpiQueueCount" style="font-size:24px;color:var(--accent);display:block;margin-top:2px;">0</strong>
         </div>
         <div style="background:var(--glass-2);border:1px solid var(--glass-border);padding:14px;border-radius:12px;">
-          <small style="color:var(--muted);font-weight:700;font-size:12px;">ANC Mothers</small>
+          <small style="color:var(--muted);font-weight:700;font-size:12px;" data-i18n="kpi_anc">ANC Mothers</small>
           <strong id="kpiAncCount" style="font-size:24px;color:#16a34a;display:block;margin-top:2px;">0</strong>
         </div>
         <div style="background:var(--glass-2);border:1px solid var(--glass-border);padding:14px;border-radius:12px;">
-          <small style="color:var(--muted);font-weight:700;font-size:12px;">Available Beds</small>
+          <small style="color:var(--muted);font-weight:700;font-size:12px;" data-i18n="kpi_beds">Available Beds</small>
           <strong id="kpiTotalBeds" style="font-size:24px;color:#db2777;display:block;margin-top:2px;">0</strong>
         </div>
       </div>
@@ -656,7 +660,7 @@ body {
         <h2 class="panel-title" data-i18n="admin_beds_title">🏥 Hospital Bed & Oxygen Grid</h2>
       </div>
       <div id="adminBedsGrid"></div>
-      <h3 style="font-size:14px;color:var(--primary);margin:16px 0 10px;" data-i18n="admin_blood_title">🩸 Blood Bank Stock Management</h3>
+      <h3 style="font-size:14px;color:var(--primary-bright);margin:16px 0 10px;" data-i18n="admin_blood_title">🩸 Blood Bank Stock Management</h3>
       <div id="adminBloodGrid" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(95px, 1fr));gap:8px;"></div>
     </div>
 
@@ -692,7 +696,7 @@ body {
 <!-- ADD FAMILY MODAL -->
 <div id="addFamilyModal" class="modal-overlay">
   <div class="modal-card">
-    <h3 style="color:var(--primary);font-size:17px;margin-bottom:14px;">+ Add Family Member</h3>
+    <h3 style="color:var(--primary-bright);font-size:17px;margin-bottom:14px;">+ Add Family Member</h3>
     <form onsubmit="patientController.submitAddFamily(event)">
       <div style="margin-bottom:10px;">
         <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Full Name *</label>
@@ -702,11 +706,11 @@ body {
         <div>
           <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Relation</label>
           <select id="famRelation" class="input-field">
-            <option value="Spouse">Spouse (पत्नी/पति)</option>
-            <option value="Son">Son (पुत्र)</option>
-            <option value="Daughter">Daughter (पुत्री)</option>
-            <option value="Father">Father (पिता)</option>
-            <option value="Mother">Mother (माता)</option>
+            <option value="Spouse">Spouse</option>
+            <option value="Son">Son</option>
+            <option value="Daughter">Daughter</option>
+            <option value="Father">Father</option>
+            <option value="Mother">Mother</option>
             <option value="Other">Other</option>
           </select>
         </div>
@@ -718,8 +722,8 @@ body {
       <div style="margin-bottom:14px;">
         <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Gender</label>
         <select id="famGender" class="input-field">
-          <option value="Female">Female (महिला)</option>
-          <option value="Male">Male (पुरुष)</option>
+          <option value="Female">Female</option>
+          <option value="Male">Male</option>
           <option value="Other">Other</option>
         </select>
       </div>
@@ -734,7 +738,7 @@ body {
 <!-- ADD QUEUE PATIENT MODAL -->
 <div id="addQueueModal" class="modal-overlay">
   <div class="modal-card">
-    <h3 style="color:var(--primary);font-size:17px;margin-bottom:14px;">+ Add Walk-in Patient</h3>
+    <h3 style="color:var(--primary-bright);font-size:17px;margin-bottom:14px;">+ Add Walk-in Patient</h3>
     <form onsubmit="doctorController.submitAddQueue(event)">
       <div style="margin-bottom:10px;">
         <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Patient Name *</label>
@@ -748,8 +752,8 @@ body {
         <div>
           <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Gender</label>
           <select id="qPatientGender" class="input-field">
-            <option value="M">Male (पुरुष)</option>
-            <option value="F">Female (महिला)</option>
+            <option value="M">Male</option>
+            <option value="F">Female</option>
             <option value="O">Other</option>
           </select>
         </div>
@@ -787,8 +791,8 @@ body {
 <!-- DOCTOR CONSULT MODAL -->
 <div id="doctorConsultModal" class="modal-overlay">
   <div class="modal-card">
-    <h3 id="consultActivePatientName" style="color:var(--primary);font-size:17px;margin-bottom:6px;">Consultation & e-Prescription</h3>
-    <p id="consultActiveVitals" style="color:var(--muted);font-size:12px;margin-bottom:14px;background:rgba(0,0,0,0.03);padding:8px;border-radius:8px;"></p>
+    <h3 id="consultActivePatientName" style="color:var(--primary-bright);font-size:17px;margin-bottom:6px;">Consultation & e-Prescription</h3>
+    <p id="consultActiveVitals" style="color:var(--muted);font-size:12px;margin-bottom:14px;background:var(--glass-1);border:1px solid var(--glass-border);padding:8px;border-radius:8px;"></p>
     <form onsubmit="doctorController.submitPrescription(event)">
       <div style="margin-bottom:10px;">
         <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Diagnosis</label>
@@ -827,7 +831,7 @@ body {
 <!-- ADD ANC MODAL -->
 <div id="addAncModal" class="modal-overlay">
   <div class="modal-card">
-    <h3 style="color:var(--primary);font-size:17px;margin-bottom:14px;">+ Register Pregnant Mother (ANC)</h3>
+    <h3 style="color:var(--primary-bright);font-size:17px;margin-bottom:14px;">+ Register Pregnant Mother (ANC)</h3>
     <form onsubmit="workerController.submitAddAnc(event)">
       <div style="margin-bottom:10px;">
         <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Mother Name *</label>
@@ -905,11 +909,6 @@ function switchRole(role) {
 // 3 Glass Themes Cycle: Classic -> Black -> Navy -> Classic
 function cycleTheme() {
   const themes = ['classic', 'black', 'navy'];
-  const labels = {
-    'classic': '🏛️ Classic (White & Blue)',
-    'black': '⬛ Pure Black (Glass)',
-    'navy': '🌊 Deep Navy (Glass)'
-  };
   const current = document.body.getAttribute('data-theme') || 'classic';
   const idx = themes.indexOf(current);
   const next = themes[(idx + 1) % themes.length];
@@ -918,10 +917,14 @@ function cycleTheme() {
   document.body.setAttribute('data-theme', next);
 
   const btn = document.getElementById('themeToggleBtn');
-  if (btn) btn.textContent = labels[next];
+  if (btn && window.i18n) {
+    btn.textContent = window.i18n.get('theme_' + next);
+  }
 
   if (window.appStore) window.appStore.setTheme(next);
-  if (typeof window.toast === 'function') window.toast('🎨 ' + labels[next]);
+  if (typeof window.toast === 'function' && window.i18n) {
+    window.toast('🎨 ' + window.i18n.get('theme_' + next));
+  }
 }
 
 window.toast = function(msg) {

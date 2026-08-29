@@ -32,23 +32,23 @@
       const ancs = this.store.getState().ancRecords || [];
 
       if (!ancs.length) {
-        el.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:20px;color:#64748b;">No pregnant mothers registered. Tap "+ Register Pregnant Mother" above.</td></tr>`;
+        el.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--muted);">No pregnant mothers registered. Tap "+ Register Mother" above.</td></tr>`;
         return;
       }
 
       el.innerHTML = ancs.map(a => `
         <tr>
-          <td><strong style="color:#0f172a;">${a.motherName}</strong></td>
-          <td>${a.husbandName || '—'}</td>
-          <td>${a.village}</td>
-          <td>${a.weeks} Wks (EDD: ${a.edd})</td>
-          <td>BP: ${a.bp} | Hb: ${a.hb}</td>
+          <td><strong style="color:var(--ink);font-size:14px;">${a.motherName}</strong></td>
+          <td style="color:var(--ink-dim);">${a.husbandName || '—'}</td>
+          <td style="color:var(--muted);">${a.village}</td>
+          <td style="color:var(--ink);">${a.weeks} Wks <small style="color:var(--muted);">(EDD: ${a.edd})</small></td>
+          <td style="color:var(--ink-dim);">BP: <strong style="color:var(--ink)">${a.bp}</strong> | Hb: <strong style="color:var(--ink)">${a.hb}</strong></td>
           <td>
-            <span class="badge" style="background:${a.riskLevel.includes('High') ? '#fee2e2' : '#dcfce7'};color:${a.riskLevel.includes('High') ? '#dc2626' : '#16a34a'};padding:4px 8px;border-radius:12px;font-size:11px;font-weight:700;">
+            <span class="badge" style="background:${a.riskLevel.includes('High') ? 'rgba(220,38,38,0.2)' : 'rgba(22,163,74,0.2)'};color:${a.riskLevel.includes('High') ? '#ef4444' : '#22c55e'};padding:4px 8px;border-radius:12px;font-size:11px;font-weight:700;border:1px solid ${a.riskLevel.includes('High') ? '#ef4444' : '#22c55e'};">
               ${a.riskLevel}
             </span>
           </td>
-          <td>${a.nextVisit}</td>
+          <td style="color:var(--primary-bright);font-weight:600;">${a.nextVisit}</td>
         </tr>
       `).join('');
     }
@@ -102,12 +102,12 @@
 
       el.innerHTML = uips.map(u => `
         <tr>
-          <td><strong style="color:#0f172a;">${u.childName}</strong></td>
-          <td>${u.parentName}</td>
-          <td>${u.dob} (${u.gender})</td>
-          <td>${u.lastVaccine}</td>
-          <td><strong style="color:#0052cc;">${u.nextDue}</strong></td>
-          <td><span class="badge" style="background:#e0f2fe;color:#0052cc;padding:4px 8px;border-radius:12px;font-size:11px;font-weight:600;">${u.status}</span></td>
+          <td><strong style="color:var(--ink);font-size:14px;">${u.childName}</strong></td>
+          <td style="color:var(--ink-dim);">${u.parentName}</td>
+          <td style="color:var(--muted);">${u.dob} (${u.gender})</td>
+          <td style="color:var(--ink);">${u.lastVaccine}</td>
+          <td><strong style="color:var(--primary-bright);">${u.nextDue}</strong></td>
+          <td><span class="badge" style="background:rgba(2,132,199,0.15);color:var(--primary-bright);padding:4px 8px;border-radius:12px;font-size:11px;font-weight:700;">${u.status}</span></td>
         </tr>
       `).join('');
     }
@@ -118,13 +118,13 @@
       const visits = this.store.getState().homeVisits || [];
 
       el.innerHTML = visits.map(v => `
-        <div style="background:#ffffff;border:1.5px solid #cbd5e1;border-radius:12px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;">
+        <div style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:14px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;box-shadow:var(--shadow-panel);">
           <div>
-            <strong style="color:#0f172a;font-size:15px;display:block;">${v.household}</strong>
-            <small style="color:#0052cc;font-weight:700;">Priority: ${v.priority}</small>
-            <p style="font-size:13px;color:#475569;margin-top:2px;">Task: ${v.task}</p>
+            <strong style="color:var(--ink);font-size:15px;display:block;">${v.household}</strong>
+            <small style="color:var(--primary-bright);font-weight:700;">Priority: ${v.priority}</small>
+            <p style="font-size:13px;color:var(--ink-dim);margin-top:2px;">Task: ${v.task}</p>
           </div>
-          <button class="btn-glass" style="padding:8px 14px;font-size:12px;background:${v.status === 'Completed' ? '#16a34a' : '#f1f5f9'};color:${v.status === 'Completed' ? '#ffffff' : '#0f172a'};" onclick="workerController.toggleVisit('${v.id}')">
+          <button class="btn-glass" style="padding:8px 14px;font-size:12px;background:${v.status === 'Completed' ? '#16a34a' : 'var(--glass-1)'};color:${v.status === 'Completed' ? '#ffffff' : 'var(--ink)'};border-color:${v.status === 'Completed' ? '#16a34a' : 'var(--glass-border)'};" onclick="workerController.toggleVisit('${v.id}')">
             ${v.status === 'Completed' ? '✓ Completed' : 'Mark Done'}
           </button>
         </div>

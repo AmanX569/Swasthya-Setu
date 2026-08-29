@@ -1,7 +1,7 @@
 /**
  * =========================================================
  * SWASTHYA SETU - HEALTH ADMINISTRATION DESK (admin.js)
- * 100% Standalone Personnel, Bed Grid & Inventory Command
+ * High-Contrast Glass Support & Dynamic Inventory
  * =========================================================
  */
 
@@ -18,6 +18,10 @@
       if (this.store) {
         this.store.subscribe(() => this.renderAll());
       }
+    }
+
+    t(key, fallback) {
+      return global.i18n ? global.i18n.get(key, fallback) : (fallback || key);
     }
 
     renderAll() {
@@ -50,26 +54,26 @@
       const staffList = this.store.getState().staff || [];
 
       if (!staffList.length) {
-        el.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:20px;color:#64748b;">No staff registered yet. Add staff above.</td></tr>`;
+        el.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--muted);">No staff registered yet. Add staff above.</td></tr>`;
         return;
       }
 
       el.innerHTML = staffList.map(s => `
         <tr>
-          <td><strong style="color:#0052cc;font-family:'IBM Plex Mono',monospace;">${s.id}</strong></td>
+          <td><strong style="color:var(--primary-bright);font-family:'IBM Plex Mono',monospace;font-size:13px;">${s.id}</strong></td>
           <td>
-            <strong style="color:#0f172a;display:block;">${s.name}</strong>
-            <small style="color:#64748b;">${s.regNo || '—'}</small>
+            <strong style="color:var(--ink);display:block;font-size:14px;">${s.name}</strong>
+            <small style="color:var(--muted);">${s.regNo || '—'}</small>
           </td>
           <td>
-            <span class="badge" style="background:${s.role === 'doctor' ? '#e0f2fe' : s.role === 'worker' ? '#f0fdf4' : '#fef3c7'};color:${s.role === 'doctor' ? '#0052cc' : s.role === 'worker' ? '#16a34a' : '#d97706'};padding:4px 8px;border-radius:12px;font-size:11px;font-weight:700;">
+            <span class="badge" style="background:${s.role === 'doctor' ? 'rgba(2,132,199,0.15)' : s.role === 'worker' ? 'rgba(22,163,74,0.15)' : 'rgba(217,119,6,0.15)'};color:${s.role === 'doctor' ? 'var(--primary-bright)' : s.role === 'worker' ? '#22c55e' : '#f59e0b'};padding:4px 8px;border-radius:12px;font-size:11px;font-weight:700;">
               ${s.role === 'doctor' ? '🩺 Doctor' : s.role === 'worker' ? '🤝 ASHA / ANM' : '👑 Administrator'}
             </span>
           </td>
-          <td>${s.location}</td>
-          <td>+91 ${s.phone}</td>
+          <td style="color:var(--ink-dim);">${s.location}</td>
+          <td style="color:var(--muted);">+91 ${s.phone}</td>
           <td>
-            <button style="color:#dc2626;background:none;border:none;cursor:pointer;font-size:12px;font-weight:600;" onclick="adminController.removeStaff('${s.id}')">✕ Remove</button>
+            <button style="color:#ef4444;background:none;border:none;cursor:pointer;font-size:12px;font-weight:700;" onclick="adminController.removeStaff('${s.id}')">✕ Remove</button>
           </td>
         </tr>
       `).join('');
@@ -112,28 +116,28 @@
       const hosps = this.store.getState().hospitals || [];
 
       el.innerHTML = hosps.map(h => `
-        <div style="background:#ffffff;border:1.5px solid #cbd5e1;border-radius:14px;padding:16px;margin-bottom:12px;">
-          <strong style="color:#0052cc;font-size:16px;display:block;margin-bottom:10px;">${h.name}</strong>
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
-            <div style="background:#f8fafc;border:1px solid #cbd5e1;border-radius:10px;padding:10px;text-align:center;">
-              <small style="color:#64748b;display:block;">General</small>
+        <div style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:var(--shadow-panel);">
+          <strong style="color:var(--primary-bright);font-size:16px;display:block;margin-bottom:10px;">${h.name}</strong>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(110px, 1fr));gap:10px;">
+            <div style="background:var(--glass-1);border:1px solid var(--glass-border);border-radius:10px;padding:10px;text-align:center;">
+              <small style="color:var(--muted);display:block;font-size:11px;">General</small>
               <strong style="font-size:18px;color:#16a34a;display:block;margin:4px 0;">${h.genBedsAvail}</strong>
               <div style="display:flex;justify-content:center;gap:6px;">
                 <button class="btn-glass" style="padding:2px 8px;font-size:12px;" onclick="adminController.updateBeds('${h.id}', 'gen', 1)">+1</button>
                 <button class="btn-glass" style="padding:2px 8px;font-size:12px;" onclick="adminController.updateBeds('${h.id}', 'gen', -1)">-1</button>
               </div>
             </div>
-            <div style="background:#f8fafc;border:1px solid #cbd5e1;border-radius:10px;padding:10px;text-align:center;">
-              <small style="color:#64748b;display:block;">ICU</small>
-              <strong style="font-size:18px;color:#dc2626;display:block;margin:4px 0;">${h.icuBedsAvail}</strong>
+            <div style="background:var(--glass-1);border:1px solid var(--glass-border);border-radius:10px;padding:10px;text-align:center;">
+              <small style="color:var(--muted);display:block;font-size:11px;">ICU</small>
+              <strong style="font-size:18px;color:#ef4444;display:block;margin:4px 0;">${h.icuBedsAvail}</strong>
               <div style="display:flex;justify-content:center;gap:6px;">
                 <button class="btn-glass" style="padding:2px 8px;font-size:12px;" onclick="adminController.updateBeds('${h.id}', 'icu', 1)">+1</button>
                 <button class="btn-glass" style="padding:2px 8px;font-size:12px;" onclick="adminController.updateBeds('${h.id}', 'icu', -1)">-1</button>
               </div>
             </div>
-            <div style="background:#f8fafc;border:1px solid #cbd5e1;border-radius:10px;padding:10px;text-align:center;">
-              <small style="color:#64748b;display:block;">Oxygen</small>
-              <strong style="font-size:18px;color:#0284c7;display:block;margin:4px 0;">${h.oxygenBedsAvail}</strong>
+            <div style="background:var(--glass-1);border:1px solid var(--glass-border);border-radius:10px;padding:10px;text-align:center;">
+              <small style="color:var(--muted);display:block;font-size:11px;">Oxygen</small>
+              <strong style="font-size:18px;color:var(--primary-bright);display:block;margin:4px 0;">${h.oxygenBedsAvail}</strong>
               <div style="display:flex;justify-content:center;gap:6px;">
                 <button class="btn-glass" style="padding:2px 8px;font-size:12px;" onclick="adminController.updateBeds('${h.id}', 'oxygen', 1)">+1</button>
                 <button class="btn-glass" style="padding:2px 8px;font-size:12px;" onclick="adminController.updateBeds('${h.id}', 'oxygen', -1)">-1</button>
@@ -154,9 +158,9 @@
       const bank = this.store.getState().bloodBank || {};
 
       el.innerHTML = Object.entries(bank).map(([grp, count]) => `
-        <div style="background:#ffffff;border:1.5px solid #cbd5e1;border-radius:12px;padding:10px;text-align:center;">
-          <strong style="color:#dc2626;font-size:16px;display:block;">${grp}</strong>
-          <span style="font-size:18px;font-weight:800;color:#0f172a;display:block;margin:4px 0;">${count}</span>
+        <div style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:12px;padding:10px;text-align:center;">
+          <strong style="color:#ef4444;font-size:16px;display:block;">${grp}</strong>
+          <span style="font-size:18px;font-weight:800;color:var(--ink);display:block;margin:4px 0;">${count}</span>
           <div style="display:flex;justify-content:center;gap:4px;">
             <button class="btn-glass" style="padding:2px 6px;font-size:11px;" onclick="adminController.updateBlood('${grp}', 1)">+1</button>
             <button class="btn-glass" style="padding:2px 6px;font-size:11px;" onclick="adminController.updateBlood('${grp}', -1)">-1</button>
@@ -174,16 +178,39 @@
       if (!el || !this.store) return;
       const meds = this.store.getState().medicines || [];
 
-      el.innerHTML = meds.map(m => `
-        <tr>
-          <td><strong style="color:#0f172a;">${m.name}</strong></td>
-          <td>${m.category}</td>
-          <td><strong>${m.stock}</strong> ${m.unit}</td>
-          <td>₹${m.genericPrice}</td>
-          <td style="text-decoration:line-through;color:#64748b;">₹${m.brandPrice}</td>
-          <td><span class="badge" style="background:#f0fdf4;color:#16a34a;padding:4px 8px;border-radius:12px;font-size:11px;font-weight:700;">${m.status}</span></td>
-        </tr>
-      `).join('');
+      const medKeyMap = {
+        'DRUG-01': 'med_paracetamol',
+        'DRUG-02': 'med_amoxicillin',
+        'DRUG-03': 'med_metformin',
+        'DRUG-04': 'med_amlodipine',
+        'DRUG-05': 'med_ors',
+        'DRUG-06': 'med_ifa'
+      };
+
+      const catKeyMap = {
+        'DRUG-01': 'cat_fever',
+        'DRUG-02': 'cat_antibiotic',
+        'DRUG-03': 'cat_diabetes',
+        'DRUG-04': 'cat_bp',
+        'DRUG-05': 'cat_dehydration',
+        'DRUG-06': 'cat_maternal'
+      };
+
+      el.innerHTML = meds.map(m => {
+        const localizedName = this.t(medKeyMap[m.id], m.name);
+        const localizedCat = this.t(catKeyMap[m.id], m.category);
+
+        return `
+          <tr>
+            <td><strong style="color:var(--ink);font-size:14px;">${localizedName}</strong></td>
+            <td style="color:var(--muted);">${localizedCat}</td>
+            <td><strong style="color:var(--ink)">${m.stock}</strong> <small style="color:var(--muted)">${m.unit}</small></td>
+            <td style="color:#16a34a;font-weight:700;">₹${m.genericPrice}</td>
+            <td style="text-decoration:line-through;color:var(--muted);">₹${m.brandPrice}</td>
+            <td><span class="badge" style="background:rgba(22,163,74,0.15);color:#22c55e;padding:4px 8px;border-radius:12px;font-size:11px;font-weight:700;">${m.status}</span></td>
+          </tr>
+        `;
+      }).join('');
     }
   }
 

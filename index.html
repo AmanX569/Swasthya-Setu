@@ -3,22 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-<title>Swasthya Setu · Rural Care Access Network | स्वास्थ्य सेतु</title>
+<title>Swasthya Setu · Rural Healthcare Grid</title>
 <link rel="manifest" href="./manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
 /* =========================================================
-   3 OPTIMIZED GLASS THEMES (CLASSIC · BLACK · NAVY)
+   3 OPTIMIZED HIGH-CONTRAST GLASS THEMES (CLASSIC · BLACK · NAVY)
    ========================================================= */
 
-/* 1. CLASSIC WHITE & ROYAL BLUE GLASS (DEFAULT) */
+/* 1. CLASSIC WHITE & ROYAL BLUE (DEFAULT) */
 :root, [data-theme="classic"], body[data-theme="classic"], body:not([data-theme="black"]):not([data-theme="navy"]) {
   --void-950: #f1f5f9;
   --void-900: #e2e8f0;
-  --glass-1: rgba(255, 255, 255, 0.85);
-  --glass-2: rgba(255, 255, 255, 0.95);
+  --glass-1: rgba(255, 255, 255, 0.88);
+  --glass-2: #ffffff;
   --glass-border: rgba(203, 213, 225, 0.85);
   --primary: #0052cc;
   --primary-dark: #003d99;
@@ -28,30 +28,30 @@
   --ink-dim: #334155;
   --muted: #64748b;
   --line: #e2e8f0;
-  --topbar-bg: rgba(255, 255, 255, 0.92);
+  --topbar-bg: rgba(255, 255, 255, 0.94);
   --body-bg: #f1f5f9;
   --shadow-panel: 0 4px 20px rgba(0, 51, 102, 0.05);
   color-scheme: light;
 }
 
-/* 2. PURE BLACK GLASS (AMOLED PITCH BLACK) */
+/* 2. PURE BLACK GLASS (AMOLED 100% PITCH BLACK) */
 [data-theme="black"], body[data-theme="black"] {
   --void-950: #000000;
   --void-900: #0a0a0a;
-  --glass-1: rgba(18, 18, 18, 0.78);
-  --glass-2: rgba(26, 26, 26, 0.9);
-  --glass-border: rgba(255, 255, 255, 0.14);
+  --glass-1: rgba(22, 22, 22, 0.85);
+  --glass-2: rgba(30, 30, 30, 0.95);
+  --glass-border: rgba(255, 255, 255, 0.16);
   --primary: #10b981;
   --primary-dark: #064e3b;
   --primary-bright: #34d399;
   --accent: #f59e0b;
   --ink: #ffffff;
-  --ink-dim: #cbd5e1;
+  --ink-dim: #e2e8f0;
   --muted: #94a3b8;
-  --line: rgba(255, 255, 255, 0.1);
-  --topbar-bg: rgba(0, 0, 0, 0.92);
+  --line: rgba(255, 255, 255, 0.12);
+  --topbar-bg: rgba(0, 0, 0, 0.94);
   --body-bg: #000000;
-  --shadow-panel: 0 8px 32px rgba(0, 0, 0, 0.8);
+  --shadow-panel: 0 8px 32px rgba(0, 0, 0, 0.85);
   color-scheme: dark;
 }
 
@@ -59,20 +59,20 @@
 [data-theme="navy"], body[data-theme="navy"] {
   --void-950: #030a16;
   --void-900: #07152b;
-  --glass-1: rgba(12, 33, 64, 0.72);
-  --glass-2: rgba(16, 42, 80, 0.85);
-  --glass-border: rgba(56, 189, 248, 0.25);
+  --glass-1: rgba(14, 38, 74, 0.8);
+  --glass-2: rgba(20, 50, 95, 0.92);
+  --glass-border: rgba(56, 189, 248, 0.28);
   --primary: #0284c7;
   --primary-dark: #0369a1;
   --primary-bright: #38bdf8;
   --accent: #f59e0b;
   --ink: #f8fafc;
-  --ink-dim: #cbd5e1;
+  --ink-dim: #e2e8f0;
   --muted: #94a3b8;
-  --line: rgba(56, 189, 248, 0.15);
-  --topbar-bg: rgba(3, 10, 22, 0.92);
+  --line: rgba(56, 189, 248, 0.18);
+  --topbar-bg: rgba(3, 10, 22, 0.94);
   --body-bg: #030a16;
-  --shadow-panel: 0 8px 32px rgba(0, 0, 0, 0.65);
+  --shadow-panel: 0 8px 32px rgba(0, 0, 0, 0.7);
   color-scheme: dark;
 }
 
@@ -120,7 +120,7 @@ body {
   font-family: 'Fraunces', Georgia, serif;
   font-size: 19px;
   font-weight: 800;
-  color: var(--primary);
+  color: var(--primary-bright);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -166,7 +166,7 @@ body {
 .role-btn.active {
   background: var(--primary);
   color: #ffffff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
 }
 
 .top-controls {
@@ -217,7 +217,7 @@ body {
 .panel-title {
   font-size: 17px;
   font-weight: 700;
-  color: var(--primary);
+  color: var(--primary-bright);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -254,7 +254,7 @@ body {
 }
 
 .btn-glass:hover {
-  filter: brightness(1.05);
+  filter: brightness(1.08);
 }
 
 .input-field {
@@ -269,8 +269,8 @@ body {
 }
 
 .input-field:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.2);
+  border-color: var(--primary-bright);
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.25);
 }
 
 .table-responsive {
@@ -287,7 +287,7 @@ body {
 
 .admin-table th {
   background: rgba(0, 0, 0, 0.04);
-  color: var(--primary);
+  color: var(--primary-bright);
   font-weight: 700;
   text-align: left;
   padding: 10px 12px;
@@ -297,7 +297,7 @@ body {
 
 [data-theme="black"] .admin-table th,
 [data-theme="navy"] .admin-table th {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .admin-table td {
@@ -305,6 +305,10 @@ body {
   border-bottom: 1px solid var(--line);
   font-size: 13px;
   color: var(--ink);
+}
+
+.admin-table td strong {
+  color: var(--ink) !important;
 }
 
 /* Modals */
@@ -330,7 +334,7 @@ body {
   padding: 22px;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
 }
 
 /* Toast */
@@ -344,7 +348,7 @@ body {
   border-radius: 12px;
   font-size: 13px;
   font-weight: 600;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
   z-index: 100000;
   display: none;
 }
@@ -2545,8 +2549,8 @@ body {
       <option value="kn">ಕನ್ನಡ (Kannada)</option>
     </select>
 
-    <button class="btn-glass" onclick="cycleTheme()" id="themeToggleBtn" data-i18n="btn_theme">
-      🏛️ Classic
+    <button class="btn-glass" onclick="cycleTheme()" id="themeToggleBtn" data-i18n="theme_classic">
+      🏛️ Classic (White & Blue)
     </button>
 
     <button class="auth-btn-primary" style="background:#dc2626;border-color:#b91c1c;padding:8px 14px;" onclick="patientController.triggerSos()" data-i18n="btn_sos">
@@ -2565,18 +2569,18 @@ body {
     <div style="background:linear-gradient(135deg, #dc2626, #b91c1c);color:#ffffff;border-radius:16px;padding:14px 18px;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;box-shadow:0 8px 24px rgba(220,38,38,0.25);">
       <div>
         <strong style="font-size:15px;display:block;" data-i18n="emergency_banner">🚑 Immediate 108 Ambulance SOS — Tap to Call or Send GPS</strong>
-        <small style="opacity:0.9;font-size:12px;">Direct connection to nearest Rural Emergency Dispatch</small>
+        <small style="opacity:0.9;font-size:12px;" data-i18n="emergency_subline">Direct connection to nearest Rural Emergency Dispatch Hub</small>
       </div>
       <div style="display:flex;gap:8px;">
-        <a href="tel:108" class="btn-glass" style="background:#ffffff;color:#dc2626;font-weight:700;padding:6px 14px;">📞 Call 108</a>
-        <button class="btn-glass" style="background:rgba(255,255,255,0.2);color:#ffffff;border-color:rgba(255,255,255,0.4);" onclick="patientController.triggerSos()">📍 GPS SOS</button>
+        <a href="tel:108" class="btn-glass" style="background:#ffffff;color:#dc2626;font-weight:700;padding:6px 14px;" data-i18n="btn_call_108">📞 Call 108</a>
+        <button class="btn-glass" style="background:rgba(255,255,255,0.2);color:#ffffff;border-color:rgba(255,255,255,0.4);" onclick="patientController.triggerSos()" data-i18n="btn_gps_sos">📍 GPS SOS</button>
       </div>
     </div>
 
     <!-- DIGITAL ABHA HEALTH CARD -->
     <div class="glass-panel">
       <div class="panel-header">
-        <h2 class="panel-title" data-i18n="abha_title">🆔 Digital ABHA Health Card (आयुष्मान कार्ड)</h2>
+        <h2 class="panel-title" data-i18n="abha_title">🆔 Digital ABHA Health Card</h2>
       </div>
       <p style="color:var(--muted);font-size:13px;margin-bottom:14px;" data-i18n="abha_desc">
         Your government health identity card. Keep it handy for free consultations and hospital visits.
@@ -2587,7 +2591,7 @@ body {
     <!-- VISUAL AI SYMPTOM TRIAGE -->
     <div class="glass-panel">
       <div class="panel-header">
-        <h2 class="panel-title" data-i18n="triage_title">🩺 Visual AI Symptom Triage (लक्षण जांच)</h2>
+        <h2 class="panel-title" data-i18n="triage_title">🩺 Visual AI Symptom Triage</h2>
       </div>
       <p style="color:var(--muted);font-size:13px;margin-bottom:14px;" data-i18n="triage_subtitle">
         Tap your symptom for instant first-aid guidance & emergency advice:
@@ -2595,27 +2599,27 @@ body {
       <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(130px, 1fr));gap:10px;">
         <button class="btn-glass" style="padding:14px 8px;text-align:center;font-weight:700;" onclick="patientController.triageSymptom('fever')">
           <div style="font-size:28px;margin-bottom:4px;">🌡️</div>
-          High Fever<br><small style="color:var(--muted);font-size:11px;">तेज बुखार</small>
+          <span data-i18n="sym_fever">High Fever</span>
         </button>
         <button class="btn-glass" style="padding:14px 8px;text-align:center;font-weight:700;" onclick="patientController.triageSymptom('snakebite')">
           <div style="font-size:28px;margin-bottom:4px;">🐍</div>
-          Snake Bite<br><small style="color:var(--muted);font-size:11px;">सांप काटना</small>
+          <span data-i18n="sym_snakebite">Snake Bite</span>
         </button>
         <button class="btn-glass" style="padding:14px 8px;text-align:center;font-weight:700;" onclick="patientController.triageSymptom('diarrhea')">
           <div style="font-size:28px;margin-bottom:4px;">💧</div>
-          Diarrhea<br><small style="color:var(--muted);font-size:11px;">दस्त व उल्टी</small>
+          <span data-i18n="sym_diarrhea">Diarrhea</span>
         </button>
         <button class="btn-glass" style="padding:14px 8px;text-align:center;font-weight:700;" onclick="patientController.triageSymptom('pregnancy')">
           <div style="font-size:28px;margin-bottom:4px;">🤰</div>
-          Pregnancy<br><small style="color:var(--muted);font-size:11px;">प्रसव दर्द</small>
+          <span data-i18n="sym_pregnancy">Pregnancy Pain</span>
         </button>
         <button class="btn-glass" style="padding:14px 8px;text-align:center;font-weight:700;" onclick="patientController.triageSymptom('chestpain')">
           <div style="font-size:28px;margin-bottom:4px;">🫀</div>
-          Chest Pain<br><small style="color:var(--muted);font-size:11px;">छाती में दर्द</small>
+          <span data-i18n="sym_chestpain">Chest Pain</span>
         </button>
         <button class="btn-glass" style="padding:14px 8px;text-align:center;font-weight:700;" onclick="patientController.triageSymptom('breathing')">
           <div style="font-size:28px;margin-bottom:4px;">😮‍💨</div>
-          Breathing<br><small style="color:var(--muted);font-size:11px;">सांस तकलीफ</small>
+          <span data-i18n="sym_breathing">Breathing Difficulty</span>
         </button>
       </div>
       <div id="triageResultContainer"></div>
@@ -2635,7 +2639,7 @@ body {
     <!-- FAMILY HEALTH CIRCLE -->
     <div class="glass-panel">
       <div class="panel-header">
-        <h2 class="panel-title" data-i18n="family_title">👨‍👩‍👧 Family Health Circle (परिवार स्वास्थ्य चक्र)</h2>
+        <h2 class="panel-title" data-i18n="family_title">👨‍👩‍👧 Family Health Circle</h2>
         <button class="auth-btn-primary" style="padding:6px 12px;font-size:12px;" onclick="patientController.openAddFamilyModal()" data-i18n="btn_add_family">
           + Add Member
         </button>
@@ -2649,7 +2653,7 @@ body {
         <h2 class="panel-title" data-i18n="hospitals_title">🏥 Live Hospital Beds & Blood Bank Near You</h2>
       </div>
       <div id="hospitalBedsList"></div>
-      <h3 style="font-size:14px;color:var(--primary);margin:16px 0 10px;">🩸 Blood Bank Live Availability (All Groups)</h3>
+      <h3 style="font-size:14px;color:var(--primary-bright);margin:16px 0 10px;" data-i18n="blood_title">🩸 Blood Bank Live Availability (All Groups)</h3>
       <div id="bloodBankGrid" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(95px, 1fr));gap:8px;"></div>
     </div>
   </section>
@@ -2660,8 +2664,8 @@ body {
   <section id="viewDoctor" style="display:none;">
     <div class="glass-panel">
       <div class="panel-header">
-        <h2 class="panel-title" data-i18n="doc_queue_title">📋 Live Teleconsultation Queue (ओपीडी कतार)</h2>
-        <button class="auth-btn-primary" style="padding:6px 12px;font-size:12px;" onclick="doctorController.openAddQueueModal()">
+        <h2 class="panel-title" data-i18n="doc_queue_title">📋 Live Teleconsultation Queue</h2>
+        <button class="auth-btn-primary" style="padding:6px 12px;font-size:12px;" onclick="doctorController.openAddQueueModal()" data-i18n="btn_add_walkin">
           + Add Patient
         </button>
       </div>
@@ -2698,7 +2702,7 @@ body {
     <div class="glass-panel">
       <div class="panel-header">
         <h2 class="panel-title" data-i18n="asha_anc_title">🤰 High-Risk Maternal Health Register (ANC)</h2>
-        <button class="auth-btn-primary" style="padding:6px 12px;font-size:12px;" onclick="workerController.openAddAncModal()">
+        <button class="auth-btn-primary" style="padding:6px 12px;font-size:12px;" onclick="workerController.openAddAncModal()" data-i18n="btn_add_anc">
           + Register Mother
         </button>
       </div>
@@ -2722,7 +2726,7 @@ body {
 
     <div class="glass-panel">
       <div class="panel-header">
-        <h2 class="panel-title" data-i18n="asha_uip_title">💉 Child Immunization Tracker (UIP टीका)</h2>
+        <h2 class="panel-title" data-i18n="asha_uip_title">💉 Child Immunization Tracker (UIP)</h2>
       </div>
       <div class="table-responsive">
         <table class="admin-table">
@@ -2759,19 +2763,19 @@ body {
       </div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(160px, 1fr));gap:10px;text-align:center;">
         <div style="background:var(--glass-2);border:1px solid var(--glass-border);padding:14px;border-radius:12px;">
-          <small style="color:var(--muted);font-weight:700;font-size:12px;">Active Staff</small>
-          <strong id="kpiTotalStaff" style="font-size:24px;color:var(--primary);display:block;margin-top:2px;">0</strong>
+          <small style="color:var(--muted);font-weight:700;font-size:12px;" data-i18n="kpi_staff">Active Staff</small>
+          <strong id="kpiTotalStaff" style="font-size:24px;color:var(--primary-bright);display:block;margin-top:2px;">0</strong>
         </div>
         <div style="background:var(--glass-2);border:1px solid var(--glass-border);padding:14px;border-radius:12px;">
-          <small style="color:var(--muted);font-weight:700;font-size:12px;">Queue Count</small>
+          <small style="color:var(--muted);font-weight:700;font-size:12px;" data-i18n="kpi_queue">Queue Count</small>
           <strong id="kpiQueueCount" style="font-size:24px;color:var(--accent);display:block;margin-top:2px;">0</strong>
         </div>
         <div style="background:var(--glass-2);border:1px solid var(--glass-border);padding:14px;border-radius:12px;">
-          <small style="color:var(--muted);font-weight:700;font-size:12px;">ANC Mothers</small>
+          <small style="color:var(--muted);font-weight:700;font-size:12px;" data-i18n="kpi_anc">ANC Mothers</small>
           <strong id="kpiAncCount" style="font-size:24px;color:#16a34a;display:block;margin-top:2px;">0</strong>
         </div>
         <div style="background:var(--glass-2);border:1px solid var(--glass-border);padding:14px;border-radius:12px;">
-          <small style="color:var(--muted);font-weight:700;font-size:12px;">Available Beds</small>
+          <small style="color:var(--muted);font-weight:700;font-size:12px;" data-i18n="kpi_beds">Available Beds</small>
           <strong id="kpiTotalBeds" style="font-size:24px;color:#db2777;display:block;margin-top:2px;">0</strong>
         </div>
       </div>
@@ -2817,7 +2821,7 @@ body {
         <h2 class="panel-title" data-i18n="admin_beds_title">🏥 Hospital Bed & Oxygen Grid</h2>
       </div>
       <div id="adminBedsGrid"></div>
-      <h3 style="font-size:14px;color:var(--primary);margin:16px 0 10px;" data-i18n="admin_blood_title">🩸 Blood Bank Stock Management</h3>
+      <h3 style="font-size:14px;color:var(--primary-bright);margin:16px 0 10px;" data-i18n="admin_blood_title">🩸 Blood Bank Stock Management</h3>
       <div id="adminBloodGrid" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(95px, 1fr));gap:8px;"></div>
     </div>
 
@@ -2853,7 +2857,7 @@ body {
 <!-- ADD FAMILY MODAL -->
 <div id="addFamilyModal" class="modal-overlay">
   <div class="modal-card">
-    <h3 style="color:var(--primary);font-size:17px;margin-bottom:14px;">+ Add Family Member</h3>
+    <h3 style="color:var(--primary-bright);font-size:17px;margin-bottom:14px;">+ Add Family Member</h3>
     <form onsubmit="patientController.submitAddFamily(event)">
       <div style="margin-bottom:10px;">
         <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Full Name *</label>
@@ -2863,11 +2867,11 @@ body {
         <div>
           <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Relation</label>
           <select id="famRelation" class="input-field">
-            <option value="Spouse">Spouse (पत्नी/पति)</option>
-            <option value="Son">Son (पुत्र)</option>
-            <option value="Daughter">Daughter (पुत्री)</option>
-            <option value="Father">Father (पिता)</option>
-            <option value="Mother">Mother (माता)</option>
+            <option value="Spouse">Spouse</option>
+            <option value="Son">Son</option>
+            <option value="Daughter">Daughter</option>
+            <option value="Father">Father</option>
+            <option value="Mother">Mother</option>
             <option value="Other">Other</option>
           </select>
         </div>
@@ -2879,8 +2883,8 @@ body {
       <div style="margin-bottom:14px;">
         <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Gender</label>
         <select id="famGender" class="input-field">
-          <option value="Female">Female (महिला)</option>
-          <option value="Male">Male (पुरुष)</option>
+          <option value="Female">Female</option>
+          <option value="Male">Male</option>
           <option value="Other">Other</option>
         </select>
       </div>
@@ -2895,7 +2899,7 @@ body {
 <!-- ADD QUEUE PATIENT MODAL -->
 <div id="addQueueModal" class="modal-overlay">
   <div class="modal-card">
-    <h3 style="color:var(--primary);font-size:17px;margin-bottom:14px;">+ Add Walk-in Patient</h3>
+    <h3 style="color:var(--primary-bright);font-size:17px;margin-bottom:14px;">+ Add Walk-in Patient</h3>
     <form onsubmit="doctorController.submitAddQueue(event)">
       <div style="margin-bottom:10px;">
         <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Patient Name *</label>
@@ -2909,8 +2913,8 @@ body {
         <div>
           <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Gender</label>
           <select id="qPatientGender" class="input-field">
-            <option value="M">Male (पुरुष)</option>
-            <option value="F">Female (महिला)</option>
+            <option value="M">Male</option>
+            <option value="F">Female</option>
             <option value="O">Other</option>
           </select>
         </div>
@@ -2948,8 +2952,8 @@ body {
 <!-- DOCTOR CONSULT MODAL -->
 <div id="doctorConsultModal" class="modal-overlay">
   <div class="modal-card">
-    <h3 id="consultActivePatientName" style="color:var(--primary);font-size:17px;margin-bottom:6px;">Consultation & e-Prescription</h3>
-    <p id="consultActiveVitals" style="color:var(--muted);font-size:12px;margin-bottom:14px;background:rgba(0,0,0,0.03);padding:8px;border-radius:8px;"></p>
+    <h3 id="consultActivePatientName" style="color:var(--primary-bright);font-size:17px;margin-bottom:6px;">Consultation & e-Prescription</h3>
+    <p id="consultActiveVitals" style="color:var(--muted);font-size:12px;margin-bottom:14px;background:var(--glass-1);border:1px solid var(--glass-border);padding:8px;border-radius:8px;"></p>
     <form onsubmit="doctorController.submitPrescription(event)">
       <div style="margin-bottom:10px;">
         <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Diagnosis</label>
@@ -2988,7 +2992,7 @@ body {
 <!-- ADD ANC MODAL -->
 <div id="addAncModal" class="modal-overlay">
   <div class="modal-card">
-    <h3 style="color:var(--primary);font-size:17px;margin-bottom:14px;">+ Register Pregnant Mother (ANC)</h3>
+    <h3 style="color:var(--primary-bright);font-size:17px;margin-bottom:14px;">+ Register Pregnant Mother (ANC)</h3>
     <form onsubmit="workerController.submitAddAnc(event)">
       <div style="margin-bottom:10px;">
         <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Mother Name *</label>
@@ -3758,7 +3762,7 @@ body {
 /**
  * =========================================================
  * SWASTHYA SETU - CITIZEN / PATIENT HUB (patient.js)
- * 100% Standalone, Pure-Client Rural Care Center
+ * Pure Language Localization & High-Contrast Glass Support
  * =========================================================
  */
 
@@ -3775,6 +3779,10 @@ body {
       if (this.store) {
         this.store.subscribe(() => this.renderAll());
       }
+    }
+
+    t(key, fallback) {
+      return global.i18n ? global.i18n.get(key, fallback) : (fallback || key);
     }
 
     renderAll() {
@@ -3794,50 +3802,50 @@ body {
       const user = this.store.getState().currentUser;
 
       el.innerHTML = `
-        <div class="abha-badge-card" style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:18px;padding:20px;box-shadow:0 8px 24px rgba(0,0,0,0.06);position:relative;overflow:hidden;">
+        <div class="abha-badge-card" style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:18px;padding:20px;box-shadow:var(--shadow-panel);position:relative;overflow:hidden;">
           <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1.5px solid var(--line);padding-bottom:12px;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
             <div style="display:flex;align-items:center;gap:10px;">
               <span style="font-size:28px;">🇮🇳</span>
               <div>
-                <strong style="font-size:16px;color:var(--primary);display:block;">NATIONAL HEALTH AUTHORITY (ABHA)</strong>
-                <small style="color:var(--muted);font-weight:600;">Government of India · राष्ट्रीय स्वास्थ्य प्राधिकरण</small>
+                <strong style="font-size:15px;color:var(--primary-bright);display:block;">${this.t('abha_nha', 'NATIONAL HEALTH AUTHORITY (ABHA)')}</strong>
+                <small style="color:var(--muted);font-weight:600;">${this.t('abha_gov', 'Government of India')}</small>
               </div>
             </div>
-            <span class="badge" style="background:var(--primary);color:#ffffff;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;">ACTIVE VERIFIED</span>
+            <span class="badge" style="background:var(--primary);color:#ffffff;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;">${this.t('abha_active', 'ACTIVE VERIFIED')}</span>
           </div>
 
           <div style="display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center;">
-            <div style="width:68px;height:68px;background:rgba(0,82,204,0.1);border:1.5px solid var(--primary);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:32px;">
+            <div style="width:68px;height:68px;background:rgba(2,132,199,0.15);border:1.5px solid var(--primary-bright);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:32px;">
               👤
             </div>
             <div>
-              <h3 style="font-size:18px;color:var(--ink);margin-bottom:4px;">${user.name}</h3>
-              <p style="font-size:13px;color:var(--ink-dim);margin-bottom:2px;">Age: ${user.age} Yrs · Gender: ${user.gender} · Blood: <strong>${user.bloodGroup}</strong></p>
+              <h3 style="font-size:18px;color:var(--ink);margin-bottom:4px;font-weight:700;">${user.name}</h3>
+              <p style="font-size:13px;color:var(--ink-dim);margin-bottom:2px;">Age: ${user.age} Yrs · Gender: ${user.gender} · Blood: <strong style="color:var(--primary-bright)">${user.bloodGroup}</strong></p>
               <p style="font-size:12px;color:var(--muted);">${user.village}</p>
             </div>
             <div style="text-align:center;background:var(--glass-1);padding:8px;border-radius:10px;border:1px solid var(--glass-border);">
               <div style="font-size:28px;line-height:1;">📱</div>
-              <small style="font-size:9px;color:var(--muted);font-weight:700;display:block;margin-top:2px;">QR SCAN</small>
+              <small style="font-size:9px;color:var(--muted);font-weight:700;display:block;margin-top:2px;">${this.t('abha_qr', 'QR SCAN')}</small>
             </div>
           </div>
 
           <div style="margin-top:14px;background:var(--primary);color:#ffffff;padding:10px 16px;border-radius:12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
             <div>
-              <small style="font-size:10px;letter-spacing:1px;opacity:0.9;">ABHA NUMBER (14-DIGIT)</small>
+              <small style="font-size:10px;letter-spacing:1px;opacity:0.9;">${this.t('abha_number_label', 'ABHA NUMBER (14-DIGIT)')}</small>
               <div style="font-family:'IBM Plex Mono',monospace;font-size:16px;font-weight:700;letter-spacing:1px;">${user.abhaId}</div>
             </div>
             <div style="text-align:right;">
-              <small style="font-size:10px;opacity:0.9;">PHONE LINKED</small>
+              <small style="font-size:10px;opacity:0.9;">${this.t('abha_phone_label', 'PHONE LINKED')}</small>
               <div style="font-size:13px;font-weight:600;">+91 ${user.phone}</div>
             </div>
           </div>
 
           <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
             <button class="auth-btn-primary" style="flex:1;min-width:180px;padding:10px;font-size:13px;" onclick="patientController.printAbhaCard()">
-              🖨️ Print / Download ABHA Card
+              ${this.t('btn_print_abha', '🖨️ Print / Download ABHA Card')}
             </button>
-            <button class="btn-glass" style="padding:10px 16px;font-size:13px;" onclick="speakText('Your ABHA ID is ' + '${user.abhaId}' + '. Valid for free healthcare across all government and empaneled hospitals.')">
-              🔊 Read Aloud
+            <button class="btn-glass" style="padding:10px 16px;font-size:13px;" onclick="speakText('Your ABHA ID is ' + '${user.abhaId}')">
+              ${this.t('read_aloud', '🔊 Read Aloud')}
             </button>
           </div>
         </div>
@@ -3853,60 +3861,60 @@ body {
     // -------------------------------------------------------------
     triggerSos() {
       const user = this.store.getState().currentUser;
-      const message = `🚨 EMERGENCY 108 SOS TRIGGERED!\n\nPatient: ${user.name}\nPhone: +91 ${user.phone}\nLocation: ${user.village}\nABHA: ${user.abhaId}\n\nAmbulance dispatched to your GPS location.`;
+      const message = `🚨 EMERGENCY 108 SOS!\n\nPatient: ${user.name}\nPhone: +91 ${user.phone}\nLocation: ${user.village}\nABHA: ${user.abhaId}\n\nEmergency ambulance dispatched.`;
       
-      speakText('Emergency 108 ambulance alert sent! Medical dispatch is contacting you now.');
+      speakText('Emergency 108 ambulance alert sent! Dispatch is calling your phone now.');
       if (typeof window.toast === 'function') {
-        window.toast('🚨 Emergency 108 Alert Sent to Ambulance Grid!');
+        window.toast('🚨 Emergency 108 Alert Dispatched!');
       }
       alert(message);
     }
 
     // -------------------------------------------------------------
-    // 3. AUDIO-VISUAL SYMPTOM TRIAGE (6 RURAL COMPLAINTS)
+    // 3. AUDIO-VISUAL SYMPTOM TRIAGE
     // -------------------------------------------------------------
     triageSymptom(type) {
       const triageData = {
         fever: {
-          title: '🌡️ High Fever & Chills (तेज बुखार)',
+          title: this.t('sym_fever', 'High Fever'),
           color: '#d97706',
-          badge: '🟡 MODERATE · VISIT PHC TODAY',
-          advice: 'Drink plenty of boiled water and ORS. Take Paracetamol 650mg if fever is above 100°F. If fever lasts more than 48 hours, visit Kondapalli PHC for Malaria/Dengue blood test.',
-          audio: 'High fever triage: Drink clean water and ORS. Take Paracetamol. Visit your local PHC if fever persists for two days.'
+          badge: '🟡 MODERATE · VISIT PHC',
+          advice: 'Drink plenty of boiled water and ORS. Take Paracetamol if fever is above 100°F. If fever lasts more than 48 hours, visit PHC for Malaria/Dengue test.',
+          audio: 'High fever triage: Drink clean water and ORS. Take Paracetamol and visit PHC if fever lasts two days.'
         },
         snakebite: {
-          title: '🐍 Snakebite / Scorpion Sting (सांप का काटना)',
+          title: this.t('sym_snakebite', 'Snake Bite'),
           color: '#dc2626',
-          badge: '🔴 CRITICAL EMERGENCY · GO TO HOSPITAL IMMEDIATELY',
-          advice: 'DO NOT cut, suck, or tie a tight tourniquet. Keep patient calm and completely still. Rush immediately to Ibrahimpatnam CHC or District Hospital for Anti-Snake Venom (ASV). Call 108 now!',
-          audio: 'Critical snakebite emergency! Do not move the affected limb. Go directly to CHC hospital for anti-venom injection.'
+          badge: '🔴 CRITICAL EMERGENCY · GO TO HOSPITAL',
+          advice: 'DO NOT cut, suck, or tie tight tourniquet. Keep patient calm and still. Rush immediately to nearest CHC for Anti-Snake Venom (ASV). Call 108 now!',
+          audio: 'Critical snakebite emergency! Do not move the affected limb. Go directly to CHC hospital for anti-venom.'
         },
         diarrhea: {
-          title: '💧 Diarrhea & Dehydration (दस्त व उल्टी)',
+          title: this.t('sym_diarrhea', 'Diarrhea'),
           color: '#16a34a',
           badge: '🟢 SAFE FOR HOME CARE WITH ORS',
-          advice: 'Dissolve 1 packet of ORS in 1 liter clean drinking water. Drink after every loose stool. Give Zinc tablets to children under 5. If extreme lethargy or no urination for 6 hours, visit PHC.',
-          audio: 'Diarrhea care: Drink one liter of ORS water frequently. Keep hydrated with coconut water and rice kanji.'
+          advice: 'Dissolve 1 packet of ORS in 1 liter clean drinking water. Drink after every loose stool. Give Zinc tablets to children under 5.',
+          audio: 'Diarrhea care: Drink one liter of ORS water frequently to prevent dehydration.'
         },
         pregnancy: {
-          title: '🤰 Pregnancy Labor / Bleeding (प्रसव दर्द)',
+          title: this.t('sym_pregnancy', 'Pregnancy Pain'),
           color: '#dc2626',
           badge: '🔴 EMERGENCY MATERNAL ADMISSION',
-          advice: 'Severe labor pains or bleeding require immediate hospital delivery. Contact Lakshmi Didi (ASHA) immediately and call 108 ambulance for direct transport to Maternity Ward.',
+          advice: 'Severe labor pains or bleeding require immediate hospital delivery. Contact your ASHA Didi immediately and take 108 ambulance.',
           audio: 'Maternal alert: Contact your ASHA Didi and take 108 ambulance to hospital delivery ward right away.'
         },
         chestpain: {
-          title: '🫀 Severe Chest Pain (छाती में तेज दर्द)',
+          title: this.t('sym_chestpain', 'Chest Pain'),
           color: '#dc2626',
-          badge: '🔴 CRITICAL EMERGENCY · CARDIAC ALERT',
-          advice: 'Chest tightness, pain radiating to left arm, and cold sweats are heart emergency signs. Chew 1 Aspirin tablet immediately if available and rush to District Hospital via 108.',
+          badge: '🔴 CRITICAL CARDIAC ALERT',
+          advice: 'Chest tightness radiating to left arm or jaw with cold sweats requires immediate hospital emergency care. Call 108.',
           audio: 'Cardiac emergency: Chew Aspirin if available and call 108 ambulance to reach hospital ICU.'
         },
         breathing: {
-          title: '😮‍💨 Difficulty Breathing / Asthma (सांस की तकलीफ)',
+          title: this.t('sym_breathing', 'Breathing Difficulty'),
           color: '#d97706',
           badge: '🟡 URGENT · OXYGEN PHC VISIT',
-          advice: 'Sit upright in an airy place. Use Salbutamol inhaler if prescribed. Visit Kondapalli PHC immediately for oxygen support and nebulization.',
+          advice: 'Sit upright in an airy place. Use inhaler if prescribed. Visit nearest PHC for oxygen support and nebulization.',
           audio: 'Breathing difficulty: Sit upright, take inhaler if prescribed, and visit nearest PHC for oxygen support.'
         }
       };
@@ -3917,18 +3925,18 @@ body {
       const container = document.getElementById('triageResultContainer');
       if (container) {
         container.innerHTML = `
-          <div style="background:var(--glass-1);border:2px solid ${item.color};border-radius:16px;padding:20px;margin-top:16px;box-shadow:0 6px 20px rgba(0,0,0,0.08);">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
-              <h3 style="color:var(--ink);font-size:18px;">${item.title}</h3>
+          <div style="background:var(--glass-2);border:2px solid ${item.color};border-radius:16px;padding:18px;margin-top:14px;box-shadow:var(--shadow-panel);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
+              <h3 style="color:var(--ink);font-size:17px;font-weight:700;">${item.title}</h3>
               <span style="background:${item.color};color:#ffffff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;">${item.badge}</span>
             </div>
-            <p style="font-size:14px;color:var(--ink-dim);line-height:1.6;margin-bottom:16px;">${item.advice}</p>
+            <p style="font-size:14px;color:var(--ink-dim);line-height:1.6;margin-bottom:14px;">${item.advice}</p>
             <div style="display:flex;gap:10px;flex-wrap:wrap;">
               <button class="auth-btn-primary" style="background:#dc2626;border-color:#b91c1c;padding:8px 16px;font-size:13px;" onclick="patientController.triggerSos()">
-                🚨 Call 108 Ambulance Now
+                ${this.t('btn_call_108', '🚨 Call 108 Ambulance')}
               </button>
               <button class="btn-glass" style="padding:8px 16px;font-size:13px;" onclick="speakText('${item.audio}')">
-                🔊 Listen in Audio (बोलकर सुनें)
+                ${this.t('read_aloud', '🔊 Listen in Audio')}
               </button>
             </div>
           </div>
@@ -3946,14 +3954,14 @@ body {
       const fams = this.store.getState().familyMembers || [];
 
       if (!fams.length) {
-        el.innerHTML = `<div style="text-align:center;padding:24px;color:var(--muted);">No family members added yet. Tap "+ Add Family Member" below.</div>`;
+        el.innerHTML = `<div style="text-align:center;padding:20px;color:var(--muted);">No family members added yet. Tap "+ Add Member" below.</div>`;
         return;
       }
 
       el.innerHTML = fams.map(f => `
-        <div style="background:var(--glass-1);border:1.5px solid var(--glass-border);border-radius:14px;padding:14px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,0.04);">
+        <div style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:14px;padding:14px;display:flex;justify-content:space-between;align-items:center;box-shadow:var(--shadow-panel);">
           <div style="display:flex;align-items:center;gap:12px;">
-            <div style="width:42px;height:42px;background:rgba(0,82,204,0.1);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;">
+            <div style="width:42px;height:42px;background:rgba(2,132,199,0.12);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;">
               ${f.gender === 'Female' ? '👩' : '👨'}
             </div>
             <div>
@@ -3962,8 +3970,8 @@ body {
             </div>
           </div>
           <div style="text-align:right;">
-            <span class="badge" style="background:rgba(0,82,204,0.1);color:var(--primary);padding:4px 8px;border-radius:12px;font-size:11px;font-weight:600;">${f.status || 'Active'}</span>
-            <button style="display:block;margin-top:4px;color:#dc2626;font-size:11px;cursor:pointer;background:none;border:none;" onclick="patientController.removeFamilyMember('${f.id}')">✕ Remove</button>
+            <span class="badge" style="background:rgba(2,132,199,0.12);color:var(--primary-bright);padding:4px 8px;border-radius:12px;font-size:11px;font-weight:700;">${f.status || 'Active'}</span>
+            <button style="display:block;margin-top:4px;color:#dc2626;font-size:11px;cursor:pointer;background:none;border:none;font-weight:600;" onclick="patientController.removeFamilyMember('${f.id}')">✕ Remove</button>
           </div>
         </div>
       `).join('');
@@ -4003,38 +4011,52 @@ body {
     }
 
     // -------------------------------------------------------------
-    // 5. JAN AUSHADHI MEDICINE TRACKER & SAVINGS
+    // 5. JAN AUSHADHI MEDICINE TRACKER & SAVINGS (TRANSLATED)
     // -------------------------------------------------------------
     renderDailyMedications() {
       const el = document.getElementById('dailyMedsList');
       if (!el || !this.store) return;
       const meds = this.store.getState().dailyMedications || [];
 
-      el.innerHTML = meds.map(m => `
-        <div style="background:var(--glass-1);border:1.5px solid var(--glass-border);border-radius:14px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
-          <div>
-            <strong style="color:var(--ink);font-size:15px;display:block;">${m.name}</strong>
-            <small style="color:#16a34a;font-weight:700;">💰 ${m.saving}</small>
+      const medKeyMap = {
+        'MED-01': 'med_paracetamol',
+        'MED-02': 'med_calcium',
+        'MED-03': 'med_ifa'
+      };
+
+      el.innerHTML = meds.map(m => {
+        const localizedName = this.t(medKeyMap[m.id], m.name);
+        const morningLabel = this.t('dose_morning', '☀️ Morning');
+        const noonLabel = this.t('dose_noon', '🌤️ Noon');
+        const nightLabel = this.t('dose_night', '🌙 Night');
+        const takenLabel = this.t('dose_taken', '✓ Taken');
+
+        return `
+          <div style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:14px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;box-shadow:var(--shadow-panel);">
+            <div>
+              <strong style="color:var(--ink);font-size:15px;display:block;">${localizedName}</strong>
+              <small style="color:#16a34a;font-weight:700;">💰 ${m.saving}</small>
+            </div>
+            <div style="display:flex;gap:8px;">
+              ${m.morning ? `
+                <button class="btn-glass" style="padding:6px 10px;font-size:12px;background:${m.taken && m.taken.morning ? '#16a34a' : 'var(--glass-1)'};color:${m.taken && m.taken.morning ? '#ffffff' : 'var(--ink)'};border-color:${m.taken && m.taken.morning ? '#16a34a' : 'var(--glass-border)'};" onclick="patientController.toggleDose('${m.id}', 'morning')">
+                  ${m.taken && m.taken.morning ? takenLabel : morningLabel}
+                </button>
+              ` : ''}
+              ${m.noon ? `
+                <button class="btn-glass" style="padding:6px 10px;font-size:12px;background:${m.taken && m.taken.noon ? '#16a34a' : 'var(--glass-1)'};color:${m.taken && m.taken.noon ? '#ffffff' : 'var(--ink)'};border-color:${m.taken && m.taken.noon ? '#16a34a' : 'var(--glass-border)'};" onclick="patientController.toggleDose('${m.id}', 'noon')">
+                  ${m.taken && m.taken.noon ? takenLabel : noonLabel}
+                </button>
+              ` : ''}
+              ${m.night ? `
+                <button class="btn-glass" style="padding:6px 10px;font-size:12px;background:${m.taken && m.taken.night ? '#16a34a' : 'var(--glass-1)'};color:${m.taken && m.taken.night ? '#ffffff' : 'var(--ink)'};border-color:${m.taken && m.taken.night ? '#16a34a' : 'var(--glass-border)'};" onclick="patientController.toggleDose('${m.id}', 'night')">
+                  ${m.taken && m.taken.night ? takenLabel : nightLabel}
+                </button>
+              ` : ''}
+            </div>
           </div>
-          <div style="display:flex;gap:8px;">
-            ${m.morning ? `
-              <button class="btn-glass" style="padding:6px 10px;font-size:12px;background:${m.taken && m.taken.morning ? '#16a34a' : 'transparent'};color:${m.taken && m.taken.morning ? '#ffffff' : 'var(--ink)'};" onclick="patientController.toggleDose('${m.id}', 'morning')">
-                ☀️ ${m.taken && m.taken.morning ? '✓ Taken' : 'Morning'}
-              </button>
-            ` : ''}
-            ${m.noon ? `
-              <button class="btn-glass" style="padding:6px 10px;font-size:12px;background:${m.taken && m.taken.noon ? '#16a34a' : 'transparent'};color:${m.taken && m.taken.noon ? '#ffffff' : 'var(--ink)'};" onclick="patientController.toggleDose('${m.id}', 'noon')">
-                🌤️ ${m.taken && m.taken.noon ? '✓ Taken' : 'Noon'}
-              </button>
-            ` : ''}
-            ${m.night ? `
-              <button class="btn-glass" style="padding:6px 10px;font-size:12px;background:${m.taken && m.taken.night ? '#16a34a' : 'transparent'};color:${m.taken && m.taken.night ? '#ffffff' : 'var(--ink)'};" onclick="patientController.toggleDose('${m.id}', 'night')">
-                🌙 ${m.taken && m.taken.night ? '✓ Taken' : 'Night'}
-              </button>
-            ` : ''}
-          </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
     toggleDose(medId, time) {
@@ -4049,27 +4071,32 @@ body {
       if (!el || !this.store) return;
       const hosps = this.store.getState().hospitals || [];
 
+      const genBedsText = this.t('gen_beds', 'General Beds');
+      const icuBedsText = this.t('icu_beds', 'ICU Beds');
+      const oxyBedsText = this.t('oxy_beds', 'Oxygen Beds');
+      const availText = this.t('avail', 'Avail');
+
       el.innerHTML = hosps.map(h => `
-        <div style="background:var(--glass-1);border:1.5px solid var(--glass-border);border-radius:14px;padding:16px;margin-bottom:12px;">
+        <div style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:var(--shadow-panel);">
           <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;flex-wrap:wrap;gap:6px;">
             <div>
-              <strong style="color:var(--primary);font-size:15px;display:block;">${h.name}</strong>
+              <strong style="color:var(--primary-bright);font-size:15px;display:block;">${h.name}</strong>
               <small style="color:var(--muted);">Distance: ${h.distance} · Doctor: ${h.doctorOnDuty}</small>
             </div>
-            <a href="tel:${h.phone}" class="btn-glass" style="padding:4px 10px;font-size:12px;color:var(--primary);">📞 Call ${h.phone}</a>
+            <a href="tel:${h.phone}" class="btn-glass" style="padding:4px 10px;font-size:12px;color:var(--primary-bright);">📞 Call ${h.phone}</a>
           </div>
           <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(90px, 1fr));gap:8px;margin-top:10px;text-align:center;">
-            <div style="background:rgba(22,163,74,0.08);border:1px solid rgba(22,163,74,0.3);padding:8px;border-radius:10px;">
-              <small style="color:#166534;font-size:11px;display:block;">General</small>
-              <strong style="color:#16a34a;font-size:16px;">${h.genBedsAvail} Avail</strong>
+            <div style="background:rgba(22,163,74,0.12);border:1px solid rgba(22,163,74,0.3);padding:8px;border-radius:10px;">
+              <small style="color:#16a34a;font-size:11px;font-weight:600;display:block;">${genBedsText}</small>
+              <strong style="color:#16a34a;font-size:16px;">${h.genBedsAvail} ${availText}</strong>
             </div>
-            <div style="background:rgba(220,38,38,0.08);border:1px solid rgba(220,38,38,0.3);padding:8px;border-radius:10px;">
-              <small style="color:#991b1b;font-size:11px;display:block;">ICU</small>
-              <strong style="color:#dc2626;font-size:16px;">${h.icuBedsAvail} Avail</strong>
+            <div style="background:rgba(220,38,38,0.12);border:1px solid rgba(220,38,38,0.3);padding:8px;border-radius:10px;">
+              <small style="color:#dc2626;font-size:11px;font-weight:600;display:block;">${icuBedsText}</small>
+              <strong style="color:#dc2626;font-size:16px;">${h.icuBedsAvail} ${availText}</strong>
             </div>
-            <div style="background:rgba(2,132,199,0.08);border:1px solid rgba(2,132,199,0.3);padding:8px;border-radius:10px;">
-              <small style="color:#075985;font-size:11px;display:block;">Oxygen</small>
-              <strong style="color:#0284c7;font-size:16px;">${h.oxygenBedsAvail} Avail</strong>
+            <div style="background:rgba(2,132,199,0.12);border:1px solid rgba(2,132,199,0.3);padding:8px;border-radius:10px;">
+              <small style="color:#0284c7;font-size:11px;font-weight:600;display:block;">${oxyBedsText}</small>
+              <strong style="color:#0284c7;font-size:16px;">${h.oxygenBedsAvail} ${availText}</strong>
             </div>
           </div>
         </div>
@@ -4081,12 +4108,15 @@ body {
       if (!el || !this.store) return;
       const bank = this.store.getState().bloodBank || {};
 
+      const inStockText = this.t('in_stock', '✓ In Stock');
+      const lowStockText = this.t('low_stock', '⚠️ Low');
+
       el.innerHTML = Object.entries(bank).map(([grp, count]) => `
-        <div style="background:var(--glass-1);border:1.5px solid var(--glass-border);border-radius:12px;padding:10px;text-align:center;">
+        <div style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:12px;padding:10px;text-align:center;">
           <strong style="color:#dc2626;font-size:16px;display:block;">${grp}</strong>
           <span style="font-size:14px;color:var(--ink);font-weight:700;">${count} Units</span>
           <small style="display:block;color:${count > 5 ? '#16a34a' : '#dc2626'};font-size:10px;font-weight:600;margin-top:2px;">
-            ${count > 5 ? '✓ In Stock' : '⚠️ Low'}
+            ${count > 5 ? inStockText : lowStockText}
           </small>
         </div>
       `).join('');
@@ -4101,7 +4131,7 @@ body {
 /**
  * =========================================================
  * SWASTHYA SETU - DOCTOR CLINICAL DESK (doctor.js)
- * 100% Standalone Teleconsultation & e-Prescription Engine
+ * High-Contrast Dark Mode & Glassmorphic Prescriptions
  * =========================================================
  */
 
@@ -4125,38 +4155,42 @@ body {
       }
     }
 
+    t(key, fallback) {
+      return global.i18n ? global.i18n.get(key, fallback) : (fallback || key);
+    }
+
     renderConsultQueue() {
       const el = document.getElementById('doctorQueueTableBody');
       if (!el || !this.store) return;
       const queue = this.store.getState().consultQueue || [];
 
       if (!queue.length) {
-        el.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:24px;color:#64748b;">No patients waiting in queue. Tap "+ Add Walk-in Patient" to admit.</td></tr>`;
+        el.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--muted);">No patients waiting in queue. Tap "+ Add Patient" above.</td></tr>`;
         return;
       }
 
       el.innerHTML = queue.map(q => `
         <tr>
-          <td><strong style="color:#0052cc;font-family:'IBM Plex Mono',monospace;">${q.token}</strong></td>
+          <td><strong style="color:var(--primary-bright);font-family:'IBM Plex Mono',monospace;font-size:14px;">${q.token}</strong></td>
           <td>
-            <strong style="color:#0f172a;display:block;">${q.patientName}</strong>
-            <small style="color:#64748b;">Age: ${q.age} · ${q.gender}</small>
+            <strong style="color:var(--ink);display:block;font-size:14px;">${q.patientName}</strong>
+            <small style="color:var(--muted);font-size:11px;">Age: ${q.age} · ${q.gender}</small>
           </td>
-          <td style="color:#334155;max-width:200px;">${q.complaint}</td>
+          <td style="color:var(--ink);max-width:220px;white-space:normal;font-size:13px;">${q.complaint}</td>
           <td>
-            <div style="font-size:11px;color:#475569;">
-              <span>BP: <strong>${q.vitals.bp || '120/80'}</strong></span> | 
-              <span>SpO2: <strong>${q.vitals.spo2 || '98%'}</strong></span><br>
-              <span>Temp: <strong>${q.vitals.temp || '98.6°F'}</strong></span> | 
-              <span>Pulse: <strong>${q.vitals.pulse || '78'}</strong></span>
+            <div style="font-size:12px;color:var(--ink-dim);line-height:1.4;">
+              <span>BP: <strong style="color:var(--ink);">${q.vitals.bp || '120/80'}</strong></span> | 
+              <span>SpO2: <strong style="color:var(--ink);">${q.vitals.spo2 || '98%'}</strong></span><br>
+              <span>Temp: <strong style="color:var(--ink);">${q.vitals.temp || '98.6°F'}</strong></span> | 
+              <span>Pulse: <strong style="color:var(--ink);">${q.vitals.pulse || '78'}</strong></span>
             </div>
           </td>
           <td>
-            <span class="badge" style="background:${q.triage === 'Red' ? '#fee2e2' : q.triage === 'Yellow' ? '#fef3c7' : '#dcfce7'};color:${q.triage === 'Red' ? '#dc2626' : q.triage === 'Yellow' ? '#d97706' : '#16a34a'};padding:4px 8px;border-radius:12px;font-size:11px;font-weight:700;">
+            <span class="badge" style="background:${q.triage === 'Red' ? 'rgba(220,38,38,0.2)' : q.triage === 'Yellow' ? 'rgba(217,119,6,0.2)' : 'rgba(22,163,74,0.2)'};color:${q.triage === 'Red' ? '#ef4444' : q.triage === 'Yellow' ? '#f59e0b' : '#22c55e'};padding:4px 8px;border-radius:12px;font-size:11px;font-weight:700;border:1px solid ${q.triage === 'Red' ? '#ef4444' : q.triage === 'Yellow' ? '#f59e0b' : '#22c55e'};">
               ${q.triage}
             </span>
           </td>
-          <td style="color:#64748b;font-size:12px;">${q.time}</td>
+          <td style="color:var(--muted);font-size:12px;">${q.time}</td>
           <td>
             <button class="auth-btn-primary" style="padding:6px 12px;font-size:12px;" onclick="doctorController.startConsult('${q.id}')">
               🩺 Consult & Prescribe
@@ -4214,7 +4248,7 @@ body {
 
       this.closeConsultModal();
       if (typeof window.toast === 'function') {
-        window.toast('✓ Prescription Generated & Sent to Patient ABHA Health Locker!');
+        window.toast('✓ Prescription Generated & Saved to Health Locker!');
       }
     }
 
@@ -4262,20 +4296,21 @@ body {
       const rxList = this.store.getState().prescriptions || [];
 
       if (!rxList.length) {
-        el.innerHTML = `<div style="text-align:center;padding:16px;color:#64748b;">No recent prescriptions generated yet.</div>`;
+        el.innerHTML = `<div style="text-align:center;padding:16px;color:var(--muted);">No recent prescriptions generated yet.</div>`;
         return;
       }
 
       el.innerHTML = rxList.slice(0, 5).map(rx => `
-        <div style="background:#ffffff;border:1.5px solid #cbd5e1;border-radius:12px;padding:14px;margin-bottom:10px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-            <strong style="color:#0052cc;font-size:15px;">${rx.patientName} (${rx.token || 'Rx'})</strong>
-            <small style="color:#64748b;">${rx.date}</small>
+        <div style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:var(--shadow-panel);">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:6px;">
+            <strong style="color:var(--primary-bright);font-size:16px;">${rx.patientName} (${rx.token || 'Rx'})</strong>
+            <small style="color:var(--muted);">${rx.date}</small>
           </div>
-          <p style="font-size:13px;color:#0f172a;margin-bottom:6px;"><strong>Diagnosis:</strong> ${rx.diagnosis}</p>
-          <div style="background:#f8fafc;padding:8px 12px;border-radius:8px;font-size:12px;color:#334155;">
-            ${rx.medicines.map(m => `• ${m.name} (${m.dosage})`).join('<br>')}
+          <p style="font-size:14px;color:var(--ink);margin-bottom:8px;"><strong>Diagnosis:</strong> ${rx.diagnosis}</p>
+          <div style="background:var(--glass-1);border:1px solid var(--glass-border);padding:10px 14px;border-radius:10px;font-size:13px;color:var(--ink-dim);">
+            ${rx.medicines.map(m => `• <strong style="color:var(--ink);">${m.name}</strong> (${m.dosage})`).join('<br>')}
           </div>
+          ${rx.advice ? `<p style="font-size:12px;color:var(--muted);margin-top:8px;"><strong>Advice:</strong> ${rx.advice}</p>` : ''}
         </div>
       `).join('');
     }
@@ -4320,23 +4355,23 @@ body {
       const ancs = this.store.getState().ancRecords || [];
 
       if (!ancs.length) {
-        el.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:20px;color:#64748b;">No pregnant mothers registered. Tap "+ Register Pregnant Mother" above.</td></tr>`;
+        el.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--muted);">No pregnant mothers registered. Tap "+ Register Mother" above.</td></tr>`;
         return;
       }
 
       el.innerHTML = ancs.map(a => `
         <tr>
-          <td><strong style="color:#0f172a;">${a.motherName}</strong></td>
-          <td>${a.husbandName || '—'}</td>
-          <td>${a.village}</td>
-          <td>${a.weeks} Wks (EDD: ${a.edd})</td>
-          <td>BP: ${a.bp} | Hb: ${a.hb}</td>
+          <td><strong style="color:var(--ink);font-size:14px;">${a.motherName}</strong></td>
+          <td style="color:var(--ink-dim);">${a.husbandName || '—'}</td>
+          <td style="color:var(--muted);">${a.village}</td>
+          <td style="color:var(--ink);">${a.weeks} Wks <small style="color:var(--muted);">(EDD: ${a.edd})</small></td>
+          <td style="color:var(--ink-dim);">BP: <strong style="color:var(--ink)">${a.bp}</strong> | Hb: <strong style="color:var(--ink)">${a.hb}</strong></td>
           <td>
-            <span class="badge" style="background:${a.riskLevel.includes('High') ? '#fee2e2' : '#dcfce7'};color:${a.riskLevel.includes('High') ? '#dc2626' : '#16a34a'};padding:4px 8px;border-radius:12px;font-size:11px;font-weight:700;">
+            <span class="badge" style="background:${a.riskLevel.includes('High') ? 'rgba(220,38,38,0.2)' : 'rgba(22,163,74,0.2)'};color:${a.riskLevel.includes('High') ? '#ef4444' : '#22c55e'};padding:4px 8px;border-radius:12px;font-size:11px;font-weight:700;border:1px solid ${a.riskLevel.includes('High') ? '#ef4444' : '#22c55e'};">
               ${a.riskLevel}
             </span>
           </td>
-          <td>${a.nextVisit}</td>
+          <td style="color:var(--primary-bright);font-weight:600;">${a.nextVisit}</td>
         </tr>
       `).join('');
     }
@@ -4390,12 +4425,12 @@ body {
 
       el.innerHTML = uips.map(u => `
         <tr>
-          <td><strong style="color:#0f172a;">${u.childName}</strong></td>
-          <td>${u.parentName}</td>
-          <td>${u.dob} (${u.gender})</td>
-          <td>${u.lastVaccine}</td>
-          <td><strong style="color:#0052cc;">${u.nextDue}</strong></td>
-          <td><span class="badge" style="background:#e0f2fe;color:#0052cc;padding:4px 8px;border-radius:12px;font-size:11px;font-weight:600;">${u.status}</span></td>
+          <td><strong style="color:var(--ink);font-size:14px;">${u.childName}</strong></td>
+          <td style="color:var(--ink-dim);">${u.parentName}</td>
+          <td style="color:var(--muted);">${u.dob} (${u.gender})</td>
+          <td style="color:var(--ink);">${u.lastVaccine}</td>
+          <td><strong style="color:var(--primary-bright);">${u.nextDue}</strong></td>
+          <td><span class="badge" style="background:rgba(2,132,199,0.15);color:var(--primary-bright);padding:4px 8px;border-radius:12px;font-size:11px;font-weight:700;">${u.status}</span></td>
         </tr>
       `).join('');
     }
@@ -4406,13 +4441,13 @@ body {
       const visits = this.store.getState().homeVisits || [];
 
       el.innerHTML = visits.map(v => `
-        <div style="background:#ffffff;border:1.5px solid #cbd5e1;border-radius:12px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;">
+        <div style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:14px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;box-shadow:var(--shadow-panel);">
           <div>
-            <strong style="color:#0f172a;font-size:15px;display:block;">${v.household}</strong>
-            <small style="color:#0052cc;font-weight:700;">Priority: ${v.priority}</small>
-            <p style="font-size:13px;color:#475569;margin-top:2px;">Task: ${v.task}</p>
+            <strong style="color:var(--ink);font-size:15px;display:block;">${v.household}</strong>
+            <small style="color:var(--primary-bright);font-weight:700;">Priority: ${v.priority}</small>
+            <p style="font-size:13px;color:var(--ink-dim);margin-top:2px;">Task: ${v.task}</p>
           </div>
-          <button class="btn-glass" style="padding:8px 14px;font-size:12px;background:${v.status === 'Completed' ? '#16a34a' : '#f1f5f9'};color:${v.status === 'Completed' ? '#ffffff' : '#0f172a'};" onclick="workerController.toggleVisit('${v.id}')">
+          <button class="btn-glass" style="padding:8px 14px;font-size:12px;background:${v.status === 'Completed' ? '#16a34a' : 'var(--glass-1)'};color:${v.status === 'Completed' ? '#ffffff' : 'var(--ink)'};border-color:${v.status === 'Completed' ? '#16a34a' : 'var(--glass-border)'};" onclick="workerController.toggleVisit('${v.id}')">
             ${v.status === 'Completed' ? '✓ Completed' : 'Mark Done'}
           </button>
         </div>
@@ -4432,7 +4467,7 @@ body {
 /**
  * =========================================================
  * SWASTHYA SETU - HEALTH ADMINISTRATION DESK (admin.js)
- * 100% Standalone Personnel, Bed Grid & Inventory Command
+ * High-Contrast Glass Support & Dynamic Inventory
  * =========================================================
  */
 
@@ -4449,6 +4484,10 @@ body {
       if (this.store) {
         this.store.subscribe(() => this.renderAll());
       }
+    }
+
+    t(key, fallback) {
+      return global.i18n ? global.i18n.get(key, fallback) : (fallback || key);
     }
 
     renderAll() {
@@ -4481,26 +4520,26 @@ body {
       const staffList = this.store.getState().staff || [];
 
       if (!staffList.length) {
-        el.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:20px;color:#64748b;">No staff registered yet. Add staff above.</td></tr>`;
+        el.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--muted);">No staff registered yet. Add staff above.</td></tr>`;
         return;
       }
 
       el.innerHTML = staffList.map(s => `
         <tr>
-          <td><strong style="color:#0052cc;font-family:'IBM Plex Mono',monospace;">${s.id}</strong></td>
+          <td><strong style="color:var(--primary-bright);font-family:'IBM Plex Mono',monospace;font-size:13px;">${s.id}</strong></td>
           <td>
-            <strong style="color:#0f172a;display:block;">${s.name}</strong>
-            <small style="color:#64748b;">${s.regNo || '—'}</small>
+            <strong style="color:var(--ink);display:block;font-size:14px;">${s.name}</strong>
+            <small style="color:var(--muted);">${s.regNo || '—'}</small>
           </td>
           <td>
-            <span class="badge" style="background:${s.role === 'doctor' ? '#e0f2fe' : s.role === 'worker' ? '#f0fdf4' : '#fef3c7'};color:${s.role === 'doctor' ? '#0052cc' : s.role === 'worker' ? '#16a34a' : '#d97706'};padding:4px 8px;border-radius:12px;font-size:11px;font-weight:700;">
+            <span class="badge" style="background:${s.role === 'doctor' ? 'rgba(2,132,199,0.15)' : s.role === 'worker' ? 'rgba(22,163,74,0.15)' : 'rgba(217,119,6,0.15)'};color:${s.role === 'doctor' ? 'var(--primary-bright)' : s.role === 'worker' ? '#22c55e' : '#f59e0b'};padding:4px 8px;border-radius:12px;font-size:11px;font-weight:700;">
               ${s.role === 'doctor' ? '🩺 Doctor' : s.role === 'worker' ? '🤝 ASHA / ANM' : '👑 Administrator'}
             </span>
           </td>
-          <td>${s.location}</td>
-          <td>+91 ${s.phone}</td>
+          <td style="color:var(--ink-dim);">${s.location}</td>
+          <td style="color:var(--muted);">+91 ${s.phone}</td>
           <td>
-            <button style="color:#dc2626;background:none;border:none;cursor:pointer;font-size:12px;font-weight:600;" onclick="adminController.removeStaff('${s.id}')">✕ Remove</button>
+            <button style="color:#ef4444;background:none;border:none;cursor:pointer;font-size:12px;font-weight:700;" onclick="adminController.removeStaff('${s.id}')">✕ Remove</button>
           </td>
         </tr>
       `).join('');
@@ -4543,28 +4582,28 @@ body {
       const hosps = this.store.getState().hospitals || [];
 
       el.innerHTML = hosps.map(h => `
-        <div style="background:#ffffff;border:1.5px solid #cbd5e1;border-radius:14px;padding:16px;margin-bottom:12px;">
-          <strong style="color:#0052cc;font-size:16px;display:block;margin-bottom:10px;">${h.name}</strong>
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
-            <div style="background:#f8fafc;border:1px solid #cbd5e1;border-radius:10px;padding:10px;text-align:center;">
-              <small style="color:#64748b;display:block;">General</small>
+        <div style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:var(--shadow-panel);">
+          <strong style="color:var(--primary-bright);font-size:16px;display:block;margin-bottom:10px;">${h.name}</strong>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(110px, 1fr));gap:10px;">
+            <div style="background:var(--glass-1);border:1px solid var(--glass-border);border-radius:10px;padding:10px;text-align:center;">
+              <small style="color:var(--muted);display:block;font-size:11px;">General</small>
               <strong style="font-size:18px;color:#16a34a;display:block;margin:4px 0;">${h.genBedsAvail}</strong>
               <div style="display:flex;justify-content:center;gap:6px;">
                 <button class="btn-glass" style="padding:2px 8px;font-size:12px;" onclick="adminController.updateBeds('${h.id}', 'gen', 1)">+1</button>
                 <button class="btn-glass" style="padding:2px 8px;font-size:12px;" onclick="adminController.updateBeds('${h.id}', 'gen', -1)">-1</button>
               </div>
             </div>
-            <div style="background:#f8fafc;border:1px solid #cbd5e1;border-radius:10px;padding:10px;text-align:center;">
-              <small style="color:#64748b;display:block;">ICU</small>
-              <strong style="font-size:18px;color:#dc2626;display:block;margin:4px 0;">${h.icuBedsAvail}</strong>
+            <div style="background:var(--glass-1);border:1px solid var(--glass-border);border-radius:10px;padding:10px;text-align:center;">
+              <small style="color:var(--muted);display:block;font-size:11px;">ICU</small>
+              <strong style="font-size:18px;color:#ef4444;display:block;margin:4px 0;">${h.icuBedsAvail}</strong>
               <div style="display:flex;justify-content:center;gap:6px;">
                 <button class="btn-glass" style="padding:2px 8px;font-size:12px;" onclick="adminController.updateBeds('${h.id}', 'icu', 1)">+1</button>
                 <button class="btn-glass" style="padding:2px 8px;font-size:12px;" onclick="adminController.updateBeds('${h.id}', 'icu', -1)">-1</button>
               </div>
             </div>
-            <div style="background:#f8fafc;border:1px solid #cbd5e1;border-radius:10px;padding:10px;text-align:center;">
-              <small style="color:#64748b;display:block;">Oxygen</small>
-              <strong style="font-size:18px;color:#0284c7;display:block;margin:4px 0;">${h.oxygenBedsAvail}</strong>
+            <div style="background:var(--glass-1);border:1px solid var(--glass-border);border-radius:10px;padding:10px;text-align:center;">
+              <small style="color:var(--muted);display:block;font-size:11px;">Oxygen</small>
+              <strong style="font-size:18px;color:var(--primary-bright);display:block;margin:4px 0;">${h.oxygenBedsAvail}</strong>
               <div style="display:flex;justify-content:center;gap:6px;">
                 <button class="btn-glass" style="padding:2px 8px;font-size:12px;" onclick="adminController.updateBeds('${h.id}', 'oxygen', 1)">+1</button>
                 <button class="btn-glass" style="padding:2px 8px;font-size:12px;" onclick="adminController.updateBeds('${h.id}', 'oxygen', -1)">-1</button>
@@ -4585,9 +4624,9 @@ body {
       const bank = this.store.getState().bloodBank || {};
 
       el.innerHTML = Object.entries(bank).map(([grp, count]) => `
-        <div style="background:#ffffff;border:1.5px solid #cbd5e1;border-radius:12px;padding:10px;text-align:center;">
-          <strong style="color:#dc2626;font-size:16px;display:block;">${grp}</strong>
-          <span style="font-size:18px;font-weight:800;color:#0f172a;display:block;margin:4px 0;">${count}</span>
+        <div style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:12px;padding:10px;text-align:center;">
+          <strong style="color:#ef4444;font-size:16px;display:block;">${grp}</strong>
+          <span style="font-size:18px;font-weight:800;color:var(--ink);display:block;margin:4px 0;">${count}</span>
           <div style="display:flex;justify-content:center;gap:4px;">
             <button class="btn-glass" style="padding:2px 6px;font-size:11px;" onclick="adminController.updateBlood('${grp}', 1)">+1</button>
             <button class="btn-glass" style="padding:2px 6px;font-size:11px;" onclick="adminController.updateBlood('${grp}', -1)">-1</button>
@@ -4605,16 +4644,39 @@ body {
       if (!el || !this.store) return;
       const meds = this.store.getState().medicines || [];
 
-      el.innerHTML = meds.map(m => `
-        <tr>
-          <td><strong style="color:#0f172a;">${m.name}</strong></td>
-          <td>${m.category}</td>
-          <td><strong>${m.stock}</strong> ${m.unit}</td>
-          <td>₹${m.genericPrice}</td>
-          <td style="text-decoration:line-through;color:#64748b;">₹${m.brandPrice}</td>
-          <td><span class="badge" style="background:#f0fdf4;color:#16a34a;padding:4px 8px;border-radius:12px;font-size:11px;font-weight:700;">${m.status}</span></td>
-        </tr>
-      `).join('');
+      const medKeyMap = {
+        'DRUG-01': 'med_paracetamol',
+        'DRUG-02': 'med_amoxicillin',
+        'DRUG-03': 'med_metformin',
+        'DRUG-04': 'med_amlodipine',
+        'DRUG-05': 'med_ors',
+        'DRUG-06': 'med_ifa'
+      };
+
+      const catKeyMap = {
+        'DRUG-01': 'cat_fever',
+        'DRUG-02': 'cat_antibiotic',
+        'DRUG-03': 'cat_diabetes',
+        'DRUG-04': 'cat_bp',
+        'DRUG-05': 'cat_dehydration',
+        'DRUG-06': 'cat_maternal'
+      };
+
+      el.innerHTML = meds.map(m => {
+        const localizedName = this.t(medKeyMap[m.id], m.name);
+        const localizedCat = this.t(catKeyMap[m.id], m.category);
+
+        return `
+          <tr>
+            <td><strong style="color:var(--ink);font-size:14px;">${localizedName}</strong></td>
+            <td style="color:var(--muted);">${localizedCat}</td>
+            <td><strong style="color:var(--ink)">${m.stock}</strong> <small style="color:var(--muted)">${m.unit}</small></td>
+            <td style="color:#16a34a;font-weight:700;">₹${m.genericPrice}</td>
+            <td style="text-decoration:line-through;color:var(--muted);">₹${m.brandPrice}</td>
+            <td><span class="badge" style="background:rgba(22,163,74,0.15);color:#22c55e;padding:4px 8px;border-radius:12px;font-size:11px;font-weight:700;">${m.status}</span></td>
+          </tr>
+        `;
+      }).join('');
     }
   }
 
@@ -4647,11 +4709,6 @@ function switchRole(role) {
 // 3 Glass Themes Cycle: Classic -> Black -> Navy -> Classic
 function cycleTheme() {
   const themes = ['classic', 'black', 'navy'];
-  const labels = {
-    'classic': '🏛️ Classic (White & Blue)',
-    'black': '⬛ Pure Black (Glass)',
-    'navy': '🌊 Deep Navy (Glass)'
-  };
   const current = document.body.getAttribute('data-theme') || 'classic';
   const idx = themes.indexOf(current);
   const next = themes[(idx + 1) % themes.length];
@@ -4660,10 +4717,14 @@ function cycleTheme() {
   document.body.setAttribute('data-theme', next);
 
   const btn = document.getElementById('themeToggleBtn');
-  if (btn) btn.textContent = labels[next];
+  if (btn && window.i18n) {
+    btn.textContent = window.i18n.get('theme_' + next);
+  }
 
   if (window.appStore) window.appStore.setTheme(next);
-  if (typeof window.toast === 'function') window.toast('🎨 ' + labels[next]);
+  if (typeof window.toast === 'function' && window.i18n) {
+    window.toast('🎨 ' + window.i18n.get('theme_' + next));
+  }
 }
 
 window.toast = function(msg) {
