@@ -1,7 +1,7 @@
 /**
  * =========================================================
  * SWASTHYA SETU - DOCTOR CLINICAL DESK (doctor.js)
- * 100% Vernacular e-Prescriptions & Queue Localization
+ * 100% Vernacular e-Prescriptions & Modal Localization
  * =========================================================
  */
 
@@ -30,7 +30,7 @@
     }
 
     tr(text) {
-      return global.localizeRxText ? global.localizeRxText(text) : text;
+      return global.localizeComplaintText ? global.localizeComplaintText(text) : text;
     }
 
     renderConsultQueue() {
@@ -79,14 +79,53 @@
       if (!q) return;
       this.selectedPatient = q;
 
+      // Localize Modal Title
       const titleEl = document.getElementById('consultActivePatientName');
       if (titleEl) {
-        titleEl.textContent = `${this.t('consulting_label', 'Consulting')}: ${q.patientName} (${q.token}) — ${q.age} Yrs, ${q.gender}`;
+        titleEl.innerHTML = `${this.t('consulting_label', 'Consulting')}: <strong style="color:var(--primary-bright);">${q.patientName} (${q.token})</strong> — ${q.age} ${this.t('years_short', 'Yrs')}, ${q.gender}`;
       }
+
+      // Localize Vitals & Chief Complaint Box
       const vitalsEl = document.getElementById('consultActiveVitals');
       if (vitalsEl) {
-        vitalsEl.textContent = `${this.t('complaint_label', 'Complaint')}: ${this.tr(q.complaint)} | BP: ${q.vitals.bp}, SpO2: ${q.vitals.spo2}, Temp: ${q.vitals.temp}, Pulse: ${q.vitals.pulse}`;
+        vitalsEl.innerHTML = `<strong>${this.t('complaint_label', 'Chief Complaint')}:</strong> ${this.tr(q.complaint)}<br><span style="opacity:0.85;">BP: ${q.vitals.bp}, SpO2: ${q.vitals.spo2}, Temp: ${q.vitals.temp}, Pulse: ${q.vitals.pulse}</span>`;
       }
+
+      // Localize Diagnosis Default Value
+      const diagInput = document.getElementById('rxDiagnosis');
+      if (diagInput) {
+        diagInput.value = this.tr(q.complaint.includes('Fever') ? 'Acute Viral Fever' : q.complaint.includes('Trimester') ? 'ANC Routine Checkup' : 'Clinical Evaluation');
+      }
+
+      // Localize Advice Default Value
+      const adviceInput = document.getElementById('rxAdvice');
+      if (adviceInput) {
+        adviceInput.value = this.t('default_advice_fever', 'Drink plenty of clean boiled water. Rest well.');
+      }
+
+      // Localize Dropdown Select Options for Medicines
+      const med1Select = document.getElementById('rxMed1');
+      if (med1Select) {
+        med1Select.innerHTML = `
+          <option value="Paracetamol 650mg">${this.t('opt_para', 'Paracetamol 650mg Tab (₹8 vs ₹34 Dolo)')}</option>
+          <option value="Amoxicillin 500mg">${this.t('opt_amox', 'Amoxicillin 500mg Cap (₹28 vs ₹110)')}</option>
+          <option value="Metformin 500mg">${this.t('opt_met', 'Metformin 500mg Tab (₹12 vs ₹58)')}</option>
+          <option value="Amlodipine 5mg">${this.t('opt_amlo', 'Amlodipine 5mg Tab (₹6 vs ₹38)')}</option>
+          <option value="ORS Powder Sachets">${this.t('opt_ors', 'ORS Sachet Powder (₹5 vs ₹24)')}</option>
+        `;
+      }
+
+      const med2Select = document.getElementById('rxMed2');
+      if (med2Select) {
+        med2Select.innerHTML = `
+          <option value="Cetirizine 10mg">${this.t('opt_cetz', 'Cetirizine 10mg Tab (₹4 vs ₹22)')}</option>
+          <option value="Vitamin C + Zinc">${this.t('opt_vitc', 'Vitamin C + Zinc Tab (₹15 vs ₹75)')}</option>
+          <option value="Iron & Folic Acid">${this.t('opt_ifa', 'Iron & Folic Acid Tab (₹4 vs ₹32)')}</option>
+        `;
+      }
+
+      // Apply any data-i18n inside modal
+      if (global.i18n) global.i18n.applyTranslations(global.i18n.currentLang);
 
       const modal = document.getElementById('doctorConsultModal');
       if (modal) modal.style.display = 'flex';
@@ -102,22 +141,22 @@
       if (e) e.preventDefault();
       if (!this.selectedPatient) return;
 
-      const diagnosis = document.getElementById('rxDiagnosis').value.trim() || 'Acute Viral Fever';
-      const med1 = document.getElementById('rxMed1').value;
-      const med2 = document.getElementById('rxMed2').value;
-      const advice = document.getElementById('rxAdvice').value.trim() || 'Take plenty of clean drinking water and rest.';
+      const diagVal = document.getElementById('rxDiagnosis').value.trim() || 'Acute Viral Fever';
+      const med1Val = document.getElementById('rxMed1').value;
+      const med2Val = document.getElementById('rxMed2').value;
+      const adviceVal = document.getElementById('rxAdvice').value.trim() || 'Drink plenty of clean boiled water. Rest well.';
 
       const medicines = [];
-      if (med1) medicines.push({ name: med1, dosage: '1 tablet 3 times a day after meals', timing: '1-1-1' });
-      if (med2) medicines.push({ name: med2, dosage: '1 tablet twice daily', timing: '1-0-1' });
+      if (med1Val) medicines.push({ name: med1Val, dosage: '1 tab 3 times daily after food for 3 days', timing: '1-1-1' });
+      if (med2Val) medicines.push({ name: med2Val, dosage: '1 tab at night for 3 days', timing: '0-0-1' });
 
       this.store.completeConsult(this.selectedPatient.id, {
         token: this.selectedPatient.token,
         patientName: this.selectedPatient.patientName,
         doctorName: 'Dr. Priya Sharma, MBBS, MD',
-        diagnosis,
+        diagnosis: diagVal,
         medicines,
-        advice
+        advice: adviceVal
       });
 
       this.closeConsultModal();

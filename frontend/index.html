@@ -967,15 +967,15 @@ body {
 <!-- DOCTOR CONSULT MODAL -->
 <div id="doctorConsultModal" class="modal-overlay">
   <div class="modal-card">
-    <h3 id="consultActivePatientName" style="color:var(--primary-bright);font-size:17px;margin-bottom:6px;">Consultation & e-Prescription</h3>
-    <p id="consultActiveVitals" style="color:var(--muted);font-size:12px;margin-bottom:14px;background:var(--glass-1);border:1px solid var(--glass-border);padding:8px;border-radius:8px;"></p>
+    <h3 id="consultActivePatientName" style="color:var(--primary-bright);font-size:17px;margin-bottom:6px;"></h3>
+    <p id="consultActiveVitals" style="color:var(--muted);font-size:12px;margin-bottom:14px;background:var(--glass-1);border:1px solid var(--glass-border);padding:8px;border-radius:8px;line-height:1.5;"></p>
     <form onsubmit="doctorController.submitPrescription(event)">
       <div style="margin-bottom:10px;">
-        <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Diagnosis</label>
-        <input type="text" id="rxDiagnosis" class="input-field" value="Acute Viral Fever" required>
+        <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;" data-i18n="label_diagnosis">Clinical Diagnosis</label>
+        <input type="text" id="rxDiagnosis" class="input-field" required>
       </div>
       <div style="margin-bottom:10px;">
-        <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Primary Generic Medicine</label>
+        <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;" data-i18n="label_primary_med">Primary Generic Medicine</label>
         <select id="rxMed1" class="input-field">
           <option value="Paracetamol 650mg">Paracetamol 650mg Tab (₹8 vs ₹34 Dolo)</option>
           <option value="Amoxicillin 500mg">Amoxicillin 500mg Cap (₹28 vs ₹110)</option>
@@ -985,7 +985,7 @@ body {
         </select>
       </div>
       <div style="margin-bottom:10px;">
-        <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Secondary Medicine</label>
+        <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;" data-i18n="label_secondary_med">Secondary Medicine</label>
         <select id="rxMed2" class="input-field">
           <option value="Cetirizine 10mg">Cetirizine 10mg Tab (₹4 vs ₹22)</option>
           <option value="Vitamin C + Zinc">Vitamin C + Zinc Tab (₹15 vs ₹75)</option>
@@ -993,12 +993,12 @@ body {
         </select>
       </div>
       <div style="margin-bottom:14px;">
-        <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Advice</label>
-        <textarea id="rxAdvice" class="input-field" rows="2">Drink plenty of clean boiled water. Rest well.</textarea>
+        <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;" data-i18n="label_advice">Doctor Advice & Instructions</label>
+        <textarea id="rxAdvice" class="input-field" rows="2"></textarea>
       </div>
       <div style="display:flex;gap:8px;justify-content:flex-end;">
-        <button type="button" class="btn-glass" onclick="doctorController.closeConsultModal()">Cancel</button>
-        <button type="submit" class="auth-btn-primary">✓ Generate e-Rx</button>
+        <button type="button" class="btn-glass" onclick="doctorController.closeConsultModal()" data-i18n="btn_cancel">Cancel</button>
+        <button type="submit" class="auth-btn-primary" data-i18n="btn_generate_rx">✓ Generate e-Rx</button>
       </div>
     </form>
   </div>
