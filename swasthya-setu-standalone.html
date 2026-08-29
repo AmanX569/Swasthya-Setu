@@ -20,58 +20,49 @@
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 <style>
 /* =========================================================
-   DESIGN SYSTEM & GLASS-TOUCHED ARCHITECTURE
+   DESIGN SYSTEM & THEME ARCHITECTURE
+   DEFAULT: CLASSIC (CLINICAL WHITE & ROYAL BLUE)
+   OPTION 2: EMERALD GREEN (DARK FOREST & HEALING MINT)
 ========================================================= */
 :root {
-  /* Ambient Obsidian & Emerald Void */
-  --void-950: #020b09;
-  --void-900: #051814;
-  --void-850: #09241f;
-  --void-800: #0d302a;
-  --void-700: #13423a;
+  /* Default: Classic White & Royal Blue Variables */
+  --void-950: #f8fafc;
+  --void-900: #f1f5f9;
+  --void-850: #e2e8f0;
+  --void-800: #cbd5e1;
+  --void-700: #94a3b8;
 
-  /* Glass Surfaces & Layered Translucency */
-  --glass-1: rgba(220, 252, 243, 0.045);
-  --glass-2: rgba(220, 252, 243, 0.085);
-  --glass-3: rgba(220, 252, 243, 0.14);
-  --glass-4: rgba(220, 252, 243, 0.22);
-  --glass-border: rgba(220, 252, 243, 0.13);
-  --glass-border-strong: rgba(220, 252, 243, 0.28);
-  --glass-glow: rgba(95, 227, 196, 0.25);
-  --glass-specular: rgba(255, 255, 255, 0.55);
-  --rail-glass: rgba(4, 18, 15, 0.78);
+  --glass-1: #ffffff;
+  --glass-2: #ffffff;
+  --glass-3: #ffffff;
+  --glass-4: #ffffff;
+  --glass-border: #cbd5e1;
+  --glass-border-strong: #94a3b8;
+  --glass-glow: transparent;
+  --glass-specular: #ffffff;
+  --rail-glass: #ffffff;
 
-  /* Primary Brand: Healing Emerald & Luminous Teal */
-  --primary: #10b981;
-  --primary-dark: #064e3b;
-  --primary-bright: #34d399;
-  --primary-glow: rgba(52, 211, 153, 0.45);
-  --teal-cyan: #22d3ee;
-  --teal-glow: rgba(34, 211, 238, 0.35);
+  --primary: #0052cc;
+  --primary-dark: #003d99;
+  --primary-bright: #0b5ed7;
+  --primary-glow: rgba(11, 94, 215, 0.2);
+  --teal-cyan: #0284c7;
+  --teal-glow: rgba(2, 132, 199, 0.15);
 
-  /* Warm Harvest Amber (Rural Energy & Warmth) */
-  --accent: #f59e0b;
-  --accent-light: #fbbf24;
-  --accent-soft: rgba(245, 158, 11, 0.16);
-  --accent-glow: rgba(245, 158, 11, 0.55);
+  --accent: #d97706;
+  --accent-light: #f59e0b;
+  --accent-soft: rgba(217, 119, 6, 0.1);
 
-  /* Emergency & Safety Alerts */
-  --danger: #ef4444;
-  --danger-bright: #f87171;
-  --danger-soft: rgba(239, 68, 68, 0.16);
-  --danger-glow: rgba(239, 68, 68, 0.65);
-  --warn: #f59e0b;
-  --warn-soft: rgba(245, 158, 11, 0.15);
-  --good: #10b981;
-  --good-soft: rgba(16, 185, 129, 0.15);
+  --danger: #dc2626;
+  --danger-bright: #b91c1c;
+  --warn: #d97706;
+  --good: #16a34a;
 
-  /* Typography & Ink */
-  --ink: #f0fdf4;
-  --ink-dim: #cbd5e1;
-  --muted: #86a79e;
-  --line: rgba(220, 252, 243, 0.1);
+  --ink: #0f172a;
+  --ink-dim: #334155;
+  --muted: #64748b;
+  --line: #e2e8f0;
 
-  /* Radii & Physics */
   --radius-sm: 10px;
   --radius: 16px;
   --radius-lg: 24px;
@@ -80,113 +71,204 @@
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
 
-  /* 3D Shadows & Inner Glows */
-  --shadow-ambient: 0 10px 30px -10px rgba(0, 0, 0, 0.65), 0 20px 50px -15px rgba(0, 0, 0, 0.8);
-  --shadow-3d: 0 25px 60px -15px rgba(0, 0, 0, 0.7), 0 0 35px -5px var(--glass-glow);
-  --shadow-inset: inset 0 1px 1px rgba(255, 255, 255, 0.35), inset 0 -1px 1px rgba(0, 0, 0, 0.5), inset 0 0 20px -10px rgba(255, 255, 255, 0.06);
+  --shadow-ambient: 0 4px 16px rgba(0, 51, 102, 0.06);
+  --shadow-3d: 0 10px 24px -4px rgba(0, 51, 102, 0.1);
+  --shadow-inset: inset 0 1px 1px rgba(255, 255, 255, 0.8);
 
   font-size: 16px;
-  color-scheme: dark;
+  color-scheme: light;
 }
 
-/* =========================================================
-   7 THEME ENGINES: BLACK / DARK / EMERALD / NAVY / GOV / DAYLIGHT / OLED
-   ========================================================= */
+/* 1. CLASSIC THEME (WHITE + BLUE · DEFAULT) */
+[data-theme="classic"], body[data-theme="classic"] {
+  --void-950: #f8fafc;
+  --void-900: #f1f5f9;
+  --void-850: #e2e8f0;
+  --void-800: #cbd5e1;
+  --void-700: #94a3b8;
 
-/* 0. Pure Black Theme (AMOLED / Pitch Black 100%) */
-[data-theme="black"], body[data-theme="black"] {
-  --void-950: #000000;
-  --void-900: #050505;
-  --void-850: #0a0a0a;
-  --void-800: #121212;
-  --void-700: #1a1a1a;
+  --glass-1: #ffffff;
+  --glass-2: #ffffff;
+  --glass-3: #ffffff;
+  --glass-4: #ffffff;
+  --glass-border: #cbd5e1;
+  --glass-border-strong: #94a3b8;
+  --glass-glow: transparent;
+  --glass-specular: #ffffff;
+  --rail-glass: #ffffff;
 
-  --glass-1: rgba(18, 18, 18, 0.9);
-  --glass-2: rgba(26, 26, 26, 0.95);
-  --glass-3: #121212;
-  --glass-4: #1c1c1c;
-  --glass-border: rgba(255, 255, 255, 0.16);
-  --glass-border-strong: rgba(52, 211, 153, 0.55);
-  --glass-glow: rgba(52, 211, 153, 0.4);
-  --glass-specular: rgba(255, 255, 255, 0.7);
-  --rail-glass: #000000;
+  --primary: #0052cc;
+  --primary-dark: #003d99;
+  --primary-bright: #0b5ed7;
+  --primary-glow: rgba(11, 94, 215, 0.2);
+  --teal-cyan: #0284c7;
 
-  --primary: #10b981;
-  --primary-dark: #064e3b;
-  --primary-bright: #34d399;
-  --primary-glow: rgba(52, 211, 153, 0.55);
-  --teal-cyan: #38bdf8;
-  --teal-glow: rgba(56, 189, 248, 0.45);
-
-  --accent: #f59e0b;
-  --accent-light: #fbbf24;
-  --accent-soft: rgba(245, 158, 11, 0.2);
-
-  --ink: #ffffff;
-  --ink-dim: #d1d5db;
-  --muted: #9ca3af;
-  --line: rgba(255, 255, 255, 0.14);
-
-  --shadow-ambient: 0 10px 30px -10px rgba(0, 0, 0, 0.95);
-  --shadow-3d: 0 25px 60px -15px rgba(0, 0, 0, 1);
-  color-scheme: dark;
+  --ink: #0f172a;
+  --ink-dim: #334155;
+  --muted: #64748b;
+  --line: #e2e8f0;
+  color-scheme: light;
 }
 
-body[data-theme="black"] {
-  background: #000000 !important;
-  background-image: none !important;
-}
-
-
-/* 5. Pure Dark Violet Theme (Ultra-Deep Midnight Neon Violet) */
-[data-theme="violet"], body[data-theme="violet"] {
-  --void-950: #07020d;
-  --void-900: #0e041a;
-  --void-850: #17072a;
-  --void-800: #230b3f;
-  --void-700: #3b1268;
-
-  --glass-1: rgba(168, 85, 247, 0.06);
-  --glass-2: rgba(168, 85, 247, 0.1);
-  --glass-3: rgba(168, 85, 247, 0.16);
-  --glass-4: rgba(168, 85, 247, 0.24);
-  --glass-border: rgba(168, 85, 247, 0.25);
-  --glass-border-strong: rgba(192, 132, 252, 0.45);
-  --glass-glow: rgba(168, 85, 247, 0.4);
-  --glass-specular: rgba(243, 232, 255, 0.7);
-  --rail-glass: rgba(7, 2, 13, 0.95);
-
-  --primary: #8b5cf6;
-  --primary-dark: #6d28d9;
-  --primary-bright: #c084fc;
-  --primary-glow: rgba(192, 132, 252, 0.55);
-  --teal-cyan: #e879f9;
-  --teal-glow: rgba(232, 121, 249, 0.45);
-
-  --accent: #f59e0b;
-  --accent-light: #fbbf24;
-  --accent-soft: rgba(245, 158, 11, 0.16);
-
-  --ink: #fdf4ff;
-  --ink-dim: #e9d5ff;
-  --muted: #a8a29e;
-  --line: rgba(168, 85, 247, 0.2);
-
-  --shadow-ambient: 0 10px 30px -10px rgba(0, 0, 0, 0.9);
-  --shadow-3d: 0 25px 60px -15px rgba(0, 0, 0, 0.95), 0 0 30px -5px rgba(168, 85, 247, 0.35);
-  color-scheme: dark;
-}
-
-body[data-theme="violet"] {
-  background: #07020d !important;
+body[data-theme="classic"], body:not([data-theme="emerald"]) {
+  background-color: #f8fafc !important;
   background-image:
-    radial-gradient(100% 70% at 15% 0%, rgba(168, 85, 247, 0.22) 0%, transparent 60%),
-    radial-gradient(80% 60% at 85% 10%, rgba(232, 121, 249, 0.18) 0%, transparent 50%),
-    radial-gradient(60% 50% at 50% 90%, rgba(109, 40, 217, 0.2) 0%, transparent 60%),
-    linear-gradient(180deg, #07020d 0%, #0e041a 50%, #07020d 100%) !important;
+    radial-gradient(100% 70% at 15% 0%, rgba(11, 94, 215, 0.05) 0%, transparent 60%),
+    linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%) !important;
+  color: #0f172a !important;
 }
 
-/* 6. Emerald Night Theme (Forest & Healing Mint) */
+/* Classic White + Blue Component Rules */
+body[data-theme="classic"] .top-appbar,
+body:not([data-theme="emerald"]) .top-appbar {
+  background: #ffffff !important;
+  border-bottom: 1.5px solid #cbd5e1 !important;
+  box-shadow: 0 2px 10px rgba(0, 51, 102, 0.05) !important;
+}
+
+body[data-theme="classic"] .sidebar-rail,
+body:not([data-theme="emerald"]) .sidebar-rail {
+  background: #ffffff !important;
+  border-right: 1.5px solid #cbd5e1 !important;
+}
+
+body[data-theme="classic"] .glass-panel,
+body[data-theme="classic"] .card-3d,
+body[data-theme="classic"] .modal-card,
+body[data-theme="classic"] .auth-modal-card,
+body[data-theme="classic"] .admin-approval-card,
+body[data-theme="classic"] .stat-card-3d,
+body:not([data-theme="emerald"]) .glass-panel,
+body:not([data-theme="emerald"]) .card-3d,
+body:not([data-theme="emerald"]) .modal-card,
+body:not([data-theme="emerald"]) .auth-modal-card,
+body:not([data-theme="emerald"]) .admin-approval-card,
+body:not([data-theme="emerald"]) .stat-card-3d {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border: 1.5px solid #cbd5e1 !important;
+  box-shadow: 0 4px 16px rgba(0, 51, 102, 0.06) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+body[data-theme="classic"] .nav-group-title,
+body:not([data-theme="emerald"]) .nav-group-title {
+  color: #0052cc !important;
+  font-weight: 800 !important;
+}
+
+body[data-theme="classic"] .nav-btn,
+body:not([data-theme="emerald"]) .nav-btn {
+  color: #334155 !important;
+}
+
+body[data-theme="classic"] .nav-btn:hover,
+body:not([data-theme="emerald"]) .nav-btn:hover {
+  background: #f1f5f9 !important;
+  color: #0052cc !important;
+}
+
+body[data-theme="classic"] .nav-btn.active,
+body[data-theme="classic"] .doc-nav-tab.active,
+body[data-theme="classic"] .worker-nav-tab.active,
+body:not([data-theme="emerald"]) .nav-btn.active,
+body:not([data-theme="emerald"]) .doc-nav-tab.active,
+body:not([data-theme="emerald"]) .worker-nav-tab.active {
+  background: #0052cc !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+}
+
+body[data-theme="classic"] .btn-glass,
+body:not([data-theme="emerald"]) .btn-glass {
+  background: #f1f5f9 !important;
+  color: #0f172a !important;
+  border: 1px solid #cbd5e1 !important;
+}
+
+body[data-theme="classic"] .btn-glass:hover,
+body:not([data-theme="emerald"]) .btn-glass:hover {
+  background: #e2e8f0 !important;
+}
+
+body[data-theme="classic"] .auth-btn-primary,
+body:not([data-theme="emerald"]) .auth-btn-primary {
+  background: #0052cc !important;
+  color: #ffffff !important;
+  border: 1px solid #003d99 !important;
+  box-shadow: 0 4px 12px rgba(0, 82, 204, 0.25) !important;
+}
+
+body[data-theme="classic"] .auth-btn-primary:hover,
+body:not([data-theme="emerald"]) .auth-btn-primary:hover {
+  background: #003d99 !important;
+}
+
+body[data-theme="classic"] .input-field,
+body[data-theme="classic"] .auth-input,
+body:not([data-theme="emerald"]) .input-field,
+body:not([data-theme="emerald"]) .auth-input {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border: 1.5px solid #cbd5e1 !important;
+}
+
+body[data-theme="classic"] .family-pill,
+body:not([data-theme="emerald"]) .family-pill {
+  background: #f1f5f9 !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+body[data-theme="classic"] .family-pill.active,
+body:not([data-theme="emerald"]) .family-pill.active {
+  background: #0052cc !important;
+  border-color: #003d99 !important;
+  color: #ffffff !important;
+}
+
+body[data-theme="classic"] .family-pill.active strong,
+body[data-theme="classic"] .family-pill.active small,
+body:not([data-theme="emerald"]) .family-pill.active strong,
+body:not([data-theme="emerald"]) .family-pill.active small {
+  color: #ffffff !important;
+}
+
+body[data-theme="classic"] .admin-table thead th,
+body:not([data-theme="emerald"]) .admin-table thead th {
+  background: #f1f5f9 !important;
+  color: #0052cc !important;
+  border-bottom: 1.5px solid #cbd5e1 !important;
+}
+
+body[data-theme="classic"] .admin-table tbody td,
+body:not([data-theme="emerald"]) .admin-table tbody td {
+  border-bottom: 1px solid #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+body[data-theme="classic"] h1,
+body[data-theme="classic"] h2,
+body[data-theme="classic"] h3,
+body[data-theme="classic"] h4,
+body[data-theme="classic"] strong,
+body:not([data-theme="emerald"]) h1,
+body:not([data-theme="emerald"]) h2,
+body:not([data-theme="emerald"]) h3,
+body:not([data-theme="emerald"]) h4,
+body:not([data-theme="emerald"]) strong {
+  color: #0f172a !important;
+}
+
+body[data-theme="classic"] .weather-ticker,
+body:not([data-theme="emerald"]) .weather-ticker {
+  background: #e0f2fe !important;
+  color: #0369a1 !important;
+  border: 1px solid #bae6fd !important;
+}
+
+/* 2. EMERALD GREEN THEME (DEEP FOREST & HEALING MINT) */
 [data-theme="emerald"], body[data-theme="emerald"] {
   --void-950: #04120f;
   --void-900: #071f1a;
@@ -201,330 +283,59 @@ body[data-theme="violet"] {
   --glass-border-strong: rgba(220, 252, 243, 0.28);
   --glass-glow: rgba(95, 227, 196, 0.25);
   --glass-specular: rgba(255, 255, 255, 0.55);
-  --rail-glass: rgba(4, 18, 15, 0.78);
+  --rail-glass: rgba(4, 18, 15, 0.95);
   --primary: #10b981;
   --primary-dark: #064e3b;
   --primary-bright: #34d399;
   --primary-glow: rgba(52, 211, 153, 0.45);
   --teal-cyan: #22d3ee;
   --teal-glow: rgba(34, 211, 238, 0.35);
+  --accent: #f59e0b;
+  --accent-light: #fbbf24;
+  --accent-soft: rgba(245, 158, 11, 0.16);
   --ink: #f0fdf4;
   --ink-dim: #cbd5e1;
   --muted: #86a79e;
   --line: rgba(220, 252, 243, 0.1);
+  --shadow-ambient: 0 10px 30px -10px rgba(0, 0, 0, 0.85);
+  --shadow-3d: 0 25px 60px -15px rgba(0, 0, 0, 0.9);
   color-scheme: dark;
 }
 
 body[data-theme="emerald"] {
+  background-color: #04120f !important;
   background-image:
     radial-gradient(100% 70% at 15% 0%, rgba(52, 211, 153, 0.14) 0%, transparent 60%),
     radial-gradient(80% 60% at 85% 10%, rgba(34, 211, 238, 0.12) 0%, transparent 50%),
-    radial-gradient(60% 50% at 50% 90%, rgba(245, 158, 11, 0.08) 0%, transparent 60%),
     linear-gradient(175deg, #04120f 0%, #071f1a 50%, #04120f 100%) !important;
+  color: #f0fdf4 !important;
 }
 
-/* 1. Classic Modern Dark Mode */
-[data-theme="dark"], body[data-theme="dark"] {
-  --void-950: #0b1120;
-  --void-900: #0f172a;
-  --void-850: #1e293b;
-  --void-800: #334155;
-  --void-700: #475569;
-
-  --glass-1: rgba(30, 41, 59, 0.65);
-  --glass-2: rgba(30, 41, 59, 0.85);
-  --glass-3: #1e293b;
-  --glass-4: #334155;
-  --glass-border: rgba(148, 163, 184, 0.18);
-  --glass-border-strong: rgba(52, 211, 153, 0.4);
-  --glass-glow: rgba(52, 211, 153, 0.35);
-  --glass-specular: rgba(255, 255, 255, 0.65);
-  --rail-glass: rgba(15, 23, 42, 0.92);
-
-  --primary: #10b981;
-  --primary-dark: #065f46;
-  --primary-bright: #34d399;
-  --primary-glow: rgba(52, 211, 153, 0.5);
-  --teal-cyan: #38bdf8;
-  --teal-glow: rgba(56, 189, 248, 0.4);
-
-  --accent: #f59e0b;
-  --accent-light: #fbbf24;
-  --accent-soft: rgba(245, 158, 11, 0.16);
-
-  --ink: #f8fafc;
-  --ink-dim: #cbd5e1;
-  --muted: #94a3b8;
-  --line: rgba(148, 163, 184, 0.15);
-
-  --shadow-ambient: 0 10px 30px -10px rgba(0, 0, 0, 0.8);
-  --shadow-3d: 0 25px 60px -15px rgba(0, 0, 0, 0.85);
-  color-scheme: dark;
+body[data-theme="emerald"] .top-appbar {
+  background: rgba(4, 18, 15, 0.95) !important;
+  border-bottom: 1px solid rgba(220, 252, 243, 0.12) !important;
 }
 
-body[data-theme="dark"] {
-  background-image:
-    radial-gradient(100% 70% at 15% 0%, rgba(52, 211, 153, 0.14) 0%, transparent 60%),
-    radial-gradient(80% 60% at 85% 10%, rgba(56, 189, 248, 0.14) 0%, transparent 50%),
-    linear-gradient(175deg, #0b1120 0%, #0f172a 40%, #1e293b 100%) !important;
+body[data-theme="emerald"] .sidebar-rail {
+  background: rgba(4, 18, 15, 0.95) !important;
+  border-right: 1px solid rgba(220, 252, 243, 0.12) !important;
 }
 
-/* 2. Deep Navy Blue Theme */
-[data-theme="navy"], body[data-theme="navy"] {
-  --void-950: #030a16;
-  --void-900: #07152b;
-  --void-850: #0c2140;
-  --void-800: #12305c;
-  --void-700: #1a427d;
-
-  --glass-1: rgba(186, 230, 253, 0.045);
-  --glass-2: rgba(186, 230, 253, 0.085);
-  --glass-3: rgba(186, 230, 253, 0.14);
-  --glass-4: rgba(186, 230, 253, 0.22);
-  --glass-border: rgba(186, 230, 253, 0.14);
-  --glass-border-strong: rgba(56, 189, 248, 0.35);
-  --glass-glow: rgba(56, 189, 248, 0.3);
-  --glass-specular: rgba(255, 255, 255, 0.65);
-  --rail-glass: rgba(4, 14, 30, 0.88);
-
-  --primary: #0284c7;
-  --primary-dark: #0369a1;
-  --primary-bright: #38bdf8;
-  --primary-glow: rgba(56, 189, 248, 0.5);
-  --teal-cyan: #22d3ee;
-  --teal-glow: rgba(34, 211, 238, 0.4);
-
-  --accent: #f59e0b;
-  --accent-light: #fbbf24;
-  --accent-soft: rgba(245, 158, 11, 0.16);
-
-  --ink: #f8fafc;
-  --ink-dim: #cbd5e1;
-  --muted: #94a3b8;
-  --line: rgba(186, 230, 253, 0.12);
-
-  --shadow-ambient: 0 10px 30px -10px rgba(0, 0, 0, 0.75);
-  --shadow-3d: 0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 35px -5px rgba(56, 189, 248, 0.25);
-  color-scheme: dark;
+body[data-theme="emerald"] .glass-panel,
+body[data-theme="emerald"] .card-3d,
+body[data-theme="emerald"] .modal-card,
+body[data-theme="emerald"] .auth-modal-card {
+  background: rgba(7, 31, 26, 0.75) !important;
+  color: #f0fdf4 !important;
+  border: 1px solid rgba(220, 252, 243, 0.15) !important;
 }
 
-/* 2. Official Government Portal (Sarkari Classic Blue & White) */
-[data-theme="gov"], body[data-theme="gov"] {
-  --void-950: #f0f4f9;
-  --void-900: #e2eaf4;
-  --void-850: #d4e0ee;
-  --void-800: #c1d2e5;
-  --void-700: #98b4d6;
-
-  --glass-1: #ffffff;
-  --glass-2: #ffffff;
-  --glass-3: #ffffff;
-  --glass-4: #ffffff;
-  --glass-border: rgba(0, 51, 102, 0.14);
-  --glass-border-strong: rgba(0, 51, 102, 0.32);
-  --glass-glow: rgba(11, 94, 215, 0.18);
-  --glass-specular: #ffffff;
-  --rail-glass: #ffffff;
-
-  --primary: #003366;
-  --primary-dark: #002244;
-  --primary-bright: #0b5ed7;
-  --primary-glow: rgba(11, 94, 215, 0.3);
-  --teal-cyan: #0284c7;
-
-  --accent: #ea580c;
-  --accent-light: #c2410c;
-  --accent-soft: rgba(234, 88, 12, 0.12);
-  --accent-glow: rgba(234, 88, 12, 0.35);
-
-  --danger: #dc2626;
-  --danger-bright: #b91c1c;
-  --warn: #d97706;
-  --good: #16a34a;
-
-  --ink: #0a192f;
-  --ink-dim: #1e293b;
-  --muted: #475569;
-  --line: rgba(0, 51, 102, 0.1);
-
-  --shadow-ambient: 0 4px 18px rgba(0, 51, 102, 0.08);
-  --shadow-3d: 0 10px 25px rgba(0, 51, 102, 0.12);
-  color-scheme: light;
-}
-
-/* 3. Daylight Pearl (High-Contrast, Non-Glare, Crystal-Clear Dark Text) */
-[data-theme="daylight"], [data-theme="day"], body[data-theme="daylight"], body[data-theme="day"] {
-  --void-950: #f8fafc;
-  --void-900: #f1f5f9;
-  --void-850: #e2e8f0;
-  --void-800: #cbd5e1;
-  --void-700: #94a3b8;
-
-  --glass-1: #ffffff;
-  --glass-2: #ffffff;
-  --glass-3: #ffffff;
-  --glass-4: #ffffff;
-  --glass-border: rgba(15, 23, 42, 0.12);
-  --glass-border-strong: rgba(15, 23, 42, 0.25);
-  --glass-glow: rgba(5, 150, 105, 0.15);
-  --glass-specular: #ffffff;
-  --rail-glass: #ffffff;
-
-  --primary: #059669;
-  --primary-dark: #065f46;
-  --primary-bright: #047857;
-  --primary-glow: rgba(5, 150, 105, 0.25);
-  --teal-cyan: #0284c7;
-  --teal-glow: rgba(2, 132, 199, 0.2);
-
-  --accent: #d97706;
-  --accent-light: #b45309;
-  --accent-soft: rgba(217, 119, 6, 0.12);
-
-  --danger: #dc2626;
-  --danger-bright: #b91c1c;
-  --warn: #d97706;
-  --good: #059669;
-
-  --ink: #0f172a;
-  --ink-dim: #334155;
-  --muted: #64748b;
-  --line: rgba(15, 23, 42, 0.08);
-
-  --shadow-ambient: 0 4px 20px -2px rgba(15, 23, 42, 0.08);
-  --shadow-3d: 0 12px 30px -6px rgba(15, 23, 42, 0.12);
-  color-scheme: light;
-}
-
-/* 4. Midnight OLED */
-[data-theme="oled"], body[data-theme="oled"] {
-  --void-950: #000000;
-  --void-900: #020605;
-  --void-850: #050c09;
-  --void-800: #0a1612;
-  --glass-1: rgba(255, 255, 255, 0.035);
-  --glass-2: rgba(255, 255, 255, 0.065);
-  --glass-border: rgba(255, 255, 255, 0.09);
-  --rail-glass: rgba(0, 0, 0, 0.92);
-  --ink: #ffffff;
-}
-
-/* Universal Light Theme Component Overrides */
-body[data-theme="daylight"] .glass-panel,
-body[data-theme="day"] .glass-panel,
-body[data-theme="gov"] .glass-panel,
-body[data-theme="daylight"] .card-3d,
-body[data-theme="day"] .card-3d,
-body[data-theme="gov"] .card-3d,
-body[data-theme="daylight"] .auth-modal-card,
-body[data-theme="day"] .auth-modal-card,
-body[data-theme="gov"] .auth-modal-card {
-  background: #ffffff !important;
-  color: var(--ink) !important;
-  border-color: var(--glass-border) !important;
-  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.07) !important;
-}
-
-body[data-theme="daylight"] .doc-nav-tab,
-body[data-theme="day"] .doc-nav-tab,
-body[data-theme="gov"] .doc-nav-tab,
-body[data-theme="daylight"] .worker-nav-tab,
-body[data-theme="day"] .worker-nav-tab,
-body[data-theme="gov"] .worker-nav-tab,
-body[data-theme="daylight"] .family-pill,
-body[data-theme="day"] .family-pill,
-body[data-theme="gov"] .family-pill {
-  background: #f1f5f9 !important;
-  color: #0f172a !important;
-  border-color: #cbd5e1 !important;
-}
-
-body[data-theme="daylight"] .doc-nav-tab:hover,
-body[data-theme="day"] .doc-nav-tab:hover,
-body[data-theme="gov"] .doc-nav-tab:hover,
-body[data-theme="daylight"] .worker-nav-tab:hover,
-body[data-theme="day"] .worker-nav-tab:hover,
-body[data-theme="gov"] .worker-nav-tab:hover,
-body[data-theme="daylight"] .family-pill:hover,
-body[data-theme="day"] .family-pill:hover,
-body[data-theme="gov"] .family-pill:hover {
-  background: #e2e8f0 !important;
-  color: #0f172a !important;
-}
-
-body[data-theme="daylight"] .doc-nav-tab.active,
-body[data-theme="day"] .doc-nav-tab.active,
-body[data-theme="daylight"] .worker-nav-tab.active,
-body[data-theme="day"] .worker-nav-tab.active {
-  background: linear-gradient(135deg, #059669, #047857) !important;
-  color: #ffffff !important;
-  border-color: transparent !important;
-}
-
-body[data-theme="gov"] .doc-nav-tab.active,
-body[data-theme="gov"] .worker-nav-tab.active {
-  background: linear-gradient(135deg, #003366, #0b5ed7) !important;
-  color: #ffffff !important;
-  border-color: transparent !important;
-}
-
-body[data-theme="daylight"] .input-field,
-body[data-theme="day"] .input-field,
-body[data-theme="gov"] .input-field {
-  background: #ffffff !important;
-  color: #0f172a !important;
-  border-color: #cbd5e1 !important;
-}
-
-body[data-theme="daylight"] .btn-glass,
-body[data-theme="day"] .btn-glass,
-body[data-theme="gov"] .btn-glass {
-  background: #f1f5f9 !important;
-  color: #0f172a !important;
-  border-color: #cbd5e1 !important;
-}
-
-body[data-theme="daylight"] .top-appbar,
-body[data-theme="day"] .top-appbar,
-body[data-theme="gov"] .top-appbar {
-  background: rgba(255, 255, 255, 0.94) !important;
-  border-bottom-color: rgba(15, 23, 42, 0.1) !important;
-}
-
-body[data-theme="daylight"] .sidebar-rail,
-body[data-theme="day"] .sidebar-rail,
-body[data-theme="gov"] .sidebar-rail {
-  background: #ffffff !important;
-  border-right-color: rgba(15, 23, 42, 0.1) !important;
-}
-
-body[data-theme="daylight"] .weather-ticker,
-body[data-theme="day"] .weather-ticker,
-body[data-theme="gov"] .weather-ticker {
-  background: #e0f2fe !important;
-  color: #0369a1 !important;
-  border-color: #bae6fd !important;
-}
-
-body[data-theme="gov"] {
-  background-image:
-    radial-gradient(100% 70% at 15% 0%, rgba(11, 94, 215, 0.1) 0%, transparent 60%),
-    radial-gradient(80% 60% at 85% 10%, rgba(234, 88, 12, 0.08) 0%, transparent 50%),
-    linear-gradient(175deg, #f0f4f9 0%, #e2eaf4 100%) !important;
-}
-
-body[data-theme="daylight"], body[data-theme="day"] {
-  background-image:
-    radial-gradient(100% 70% at 15% 0%, rgba(5, 150, 105, 0.08) 0%, transparent 60%),
-    radial-gradient(80% 60% at 85% 10%, rgba(2, 132, 199, 0.08) 0%, transparent 50%),
-    linear-gradient(175deg, #f8fafc 0%, #f1f5f9 100%) !important;
-}
-
-body[data-theme="navy"] {
-  background-image:
-    radial-gradient(100% 70% at 15% 0%, rgba(56, 189, 248, 0.18) 0%, transparent 60%),
-    radial-gradient(80% 60% at 85% 10%, rgba(34, 211, 238, 0.12) 0%, transparent 50%),
-    linear-gradient(175deg, #030a16 0%, #07152b 40%, #0c2140 100%) !important;
+body[data-theme="emerald"] h1,
+body[data-theme="emerald"] h2,
+body[data-theme="emerald"] h3,
+body[data-theme="emerald"] h4,
+body[data-theme="emerald"] strong {
+  color: #f0fdf4 !important;
 }
 
 *, *::before, *::after {
