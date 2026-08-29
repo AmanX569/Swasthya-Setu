@@ -22,13 +22,13 @@ let inlinedJs = '';
 for (const f of jsFiles) {
   const jsPath = path.join(baseDir, f);
   if (fs.existsSync(jsPath)) {
-    inlinedJs += '\n/* --- ' + f + ' --- */\n' + fs.readFileSync(jsPath, 'utf8');
+    inlinedJs += '\n/* ==================== ' + f + ' ==================== */\n' + fs.readFileSync(jsPath, 'utf8') + '\n';
     html = html.replace('<script src="' + f + '"></script>', '');
   }
 }
 
-// Place inlined scripts right before the first inline script block
-html = html.replace('<script>', '<script>\n' + inlinedJs + '\n');
+// Replace the script loader comment or place directly before the inline controller script
+html = html.replace('<!-- APP SCRIPTS -->', '<script>\n' + inlinedJs + '\n</script>');
 
 const outPath = 'C:/Users/grani/OneDrive/Desktop/Swasthya-setu/swasthya-setu-standalone.html';
 fs.writeFileSync(outPath, html, 'utf8');

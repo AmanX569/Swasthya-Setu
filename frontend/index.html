@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0, user-scalable=yes">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <script>
-// Auto-purge any stale service workers or offline caches so users always see live updates
+// Purge legacy caches and service workers
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.getRegistrations().then(registrations => {
     registrations.forEach(r => r.unregister());
@@ -17,9 +19,6 @@ if ('caches' in window) {
   });
 }
 </script>
-
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0, user-scalable=yes">
 <title>Swasthya Setu · Rural Healthcare Grid</title>
 <link rel="manifest" href="./manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -203,7 +202,7 @@ body {
   background: var(--primary);
   color: #ffffff;
   border: 1px solid var(--primary-dark);
-  padding: 10px 16px;
+  padding: 11px 16px;
   border-radius: 10px;
   font-size: 14px;
   font-weight: 700;
@@ -326,7 +325,7 @@ body {
   border: 1px dashed var(--glass-border);
   border-radius: 12px;
   padding: 12px 14px;
-  margin-top: 14px;
+  margin-top: 16px;
   font-size: 12px;
   color: var(--ink-dim);
 }
@@ -421,7 +420,7 @@ body {
 <main class="main-container">
 
   <!-- =========================================================
-       0. PROFESSIONAL VERIFIED LOGIN GATEWAY
+       0. PROFESSIONAL STRICT CREDENTIAL LOGIN GATEWAY
        ========================================================= -->
   <section id="viewLogin">
     
@@ -469,30 +468,26 @@ body {
       <form onsubmit="handlePatientAuth(event)">
         <div style="margin-bottom:12px;">
           <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">Mobile Number or ABHA Health ID *</label>
-          <input type="text" id="patInputId" class="input-field" placeholder="e.g. 9876543210 or 14-8921-4402-9912" value="9876543210" required>
+          <input type="text" id="patInputId" class="input-field" placeholder="e.g. 9876543210 or 14-8921-4402-9912" required>
         </div>
 
-        <div style="display:grid;grid-template-columns:1fr auto;gap:8px;margin-bottom:14px;align-items:flex-end;">
+        <div style="display:grid;grid-template-columns:1fr auto;gap:8px;margin-bottom:16px;align-items:flex-end;">
           <div>
             <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">One-Time Password (OTP) *</label>
-            <input type="text" id="patInputOtp" class="input-field" placeholder="6-digit OTP" value="123456" maxlength="6" required>
+            <input type="text" id="patInputOtp" class="input-field" placeholder="Enter 6-digit OTP" maxlength="6" required>
           </div>
           <button type="button" class="btn-glass" style="height:44px;padding:0 14px;font-size:12px;font-weight:700;" onclick="sendMockOtp('patient')">
             📲 Send OTP
           </button>
         </div>
 
-        <button type="submit" class="auth-btn-primary" style="width:100%;padding:12px;background:#16a34a;border-color:#15803d;font-size:15px;margin-bottom:8px;">
+        <button type="submit" class="auth-btn-primary" style="width:100%;padding:12px;background:#16a34a;border-color:#15803d;font-size:15px;">
           ✓ Verify OTP & Enter Patient Portal
-        </button>
-
-        <button type="button" class="btn-glass" style="width:100%;padding:10px;font-size:13px;font-weight:700;color:var(--primary-bright);" onclick="quickLogin('patient')">
-          ⚡ 1-Tap Direct Patient Access
         </button>
       </form>
 
       <div class="demo-credentials-box">
-        <strong style="color:var(--primary-bright);display:block;margin-bottom:4px;">⚡ Verified Demo Citizen:</strong>
+        <strong style="color:var(--primary-bright);display:block;margin-bottom:4px;">🔑 Authorized Citizen Test Credentials:</strong>
         <span>Mobile: <strong>9876543210</strong> · ABHA: <strong>14-8921-4402-9912</strong> · OTP: <strong>123456</strong></span>
       </div>
     </div>
@@ -512,25 +507,21 @@ body {
       <form onsubmit="handleStaffAuth(event, 'doctor')">
         <div style="margin-bottom:12px;">
           <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">Doctor Employee ID or MCI Registration No. *</label>
-          <input type="text" id="docInputId" class="input-field" placeholder="e.g. DOC-101 or MCI-AP-48912" value="DOC-101" required>
+          <input type="text" id="docInputId" class="input-field" placeholder="e.g. DOC-101 or MCI-AP-48912" required>
         </div>
 
-        <div style="margin-bottom:14px;">
+        <div style="margin-bottom:16px;">
           <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">Clinical Password / Security PIN *</label>
-          <input type="password" id="docInputPass" class="input-field" placeholder="Enter password" value="doc@123" required>
+          <input type="password" id="docInputPass" class="input-field" placeholder="Enter clinical password" required>
         </div>
 
-        <button type="submit" class="auth-btn-primary" style="width:100%;padding:12px;background:#0284c7;border-color:#0369a1;font-size:15px;margin-bottom:8px;">
+        <button type="submit" class="auth-btn-primary" style="width:100%;padding:12px;background:#0284c7;border-color:#0369a1;font-size:15px;">
           🩺 Authenticate & Enter OPD Queue
-        </button>
-
-        <button type="button" class="btn-glass" style="width:100%;padding:10px;font-size:13px;font-weight:700;color:var(--primary-bright);" onclick="quickLogin('doctor')">
-          ⚡ 1-Tap Login as Dr. Priya Sharma
         </button>
       </form>
 
       <div class="demo-credentials-box">
-        <strong style="color:var(--primary-bright);display:block;margin-bottom:4px;">⚡ Verified Doctor Credentials:</strong>
+        <strong style="color:var(--primary-bright);display:block;margin-bottom:4px;">🔑 Authorized Doctor Test Credentials:</strong>
         <span>1. Dr. Priya: ID <strong>DOC-101</strong> / Pass: <strong>doc@123</strong><br>2. Dr. Rajesh: ID <strong>DOC-102</strong> / Pass: <strong>doc@123</strong></span>
       </div>
     </div>
@@ -550,25 +541,21 @@ body {
       <form onsubmit="handleStaffAuth(event, 'worker')">
         <div style="margin-bottom:12px;">
           <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">ASHA Worker ID or Registered Phone *</label>
-          <input type="text" id="workerInputId" class="input-field" placeholder="e.g. ASH-201 or 9833344455" value="ASH-201" required>
+          <input type="text" id="workerInputId" class="input-field" placeholder="e.g. ASH-201 or 9833344455" required>
         </div>
 
-        <div style="margin-bottom:14px;">
+        <div style="margin-bottom:16px;">
           <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">Sector Passcode / PIN *</label>
-          <input type="password" id="workerInputPass" class="input-field" placeholder="Enter passcode" value="asha@123" required>
+          <input type="password" id="workerInputPass" class="input-field" placeholder="Enter sector passcode" required>
         </div>
 
-        <button type="submit" class="auth-btn-primary" style="width:100%;padding:12px;background:#d97706;border-color:#b45309;font-size:15px;margin-bottom:8px;">
+        <button type="submit" class="auth-btn-primary" style="width:100%;padding:12px;background:#d97706;border-color:#b45309;font-size:15px;">
           🤝 Verify & Access Maternal Register
-        </button>
-
-        <button type="button" class="btn-glass" style="width:100%;padding:10px;font-size:13px;font-weight:700;color:var(--primary-bright);" onclick="quickLogin('worker')">
-          ⚡ 1-Tap Login as Lakshmi Didi (ASHA)
         </button>
       </form>
 
       <div class="demo-credentials-box">
-        <strong style="color:var(--primary-bright);display:block;margin-bottom:4px;">⚡ Verified ASHA Credentials:</strong>
+        <strong style="color:var(--primary-bright);display:block;margin-bottom:4px;">🔑 Authorized ASHA Test Credentials:</strong>
         <span>1. Lakshmi Didi: ID <strong>ASH-201</strong> / Pass: <strong>asha@123</strong><br>2. Anitha Rao: ID <strong>ASH-202</strong> / Pass: <strong>asha@123</strong></span>
       </div>
     </div>
@@ -588,25 +575,21 @@ body {
       <form onsubmit="handleStaffAuth(event, 'admin')">
         <div style="margin-bottom:12px;">
           <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">District Officer ID or Designation *</label>
-          <input type="text" id="adminInputId" class="input-field" placeholder="e.g. ADM-001 or DHO-AP-001" value="ADM-001" required>
+          <input type="text" id="adminInputId" class="input-field" placeholder="e.g. ADM-001 or DHO-AP-001" required>
         </div>
 
-        <div style="margin-bottom:14px;">
+        <div style="margin-bottom:16px;">
           <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">Admin Master Passcode *</label>
-          <input type="password" id="adminInputPass" class="input-field" placeholder="Enter master passcode" value="admin@123" required>
+          <input type="password" id="adminInputPass" class="input-field" placeholder="Enter master passcode" required>
         </div>
 
-        <button type="submit" class="auth-btn-primary" style="width:100%;padding:12px;background:#db2777;border-color:#be185d;font-size:15px;margin-bottom:8px;">
+        <button type="submit" class="auth-btn-primary" style="width:100%;padding:12px;background:#db2777;border-color:#be185d;font-size:15px;">
           👑 Authorize Command Center
-        </button>
-
-        <button type="button" class="btn-glass" style="width:100%;padding:10px;font-size:13px;font-weight:700;color:var(--primary-bright);" onclick="quickLogin('admin')">
-          ⚡ 1-Tap Login as District Officer
         </button>
       </form>
 
       <div class="demo-credentials-box">
-        <strong style="color:var(--primary-bright);display:block;margin-bottom:4px;">⚡ Verified Admin Credentials:</strong>
+        <strong style="color:var(--primary-bright);display:block;margin-bottom:4px;">🔑 Authorized Admin Test Credentials:</strong>
         <span>District Officer: ID <strong>ADM-001</strong> / Pass: <strong>admin@123</strong></span>
       </div>
     </div>
@@ -1104,54 +1087,29 @@ function hideLoginError() {
 }
 
 function sendMockOtp(role) {
-  if (typeof window.toast === 'function') {
-    window.toast('📲 OTP sent to mobile: 123456');
+  const patInput = document.getElementById('patInputId');
+  const val = patInput ? patInput.value.trim() : '';
+  if (!val) {
+    showLoginError('Please enter your mobile number or ABHA ID first before requesting OTP.');
+    return;
   }
-  const otpInput = document.getElementById('patInputOtp');
-  if (otpInput) otpInput.value = '123456';
-}
-
-// Quick 1-Tap Login for any role
-function quickLogin(role) {
   hideLoginError();
-  if (role === 'patient') {
-    handlePatientAuth();
-  } else if (role === 'doctor') {
-    const docId = document.getElementById('docInputId');
-    const docPass = document.getElementById('docInputPass');
-    if (docId) docId.value = 'DOC-101';
-    if (docPass) docPass.value = 'doc@123';
-    handleStaffAuth(null, 'doctor');
-  } else if (role === 'worker') {
-    const wId = document.getElementById('workerInputId');
-    const wPass = document.getElementById('workerInputPass');
-    if (wId) wId.value = 'ASH-201';
-    if (wPass) wPass.value = 'asha@123';
-    handleStaffAuth(null, 'worker');
-  } else if (role === 'admin') {
-    const aId = document.getElementById('adminInputId');
-    const aPass = document.getElementById('adminInputPass');
-    if (aId) aId.value = 'ADM-001';
-    if (aPass) aPass.value = 'admin@123';
-    handleStaffAuth(null, 'admin');
+  if (typeof window.toast === 'function') {
+    window.toast('📲 OTP sent to ' + val + ': 123456');
   }
 }
 
-// Patient Verification Handler
+// Patient Verification Handler (Requires Valid Phone/ABHA + OTP)
 function handlePatientAuth(e) {
   if (e) e.preventDefault();
   hideLoginError();
 
   const idEl = document.getElementById('patInputId');
   const otpEl = document.getElementById('patInputOtp');
-  const id = idEl ? idEl.value.trim() : '9876543210';
-  const otp = otpEl ? otpEl.value.trim() : '123456';
+  const id = idEl ? idEl.value.trim() : '';
+  const otp = otpEl ? otpEl.value.trim() : '';
 
-  const res = window.appStore.verifyAndLogin('patient', {
-    id: id || '9876543210',
-    phone: id || '9876543210',
-    otp: otp || '123456'
-  });
+  const res = window.appStore.verifyAndLogin('patient', { id, otp });
 
   if (!res.success) {
     showLoginError(res.error);
@@ -1160,7 +1118,7 @@ function handlePatientAuth(e) {
 
   renderActivePortalView();
   if (typeof window.toast === 'function') {
-    window.toast('✓ Verified. Logged in as ' + res.user.name);
+    window.toast('✓ OTP Verified. Welcome ' + res.user.name);
   }
 }
 
@@ -1174,8 +1132,8 @@ function handleStaffAuth(e, role) {
 
   const idEl = document.getElementById(idInputId);
   const passEl = document.getElementById(passInputId);
-  const id = idEl ? idEl.value.trim() : (role === 'doctor' ? 'DOC-101' : role === 'worker' ? 'ASH-201' : 'ADM-001');
-  const password = passEl ? passEl.value.trim() : (role + '@123');
+  const id = idEl ? idEl.value.trim() : '';
+  const password = passEl ? passEl.value.trim() : '';
 
   const res = window.appStore.verifyAndLogin(role, { id, password });
 
@@ -1186,7 +1144,7 @@ function handleStaffAuth(e, role) {
 
   renderActivePortalView();
   if (typeof window.toast === 'function') {
-    window.toast('✓ Verified: ' + res.user.name);
+    window.toast('✓ Credentials Verified: ' + res.user.name);
   }
 }
 

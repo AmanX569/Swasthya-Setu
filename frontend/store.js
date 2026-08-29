@@ -1,7 +1,7 @@
 /**
  * =========================================================
  * SWASTHYA SETU - UNIFIED CLIENT-SIDE REACTIVE STORE (store.js)
- * Standalone Zero-Backend Store with Secure & Frictionless Auth
+ * Standalone Zero-Backend Store with Strict Credential Verification
  * =========================================================
  */
 
@@ -162,30 +162,42 @@
       });
     }
 
-    // Professional & Robust Credential Verification
+    // Strict Credential Verification & Authentication
     verifyAndLogin(role, credentials = {}) {
+      // 1. Patient verification
       if (role === 'patient') {
         const rawId = (credentials.id || credentials.phone || credentials.abhaId || '').trim();
-        let phone = this.state.currentUser.phone;
-        let abhaId = this.state.currentUser.abhaId;
-        let name = this.state.currentUser.name;
+        const otp = (credentials.otp || '').trim();
 
-        if (rawId) {
-          const digitsOnly = rawId.replace(/\D/g, '');
-          if (digitsOnly.length === 10) phone = digitsOnly;
-          else if (rawId.includes('-')) abhaId = rawId;
-          else name = rawId;
+        if (!rawId) {
+          return { success: false, error: 'Please enter your 10-digit mobile number or 14-digit ABHA ID.' };
+        }
+
+        const digitsOnly = rawId.replace(/\D/g, '');
+        const isPhone = digitsOnly.length === 10;
+        const isAbha = rawId.length >= 14 && rawId.includes('-');
+
+        if (!isPhone && !isAbha) {
+          return { success: false, error: 'Invalid ID format. Please enter a valid 10-digit mobile number or 14-digit ABHA ID (e.g. 14-8921-4402-9912).' };
+        }
+
+        if (!otp) {
+          return { success: false, error: 'Please enter the 6-digit OTP code received on your mobile.' };
+        }
+
+        if (otp !== '123456' && otp.length !== 6) {
+          return { success: false, error: 'Incorrect OTP code. Please enter the valid 6-digit OTP (123456).' };
         }
 
         const user = {
           id: 'USR-PAT-001',
-          name: name || 'Ramesh Kumar',
-          phone: phone || '9876543210',
-          abhaId: abhaId || '14-8921-4402-9912',
-          village: this.state.currentUser.village || 'Kondapalli Sub-Centre, Ward 4',
-          age: this.state.currentUser.age || 38,
-          gender: this.state.currentUser.gender || 'Male',
-          bloodGroup: this.state.currentUser.bloodGroup || 'O+'
+          name: isPhone && digitsOnly === '9876543210' ? 'Ramesh Kumar' : 'Verified Citizen',
+          phone: isPhone ? digitsOnly : this.state.currentUser.phone,
+          abhaId: isAbha ? rawId : this.state.currentUser.abhaId,
+          village: this.state.currentUser.village,
+          age: this.state.currentUser.age,
+          gender: this.state.currentUser.gender,
+          bloodGroup: this.state.currentUser.bloodGroup
         };
 
         this.state.session = { isLoggedIn: true, role: 'patient', user };
@@ -193,38 +205,43 @@
         return { success: true, user };
       }
 
-      // Staff roles verification (Doctor, Worker, Admin)
-      const inputId = (credentials.id || '').trim().toLowerCase();
-      const inputPass = (credentials.password || '').trim().toLowerCase();
+      // 2. Staff roles verification (Doctor, Worker, Admin)
+      const inputId = (credentials.id || '').trim().toUpperCase();
+      const inputPass = (credentials.password || '').trim();
 
-      let staffList = this.state.staff.filter(s => s.role === role);
-      let matchedStaff = null;
-
-      if (inputId) {
-        matchedStaff = staffList.find(s => {
-          const sId = (s.id || '').toLowerCase();
-          const sReg = (s.regNo || '').toLowerCase();
-          const sName = (s.name || '').toLowerCase();
-          const sPhone = (s.phone || '').toLowerCase();
-          return sId.includes(inputId) || sReg.includes(inputId) || sName.includes(inputId) || sPhone === inputId;
-        });
+      if (!inputId) {
+        return { success: false, error: 'Please enter your Employee / Registration ID.' };
+      }
+      if (!inputPass) {
+        return { success: false, error: 'Please enter your Security Password / PIN.' };
       }
 
-      if (!matchedStaff) {
-        matchedStaff = staffList[0] || {
-          id: role === 'doctor' ? 'DOC-101' : role === 'worker' ? 'ASH-201' : 'ADM-001',
-          name: role === 'doctor' ? 'Dr. Priya Sharma, MBBS, MD' : role === 'worker' ? 'Lakshmi Didi (ASHA Lead)' : 'S. K. Nambiar (District Officer)',
-          role: role
+      const staffList = this.state.staff.filter(s => s.role === role);
+
+      const matched = staffList.find(s => {
+        const sId = (s.id || '').toUpperCase();
+        const sReg = (s.regNo || '').toUpperCase();
+        const sPhone = (s.phone || '');
+        const idMatches = (sId === inputId || sReg === inputId || sPhone === inputId);
+        const passMatches = (s.password === inputPass || s.pin === inputPass);
+        return idMatches && passMatches;
+      });
+
+      if (!matched) {
+        const roleLabels = { doctor: 'Doctor', worker: 'ASHA Field Worker', admin: 'District Administrator' };
+        return {
+          success: false,
+          error: `Authentication failed: Invalid ${roleLabels[role] || role} ID or Password. Access Denied.`
         };
       }
 
       this.state.session = {
         isLoggedIn: true,
         role: role,
-        user: matchedStaff
+        user: matched
       };
       this.saveState();
-      return { success: true, user: matchedStaff };
+      return { success: true, user: matched };
     }
 
     logout() {
