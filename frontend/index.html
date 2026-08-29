@@ -217,13 +217,14 @@ body {
 
 .input-field {
   width: 100%;
-  padding: 10px 12px;
+  padding: 11px 13px;
   border-radius: 10px;
   border: 1px solid var(--glass-border);
   background: var(--glass-2);
   color: var(--ink);
   font-size: 14px;
   outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .input-field:focus {
@@ -269,22 +270,48 @@ body {
   color: var(--ink) !important;
 }
 
-/* Portal Role Cards */
-.portal-card {
-  background: var(--glass-2);
+/* Professional Login Portal */
+.auth-tab-btn {
+  padding: 12px 16px;
+  border-radius: 12px;
   border: 1.5px solid var(--glass-border);
-  border-radius: 18px;
-  padding: 22px;
-  box-shadow: var(--shadow-panel);
+  background: var(--glass-1);
+  color: var(--ink-dim);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
   display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+  transition: all 0.2s ease;
 }
 
-.portal-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+.auth-tab-btn.active {
+  background: var(--primary);
+  color: #ffffff;
+  border-color: var(--primary-dark);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+}
+
+.auth-form-card {
+  background: var(--glass-2);
+  border: 1.5px solid var(--glass-border);
+  border-radius: 20px;
+  padding: 26px;
+  box-shadow: var(--shadow-panel);
+  max-width: 580px;
+  margin: 0 auto;
+}
+
+.demo-credentials-box {
+  background: var(--glass-1);
+  border: 1px dashed var(--glass-border);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-top: 16px;
+  font-size: 12px;
+  color: var(--ink-dim);
 }
 
 /* Modals */
@@ -377,102 +404,180 @@ body {
 <main class="main-container">
 
   <!-- =========================================================
-       0. GATEWAY LOGIN PORTAL (SHOWN WHEN NOT LOGGED IN)
+       0. PROFESSIONAL VERIFIED LOGIN GATEWAY
        ========================================================= -->
   <section id="viewLogin">
-    <div style="text-align:center;max-width:760px;margin:20px auto 30px;">
-      <span style="font-size:42px;display:block;margin-bottom:6px;">🏥</span>
-      <h1 style="font-size:26px;color:var(--primary-bright);font-weight:800;margin-bottom:6px;" data-i18n="portal_welcome">Welcome to Swasthya Setu</h1>
-      <p style="font-size:14px;color:var(--muted);" data-i18n="portal_subline">Select your respected portal below for dedicated healthcare access:</p>
+    
+    <!-- GOVERNMENT BRANDING HEADER -->
+    <div style="text-align:center;max-width:760px;margin:10px auto 24px;">
+      <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(2,132,199,0.1);padding:6px 14px;border-radius:20px;border:1px solid var(--glass-border);margin-bottom:12px;">
+        <span style="font-size:16px;">🏛️</span>
+        <span style="font-size:12px;font-weight:700;color:var(--primary-bright);letter-spacing:0.5px;">NATIONAL HEALTH AUTHORITY · AYUSHMAN BHARAT DIGITAL GATEWAY</span>
+      </div>
+      <h1 style="font-size:26px;color:var(--ink);font-weight:800;margin-bottom:6px;" data-i18n="portal_welcome">Welcome to Swasthya Setu</h1>
+      <p style="font-size:14px;color:var(--muted);" data-i18n="portal_subline">Select your respected healthcare role to authenticate with verified credentials:</p>
     </div>
 
-    <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));gap:16px;margin-bottom:30px;">
-      
-      <!-- 1. CITIZEN PORTAL CARD -->
-      <div class="portal-card">
-        <div>
-          <div style="width:52px;height:52px;background:rgba(22,163,74,0.15);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:12px;">
-            🌾
-          </div>
-          <h2 style="font-size:18px;color:var(--ink);margin-bottom:6px;font-weight:700;" data-i18n="login_patient_title">Citizen / Patient Portal</h2>
-          <p style="font-size:13px;color:var(--ink-dim);line-height:1.5;margin-bottom:14px;" data-i18n="login_patient_desc">
-            Digital ABHA Card, 108 Emergency SOS, Jan Aushadhi generic medicines, symptom triage & family health.
-          </p>
-        </div>
-        <div>
-          <button class="auth-btn-primary" style="width:100%;padding:10px;background:#16a34a;border-color:#15803d;margin-bottom:6px;" onclick="doLogin('patient')">
-            <span data-i18n="btn_enter_portal">Enter Patient Portal</span> →
-          </button>
-          <button class="btn-glass" style="width:100%;padding:8px;font-size:12px;" onclick="doLogin('patient')">
-            <span data-i18n="btn_quick_access">⚡ 1-Tap Quick Access</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- 2. DOCTOR PORTAL CARD -->
-      <div class="portal-card">
-        <div>
-          <div style="width:52px;height:52px;background:rgba(2,132,199,0.15);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:12px;">
-            🩺
-          </div>
-          <h2 style="font-size:18px;color:var(--ink);margin-bottom:6px;font-weight:700;" data-i18n="login_doctor_title">Doctor Clinical Portal</h2>
-          <p style="font-size:13px;color:var(--ink-dim);line-height:1.5;margin-bottom:14px;" data-i18n="login_doctor_desc">
-            Teleconsultation OPD queue, diagnostic vitals review & instant electronic prescriptions.
-          </p>
-        </div>
-        <div>
-          <button class="auth-btn-primary" style="width:100%;padding:10px;background:#0284c7;border-color:#0369a1;margin-bottom:6px;" onclick="doLogin('doctor')">
-            <span data-i18n="btn_enter_portal">Enter Doctor Portal</span> →
-          </button>
-          <button class="btn-glass" style="width:100%;padding:8px;font-size:12px;" onclick="doLogin('doctor')">
-            <span data-i18n="btn_quick_access">⚡ Login as Dr. Priya</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- 3. ASHA PORTAL CARD -->
-      <div class="portal-card">
-        <div>
-          <div style="width:52px;height:52px;background:rgba(217,119,6,0.15);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:12px;">
-            🤝
-          </div>
-          <h2 style="font-size:18px;color:var(--ink);margin-bottom:6px;font-weight:700;" data-i18n="login_worker_title">ASHA Frontline Portal</h2>
-          <p style="font-size:13px;color:var(--ink-dim);line-height:1.5;margin-bottom:14px;" data-i18n="login_worker_desc">
-            Maternal ANC register, child universal immunization (UIP) & daily village home visits.
-          </p>
-        </div>
-        <div>
-          <button class="auth-btn-primary" style="width:100%;padding:10px;background:#d97706;border-color:#b45309;margin-bottom:6px;" onclick="doLogin('worker')">
-            <span data-i18n="btn_enter_portal">Enter ASHA Portal</span> →
-          </button>
-          <button class="btn-glass" style="width:100%;padding:8px;font-size:12px;" onclick="doLogin('worker')">
-            <span data-i18n="btn_quick_access">⚡ Login as Lakshmi Didi</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- 4. ADMIN PORTAL CARD -->
-      <div class="portal-card">
-        <div>
-          <div style="width:52px;height:52px;background:rgba(219,39,119,0.15);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:12px;">
-            👑
-          </div>
-          <h2 style="font-size:18px;color:var(--ink);margin-bottom:6px;font-weight:700;" data-i18n="login_admin_title">Health Admin Portal</h2>
-          <p style="font-size:13px;color:var(--ink-dim);line-height:1.5;margin-bottom:14px;" data-i18n="login_admin_desc">
-            Hospital bed grid, blood bank stock, healthcare staff registry & drug inventory control.
-          </p>
-        </div>
-        <div>
-          <button class="auth-btn-primary" style="width:100%;padding:10px;background:#db2777;border-color:#be185d;margin-bottom:6px;" onclick="doLogin('admin')">
-            <span data-i18n="btn_enter_portal">Enter Admin Portal</span> →
-          </button>
-          <button class="btn-glass" style="width:100%;padding:8px;font-size:12px;" onclick="doLogin('admin')">
-            <span data-i18n="btn_quick_access">⚡ Login as Admin</span>
-          </button>
-        </div>
-      </div>
-
+    <!-- 4 ROLE SELECTOR TABS -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(135px, 1fr));gap:10px;max-width:680px;margin:0 auto 20px;">
+      <button class="auth-tab-btn active" id="tabBtnPatient" onclick="switchLoginTab('patient')">
+        <span>🌾</span> <span>Citizen</span>
+      </button>
+      <button class="auth-tab-btn" id="tabBtnDoctor" onclick="switchLoginTab('doctor')">
+        <span>🩺</span> <span>Doctor</span>
+      </button>
+      <button class="auth-tab-btn" id="tabBtnWorker" onclick="switchLoginTab('worker')">
+        <span>🤝</span> <span>ASHA</span>
+      </button>
+      <button class="auth-tab-btn" id="tabBtnAdmin" onclick="switchLoginTab('admin')">
+        <span>👑</span> <span>Admin</span>
+      </button>
     </div>
+
+    <!-- AUTH ERROR BANNER -->
+    <div id="loginErrorBanner" style="display:none;max-width:580px;margin:0 auto 14px;background:rgba(220,38,38,0.12);border:1.5px solid #dc2626;border-radius:12px;padding:12px 16px;color:#dc2626;font-size:13px;font-weight:600;"></div>
+
+    <!-- 1. CITIZEN / PATIENT LOGIN FORM -->
+    <div id="formCardPatient" class="auth-form-card">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+        <div style="width:46px;height:46px;background:rgba(22,163,74,0.15);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;">
+          🌾
+        </div>
+        <div>
+          <h2 style="font-size:18px;color:var(--ink);font-weight:700;">Citizen & Patient Access</h2>
+          <small style="color:var(--muted);">Verify with 10-Digit Mobile or 14-Digit ABHA ID</small>
+        </div>
+      </div>
+
+      <form onsubmit="handlePatientAuth(event)">
+        <div style="margin-bottom:12px;">
+          <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">Mobile Number or ABHA Health ID *</label>
+          <input type="text" id="patInputId" class="input-field" placeholder="e.g. 9876543210 or 14-8921-4402-9912" value="9876543210" required>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr auto;gap:8px;margin-bottom:16px;align-items:flex-end;">
+          <div>
+            <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">One-Time Password (OTP) *</label>
+            <input type="text" id="patInputOtp" class="input-field" placeholder="6-digit OTP" value="123456" maxlength="6" required>
+          </div>
+          <button type="button" class="btn-glass" style="height:44px;padding:0 14px;font-size:12px;font-weight:700;" onclick="sendMockOtp('patient')">
+            📲 Send OTP
+          </button>
+        </div>
+
+        <button type="submit" class="auth-btn-primary" style="width:100%;padding:12px;background:#16a34a;border-color:#15803d;font-size:15px;">
+          ✓ Verify OTP & Enter Patient Portal
+        </button>
+      </form>
+
+      <div class="demo-credentials-box">
+        <strong style="color:var(--primary-bright);display:block;margin-bottom:4px;">⚡ Verified Demo Citizen Credentials:</strong>
+        <span>Mobile: <strong>9876543210</strong> · ABHA: <strong>14-8921-4402-9912</strong> · OTP: <strong>123456</strong></span>
+      </div>
+    </div>
+
+    <!-- 2. DOCTOR LOGIN FORM -->
+    <div id="formCardDoctor" class="auth-form-card" style="display:none;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+        <div style="width:46px;height:46px;background:rgba(2,132,199,0.15);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;">
+          🩺
+        </div>
+        <div>
+          <h2 style="font-size:18px;color:var(--ink);font-weight:700;">Doctor Clinical Portal Login</h2>
+          <small style="color:var(--muted);">Medical Council Registration & License Verification</small>
+        </div>
+      </div>
+
+      <form onsubmit="handleStaffAuth(event, 'doctor')">
+        <div style="margin-bottom:12px;">
+          <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">Doctor Employee ID or MCI Registration No. *</label>
+          <input type="text" id="docInputId" class="input-field" placeholder="e.g. DOC-101 or MCI-AP-48912" value="DOC-101" required>
+        </div>
+
+        <div style="margin-bottom:16px;">
+          <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">Clinical Password / Security PIN *</label>
+          <input type="password" id="docInputPass" class="input-field" placeholder="Enter password" value="doc@123" required>
+        </div>
+
+        <button type="submit" class="auth-btn-primary" style="width:100%;padding:12px;background:#0284c7;border-color:#0369a1;font-size:15px;">
+          🩺 Authenticate & Enter OPD Queue
+        </button>
+      </form>
+
+      <div class="demo-credentials-box">
+        <strong style="color:var(--primary-bright);display:block;margin-bottom:4px;">⚡ Verified Doctor Credentials:</strong>
+        <span>1. Dr. Priya: ID <strong>DOC-101</strong> / Pass: <strong>doc@123</strong><br>2. Dr. Rajesh: ID <strong>DOC-102</strong> / Pass: <strong>doc@123</strong></span>
+      </div>
+    </div>
+
+    <!-- 3. ASHA WORKER LOGIN FORM -->
+    <div id="formCardWorker" class="auth-form-card" style="display:none;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+        <div style="width:46px;height:46px;background:rgba(217,119,6,0.15);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;">
+          🤝
+        </div>
+        <div>
+          <h2 style="font-size:18px;color:var(--ink);font-weight:700;">ASHA & ANM Frontline Login</h2>
+          <small style="color:var(--muted);">Village Field Worker & Sector ID Verification</small>
+        </div>
+      </div>
+
+      <form onsubmit="handleStaffAuth(event, 'worker')">
+        <div style="margin-bottom:12px;">
+          <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">ASHA Worker ID or Registered Phone *</label>
+          <input type="text" id="workerInputId" class="input-field" placeholder="e.g. ASH-201 or 9833344455" value="ASH-201" required>
+        </div>
+
+        <div style="margin-bottom:16px;">
+          <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">Sector Passcode / PIN *</label>
+          <input type="password" id="workerInputPass" class="input-field" placeholder="Enter passcode" value="asha@123" required>
+        </div>
+
+        <button type="submit" class="auth-btn-primary" style="width:100%;padding:12px;background:#d97706;border-color:#b45309;font-size:15px;">
+          🤝 Verify & Access Maternal Register
+        </button>
+      </form>
+
+      <div class="demo-credentials-box">
+        <strong style="color:var(--primary-bright);display:block;margin-bottom:4px;">⚡ Verified ASHA Credentials:</strong>
+        <span>1. Lakshmi Didi: ID <strong>ASH-201</strong> / Pass: <strong>asha@123</strong><br>2. Anitha Rao: ID <strong>ASH-202</strong> / Pass: <strong>asha@123</strong></span>
+      </div>
+    </div>
+
+    <!-- 4. HEALTH ADMIN LOGIN FORM -->
+    <div id="formCardAdmin" class="auth-form-card" style="display:none;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+        <div style="width:46px;height:46px;background:rgba(219,39,119,0.15);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;">
+          👑
+        </div>
+        <div>
+          <h2 style="font-size:18px;color:var(--ink);font-weight:700;">District Health Administration</h2>
+          <small style="color:var(--muted);">Authorized Officer Executive Access</small>
+        </div>
+      </div>
+
+      <form onsubmit="handleStaffAuth(event, 'admin')">
+        <div style="margin-bottom:12px;">
+          <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">District Officer ID or Designation *</label>
+          <input type="text" id="adminInputId" class="input-field" placeholder="e.g. ADM-001 or DHO-AP-001" value="ADM-001" required>
+        </div>
+
+        <div style="margin-bottom:16px;">
+          <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">Admin Master Passcode *</label>
+          <input type="password" id="adminInputPass" class="input-field" placeholder="Enter master passcode" value="admin@123" required>
+        </div>
+
+        <button type="submit" class="auth-btn-primary" style="width:100%;padding:12px;background:#db2777;border-color:#be185d;font-size:15px;">
+          👑 Authorize Command Center
+        </button>
+      </form>
+
+      <div class="demo-credentials-box">
+        <strong style="color:var(--primary-bright);display:block;margin-bottom:4px;">⚡ Verified Admin Credentials:</strong>
+        <span>District Officer: ID <strong>ADM-001</strong> / Pass: <strong>admin@123</strong></span>
+      </div>
+    </div>
+
   </section>
 
   <!-- =========================================================
@@ -935,20 +1040,90 @@ body {
 <script src="admin.js"></script>
 
 <script>
-// Authentication / Login Flow
-function doLogin(role) {
-  if (window.appStore) {
-    window.appStore.login(role);
+// Switch Active Login Tab
+function switchLoginTab(role) {
+  const roles = ['patient', 'doctor', 'worker', 'admin'];
+  roles.forEach(r => {
+    const btn = document.getElementById('tabBtn' + r.charAt(0).toUpperCase() + r.slice(1));
+    const card = document.getElementById('formCard' + r.charAt(0).toUpperCase() + r.slice(1));
+    if (btn) {
+      if (r === role) btn.classList.add('active');
+      else btn.classList.remove('active');
+    }
+    if (card) {
+      card.style.display = (r === role) ? 'block' : 'none';
+    }
+  });
+  hideLoginError();
+}
+
+function showLoginError(msg) {
+  const b = document.getElementById('loginErrorBanner');
+  if (b) {
+    b.textContent = '⚠️ ' + msg;
+    b.style.display = 'block';
   }
+}
+
+function hideLoginError() {
+  const b = document.getElementById('loginErrorBanner');
+  if (b) b.style.display = 'none';
+}
+
+function sendMockOtp(role) {
+  if (typeof window.toast === 'function') {
+    window.toast('📲 OTP sent to mobile: 123456');
+  }
+  const otpInput = document.getElementById('patInputOtp');
+  if (otpInput) otpInput.value = '123456';
+}
+
+// Patient Verification Handler
+function handlePatientAuth(e) {
+  if (e) e.preventDefault();
+  hideLoginError();
+
+  const id = document.getElementById('patInputId').value.trim();
+  const otp = document.getElementById('patInputOtp').value.trim();
+
+  const res = window.appStore.verifyAndLogin('patient', {
+    phone: id.replace(/\D/g, '').length === 10 ? id : '',
+    abhaId: id.includes('-') ? id : '',
+    otp: otp || '123456'
+  });
+
+  if (!res.success) {
+    showLoginError(res.error);
+    return;
+  }
+
   renderActivePortalView();
   if (typeof window.toast === 'function') {
-    const roleNames = {
-      patient: '🌾 Citizen Portal',
-      doctor: '🩺 Doctor Portal',
-      worker: '🤝 ASHA Frontline Portal',
-      admin: '👑 Health Admin Portal'
-    };
-    window.toast('✓ Logged in to ' + (roleNames[role] || role));
+    window.toast('✓ OTP Verified. Logged in as ' + res.user.name);
+  }
+}
+
+// Staff Verification Handler (Doctor, Worker, Admin)
+function handleStaffAuth(e, role) {
+  if (e) e.preventDefault();
+  hideLoginError();
+
+  let idInputId = (role === 'doctor') ? 'docInputId' : (role === 'worker') ? 'workerInputId' : 'adminInputId';
+  let passInputId = (role === 'doctor') ? 'docInputPass' : (role === 'worker') ? 'workerInputPass' : 'adminInputPass';
+
+  const id = document.getElementById(idInputId).value.trim();
+  const password = document.getElementById(passInputId).value.trim();
+
+  const res = window.appStore.verifyAndLogin(role, { id, password });
+
+  if (!res.success) {
+    showLoginError(res.error);
+    return;
+  }
+
+  renderActivePortalView();
+  if (typeof window.toast === 'function') {
+    window.toast('✓ Credentials Verified: ' + res.user.name);
   }
 }
 
@@ -958,7 +1133,7 @@ function doLogout() {
   }
   renderActivePortalView();
   if (typeof window.toast === 'function') {
-    window.toast('🚪 Logged out to Gateway Portal');
+    window.toast('🚪 Logged out to Healthcare Gateway');
   }
 }
 
@@ -978,7 +1153,7 @@ function renderActivePortalView() {
     return;
   }
 
-  // User is logged in to a specific role
+  // User is authenticated
   const role = session.role;
   const activeViewName = role.charAt(0).toUpperCase() + role.slice(1);
 
