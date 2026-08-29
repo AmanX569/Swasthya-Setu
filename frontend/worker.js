@@ -20,12 +20,17 @@
       }
     }
 
+    t(key, fallback) {
+      return global.i18n ? global.i18n.get(key, fallback) : (fallback || key);
+    }
+
     renderAll() {
       this.renderAncRecords();
       this.renderImmunizations();
       this.renderHomeVisits();
     }
 
+    // 1. ANC High-Risk Mothers
     renderAncRecords() {
       const el = document.getElementById('ashaAncTableBody');
       if (!el || !this.store) return;
@@ -42,7 +47,7 @@
           <td style="color:var(--ink-dim);">${a.husbandName || '—'}</td>
           <td style="color:var(--muted);">${a.village}</td>
           <td style="color:var(--ink);">${a.weeks} Wks <small style="color:var(--muted);">(EDD: ${a.edd})</small></td>
-          <td style="color:var(--ink-dim);">BP: <strong style="color:var(--ink)">${a.bp}</strong> | Hb: <strong style="color:var(--ink)">${a.hb}</strong></td>
+          <td style="color:var(--ink-dim);">BP: <strong style="color:var(--ink)">${a.bp}</strong> | Hb: <strong style="color:var(--ink)">${a.hb || '11.0 g/dL'}</strong></td>
           <td>
             <span class="badge" style="background:${a.riskLevel.includes('High') ? 'rgba(220,38,38,0.2)' : 'rgba(22,163,74,0.2)'};color:${a.riskLevel.includes('High') ? '#ef4444' : '#22c55e'};padding:4px 8px;border-radius:12px;font-size:11px;font-weight:700;border:1px solid ${a.riskLevel.includes('High') ? '#ef4444' : '#22c55e'};">
               ${a.riskLevel}
@@ -70,7 +75,7 @@
       const village = document.getElementById('ancVillage').value.trim();
       const weeks = parseInt(document.getElementById('ancWeeks').value, 10) || 12;
       const bp = document.getElementById('ancBp').value.trim() || '110/70';
-      const hb = document.getElementById('ancHb').value.trim() || '11.0 g/dL';
+      const hb = (document.getElementById('ancHb') ? document.getElementById('ancHb').value.trim() : '') || '11.0 g/dL';
       const riskLevel = document.getElementById('ancRisk').value;
 
       if (!motherName) {
@@ -95,6 +100,7 @@
       if (typeof window.toast === 'function') window.toast('✓ Registered ' + motherName + ' in Maternal ANC Register');
     }
 
+    // 2. Child UIP Immunization
     renderImmunizations() {
       const el = document.getElementById('ashaUipTableBody');
       if (!el || !this.store) return;
@@ -112,6 +118,46 @@
       `).join('');
     }
 
+    openAddImmModal() {
+      const m = document.getElementById('addImmModal');
+      if (m) m.style.display = 'flex';
+    }
+
+    closeAddImmModal() {
+      const m = document.getElementById('addImmModal');
+      if (m) m.style.display = 'none';
+    }
+
+    submitAddImm(e) {
+      if (e) e.preventDefault();
+      const childName = document.getElementById('immChildName').value.trim();
+      const parentName = document.getElementById('immParentName').value.trim();
+      const dob = document.getElementById('immDob').value.trim() || new Date().toISOString().split('T')[0];
+      const gender = document.getElementById('immGender').value;
+      const village = document.getElementById('immVillage').value.trim() || 'Kondapalli';
+      const lastVaccine = document.getElementById('immVaccine').value.trim() || 'BCG + OPV-0';
+
+      if (!childName) {
+        alert('Please enter child name');
+        return;
+      }
+
+      this.store.addImmunization({
+        childName,
+        parentName,
+        dob,
+        gender,
+        village,
+        lastVaccine,
+        nextDue: 'Next UIP Camp',
+        status: 'Up to Date'
+      });
+
+      this.closeAddImmModal();
+      if (typeof window.toast === 'function') window.toast('✓ Added ' + childName + ' to UIP Tracker');
+    }
+
+    // 3. Home Visits
     renderHomeVisits() {
       const el = document.getElementById('ashaVisitsList');
       if (!el || !this.store) return;
@@ -124,7 +170,7 @@
             <small style="color:var(--primary-bright);font-weight:700;">Priority: ${v.priority}</small>
             <p style="font-size:13px;color:var(--ink-dim);margin-top:2px;">Task: ${v.task}</p>
           </div>
-          <button class="btn-glass" style="padding:8px 14px;font-size:12px;background:${v.status === 'Completed' ? '#16a34a' : 'var(--glass-1)'};color:${v.status === 'Completed' ? '#ffffff' : 'var(--ink)'};border-color:${v.status === 'Completed' ? '#16a34a' : 'var(--glass-border)'};" onclick="workerController.toggleVisit('${v.id}')">
+          <button class="btn-glass" style="padding:8px 14px;font-size:12px;background:${v.status === 'Completed' ? '#16a34a' : 'var(--glass-1)'};color:${v.status === 'Completed' ? '#ffffff' : 'var(--ink)'};border-color:${v.status === 'Completed' ? '#16a34a' : 'var(--glass-border)'};cursor:pointer;" onclick="workerController.toggleVisit('${v.id}')">
             ${v.status === 'Completed' ? '✓ Completed' : 'Mark Done'}
           </button>
         </div>
@@ -133,6 +179,39 @@
 
     toggleVisit(id) {
       this.store.toggleHomeVisit(id);
+    }
+
+    openAddVisitModal() {
+      const m = document.getElementById('addVisitModal');
+      if (m) m.style.display = 'flex';
+    }
+
+    closeAddVisitModal() {
+      const m = document.getElementById('addVisitModal');
+      if (m) m.style.display = 'none';
+    }
+
+    submitAddVisit(e) {
+      if (e) e.preventDefault();
+      const household = document.getElementById('visHousehold').value.trim();
+      const members = parseInt(document.getElementById('visMembers').value, 10) || 3;
+      const priority = document.getElementById('visPriority').value;
+      const task = document.getElementById('visTask').value.trim();
+
+      if (!household) {
+        alert('Please enter household name');
+        return;
+      }
+
+      this.store.addHomeVisit({
+        household,
+        members,
+        priority,
+        task: task || 'Routine Health Visit & Vitals Check'
+      });
+
+      this.closeAddVisitModal();
+      if (typeof window.toast === 'function') window.toast('✓ Added Home Visit for ' + household);
     }
   }
 

@@ -3194,6 +3194,10 @@ body {
           <input type="text" id="ancBp" class="input-field" value="110/70">
         </div>
         <div>
+          <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Hb (g/dL)</label>
+          <input type="text" id="ancHb" class="input-field" value="11.2">
+        </div>
+        <div>
           <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Risk</label>
           <select id="ancRisk" class="input-field">
             <option value="Normal">Normal</option>
@@ -3205,6 +3209,126 @@ body {
       <div style="display:flex;gap:8px;justify-content:flex-end;">
         <button type="button" class="btn-glass" onclick="workerController.closeAddAncModal()">Cancel</button>
         <button type="submit" class="auth-btn-primary">+ Register</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<!-- ADD UIP IMMUNIZATION MODAL -->
+<div id="addImmModal" class="modal-overlay">
+  <div class="modal-card">
+    <h3 style="color:var(--primary-bright);font-size:17px;margin-bottom:14px;">+ Record Child Immunization (UIP)</h3>
+    <form onsubmit="workerController.submitAddImm(event)">
+      <div style="margin-bottom:10px;">
+        <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Child Full Name *</label>
+        <input type="text" id="immChildName" class="input-field" placeholder="e.g. Aarav Kumar" required>
+      </div>
+      <div style="margin-bottom:10px;">
+        <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Parent / Guardian Name</label>
+        <input type="text" id="immParentName" class="input-field" placeholder="e.g. Ramesh Kumar">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+        <div>
+          <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Date of Birth</label>
+          <input type="date" id="immDob" class="input-field" value="2026-01-01">
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Gender</label>
+          <select id="immGender" class="input-field">
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+        <div>
+          <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Village / Ward</label>
+          <input type="text" id="immVillage" class="input-field" value="Kondapalli Ward 4">
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Administered Vaccine</label>
+          <input type="text" id="immVaccine" class="input-field" value="Pentavalent 1 + OPV">
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;">
+        <button type="button" class="btn-glass" onclick="workerController.closeAddImmModal()">Cancel</button>
+        <button type="submit" class="auth-btn-primary">+ Save Record</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ADD HOME VISIT MODAL -->
+<div id="addVisitModal" class="modal-overlay">
+  <div class="modal-card">
+    <h3 style="color:var(--primary-bright);font-size:17px;margin-bottom:14px;">+ Schedule Village Home Visit</h3>
+    <form onsubmit="workerController.submitAddVisit(event)">
+      <div style="margin-bottom:10px;">
+        <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Household / Family Name *</label>
+        <input type="text" id="visHousehold" class="input-field" placeholder="e.g. House #84, Venkat Rao" required>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+        <div>
+          <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Family Members</label>
+          <input type="number" id="visMembers" class="input-field" value="4">
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Priority</label>
+          <select id="visPriority" class="input-field">
+            <option value="ANC Follow-up">ANC Follow-up</option>
+            <option value="High-Risk Pregnancy">High-Risk Pregnancy</option>
+            <option value="UIP Immunization">UIP Immunization</option>
+            <option value="NCD Diabetes/BP">NCD Diabetes/BP</option>
+            <option value="General Welfare">General Welfare</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-bottom:14px;">
+        <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Visit Task / Objective</label>
+        <input type="text" id="visTask" class="input-field" placeholder="e.g. Check IFA intake and blood pressure">
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;">
+        <button type="button" class="btn-glass" onclick="workerController.closeAddVisitModal()">Cancel</button>
+        <button type="submit" class="auth-btn-primary">+ Add Visit</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ADD JAN AUSHADHI MEDICINE MODAL (ADMIN) -->
+<div id="addDrugModal" class="modal-overlay">
+  <div class="modal-card">
+    <h3 style="color:var(--primary-bright);font-size:17px;margin-bottom:14px;">+ Add Jan Aushadhi Medicine</h3>
+    <form onsubmit="adminController.submitAddDrug(event)">
+      <div style="margin-bottom:10px;">
+        <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Generic Medicine Name *</label>
+        <input type="text" id="drugName" class="input-field" placeholder="e.g. Azithromycin 500mg" required>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+        <div>
+          <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Therapeutic Category</label>
+          <input type="text" id="drugCat" class="input-field" placeholder="e.g. Antibiotic Infection">
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Stock Units</label>
+          <input type="number" id="drugStock" class="input-field" value="250">
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+        <div>
+          <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Jan Aushadhi Price (₹)</label>
+          <input type="number" id="drugGenPrice" class="input-field" value="22">
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Branded Market Price (₹)</label>
+          <input type="number" id="drugBrandPrice" class="input-field" value="115">
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;">
+        <button type="button" class="btn-glass" onclick="adminController.closeAddDrugModal()">Cancel</button>
+        <button type="submit" class="auth-btn-primary">+ Add to Stock</button>
       </div>
     </form>
   </div>
@@ -5744,12 +5868,17 @@ body {
       }
     }
 
+    t(key, fallback) {
+      return global.i18n ? global.i18n.get(key, fallback) : (fallback || key);
+    }
+
     renderAll() {
       this.renderAncRecords();
       this.renderImmunizations();
       this.renderHomeVisits();
     }
 
+    // 1. ANC High-Risk Mothers
     renderAncRecords() {
       const el = document.getElementById('ashaAncTableBody');
       if (!el || !this.store) return;
@@ -5766,7 +5895,7 @@ body {
           <td style="color:var(--ink-dim);">${a.husbandName || '—'}</td>
           <td style="color:var(--muted);">${a.village}</td>
           <td style="color:var(--ink);">${a.weeks} Wks <small style="color:var(--muted);">(EDD: ${a.edd})</small></td>
-          <td style="color:var(--ink-dim);">BP: <strong style="color:var(--ink)">${a.bp}</strong> | Hb: <strong style="color:var(--ink)">${a.hb}</strong></td>
+          <td style="color:var(--ink-dim);">BP: <strong style="color:var(--ink)">${a.bp}</strong> | Hb: <strong style="color:var(--ink)">${a.hb || '11.0 g/dL'}</strong></td>
           <td>
             <span class="badge" style="background:${a.riskLevel.includes('High') ? 'rgba(220,38,38,0.2)' : 'rgba(22,163,74,0.2)'};color:${a.riskLevel.includes('High') ? '#ef4444' : '#22c55e'};padding:4px 8px;border-radius:12px;font-size:11px;font-weight:700;border:1px solid ${a.riskLevel.includes('High') ? '#ef4444' : '#22c55e'};">
               ${a.riskLevel}
@@ -5794,7 +5923,7 @@ body {
       const village = document.getElementById('ancVillage').value.trim();
       const weeks = parseInt(document.getElementById('ancWeeks').value, 10) || 12;
       const bp = document.getElementById('ancBp').value.trim() || '110/70';
-      const hb = document.getElementById('ancHb').value.trim() || '11.0 g/dL';
+      const hb = (document.getElementById('ancHb') ? document.getElementById('ancHb').value.trim() : '') || '11.0 g/dL';
       const riskLevel = document.getElementById('ancRisk').value;
 
       if (!motherName) {
@@ -5819,6 +5948,7 @@ body {
       if (typeof window.toast === 'function') window.toast('✓ Registered ' + motherName + ' in Maternal ANC Register');
     }
 
+    // 2. Child UIP Immunization
     renderImmunizations() {
       const el = document.getElementById('ashaUipTableBody');
       if (!el || !this.store) return;
@@ -5836,6 +5966,46 @@ body {
       `).join('');
     }
 
+    openAddImmModal() {
+      const m = document.getElementById('addImmModal');
+      if (m) m.style.display = 'flex';
+    }
+
+    closeAddImmModal() {
+      const m = document.getElementById('addImmModal');
+      if (m) m.style.display = 'none';
+    }
+
+    submitAddImm(e) {
+      if (e) e.preventDefault();
+      const childName = document.getElementById('immChildName').value.trim();
+      const parentName = document.getElementById('immParentName').value.trim();
+      const dob = document.getElementById('immDob').value.trim() || new Date().toISOString().split('T')[0];
+      const gender = document.getElementById('immGender').value;
+      const village = document.getElementById('immVillage').value.trim() || 'Kondapalli';
+      const lastVaccine = document.getElementById('immVaccine').value.trim() || 'BCG + OPV-0';
+
+      if (!childName) {
+        alert('Please enter child name');
+        return;
+      }
+
+      this.store.addImmunization({
+        childName,
+        parentName,
+        dob,
+        gender,
+        village,
+        lastVaccine,
+        nextDue: 'Next UIP Camp',
+        status: 'Up to Date'
+      });
+
+      this.closeAddImmModal();
+      if (typeof window.toast === 'function') window.toast('✓ Added ' + childName + ' to UIP Tracker');
+    }
+
+    // 3. Home Visits
     renderHomeVisits() {
       const el = document.getElementById('ashaVisitsList');
       if (!el || !this.store) return;
@@ -5848,7 +6018,7 @@ body {
             <small style="color:var(--primary-bright);font-weight:700;">Priority: ${v.priority}</small>
             <p style="font-size:13px;color:var(--ink-dim);margin-top:2px;">Task: ${v.task}</p>
           </div>
-          <button class="btn-glass" style="padding:8px 14px;font-size:12px;background:${v.status === 'Completed' ? '#16a34a' : 'var(--glass-1)'};color:${v.status === 'Completed' ? '#ffffff' : 'var(--ink)'};border-color:${v.status === 'Completed' ? '#16a34a' : 'var(--glass-border)'};" onclick="workerController.toggleVisit('${v.id}')">
+          <button class="btn-glass" style="padding:8px 14px;font-size:12px;background:${v.status === 'Completed' ? '#16a34a' : 'var(--glass-1)'};color:${v.status === 'Completed' ? '#ffffff' : 'var(--ink)'};border-color:${v.status === 'Completed' ? '#16a34a' : 'var(--glass-border)'};cursor:pointer;" onclick="workerController.toggleVisit('${v.id}')">
             ${v.status === 'Completed' ? '✓ Completed' : 'Mark Done'}
           </button>
         </div>
@@ -5857,6 +6027,39 @@ body {
 
     toggleVisit(id) {
       this.store.toggleHomeVisit(id);
+    }
+
+    openAddVisitModal() {
+      const m = document.getElementById('addVisitModal');
+      if (m) m.style.display = 'flex';
+    }
+
+    closeAddVisitModal() {
+      const m = document.getElementById('addVisitModal');
+      if (m) m.style.display = 'none';
+    }
+
+    submitAddVisit(e) {
+      if (e) e.preventDefault();
+      const household = document.getElementById('visHousehold').value.trim();
+      const members = parseInt(document.getElementById('visMembers').value, 10) || 3;
+      const priority = document.getElementById('visPriority').value;
+      const task = document.getElementById('visTask').value.trim();
+
+      if (!household) {
+        alert('Please enter household name');
+        return;
+      }
+
+      this.store.addHomeVisit({
+        household,
+        members,
+        priority,
+        task: task || 'Routine Health Visit & Vitals Check'
+      });
+
+      this.closeAddVisitModal();
+      if (typeof window.toast === 'function') window.toast('✓ Added Home Visit for ' + household);
     }
   }
 
@@ -6081,6 +6284,44 @@ body {
       }).join('');
     }
   }
+
+  
+    openAddDrugModal() {
+      const m = document.getElementById('addDrugModal');
+      if (m) m.style.display = 'flex';
+    }
+
+    closeAddDrugModal() {
+      const m = document.getElementById('addDrugModal');
+      if (m) m.style.display = 'none';
+    }
+
+    submitAddDrug(e) {
+      if (e) e.preventDefault();
+      const name = document.getElementById('drugName').value.trim();
+      const category = document.getElementById('drugCat').value.trim();
+      const stock = parseInt(document.getElementById('drugStock').value, 10) || 100;
+      const genericPrice = parseFloat(document.getElementById('drugGenPrice').value) || 10;
+      const brandPrice = parseFloat(document.getElementById('drugBrandPrice').value) || 50;
+
+      if (!name) {
+        alert('Please enter medicine name');
+        return;
+      }
+
+      this.store.addMedicine({
+        name,
+        category: category || 'General Medicine',
+        stock,
+        unit: 'Tablets',
+        genericPrice,
+        brandPrice,
+        status: 'In Stock'
+      });
+
+      this.closeAddDrugModal();
+      if (typeof window.toast === 'function') window.toast('✓ Added ' + name + ' to Jan Aushadhi Inventory');
+    }
 
   global.adminController = new AdminController();
 

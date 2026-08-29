@@ -214,6 +214,44 @@
     }
   }
 
+  
+    openAddDrugModal() {
+      const m = document.getElementById('addDrugModal');
+      if (m) m.style.display = 'flex';
+    }
+
+    closeAddDrugModal() {
+      const m = document.getElementById('addDrugModal');
+      if (m) m.style.display = 'none';
+    }
+
+    submitAddDrug(e) {
+      if (e) e.preventDefault();
+      const name = document.getElementById('drugName').value.trim();
+      const category = document.getElementById('drugCat').value.trim();
+      const stock = parseInt(document.getElementById('drugStock').value, 10) || 100;
+      const genericPrice = parseFloat(document.getElementById('drugGenPrice').value) || 10;
+      const brandPrice = parseFloat(document.getElementById('drugBrandPrice').value) || 50;
+
+      if (!name) {
+        alert('Please enter medicine name');
+        return;
+      }
+
+      this.store.addMedicine({
+        name,
+        category: category || 'General Medicine',
+        stock,
+        unit: 'Tablets',
+        genericPrice,
+        brandPrice,
+        status: 'In Stock'
+      });
+
+      this.closeAddDrugModal();
+      if (typeof window.toast === 'function') window.toast('✓ Added ' + name + ' to Jan Aushadhi Inventory');
+    }
+
   global.adminController = new AdminController();
 
 })(typeof window !== 'undefined' ? window : this);

@@ -1033,6 +1033,10 @@ body {
           <input type="text" id="ancBp" class="input-field" value="110/70">
         </div>
         <div>
+          <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Hb (g/dL)</label>
+          <input type="text" id="ancHb" class="input-field" value="11.2">
+        </div>
+        <div>
           <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Risk</label>
           <select id="ancRisk" class="input-field">
             <option value="Normal">Normal</option>
@@ -1044,6 +1048,126 @@ body {
       <div style="display:flex;gap:8px;justify-content:flex-end;">
         <button type="button" class="btn-glass" onclick="workerController.closeAddAncModal()">Cancel</button>
         <button type="submit" class="auth-btn-primary">+ Register</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<!-- ADD UIP IMMUNIZATION MODAL -->
+<div id="addImmModal" class="modal-overlay">
+  <div class="modal-card">
+    <h3 style="color:var(--primary-bright);font-size:17px;margin-bottom:14px;">+ Record Child Immunization (UIP)</h3>
+    <form onsubmit="workerController.submitAddImm(event)">
+      <div style="margin-bottom:10px;">
+        <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Child Full Name *</label>
+        <input type="text" id="immChildName" class="input-field" placeholder="e.g. Aarav Kumar" required>
+      </div>
+      <div style="margin-bottom:10px;">
+        <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Parent / Guardian Name</label>
+        <input type="text" id="immParentName" class="input-field" placeholder="e.g. Ramesh Kumar">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+        <div>
+          <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Date of Birth</label>
+          <input type="date" id="immDob" class="input-field" value="2026-01-01">
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Gender</label>
+          <select id="immGender" class="input-field">
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+        <div>
+          <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Village / Ward</label>
+          <input type="text" id="immVillage" class="input-field" value="Kondapalli Ward 4">
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Administered Vaccine</label>
+          <input type="text" id="immVaccine" class="input-field" value="Pentavalent 1 + OPV">
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;">
+        <button type="button" class="btn-glass" onclick="workerController.closeAddImmModal()">Cancel</button>
+        <button type="submit" class="auth-btn-primary">+ Save Record</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ADD HOME VISIT MODAL -->
+<div id="addVisitModal" class="modal-overlay">
+  <div class="modal-card">
+    <h3 style="color:var(--primary-bright);font-size:17px;margin-bottom:14px;">+ Schedule Village Home Visit</h3>
+    <form onsubmit="workerController.submitAddVisit(event)">
+      <div style="margin-bottom:10px;">
+        <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Household / Family Name *</label>
+        <input type="text" id="visHousehold" class="input-field" placeholder="e.g. House #84, Venkat Rao" required>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+        <div>
+          <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Family Members</label>
+          <input type="number" id="visMembers" class="input-field" value="4">
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Priority</label>
+          <select id="visPriority" class="input-field">
+            <option value="ANC Follow-up">ANC Follow-up</option>
+            <option value="High-Risk Pregnancy">High-Risk Pregnancy</option>
+            <option value="UIP Immunization">UIP Immunization</option>
+            <option value="NCD Diabetes/BP">NCD Diabetes/BP</option>
+            <option value="General Welfare">General Welfare</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-bottom:14px;">
+        <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Visit Task / Objective</label>
+        <input type="text" id="visTask" class="input-field" placeholder="e.g. Check IFA intake and blood pressure">
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;">
+        <button type="button" class="btn-glass" onclick="workerController.closeAddVisitModal()">Cancel</button>
+        <button type="submit" class="auth-btn-primary">+ Add Visit</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ADD JAN AUSHADHI MEDICINE MODAL (ADMIN) -->
+<div id="addDrugModal" class="modal-overlay">
+  <div class="modal-card">
+    <h3 style="color:var(--primary-bright);font-size:17px;margin-bottom:14px;">+ Add Jan Aushadhi Medicine</h3>
+    <form onsubmit="adminController.submitAddDrug(event)">
+      <div style="margin-bottom:10px;">
+        <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Generic Medicine Name *</label>
+        <input type="text" id="drugName" class="input-field" placeholder="e.g. Azithromycin 500mg" required>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+        <div>
+          <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Therapeutic Category</label>
+          <input type="text" id="drugCat" class="input-field" placeholder="e.g. Antibiotic Infection">
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Stock Units</label>
+          <input type="number" id="drugStock" class="input-field" value="250">
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+        <div>
+          <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Jan Aushadhi Price (₹)</label>
+          <input type="number" id="drugGenPrice" class="input-field" value="22">
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Branded Market Price (₹)</label>
+          <input type="number" id="drugBrandPrice" class="input-field" value="115">
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;">
+        <button type="button" class="btn-glass" onclick="adminController.closeAddDrugModal()">Cancel</button>
+        <button type="submit" class="auth-btn-primary">+ Add to Stock</button>
       </div>
     </form>
   </div>
