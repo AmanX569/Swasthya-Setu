@@ -1,7 +1,7 @@
 /**
  * =========================================================
  * SWASTHYA SETU - SUPABASE CONFIGURATION (supabase-config.js)
- * Pre-configured for instant out-of-the-box local or cloud Supabase
+ * Pre-configured with your Supabase Project
  * =========================================================
  */
 
@@ -11,22 +11,22 @@
   const STORAGE_KEY_URL = 'swasthya_setu_supabase_url';
   const STORAGE_KEY_KEY = 'swasthya_setu_supabase_key';
 
-  const DEFAULT_LOCAL_URL = 'http://localhost:54321';
-  const DEFAULT_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.swasthya-setu-local-key';
+  // Your Supabase Project URL
+  const PROJECT_URL = 'https://alevajxfkvnhuicfmpgr.supabase.co';
 
   const savedUrl = localStorage.getItem(STORAGE_KEY_URL);
   const savedKey = localStorage.getItem(STORAGE_KEY_KEY);
 
   global.SUPABASE_CONFIG = {
-    url: savedUrl || DEFAULT_LOCAL_URL,
-    anonKey: savedKey || DEFAULT_ANON_KEY,
+    url: savedUrl || PROJECT_URL,
+    anonKey: savedKey || '',
 
     isConfigured: function() {
-      return Boolean(this.url && this.anonKey);
+      return Boolean(this.url && this.anonKey && this.anonKey.length > 20);
     },
 
     saveCredentials: function(url, anonKey) {
-      this.url = (url || '').trim();
+      this.url = (url || PROJECT_URL).trim();
       this.anonKey = (anonKey || '').trim();
       localStorage.setItem(STORAGE_KEY_URL, this.url);
       localStorage.setItem(STORAGE_KEY_KEY, this.anonKey);
@@ -36,8 +36,8 @@
     },
 
     clearCredentials: function() {
-      this.url = DEFAULT_LOCAL_URL;
-      this.anonKey = DEFAULT_ANON_KEY;
+      this.url = PROJECT_URL;
+      this.anonKey = '';
       localStorage.removeItem(STORAGE_KEY_URL);
       localStorage.removeItem(STORAGE_KEY_KEY);
       if (global.supabaseService) {
