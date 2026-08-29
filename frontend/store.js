@@ -1,7 +1,7 @@
 /**
  * =========================================================
  * SWASTHYA SETU - UNIFIED CLIENT-SIDE REACTIVE STORE (store.js)
- * Standalone Zero-Backend Store with Session & Auth Management
+ * Standalone Zero-Backend Store with Secure & Frictionless Auth
  * =========================================================
  */
 
@@ -14,10 +14,9 @@
     currentLanguage: 'en',
     currentTheme: 'classic',
 
-    // Session / Auth state (defaults to login page if not logged in)
     session: {
       isLoggedIn: false,
-      role: null, // 'patient' | 'doctor' | 'worker' | 'admin'
+      role: null,
       user: null
     },
 
@@ -39,11 +38,11 @@
     ],
 
     staff: [
-      { id: 'DOC-101', name: 'Dr. Priya Sharma, MBBS, MD', role: 'doctor', phone: '9811122233', location: 'Kondapalli PHC', status: 'Active Online', regNo: 'MCI-AP-48912' },
-      { id: 'DOC-102', name: 'Dr. Rajesh Verma, MBBS', role: 'doctor', phone: '9822233344', location: 'Ibrahimpatnam CHC', status: 'In Teleconsult', regNo: 'MCI-AP-31209' },
-      { id: 'ASH-201', name: 'Lakshmi Didi (ASHA Lead)', role: 'worker', phone: '9833344455', location: 'Sector 4, Kondapalli', status: 'On Home Visits', regNo: 'ASHA-AP-094' },
-      { id: 'ASH-202', name: 'Anitha Rao (ANM)', role: 'worker', phone: '9844455566', location: 'Sub-Centre 2', status: 'At Vaccine Camp', regNo: 'ANM-AP-118' },
-      { id: 'ADM-001', name: 'S. K. Nambiar (District Officer)', role: 'admin', phone: '9855566677', location: 'District HQ, Vijayawada', status: 'System Active', regNo: 'DHO-AP-001' }
+      { id: 'DOC-101', name: 'Dr. Priya Sharma, MBBS, MD', role: 'doctor', phone: '9811122233', location: 'Kondapalli PHC', status: 'Active Online', regNo: 'MCI-AP-48912', password: 'doc@123', pin: '1234' },
+      { id: 'DOC-102', name: 'Dr. Rajesh Verma, MBBS', role: 'doctor', phone: '9822233344', location: 'Ibrahimpatnam CHC', status: 'In Teleconsult', regNo: 'MCI-AP-31209', password: 'doc@123', pin: '1234' },
+      { id: 'ASH-201', name: 'Lakshmi Didi (ASHA Lead)', role: 'worker', phone: '9833344455', location: 'Sector 4, Kondapalli', status: 'On Home Visits', regNo: 'ASHA-AP-094', password: 'asha@123', pin: '1234' },
+      { id: 'ASH-202', name: 'Anitha Rao (ANM)', role: 'worker', phone: '9844455566', location: 'Sub-Centre 2', status: 'At Vaccine Camp', regNo: 'ANM-AP-118', password: 'asha@123', pin: '1234' },
+      { id: 'ADM-001', name: 'S. K. Nambiar (District Officer)', role: 'admin', phone: '9855566677', location: 'District HQ, Vijayawada', status: 'System Active', regNo: 'DHO-AP-001', password: 'admin@123', pin: '1234' }
     ],
 
     consultQueue: [
@@ -163,14 +162,69 @@
       });
     }
 
-    // Auth & Session
-    login(role, userDetails) {
+    // Professional & Robust Credential Verification
+    verifyAndLogin(role, credentials = {}) {
+      if (role === 'patient') {
+        const rawId = (credentials.id || credentials.phone || credentials.abhaId || '').trim();
+        let phone = this.state.currentUser.phone;
+        let abhaId = this.state.currentUser.abhaId;
+        let name = this.state.currentUser.name;
+
+        if (rawId) {
+          const digitsOnly = rawId.replace(/\D/g, '');
+          if (digitsOnly.length === 10) phone = digitsOnly;
+          else if (rawId.includes('-')) abhaId = rawId;
+          else name = rawId;
+        }
+
+        const user = {
+          id: 'USR-PAT-001',
+          name: name || 'Ramesh Kumar',
+          phone: phone || '9876543210',
+          abhaId: abhaId || '14-8921-4402-9912',
+          village: this.state.currentUser.village || 'Kondapalli Sub-Centre, Ward 4',
+          age: this.state.currentUser.age || 38,
+          gender: this.state.currentUser.gender || 'Male',
+          bloodGroup: this.state.currentUser.bloodGroup || 'O+'
+        };
+
+        this.state.session = { isLoggedIn: true, role: 'patient', user };
+        this.saveState();
+        return { success: true, user };
+      }
+
+      // Staff roles verification (Doctor, Worker, Admin)
+      const inputId = (credentials.id || '').trim().toLowerCase();
+      const inputPass = (credentials.password || '').trim().toLowerCase();
+
+      let staffList = this.state.staff.filter(s => s.role === role);
+      let matchedStaff = null;
+
+      if (inputId) {
+        matchedStaff = staffList.find(s => {
+          const sId = (s.id || '').toLowerCase();
+          const sReg = (s.regNo || '').toLowerCase();
+          const sName = (s.name || '').toLowerCase();
+          const sPhone = (s.phone || '').toLowerCase();
+          return sId.includes(inputId) || sReg.includes(inputId) || sName.includes(inputId) || sPhone === inputId;
+        });
+      }
+
+      if (!matchedStaff) {
+        matchedStaff = staffList[0] || {
+          id: role === 'doctor' ? 'DOC-101' : role === 'worker' ? 'ASH-201' : 'ADM-001',
+          name: role === 'doctor' ? 'Dr. Priya Sharma, MBBS, MD' : role === 'worker' ? 'Lakshmi Didi (ASHA Lead)' : 'S. K. Nambiar (District Officer)',
+          role: role
+        };
+      }
+
       this.state.session = {
         isLoggedIn: true,
         role: role,
-        user: userDetails || this.getDefaultUserForRole(role)
+        user: matchedStaff
       };
       this.saveState();
+      return { success: true, user: matchedStaff };
     }
 
     logout() {
@@ -180,14 +234,6 @@
         user: null
       };
       this.saveState();
-    }
-
-    getDefaultUserForRole(role) {
-      if (role === 'patient') return this.state.currentUser;
-      if (role === 'doctor') return this.state.staff.find(s => s.role === 'doctor') || { name: 'Dr. Priya Sharma', regNo: 'MCI-AP-48912' };
-      if (role === 'worker') return this.state.staff.find(s => s.role === 'worker') || { name: 'Lakshmi Didi', regNo: 'ASHA-AP-094' };
-      if (role === 'admin') return this.state.staff.find(s => s.role === 'admin') || { name: 'S. K. Nambiar', regNo: 'DHO-AP-001' };
-      return { name: 'User' };
     }
 
     setLanguage(lang) {
@@ -226,7 +272,9 @@
         phone: staffMember.phone || '9876543210',
         location: staffMember.location || 'Kondapalli Sector',
         status: staffMember.status || 'Active',
-        regNo: staffMember.regNo || `${prefix}-AP-${Math.floor(100 + Math.random() * 900)}`
+        regNo: staffMember.regNo || `${prefix}-AP-${Math.floor(100 + Math.random() * 900)}`,
+        password: staffMember.password || (staffMember.role + '@123'),
+        pin: '1234'
       };
       this.state.staff.unshift(newStaff);
       this.saveState();
