@@ -511,6 +511,142 @@ body {
   z-index: 100000;
   display: none;
 }
+
+/* Smooth Page Transitions & Animations */
+@keyframes slideUpFadeIn {
+  0% { opacity: 0; transform: translateY(24px) scale(0.98); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 15px rgba(2, 132, 199, 0.4); }
+  50% { box-shadow: 0 0 30px rgba(2, 132, 199, 0.8); }
+}
+
+@keyframes floatHeroLogo {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+.animated-page {
+  animation: slideUpFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.hero-logo-float {
+  animation: floatHeroLogo 4s ease-in-out infinite;
+}
+
+.hero-cta-btn {
+  background: linear-gradient(135deg, #0284c7, #0369a1);
+  color: #ffffff;
+  padding: 14px 28px;
+  font-size: 16px;
+  font-weight: 800;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 6px 20px rgba(2, 132, 199, 0.4);
+  transition: all 0.2s ease;
+  animation: pulseGlow 3s infinite;
+}
+
+.hero-cta-btn:hover {
+  transform: translateY(-2px) scale(1.03);
+  filter: brightness(1.1);
+}
+
+.hero-guide-btn {
+  background: var(--glass-2);
+  color: var(--ink);
+  padding: 14px 22px;
+  font-size: 15px;
+  font-weight: 700;
+  border-radius: 12px;
+  border: 1.5px solid var(--glass-border);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.hero-guide-btn:hover {
+  background: var(--glass-1);
+  border-color: var(--primary-bright);
+  transform: translateY(-2px);
+}
+
+.pillar-card {
+  background: var(--glass-1);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1.5px solid var(--glass-border);
+  border-radius: 18px;
+  padding: 22px 18px;
+  transition: all 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.pillar-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--primary-bright);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.2);
+}
+
+/* Help Modal Tabs & Accordions */
+.help-tab-btn {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1.5px solid var(--glass-border);
+  background: var(--glass-1);
+  color: var(--ink-dim);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+
+.help-tab-btn.active {
+  background: var(--primary);
+  color: #ffffff;
+  border-color: var(--primary-dark);
+}
+
+.faq-item {
+  background: var(--glass-1);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+
+.faq-question {
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.faq-answer {
+  padding: 0 16px 12px;
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.5;
+  display: none;
+}
+
 </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -547,7 +683,14 @@ body {
   </div>
 
   <!-- TOP TASKBAR SYSTEM CONTROLS -->
-  <div class="top-controls" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+  <div class="top-controls">    <button class="btn-glass btn-taskbar-item" id="btnNavHome" onclick="goToHome()" style="display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;padding:7px 12px;cursor:pointer;border-radius:10px;">
+      🏠 <span>Home</span>
+    </button>
+
+    <button class="btn-glass btn-taskbar-item" id="btnNavGuide" onclick="openHelpGuideModal()" style="display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;padding:7px 12px;cursor:pointer;border-radius:10px;color:var(--primary-bright);border-color:rgba(2,132,199,0.3);">
+      ❓ <span>Guide</span>
+    </button>
+ style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
     <button class="btn-glass" id="supabaseStatusBadge" onclick="openSupabaseSettingsModal()" style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:7px 12px;cursor:pointer;border-radius:10px;">
       ⚙️ <span>Supabase</span>
     </button>
@@ -582,7 +725,148 @@ body {
   <!-- =========================================================
        0. PROFESSIONAL STRICT CREDENTIAL LOGIN GATEWAY
        ========================================================= -->
-  <section id="viewLogin">
+  
+  <!-- =========================================================
+       WELCOME HOME / LANDING HERO SECTION (#viewHome)
+       ========================================================= -->
+  <section id="viewHome" class="animated-page">
+    <!-- HERO BANNER -->
+    <div style="text-align:center;max-width:880px;margin:10px auto 36px;padding:20px 10px;">
+      
+      <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(2,132,199,0.12);padding:6px 16px;border-radius:24px;border:1px solid var(--glass-border);margin-bottom:18px;">
+        <span style="font-size:16px;">🏛️</span>
+        <span style="font-size:12px;font-weight:800;color:var(--primary-bright);letter-spacing:0.8px;">AYUSHMAN BHARAT DIGITAL MISSION (ABDM) · NATIONAL RURAL GRID</span>
+      </div>
+
+      <div style="display:flex;justify-content:center;margin-bottom:20px;">
+        <img src="assets/logo.png" class="hero-logo-float" style="width:110px;height:110px;border-radius:50%;object-fit:cover;border:3px solid var(--primary-bright);box-shadow:0 8px 32px rgba(2,132,199,0.35);" alt="Swasthya Setu Emblem">
+      </div>
+
+      <h1 style="font-size:36px;font-weight:900;color:var(--ink);margin-bottom:12px;line-height:1.2;letter-spacing:-0.5px;">
+        Bridging Rural India to Modern Healthcare
+      </h1>
+      <div style="font-size:18px;font-weight:800;color:var(--primary-bright);margin-bottom:14px;letter-spacing:0.5px;">
+        स्वास्थ्य • सुरक्षा • सेवा (Swasthya • Suraksha • Seva)
+      </div>
+      
+      <p style="font-size:16px;color:var(--muted);max-width:700px;margin:0 auto 26px;line-height:1.6;">
+        Unified digital health architecture connecting <strong>Citizens</strong>, <strong>Medical Officers</strong>, <strong>ASHA Frontline Workers</strong>, and <strong>District Hospitals</strong> into a transparent, real-time healthcare continuum.
+      </p>
+
+      <div style="display:flex;justify-content:center;align-items:center;gap:14px;flex-wrap:wrap;">
+        <button type="button" class="hero-cta-btn" onclick="goToLogin()">
+          <span>🚀</span> <span>Get Started / पोर्टल में प्रवेश करें</span>
+        </button>
+        <button type="button" class="hero-guide-btn" onclick="openHelpGuideModal()">
+          <span>📖</span> <span>How It Works & User Guide</span>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- LIVE TELEMETRY COUNTERS BAR -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:12px;max-width:1100px;margin:0 auto 36px;">
+      <div class="glass-panel" style="padding:16px;text-align:center;margin-bottom:0;">
+        <div style="font-size:28px;font-weight:900;color:var(--primary-bright);font-family:'IBM Plex Mono',monospace;">500+</div>
+        <small style="color:var(--muted);font-weight:700;display:block;margin-top:2px;">Hospital Beds Tracked Live</small>
+      </div>
+      <div class="glass-panel" style="padding:16px;text-align:center;margin-bottom:0;">
+        <div style="font-size:28px;font-weight:900;color:#16a34a;font-family:'IBM Plex Mono',monospace;">8 Groups</div>
+        <small style="color:var(--muted);font-weight:700;display:block;margin-top:2px;">Real-Time Blood Bank Stock</small>
+      </div>
+      <div class="glass-panel" style="padding:16px;text-align:center;margin-bottom:0;">
+        <div style="font-size:28px;font-weight:900;color:#d97706;font-family:'IBM Plex Mono',monospace;">7 Languages</div>
+        <small style="color:var(--muted);font-weight:700;display:block;margin-top:2px;">Multilingual Audio Localization</small>
+      </div>
+      <div class="glass-panel" style="padding:16px;text-align:center;margin-bottom:0;">
+        <div style="font-size:28px;font-weight:900;color:#dc2626;font-family:'IBM Plex Mono',monospace;">100% ABDM</div>
+        <small style="color:var(--muted);font-weight:700;display:block;margin-top:2px;">14-Digit ABHA Cards & e-Rx</small>
+      </div>
+    </div>
+
+    <!-- 6 CORE PLATFORM PILLARS -->
+    <div style="max-width:1100px;margin:0 auto 36px;">
+      <div style="text-align:center;margin-bottom:24px;">
+        <h2 style="font-size:24px;font-weight:800;color:var(--ink);margin-bottom:6px;">Unified Digital Healthcare Ecosystem</h2>
+        <p style="color:var(--muted);font-size:14px;">Designed specifically for rural health sub-centres, primary health centres (PHC), and community health clinics.</p>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));gap:16px;">
+        
+        <!-- Pillar 1 -->
+        <div class="pillar-card">
+          <div>
+            <div style="font-size:36px;margin-bottom:10px;">🌾</div>
+            <h3 style="font-size:17px;font-weight:800;color:var(--ink);margin-bottom:6px;">Citizen Health Lockers & ABHA</h3>
+            <p style="font-size:13px;color:var(--muted);line-height:1.5;">Self-register for 14-digit ABDM ABHA health cards, family health tracking, AI visual symptom triage, and medical records.</p>
+          </div>
+          <div style="margin-top:14px;color:var(--primary-bright);font-size:12px;font-weight:700;">✓ Automated ABHA Generation →</div>
+        </div>
+
+        <!-- Pillar 2 -->
+        <div class="pillar-card">
+          <div>
+            <div style="font-size:36px;margin-bottom:10px;">🩺</div>
+            <h3 style="font-size:17px;font-weight:800;color:var(--ink);margin-bottom:6px;">OPD Teleconsultation & e-Prescriptions</h3>
+            <p style="font-size:13px;color:var(--muted);line-height:1.5;">Connect with verified Medical Officers via live queue. Receive official Government e-Prescriptions with downloadable ABDM PDF.</p>
+          </div>
+          <div style="margin-top:14px;color:#0284c7;font-size:12px;font-weight:700;">✓ 1-Click PDF Downloads →</div>
+        </div>
+
+        <!-- Pillar 3 -->
+        <div class="pillar-card">
+          <div>
+            <div style="font-size:36px;margin-bottom:10px;">🤝</div>
+            <h3 style="font-size:17px;font-weight:800;color:var(--ink);margin-bottom:6px;">ASHA & ANM Frontline Field Hub</h3>
+            <p style="font-size:13px;color:var(--muted);line-height:1.5;">Maternal ANC tracking, child UIP immunization rosters, daily village home visit planners, and direct patient-to-doctor referrals.</p>
+          </div>
+          <div style="margin-top:14px;color:#d97706;font-size:12px;font-weight:700;">✓ Instant Doctor Referrals →</div>
+        </div>
+
+        <!-- Pillar 4 -->
+        <div class="pillar-card">
+          <div>
+            <div style="font-size:36px;margin-bottom:10px;">🏥</div>
+            <h3 style="font-size:17px;font-weight:800;color:var(--ink);margin-bottom:6px;">Live Hospital Bed & Oxygen Grid</h3>
+            <p style="font-size:13px;color:var(--muted);line-height:1.5;">Real-time transparency of general beds, ICU beds, oxygen units, and emergency doctor availability across district healthcare facilities.</p>
+          </div>
+          <div style="margin-top:14px;color:#16a34a;font-size:12px;font-weight:700;">✓ Real-Time Bed Availability →</div>
+        </div>
+
+        <!-- Pillar 5 -->
+        <div class="pillar-card">
+          <div>
+            <div style="font-size:36px;margin-bottom:10px;">💊</div>
+            <h3 style="font-size:17px;font-weight:800;color:var(--ink);margin-bottom:6px;">PMBJP Jan Aushadhi Savings</h3>
+            <p style="font-size:13px;color:var(--muted);line-height:1.5;">Access affordable generic formulations saving rural families up to 80% on everyday prescription drug costs.</p>
+          </div>
+          <div style="margin-top:14px;color:#0284c7;font-size:12px;font-weight:700;">✓ Generic Drug Transparency →</div>
+        </div>
+
+        <!-- Pillar 6 -->
+        <div class="pillar-card">
+          <div>
+            <div style="font-size:36px;margin-bottom:10px;">🚨</div>
+            <h3 style="font-size:17px;font-weight:800;color:var(--ink);margin-bottom:6px;">24x7 108 Rural Emergency SOS</h3>
+            <p style="font-size:13px;color:var(--muted);line-height:1.5;">One-touch instant ambulance dispatch with live GPS telemetry sending immediate distress coordinates to rural emergency units.</p>
+          </div>
+          <div style="margin-top:14px;color:#dc2626;font-size:12px;font-weight:700;">✓ Immediate GPS Dispatch →</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- BOTTOM GET STARTED CALLOUT -->
+    <div style="background:linear-gradient(135deg, rgba(2,132,199,0.18), rgba(15,23,42,0.6));border:1.5px solid var(--primary-bright);border-radius:20px;padding:30px 20px;text-align:center;max-width:1100px;margin:0 auto;">
+      <h3 style="font-size:22px;font-weight:800;color:var(--ink);margin-bottom:8px;">Ready to Experience Seamless Rural Healthcare?</h3>
+      <p style="color:var(--muted);font-size:14px;margin-bottom:18px;">Select your role to access your verified healthcare portal or create your ABDM ABHA health card.</p>
+      <button type="button" class="hero-cta-btn" onclick="goToLogin()">
+        <span>🚀</span> <span>Enter Healthcare Gateway / पोर्टल में जाएँ</span>
+      </button>
+    </div>
+  </section>
+
+  <section id="viewLogin" style="display:none;">
     
     <!-- GOVERNMENT BRANDING HEADER -->
     <div style="text-align:center;max-width:760px;margin:10px auto 20px;">
@@ -1783,6 +2067,125 @@ body {
   </div>
 </div>
 
+
+<!-- =========================================================
+     COMPREHENSIVE INTERACTIVE HELP CENTER & USER GUIDE MODAL
+     ========================================================= -->
+<div id="helpGuideModal" class="modal-overlay">
+  <div class="modal-card" style="max-width:680px;max-height:85vh;overflow-y:auto;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:28px;">📚</span>
+        <div>
+          <h3 style="color:var(--ink);font-size:18px;font-weight:800;">Swasthya Setu User Guide & Help Center</h3>
+          <small style="color:var(--muted);">Role Tutorials, Step-by-Step Instructions & FAQs</small>
+        </div>
+      </div>
+      <button onclick="closeHelpGuideModal()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;">✕</button>
+    </div>
+
+    <!-- ROLE TABS -->
+    <div style="display:grid;grid-template-columns:repeat(4, 1fr);gap:8px;margin-bottom:16px;">
+      <button class="help-tab-btn active" id="helpTabPat" onclick="switchHelpTab('pat')">🌾 Citizen</button>
+      <button class="help-tab-btn" id="helpTabDoc" onclick="switchHelpTab('doc')">🩺 Doctor</button>
+      <button class="help-tab-btn" id="helpTabAsh" onclick="switchHelpTab('ash')">🤝 ASHA</button>
+      <button class="help-tab-btn" id="helpTabAdm" onclick="switchHelpTab('adm')">👑 Admin</button>
+    </div>
+
+    <!-- GUIDE 1: CITIZEN -->
+    <div id="helpContentPat" style="display:block;">
+      <div style="background:var(--glass-1);border:1px solid var(--glass-border);border-radius:12px;padding:14px;margin-bottom:14px;">
+        <h4 style="color:var(--primary-bright);font-size:14px;font-weight:800;margin-bottom:8px;">🌾 Citizen & Patient Quickstart Guide</h4>
+        <ul style="padding-left:20px;font-size:13px;color:var(--ink-dim);line-height:1.6;">
+          <li><strong>Self-Registration</strong>: Click <em>"New User? Register"</em> on the login screen. Fill in your details to automatically receive your 14-digit ABHA Card.</li>
+          <li><strong>Request Teleconsultation</strong>: Click <em>"+ Request Doctor Consultation"</em>, select your preferred registered doctor, type your symptoms, and send the request.</li>
+          <li><strong>Download e-Prescriptions</strong>: Once the doctor prescribes medications, you will hear a notification chime. Click <em>"📥 Download PDF"</em> on your prescription card to download your official ABDM PDF.</li>
+          <li><strong>Delete Prescriptions</strong>: Click <em>"🗑️ Delete"</em> after downloading to keep your health locker clean and save storage.</li>
+          <li><strong>Emergency 108 SOS</strong>: Click <em>"🚨 108 SOS"</em> or <em>"📍 GPS SOS"</em> for instant emergency ambulance dispatch.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- GUIDE 2: DOCTOR -->
+    <div id="helpContentDoc" style="display:none;">
+      <div style="background:var(--glass-1);border:1px solid var(--glass-border);border-radius:12px;padding:14px;margin-bottom:14px;">
+        <h4 style="color:#0284c7;font-size:14px;font-weight:800;margin-bottom:8px;">🩺 Medical Officer / Doctor Quickstart Guide</h4>
+        <ul style="padding-left:20px;font-size:13px;color:var(--ink-dim);line-height:1.6;">
+          <li><strong>Manage OPD Queue</strong>: The queue displays live walk-in patients, citizen consultation requests, and ASHA referrals with triage badges.</li>
+          <li><strong>Conduct Consultation</strong>: Click <em>"Consult & Prescribe"</em> on any patient in the queue. Select Jan Aushadhi generic medicines, enter advice, and submit.</li>
+          <li><strong>Instant Queue Removal</strong>: Upon prescription issuance, the patient is removed from the active queue and saved in your issued prescription history.</li>
+          <li><strong>Dynamic PDF Export</strong>: Prescriptions carry your name, medical registration number, and digital signature for ABDM compliance.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- GUIDE 3: ASHA WORKER -->
+    <div id="helpContentAsh" style="display:none;">
+      <div style="background:var(--glass-1);border:1px solid var(--glass-border);border-radius:12px;padding:14px;margin-bottom:14px;">
+        <h4 style="color:#d97706;font-size:14px;font-weight:800;margin-bottom:8px;">🤝 ASHA & ANM Frontline Field Worker Guide</h4>
+        <ul style="padding-left:20px;font-size:13px;color:var(--ink-dim);line-height:1.6;">
+          <li><strong>Register & Refer Patients</strong>: Click <em>"+ Register & Refer Patient to Doctor"</em> to create an ABHA card and dispatch a referral directly to a registered doctor.</li>
+          <li><strong>Maternal ANC Care</strong>: Register pregnant mothers, record gestational weeks, BP, Hb levels, and track high-risk pregnancies.</li>
+          <li><strong>Child UIP Immunization</strong>: Track vaccine doses (BCG, Pentavalent, Rotavirus, MR) and upcoming due dates.</li>
+          <li><strong>Master Field Registry</strong>: View all referrals, ANC records, vaccines, and home visit logs in a consolidated master table.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- GUIDE 4: ADMIN -->
+    <div id="helpContentAdm" style="display:none;">
+      <div style="background:var(--glass-1);border:1px solid var(--glass-border);border-radius:12px;padding:14px;margin-bottom:14px;">
+        <h4 style="color:#db2777;font-size:14px;font-weight:800;margin-bottom:8px;">👑 District Health Administrator Guide</h4>
+        <ul style="padding-left:20px;font-size:13px;color:var(--ink-dim);line-height:1.6;">
+          <li><strong>Provision Staff</strong>: Click <em>"+ Provision New Staff"</em> to create Doctors, ASHA workers, or other Admins with temporary credentials.</li>
+          <li><strong>Live Staff Removal</strong>: Click <em>"✕ Remove"</em> on any staff row to immediately delete from local memory and Supabase Cloud.</li>
+          <li><strong>Hospital Bed Allocation</strong>: Adjust general, ICU, and oxygen bed counts in real time.</li>
+          <li><strong>Blood Bank Stock</strong>: Manage blood unit inventory across all 8 blood groups.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- FAQS ACCORDION -->
+    <h4 style="font-size:14px;font-weight:800;color:var(--ink);margin:16px 0 10px;">❓ Frequently Asked Questions (FAQ)</h4>
+    
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">
+        <span>How do I create or find my 14-digit ABHA Card?</span>
+        <span>▼</span>
+      </div>
+      <div class="faq-answer">
+        When you register as a Citizen / Patient, an official 14-digit Ayushman Bharat ABHA card is generated automatically. You can print or download your ABHA card from the Patient Hub.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">
+        <span>Can I log in using my mobile number?</span>
+        <span>▼</span>
+      </div>
+      <div class="faq-answer">
+        Yes! All roles (Citizens, Doctors, ASHA workers, and Admins) can log in using their 10-digit registered mobile number along with their private password. If you have multiple roles, a role selection menu will appear.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">
+        <span>How does live cloud synchronization work?</span>
+        <span>▼</span>
+      </div>
+      <div class="faq-answer">
+        Swasthya Setu is connected directly to Supabase PostgreSQL with real-time WebSockets. Any prescription issued, bed updated, or referral sent syncs instantly across all devices.
+      </div>
+    </div>
+
+    <div style="margin-top:16px;text-align:right;">
+      <button type="button" class="auth-btn-primary" style="background:#0284c7;border-color:#0369a1;" onclick="closeHelpGuideModal()">
+        ✓ Got It, Close Guide
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- TOAST -->
 <div id="toast"></div>
 
@@ -2044,7 +2447,91 @@ function handleStaffAuth(e, role) {
   }
 }
 
+
+// Page & Portal View Navigation Handlers
+function goToHome() {
+  const session = window.appStore ? window.appStore.getState().session : { isLoggedIn: false };
+  if (session && session.isLoggedIn) {
+    if (confirm('Navigate to Home? You will remain logged in.')) {
+      showView('Home');
+    }
+  } else {
+    showView('Home');
+  }
+}
+
+function goToLogin() {
+  showView('Login');
+}
+
+function showView(viewName) {
+  const views = ['Home', 'Login', 'Patient', 'Doctor', 'Worker', 'Admin'];
+  views.forEach(v => {
+    const el = document.getElementById('view' + v);
+    if (el) {
+      if (v === viewName) {
+        el.style.display = 'block';
+        el.classList.add('animated-page');
+      } else {
+        el.style.display = 'none';
+      }
+    }
+  });
+
+  const headerControls = document.getElementById('sessionHeaderControls');
+  const session = window.appStore ? window.appStore.getState().session : { isLoggedIn: false };
+  if (headerControls) {
+    headerControls.style.display = (session && session.isLoggedIn && viewName !== 'Home') ? 'flex' : 'none';
+  }
+}
+
 function handleLogoClick() {
+  if (typeof window.stopReadAloud === 'function') window.stopReadAloud();
+  const session = window.appStore ? window.appStore.getState().session : { isLoggedIn: false };
+  if (session && session.isLoggedIn) {
+    doLogout();
+  } else {
+    goToHome();
+  }
+}
+
+function openHelpGuideModal() {
+  const m = document.getElementById('helpGuideModal');
+  if (m) m.style.display = 'flex';
+}
+
+function closeHelpGuideModal() {
+  const m = document.getElementById('helpGuideModal');
+  if (m) m.style.display = 'none';
+}
+
+function switchHelpTab(tabKey) {
+  const tabs = ['pat', 'doc', 'ash', 'adm'];
+  tabs.forEach(t => {
+    const btn = document.getElementById('helpTab' + t.charAt(0).toUpperCase() + t.slice(1));
+    const content = document.getElementById('helpContent' + t.charAt(0).toUpperCase() + t.slice(1));
+    if (btn) {
+      if (t === tabKey) btn.classList.add('active');
+      else btn.classList.remove('active');
+    }
+    if (content) {
+      content.style.display = (t === tabKey) ? 'block' : 'none';
+    }
+  });
+}
+
+function toggleFaq(el) {
+  const ans = el.nextElementSibling;
+  if (ans) {
+    const isShown = ans.style.display === 'block';
+    ans.style.display = isShown ? 'none' : 'block';
+    const arrow = el.querySelector('span:last-child');
+    if (arrow) arrow.textContent = isShown ? '▼' : '▲';
+  }
+}
+
+
+function _legacyHandleLogoClick() {
   if (typeof window.stopReadAloud === 'function') window.stopReadAloud();
   doLogout();
 }
