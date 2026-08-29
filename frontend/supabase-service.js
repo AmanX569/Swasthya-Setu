@@ -33,7 +33,7 @@
         this.client = global.supabase.createClient(config.url, config.anonKey);
         this.isOnline = true;
         this.updateBadgeUI(true);
-        console.log('✓ [Supabase] Connected to Cloud PostgreSQL instance at:', config.url);
+        console.log('✓ [Supabase] Connected to Cloud PostgreSQL at:', config.url);
         this.setupRealtimeSubscriptions();
         this.syncInitialData();
         return true;
@@ -63,15 +63,16 @@
       }
     }
 
-    // Synchronize full state from Supabase to store
+    // Synchronize full state from Supabase Cloud to store
     async syncInitialData() {
       if (!this.client || !global.appStore) return;
       try {
-        const [qRes, hospRes, bloodRes, staffRes, ancRes, immRes, visRes, rxRes, medRes] = await Promise.all([
+        const [qRes, hospRes, bloodRes, staffRes, profRes, ancRes, immRes, visRes, rxRes, medRes] = await Promise.all([
           this.client.from('consult_queue').select('*').order('created_at', { ascending: false }),
           this.client.from('hospitals').select('*').order('name'),
           this.client.from('blood_bank').select('*'),
           this.client.from('staff').select('*'),
+          this.client.from('profiles').select('*'),
           this.client.from('anc_records').select('*').order('created_at', { ascending: false }),
           this.client.from('immunizations').select('*').order('created_at', { ascending: false }),
           this.client.from('home_visits').select('*').order('created_at', { ascending: false }),
@@ -80,6 +81,39 @@
         ]);
 
         const patch = {};
+
+        if (profRes.data && profRes.data.length) {
+          patch.patients = profRes.data.map(p => ({
+            id: p.id,
+            abhaId: p.abha_id,
+            name: p.name,
+            phone: p.phone,
+            age: p.age,
+            gender: p.gender,
+            village: p.village,
+            bloodGroup: p.blood_group,
+            password: '123456'
+          }));
+          if (!global.appStore.state.currentUser && patch.patients.length) {
+            patch.currentUser = patch.patients[0];
+          }
+        }
+
+        if (staffRes.data && staffRes.data.length) {
+          patch.staff = staffRes.data.map(s => ({
+            id: s.staff_code || s.id,
+            staff_code: s.staff_code || s.id,
+            name: s.name,
+            role: s.role,
+            phone: s.phone,
+            location: s.location,
+            status: s.status,
+            regNo: s.reg_no,
+            password: s.password_hash || s.pin || (s.role + '@123'),
+            pin: s.pin || '1234'
+          }));
+        }
+
         if (qRes.data && qRes.data.length) {
           patch.consultQueue = qRes.data.map(q => ({
             id: q.id,
@@ -114,20 +148,6 @@
           const bank = {};
           bloodRes.data.forEach(b => { bank[b.blood_group] = b.units_available; });
           patch.bloodBank = bank;
-        }
-
-        if (staffRes.data && staffRes.data.length) {
-          patch.staff = staffRes.data.map(s => ({
-            id: s.staff_code,
-            name: s.name,
-            role: s.role,
-            phone: s.phone,
-            location: s.location,
-            status: s.status,
-            regNo: s.reg_no,
-            password: s.password_hash,
-            pin: s.pin
-          }));
         }
 
         if (ancRes.data && ancRes.data.length) {
@@ -198,7 +218,6 @@
           }));
         }
 
-        // Apply to store
         Object.assign(global.appStore.state, patch);
         global.appStore.saveState();
 
@@ -219,7 +238,7 @@
         }
         if (global.adminController) {
           if (typeof global.adminController.renderStats === 'function') global.adminController.renderStats();
-          if (typeof global.adminController.renderStaff === 'function') global.adminController.renderStaff();
+          if (typeof global.adminController.renderStaffTable === 'function') global.adminController.renderStaffTable();
           if (typeof global.adminController.renderHospitals === 'function') global.adminController.renderHospitals();
           if (typeof global.adminController.renderBloodBank === 'function') global.adminController.renderBloodBank();
           if (typeof global.adminController.renderMedicines === 'function') global.adminController.renderMedicines();
@@ -236,7 +255,7 @@
       this.channels.forEach(ch => this.client.removeChannel(ch));
       this.channels = [];
 
-      const tables = ['consult_queue', 'hospitals', 'blood_bank', 'prescriptions', 'anc_records', 'immunizations', 'home_visits', 'medicines', 'staff', 'sos_alerts'];
+      const tables = ['consult_queue', 'hospitals', 'blood_bank', 'prescriptions', 'anc_records', 'immunizations', 'home_visits', 'medicines', 'staff', 'profiles', 'sos_alerts'];
 
       tables.forEach(table => {
         const ch = this.client.channel('public:' + table)
@@ -352,51 +371,6 @@
       }]);
     }
 
-    
-    async updateStaffPassword(staffCode, newPassword) {
-      if (!this.client) return;
-      return await this.client.from('staff').update({
-        password_hash: newPassword,
-        pin: newPassword
-      }).eq('staff_code', staffCode);
-    }
-
-    async updateProfilePassword(phoneOrAbha, newPassword) {
-      if (!this.client) return;
-      return await this.client.from('profiles').update({
-        blood_group: newPassword // or password field if present
-      }).or(`phone.eq.${phoneOrAbha},abha_id.eq.${phoneOrAbha}`);
-    }
-
-    async approveStaff(staffCode) {
-      if (!this.client) return;
-      return await this.client.from('staff').update({
-        status: 'Active Online'
-      }).eq('staff_code', staffCode);
-    }
-
-    async deleteStaff(staffCode) {
-      if (!this.client) return;
-      console.log('[Supabase] Deleting staff member from Cloud:', staffCode);
-      const res = await this.client.from('staff').delete().or(`staff_code.eq.${staffCode},id.eq.${staffCode}`);
-      console.log('[Supabase] Staff delete result:', res);
-      return res;
-    }
-
-    async insertProfile(p) {
-      if (!this.client) return;
-      return await this.client.from('profiles').insert([{
-        abha_id: p.abhaId,
-        phone: p.phone,
-        name: p.name,
-        age: p.age,
-        gender: p.gender,
-        village: p.village,
-        blood_group: p.bloodGroup,
-        role: p.role || 'patient'
-      }]);
-    }
-
     async insertStaff(s) {
       if (!this.client) return;
       return await this.client.from('staff').insert([{
@@ -412,21 +386,44 @@
       }]);
     }
 
-    async insertSosAlert(alert) {
+    async deleteStaff(staffCode) {
       if (!this.client) return;
-      return await this.client.from('sos_alerts').insert([{
-        patient_name: alert.name,
-        phone: alert.phone,
-        village: alert.village,
-        abha_id: alert.abhaId,
-        status: 'Dispatched'
+      console.log('[Supabase] Deleting staff member from Cloud:', staffCode);
+      return await this.client.from('staff').delete().or(`staff_code.eq.${staffCode},id.eq.${staffCode},phone.eq.${staffCode}`);
+    }
+
+    async updateStaffPassword(staffCode, newPassword) {
+      if (!this.client) return;
+      return await this.client.from('staff').update({
+        password_hash: newPassword,
+        pin: newPassword
+      }).or(`staff_code.eq.${staffCode},id.eq.${staffCode},phone.eq.${staffCode}`);
+    }
+
+    async insertProfile(p) {
+      if (!this.client) return;
+      return await this.client.from('profiles').insert([{
+        abha_id: p.abhaId,
+        phone: p.phone,
+        name: p.name,
+        age: p.age,
+        gender: p.gender,
+        village: p.village,
+        blood_group: p.bloodGroup,
+        role: 'patient'
       }]);
+    }
+
+    async updateProfilePassword(phoneOrAbha, newPassword) {
+      if (!this.client) return;
+      return await this.client.from('profiles').update({
+        blood_group: newPassword
+      }).or(`phone.eq.${phoneOrAbha},abha_id.eq.${phoneOrAbha}`);
     }
   }
 
   global.supabaseService = new SupabaseService();
 
-  // Initialize on load
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => global.supabaseService.init());
   } else {

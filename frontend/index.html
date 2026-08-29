@@ -609,7 +609,6 @@ body {
        1. CITIZEN / PATIENT HUB
        ========================================================= -->
   <section id="viewPatient" style="display:none;">
-    <!-- 108 SOS BANNER -->
     <div style="background:linear-gradient(135deg, #dc2626, #b91c1c);color:#ffffff;border-radius:16px;padding:14px 18px;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;box-shadow:0 8px 24px rgba(220,38,38,0.25);">
       <div>
         <strong style="font-size:15px;display:block;" data-i18n="emergency_banner">🚑 Immediate 108 Ambulance SOS — Tap to Call or Send GPS</strong>
@@ -649,56 +648,74 @@ body {
       <div class="panel-header">
         <h2 class="panel-title" data-i18n="meds_title">💊 Jan Aushadhi Generic Medicine Savings</h2>
       </div>
-      <p style="color:var(--muted);font-size:13px;margin-bottom:14px;" data-i18n="meds_desc">
-        Save up to 80% with Pradhan Mantri Jan Aushadhi generic medicines.
+      <p style="color:var(--muted);font-size:13px;margin-bottom:14px;" data-i18n="meds_subtitle">
+        PMBJP Jan Aushadhi generic medicines save up to 80% on everyday healthcare costs.
       </p>
-      <div id="dailyMedsList"></div>
+      <div id="dailyMedsContainer"></div>
     </div>
 
     <!-- FAMILY HEALTH CIRCLE -->
     <div class="glass-panel">
       <div class="panel-header">
-        <h2 class="panel-title" data-i18n="family_title">👨‍👩‍👧 Family Health Circle</h2>
-        <button class="auth-btn-primary" style="padding:6px 12px;font-size:12px;" onclick="patientController.openAddFamilyModal()" data-i18n="btn_add_family">
+        <h2 class="panel-title" data-i18n="family_title">👨‍👩‍👧‍👦 Family Health Circle</h2>
+        <button class="auth-btn-primary" style="padding:6px 12px;font-size:12px;background:#16a34a;border-color:#15803d;" onclick="patientController.openAddFamilyModal()" data-i18n="btn_add_family">
           + Add Member
         </button>
       </div>
-      <div id="familyMembersList" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));gap:10px;"></div>
+      <div id="familyMembersGrid" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));gap:12px;"></div>
     </div>
 
-    <!-- NEARBY HOSPITALS & BLOOD BANK -->
+    <!-- LIVE HOSPITAL BED GRID -->
     <div class="glass-panel">
       <div class="panel-header">
-        <h2 class="panel-title" data-i18n="hospitals_title">🏥 Live Hospital Beds & Blood Bank Near You</h2>
+        <h2 class="panel-title" data-i18n="hosp_title">🏥 Live Hospital Bed & Oxygen Availability</h2>
       </div>
-      <div id="hospitalBedsList"></div>
-      <h3 style="font-size:14px;color:var(--primary-bright);margin:16px 0 10px;" data-i18n="blood_title">🩸 Blood Bank Live Availability (All Groups)</h3>
-      <div id="bloodBankGrid" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(95px, 1fr));gap:8px;"></div>
+      <div id="hospitalBedsContainer"></div>
+    </div>
+
+    <!-- LIVE BLOOD BANK STOCK -->
+    <div class="glass-panel">
+      <div class="panel-header">
+        <h2 class="panel-title" data-i18n="blood_title">🩸 Real-Time Blood Bank Inventory (8 Groups)</h2>
+      </div>
+      <div id="bloodBankGrid" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(90px, 1fr));gap:10px;"></div>
     </div>
   </section>
 
   <!-- =========================================================
-       2. DOCTOR CLINICAL HUB
+       2. DOCTOR CLINICAL DESK & TELECONSULTATION PORTAL
        ========================================================= -->
   <section id="viewDoctor" style="display:none;">
+    <div class="glass-panel" style="background:linear-gradient(135deg, rgba(2,132,199,0.15), rgba(15,23,42,0.4));border-color:rgba(2,132,199,0.3);">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+        <div>
+          <h2 style="font-size:20px;color:var(--ink);font-weight:800;margin-bottom:4px;" data-i18n="doc_title">🩺 OPD Clinical Teleconsultation Desk</h2>
+          <small style="color:var(--muted);" data-i18n="doc_subline">National Rural Telemedicine Network · e-Sanjeevani Clinical HUD</small>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="auth-btn-primary" style="background:#0284c7;border-color:#0369a1;" onclick="doctorController.openAddQueueModal()" data-i18n="btn_admit_patient">
+            + Admit Walk-in Patient
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="doctorStatsGrid" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:12px;margin-bottom:18px;"></div>
+
     <div class="glass-panel">
       <div class="panel-header">
-        <h2 class="panel-title" data-i18n="doc_queue_title">📋 Live Teleconsultation Queue</h2>
-        <button class="auth-btn-primary" style="padding:6px 12px;font-size:12px;" onclick="doctorController.openAddQueueModal()" data-i18n="btn_add_walkin">
-          + Add Patient
-        </button>
+        <h3 class="panel-title" data-i18n="doc_queue_title">📋 Live Teleconsultation & OPD Queue</h3>
       </div>
       <div class="table-responsive">
         <table class="admin-table">
           <thead>
             <tr>
-              <th>Token</th>
-              <th>Patient Name</th>
-              <th>Chief Complaint</th>
-              <th>Vitals</th>
-              <th>Triage</th>
-              <th>Time</th>
-              <th>Action</th>
+              <th data-i18n="th_token">Token</th>
+              <th data-i18n="th_patient">Patient</th>
+              <th data-i18n="th_complaint">Chief Complaint</th>
+              <th data-i18n="th_vitals">Recorded Vitals</th>
+              <th data-i18n="th_triage">Triage</th>
+              <th data-i18n="th_action">Action</th>
             </tr>
           </thead>
           <tbody id="doctorQueueTableBody"></tbody>
@@ -708,21 +725,33 @@ body {
 
     <div class="glass-panel">
       <div class="panel-header">
-        <h2 class="panel-title" data-i18n="doc_rx_title">📝 Recent e-Prescriptions Generated</h2>
+        <h3 class="panel-title" data-i18n="doc_history_title">📜 Issued e-Prescriptions History</h3>
       </div>
-      <div id="doctorRxHistoryList"></div>
+      <div id="doctorPrescriptionsHistory" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));gap:14px;"></div>
     </div>
   </section>
 
   <!-- =========================================================
-       3. ASHA FRONTLINE WORKER HUB
+       3. ASHA & FRONTLINE FIELD WORKER HUB
        ========================================================= -->
   <section id="viewWorker" style="display:none;">
+    <div class="glass-panel" style="background:linear-gradient(135deg, rgba(217,119,6,0.15), rgba(15,23,42,0.4));border-color:rgba(217,119,6,0.3);">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+        <div>
+          <h2 style="font-size:20px;color:var(--ink);font-weight:800;margin-bottom:4px;" data-i18n="worker_title">🤝 ASHA & ANM Frontline Field Hub</h2>
+          <small style="color:var(--muted);" data-i18n="worker_subline">Maternal ANC Register, UIP Child Immunization & Village Home Visits</small>
+        </div>
+      </div>
+    </div>
+
+    <div id="workerStatsGrid" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:12px;margin-bottom:18px;"></div>
+
+    <!-- ANC High-Risk Pregnancy Tracker -->
     <div class="glass-panel">
       <div class="panel-header">
-        <h2 class="panel-title" data-i18n="asha_anc_title">🤰 High-Risk Maternal Health Register (ANC)</h2>
-        <button class="auth-btn-primary" style="padding:6px 12px;font-size:12px;" onclick="workerController.openAddAncModal()" data-i18n="btn_add_anc">
-          + Register Mother
+        <h3 class="panel-title" data-i18n="worker_anc_title">🤰 High-Risk Pregnancy (ANC) Register</h3>
+        <button class="auth-btn-primary" style="padding:6px 12px;font-size:12px;background:#d97706;border-color:#b45309;" onclick="workerController.openAddAncModal()">
+          + Register Pregnant Mother
         </button>
       </div>
       <div class="table-responsive">
@@ -730,22 +759,25 @@ body {
           <thead>
             <tr>
               <th>Mother Name</th>
-              <th>Husband</th>
               <th>Village</th>
-              <th>Gestational Age</th>
-              <th>BP & Hb</th>
+              <th>Weeks / EDD</th>
+              <th>Vitals (BP/Hb)</th>
+              <th>IFA Stock</th>
               <th>Risk Level</th>
-              <th>Next Checkup</th>
             </tr>
           </thead>
-          <tbody id="ashaAncTableBody"></tbody>
+          <tbody id="workerAncTableBody"></tbody>
         </table>
       </div>
     </div>
 
+    <!-- UIP Immunization Tracker -->
     <div class="glass-panel">
       <div class="panel-header">
-        <h2 class="panel-title" data-i18n="asha_uip_title">💉 Child Immunization Tracker (UIP)</h2>
+        <h3 class="panel-title" data-i18n="worker_uip_title">👶 Child Immunization (UIP) Tracker</h3>
+        <button class="auth-btn-primary" style="padding:6px 12px;font-size:12px;background:#16a34a;border-color:#15803d;" onclick="workerController.openAddImmModal()">
+          + Add Vaccine
+        </button>
       </div>
       <div class="table-responsive">
         <table class="admin-table">
@@ -753,79 +785,61 @@ body {
             <tr>
               <th>Child Name</th>
               <th>Parent</th>
-              <th>DOB / Gender</th>
+              <th>DOB / Age</th>
               <th>Last Vaccine</th>
               <th>Next Due</th>
               <th>Status</th>
             </tr>
           </thead>
-          <tbody id="ashaUipTableBody"></tbody>
+          <tbody id="workerImmTableBody"></tbody>
         </table>
       </div>
     </div>
 
+    <!-- Daily Home Visits -->
     <div class="glass-panel">
       <div class="panel-header">
-        <h2 class="panel-title" data-i18n="asha_visits_title">🏡 Village Daily Home Visit Planner</h2>
+        <h3 class="panel-title" data-i18n="worker_visits_title">🏡 Daily Village Home Visit Planner</h3>
+        <button class="auth-btn-primary" style="padding:6px 12px;font-size:12px;background:#0284c7;border-color:#0369a1;" onclick="workerController.openAddVisitModal()">
+          + Add Visit
+        </button>
       </div>
-      <div id="ashaVisitsList"></div>
+      <div id="workerHomeVisitsGrid" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:12px;"></div>
     </div>
   </section>
 
   <!-- =========================================================
-       4. HEALTH ADMINISTRATION HUB
+       4. DISTRICT HEALTH ADMINISTRATION & COMMAND CENTER
        ========================================================= -->
   <section id="viewAdmin" style="display:none;">
-    <div class="glass-panel">
-      <div class="panel-header">
-        <h2 class="panel-title" data-i18n="admin_kpi_title">📊 Rural Health Grid Executive Dashboard</h2>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(160px, 1fr));gap:10px;text-align:center;">
-        <div style="background:var(--glass-2);border:1px solid var(--glass-border);padding:14px;border-radius:12px;">
-          <small style="color:var(--muted);font-weight:700;font-size:12px;" data-i18n="kpi_staff">Active Staff</small>
-          <strong id="kpiTotalStaff" style="font-size:24px;color:var(--primary-bright);display:block;margin-top:2px;">0</strong>
-        </div>
-        <div style="background:var(--glass-2);border:1px solid var(--glass-border);padding:14px;border-radius:12px;">
-          <small style="color:var(--muted);font-weight:700;font-size:12px;" data-i18n="kpi_queue">Queue Count</small>
-          <strong id="kpiQueueCount" style="font-size:24px;color:var(--accent);display:block;margin-top:2px;">0</strong>
-        </div>
-        <div style="background:var(--glass-2);border:1px solid var(--glass-border);padding:14px;border-radius:12px;">
-          <small style="color:var(--muted);font-weight:700;font-size:12px;" data-i18n="kpi_anc">ANC Mothers</small>
-          <strong id="kpiAncCount" style="font-size:24px;color:#16a34a;display:block;margin-top:2px;">0</strong>
-        </div>
-        <div style="background:var(--glass-2);border:1px solid var(--glass-border);padding:14px;border-radius:12px;">
-          <small style="color:var(--muted);font-weight:700;font-size:12px;" data-i18n="kpi_beds">Available Beds</small>
-          <strong id="kpiTotalBeds" style="font-size:24px;color:#db2777;display:block;margin-top:2px;">0</strong>
+    <div class="glass-panel" style="background:linear-gradient(135deg, rgba(219,39,119,0.15), rgba(15,23,42,0.4));border-color:rgba(219,39,119,0.3);">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+        <div>
+          <h2 style="font-size:20px;color:var(--ink);font-weight:800;margin-bottom:4px;" data-i18n="admin_title">👑 District Health Officer Command Center</h2>
+          <small style="color:var(--muted);" data-i18n="admin_subline">Executive KPIs, Staff Roster, Hospital Grid & Drug Supply Oversight</small>
         </div>
       </div>
     </div>
 
-    <!-- STAFF REGISTRY -->
+    <div id="adminStatsGrid" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:12px;margin-bottom:18px;"></div>
+
+    <!-- Staff Directory & Management -->
     <div class="glass-panel">
       <div class="panel-header">
-        <h2 class="panel-title" data-i18n="admin_staff_title">👥 Healthcare Personnel Registry</h2>
+        <h3 class="panel-title" data-i18n="admin_staff_title">Staff Directory & Medical Officer Roster</h3>
+        <button class="auth-btn-primary" style="padding:6px 12px;font-size:12px;background:#db2777;border-color:#be185d;" onclick="adminController.openProvisionStaffModal()">
+          + Provision New Staff
+        </button>
       </div>
-      <form onsubmit="adminController.submitQuickAddStaff(event)" style="background:rgba(0,0,0,0.02);border:1px solid var(--glass-border);border-radius:12px;padding:10px;margin-bottom:12px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
-        <input type="text" id="quickStaffName" class="input-field" style="flex:2;min-width:140px;" placeholder="Name" required>
-        <select id="quickStaffRole" class="input-field" style="flex:1;min-width:110px;">
-          <option value="doctor">🩺 Doctor</option>
-          <option value="worker">🤝 ASHA</option>
-          <option value="admin">👑 Admin</option>
-        </select>
-        <input type="text" id="quickStaffPhone" class="input-field" style="flex:1.2;min-width:110px;" placeholder="Phone">
-        <input type="text" id="quickStaffLocation" class="input-field" style="flex:1.2;min-width:110px;" placeholder="Sector">
-        <button type="submit" class="auth-btn-primary" style="padding:8px 14px;">+ Add</button>
-      </form>
-
       <div class="table-responsive">
         <table class="admin-table">
           <thead>
             <tr>
               <th>ID</th>
-              <th>Name</th>
+              <th>Name & Registration</th>
               <th>Role</th>
               <th>Location</th>
-              <th>Phone</th>
+              <th>Mobile</th>
               <th>Action</th>
             </tr>
           </thead>
@@ -834,20 +848,29 @@ body {
       </div>
     </div>
 
-    <!-- BEDS & BLOOD -->
+    <!-- Live Bed Grid Management -->
     <div class="glass-panel">
       <div class="panel-header">
-        <h2 class="panel-title" data-i18n="admin_beds_title">🏥 Hospital Bed & Oxygen Grid</h2>
+        <h3 class="panel-title" data-i18n="admin_beds_title">District Hospital Bed & Oxygen Allocation</h3>
       </div>
       <div id="adminBedsGrid"></div>
-      <h3 style="font-size:14px;color:var(--primary-bright);margin:16px 0 10px;" data-i18n="admin_blood_title">🩸 Blood Bank Stock Management</h3>
-      <div id="adminBloodGrid" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(95px, 1fr));gap:8px;"></div>
     </div>
 
-    <!-- DRUGS -->
+    <!-- Live Blood Bank Stock Management -->
     <div class="glass-panel">
       <div class="panel-header">
-        <h2 class="panel-title" data-i18n="admin_drugs_title">📦 Jan Aushadhi Medicine Inventory</h2>
+        <h3 class="panel-title" data-i18n="admin_blood_title">Live Blood Bank Stock Allocation (Units)</h3>
+      </div>
+      <div id="adminBloodGrid" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(110px, 1fr));gap:10px;"></div>
+    </div>
+
+    <!-- Jan Aushadhi Medicine Inventory -->
+    <div class="glass-panel">
+      <div class="panel-header">
+        <h3 class="panel-title" data-i18n="admin_drugs_title">Jan Aushadhi Generic Medicine Inventory</h3>
+        <button class="auth-btn-primary" style="padding:6px 12px;font-size:12px;background:#16a34a;border-color:#15803d;" onclick="adminController.openAddDrugModal()">
+          + Add Medicine
+        </button>
       </div>
       <div class="table-responsive">
         <table class="admin-table">
@@ -856,12 +879,12 @@ body {
               <th>Medicine Name</th>
               <th>Category</th>
               <th>Stock</th>
-              <th>Generic</th>
-              <th>Brand</th>
+              <th>Jan Aushadhi Price</th>
+              <th>Market Brand Price</th>
               <th>Status</th>
             </tr>
           </thead>
-          <tbody id="adminMedicinesTableBody"></tbody>
+          <tbody id="adminDrugTableBody"></tbody>
         </table>
       </div>
     </div>
@@ -870,732 +893,337 @@ body {
 </main>
 
 <!-- =========================================================
-     MODALS
+     MODAL DIALOGS
      ========================================================= -->
 
-<!-- ADD FAMILY MODAL -->
+<!-- ADD FAMILY MEMBER MODAL -->
 <div id="addFamilyModal" class="modal-overlay">
   <div class="modal-card">
-    <h3 style="color:var(--primary-bright);font-size:17px;margin-bottom:14px;">+ Add Family Member</h3>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <h3 style="color:var(--ink);font-size:17px;font-weight:700;" data-i18n="modal_add_family_title">Add Family Member</h3>
+      <button onclick="patientController.closeAddFamilyModal()" style="background:none;border:none;font-size:20px;color:var(--muted);cursor:pointer;">✕</button>
+    </div>
     <form onsubmit="patientController.submitAddFamily(event)">
-      <div style="margin-bottom:10px;">
-        <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Full Name *</label>
+      <div style="margin-bottom:12px;">
+        <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;" data-i18n="lbl_fam_name">Full Name *</label>
         <input type="text" id="famName" class="input-field" placeholder="e.g. Sunita Devi" required>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
         <div>
-          <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Relation</label>
-          <select id="famRelation" class="input-field">
-            <option value="Spouse">Spouse</option>
-            <option value="Son">Son</option>
-            <option value="Daughter">Daughter</option>
-            <option value="Father">Father</option>
-            <option value="Mother">Mother</option>
-            <option value="Other">Other</option>
+          <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;" data-i18n="lbl_fam_rel">Relation *</label>
+          <select id="famRelation" class="input-field" style="height:44px;" required>
+            <option value="Spouse">Spouse (पति/पत्नी)</option>
+            <option value="Son">Son (पुत्र)</option>
+            <option value="Daughter">Daughter (पुत्री)</option>
+            <option value="Father">Father (पिता)</option>
+            <option value="Mother">Mother (माता)</option>
+            <option value="Other">Other (अन्य)</option>
           </select>
         </div>
         <div>
-          <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Age</label>
-          <input type="number" id="famAge" class="input-field" value="25">
+          <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;" data-i18n="lbl_fam_age">Age *</label>
+          <input type="number" id="famAge" class="input-field" placeholder="32" min="1" max="120" required>
         </div>
       </div>
-      <div style="margin-bottom:14px;">
-        <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Gender</label>
-        <select id="famGender" class="input-field">
-          <option value="Female">Female</option>
-          <option value="Male">Male</option>
-          <option value="Other">Other</option>
+      <div style="margin-bottom:16px;">
+        <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;" data-i18n="lbl_fam_gender">Gender *</label>
+        <select id="famGender" class="input-field" style="height:44px;" required>
+          <option value="Female">Female (महिला)</option>
+          <option value="Male">Male (पुरुष)</option>
+          <option value="Other">Other (अन्य)</option>
         </select>
       </div>
-      <div style="display:flex;gap:8px;justify-content:flex-end;">
-        <button type="button" class="btn-glass" onclick="patientController.closeAddFamilyModal()">Cancel</button>
-        <button type="submit" class="auth-btn-primary">+ Add</button>
+      <div style="display:flex;justify-content:flex-end;gap:8px;">
+        <button type="button" class="btn-glass" onclick="patientController.closeAddFamilyModal()" data-i18n="btn_cancel">Cancel</button>
+        <button type="submit" class="auth-btn-primary" style="background:#16a34a;border-color:#15803d;" data-i18n="btn_save">✓ Save Member</button>
       </div>
     </form>
   </div>
 </div>
 
-<!-- ADD QUEUE PATIENT MODAL -->
+<!-- DOCTOR ADMIT WALK-IN PATIENT MODAL -->
 <div id="addQueueModal" class="modal-overlay">
   <div class="modal-card">
-    <h3 style="color:var(--primary-bright);font-size:17px;margin-bottom:14px;">+ Add Walk-in Patient</h3>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <h3 style="color:var(--ink);font-size:17px;font-weight:700;" data-i18n="modal_admit_title">Admit Walk-in Patient to OPD Queue</h3>
+      <button onclick="doctorController.closeAddQueueModal()" style="background:none;border:none;font-size:20px;color:var(--muted);cursor:pointer;">✕</button>
+    </div>
     <form onsubmit="doctorController.submitAddQueue(event)">
-      <div style="margin-bottom:10px;">
-        <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Patient Name *</label>
-        <input type="text" id="qPatientName" class="input-field" placeholder="e.g. Ramesh Kumar" required>
+      <div style="margin-bottom:12px;">
+        <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;" data-i18n="lbl_q_name">Patient Name *</label>
+        <input type="text" id="qPatientName" class="input-field" placeholder="e.g. Gopal Raju" required>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
         <div>
-          <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Age</label>
-          <input type="number" id="qPatientAge" class="input-field" value="35">
+          <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;" data-i18n="lbl_q_age">Age *</label>
+          <input type="number" id="qPatientAge" class="input-field" placeholder="45" min="1" max="120" required>
         </div>
         <div>
-          <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Gender</label>
-          <select id="qPatientGender" class="input-field">
-            <option value="M">Male</option>
-            <option value="F">Female</option>
-            <option value="O">Other</option>
+          <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;" data-i18n="lbl_q_gender">Gender *</label>
+          <select id="qPatientGender" class="input-field" style="height:44px;" required>
+            <option value="M">Male (पुरुष)</option>
+            <option value="F">Female (महिला)</option>
+            <option value="O">Other (अन्य)</option>
           </select>
         </div>
       </div>
-      <div style="margin-bottom:10px;">
-        <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Complaint</label>
-        <input type="text" id="qComplaint" class="input-field" placeholder="e.g. High Fever & Weakness">
+      <div style="margin-bottom:12px;">
+        <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;" data-i18n="lbl_q_complaint">Chief Complaint *</label>
+        <input type="text" id="qComplaint" class="input-field" placeholder="e.g. Chest tightness and breathlessness" required>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px;">
         <div>
-          <label style="font-size:11px;color:var(--muted);display:block;">BP</label>
-          <input type="text" id="qBp" class="input-field" value="120/80">
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;" data-i18n="lbl_q_bp">Blood Pressure</label>
+          <input type="text" id="qBp" class="input-field" placeholder="120/80" value="120/80">
         </div>
         <div>
-          <label style="font-size:11px;color:var(--muted);display:block;">Temp</label>
-          <input type="text" id="qTemp" class="input-field" value="98.6°F">
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;" data-i18n="lbl_q_temp">Temperature</label>
+          <input type="text" id="qTemp" class="input-field" placeholder="98.6°F" value="98.6°F">
         </div>
         <div>
-          <label style="font-size:11px;color:var(--muted);display:block;">Triage</label>
-          <select id="qTriage" class="input-field">
-            <option value="Green">Green</option>
-            <option value="Yellow">Yellow</option>
-            <option value="Red">Red</option>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;" data-i18n="lbl_q_triage">Triage</label>
+          <select id="qTriage" class="input-field" style="height:44px;">
+            <option value="Green">Green (Routine)</option>
+            <option value="Yellow">Yellow (Urgent)</option>
+            <option value="Red">Red (Emergency)</option>
           </select>
         </div>
       </div>
-      <div style="display:flex;gap:8px;justify-content:flex-end;">
-        <button type="button" class="btn-glass" onclick="doctorController.closeAddQueueModal()">Cancel</button>
-        <button type="submit" class="auth-btn-primary">+ Admit</button>
+      <div style="display:flex;justify-content:flex-end;gap:8px;">
+        <button type="button" class="btn-glass" onclick="doctorController.closeAddQueueModal()" data-i18n="btn_cancel">Cancel</button>
+        <button type="submit" class="auth-btn-primary" style="background:#0284c7;border-color:#0369a1;" data-i18n="btn_admit_confirm">✓ Admit to OPD</button>
       </div>
     </form>
   </div>
 </div>
 
-<!-- DOCTOR CONSULT MODAL -->
+<!-- DOCTOR CLINICAL CONSULTATION & E-PRESCRIPTION MODAL -->
 <div id="doctorConsultModal" class="modal-overlay">
-  <div class="modal-card">
-    <h3 id="consultActivePatientName" style="color:var(--primary-bright);font-size:17px;margin-bottom:6px;"></h3>
-    <p id="consultActiveVitals" style="color:var(--muted);font-size:12px;margin-bottom:14px;background:var(--glass-1);border:1px solid var(--glass-border);padding:8px;border-radius:8px;line-height:1.5;"></p>
+  <div class="modal-card" style="max-width:580px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <div>
+        <h3 style="color:var(--ink);font-size:18px;font-weight:800;" data-i18n="rx_modal_title">Doctor Consultation & e-Prescription</h3>
+        <small id="consultPatientHeader" style="color:var(--primary-bright);font-weight:700;"></small>
+      </div>
+      <button onclick="doctorController.closeConsultModal()" style="background:none;border:none;font-size:20px;color:var(--muted);cursor:pointer;">✕</button>
+    </div>
     <form onsubmit="doctorController.submitPrescription(event)">
-      <div style="margin-bottom:10px;">
-        <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;" data-i18n="label_diagnosis">Clinical Diagnosis</label>
-        <input type="text" id="rxDiagnosis" class="input-field" required>
+      <div style="background:var(--glass-1);border:1px solid var(--glass-border);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:12px;">
+        <strong style="color:var(--ink-dim);display:block;margin-bottom:2px;" data-i18n="rx_lbl_complaint">Recorded Chief Complaint:</strong>
+        <span id="consultRecordedComplaint" style="color:var(--ink);font-weight:600;"></span>
       </div>
-      <div style="margin-bottom:10px;">
-        <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;" data-i18n="label_primary_med">Primary Generic Medicine</label>
-        <select id="rxMed1" class="input-field">
-          <option value="Paracetamol 650mg">Paracetamol 650mg Tab (₹8 vs ₹34 Dolo)</option>
-          <option value="Amoxicillin 500mg">Amoxicillin 500mg Cap (₹28 vs ₹110)</option>
-          <option value="Metformin 500mg">Metformin 500mg Tab (₹12 vs ₹58)</option>
-          <option value="Amlodipine 5mg">Amlodipine 5mg Tab (₹6 vs ₹38)</option>
-          <option value="ORS Powder Sachets">ORS Sachet Powder (₹5 vs ₹24)</option>
-        </select>
+      <div style="margin-bottom:12px;">
+        <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;" data-i18n="rx_lbl_diagnosis">Clinical Diagnosis *</label>
+        <input type="text" id="rxDiagnosis" class="input-field" placeholder="e.g. Acute Upper Respiratory Infection / Viral Fever" required>
       </div>
-      <div style="margin-bottom:10px;">
-        <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;" data-i18n="label_secondary_med">Secondary Medicine</label>
-        <select id="rxMed2" class="input-field">
-          <option value="Cetirizine 10mg">Cetirizine 10mg Tab (₹4 vs ₹22)</option>
-          <option value="Vitamin C + Zinc">Vitamin C + Zinc Tab (₹15 vs ₹75)</option>
-          <option value="Iron & Folic Acid">Iron & Folic Acid Tab (₹4 vs ₹32)</option>
-        </select>
+      <div style="margin-bottom:12px;">
+        <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;" data-i18n="rx_lbl_med1">Jan Aushadhi Generic Medicine 1 *</label>
+        <select id="rxMed1" class="input-field" style="height:44px;" required></select>
       </div>
-      <div style="margin-bottom:14px;">
-        <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;" data-i18n="label_advice">Doctor Advice & Instructions</label>
-        <textarea id="rxAdvice" class="input-field" rows="2"></textarea>
+      <div style="margin-bottom:12px;">
+        <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;" data-i18n="rx_lbl_med2">Jan Aushadhi Generic Medicine 2</label>
+        <select id="rxMed2" class="input-field" style="height:44px;"></select>
       </div>
-      <div style="display:flex;gap:8px;justify-content:flex-end;">
+      <div style="margin-bottom:16px;">
+        <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;" data-i18n="rx_lbl_advice">Doctor Clinical Advice & Precautions *</label>
+        <textarea id="rxAdvice" class="input-field" rows="2" placeholder="e.g. Drink boiled water, rest well, report if fever exceeds 101°F" required></textarea>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:8px;">
         <button type="button" class="btn-glass" onclick="doctorController.closeConsultModal()" data-i18n="btn_cancel">Cancel</button>
-        <button type="submit" class="auth-btn-primary" data-i18n="btn_generate_rx">✓ Generate e-Rx</button>
+        <button type="submit" class="auth-btn-primary" style="background:#16a34a;border-color:#15803d;" data-i18n="btn_issue_rx">✓ Issue e-Prescription</button>
       </div>
     </form>
   </div>
 </div>
 
-<!-- ADD ANC MODAL -->
+<!-- ASHA REGISTER PREGNANT MOTHER MODAL -->
 <div id="addAncModal" class="modal-overlay">
   <div class="modal-card">
-    <h3 style="color:var(--primary-bright);font-size:17px;margin-bottom:14px;">+ Register Pregnant Mother (ANC)</h3>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <h3 style="color:var(--ink);font-size:17px;font-weight:700;">Register Pregnant Mother (ANC)</h3>
+      <button onclick="workerController.closeAddAncModal()" style="background:none;border:none;font-size:20px;color:var(--muted);cursor:pointer;">✕</button>
+    </div>
     <form onsubmit="workerController.submitAddAnc(event)">
-      <div style="margin-bottom:10px;">
-        <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Mother Name *</label>
-        <input type="text" id="ancMotherName" class="input-field" placeholder="e.g. Kavitha M." required>
-      </div>
-      <div style="margin-bottom:10px;">
-        <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Husband Name</label>
-        <input type="text" id="ancHusbandName" class="input-field" placeholder="e.g. Srinivas M.">
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
         <div>
-          <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Village</label>
-          <input type="text" id="ancVillage" class="input-field" value="Kondapalli Ward 2">
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Mother Full Name *</label>
+          <input type="text" id="ancMotherName" class="input-field" placeholder="e.g. Sunita Devi" required>
         </div>
         <div>
-          <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Weeks</label>
-          <input type="number" id="ancWeeks" class="input-field" value="16">
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Husband Name</label>
+          <input type="text" id="ancHusbandName" class="input-field" placeholder="e.g. Ramesh Kumar">
         </div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
         <div>
-          <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">BP</label>
-          <input type="text" id="ancBp" class="input-field" value="110/70">
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Village / Ward *</label>
+          <input type="text" id="ancVillage" class="input-field" placeholder="e.g. Ward 4, Kondapalli" required>
         </div>
         <div>
-          <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Hb (g/dL)</label>
-          <input type="text" id="ancHb" class="input-field" value="11.2">
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Gestational Weeks *</label>
+          <input type="number" id="ancWeeks" class="input-field" placeholder="24" min="1" max="42" required>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px;">
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Blood Pressure</label>
+          <input type="text" id="ancBp" class="input-field" placeholder="110/70" value="110/70">
         </div>
         <div>
-          <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Risk</label>
-          <select id="ancRisk" class="input-field">
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Hemoglobin (Hb)</label>
+          <input type="text" id="ancHb" class="input-field" placeholder="11.2 g/dL" value="11.2 g/dL">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Risk Category</label>
+          <select id="ancRisk" class="input-field" style="height:44px;">
             <option value="Normal">Normal</option>
+            <option value="High Risk (Anemia)">High Risk (Anemia)</option>
             <option value="High Risk (Hypertension)">High Risk (Hypertension)</option>
-            <option value="High Risk (Severe Anemia)">High Risk (Anemia)</option>
           </select>
         </div>
       </div>
-      <div style="display:flex;gap:8px;justify-content:flex-end;">
+      <div style="display:flex;justify-content:flex-end;gap:8px;">
         <button type="button" class="btn-glass" onclick="workerController.closeAddAncModal()">Cancel</button>
-        <button type="submit" class="auth-btn-primary">+ Register</button>
+        <button type="submit" class="auth-btn-primary" style="background:#d97706;border-color:#b45309;">✓ Save to Register</button>
       </div>
     </form>
   </div>
 </div>
 
-
-<!-- ADD UIP IMMUNIZATION MODAL -->
+<!-- ASHA CHILD IMMUNIZATION MODAL -->
 <div id="addImmModal" class="modal-overlay">
   <div class="modal-card">
-    <h3 style="color:var(--primary-bright);font-size:17px;margin-bottom:14px;">+ Record Child Immunization (UIP)</h3>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <h3 style="color:var(--ink);font-size:17px;font-weight:700;">Add Child Immunization Record (UIP)</h3>
+      <button onclick="workerController.closeAddImmModal()" style="background:none;border:none;font-size:20px;color:var(--muted);cursor:pointer;">✕</button>
+    </div>
     <form onsubmit="workerController.submitAddImm(event)">
-      <div style="margin-bottom:10px;">
-        <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Child Full Name *</label>
-        <input type="text" id="immChildName" class="input-field" placeholder="e.g. Aarav Kumar" required>
-      </div>
-      <div style="margin-bottom:10px;">
-        <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Parent / Guardian Name</label>
-        <input type="text" id="immParentName" class="input-field" placeholder="e.g. Ramesh Kumar">
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
-        <div>
-          <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Date of Birth</label>
-          <input type="date" id="immDob" class="input-field" value="2026-01-01">
-        </div>
-        <div>
-          <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Gender</label>
-          <select id="immGender" class="input-field">
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
-            <option value="Other">Other</option>
-          </select>
-        </div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
-        <div>
-          <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Village / Ward</label>
-          <input type="text" id="immVillage" class="input-field" value="Kondapalli Ward 4">
-        </div>
-        <div>
-          <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Administered Vaccine</label>
-          <input type="text" id="immVaccine" class="input-field" value="Pentavalent 1 + OPV">
-        </div>
-      </div>
-      <div style="display:flex;gap:8px;justify-content:flex-end;">
-        <button type="button" class="btn-glass" onclick="workerController.closeAddImmModal()">Cancel</button>
-        <button type="submit" class="auth-btn-primary">+ Save Record</button>
-      </div>
-    </form>
-  </div>
-</div>
-
-<!-- ADD HOME VISIT MODAL -->
-<div id="addVisitModal" class="modal-overlay">
-  <div class="modal-card">
-    <h3 style="color:var(--primary-bright);font-size:17px;margin-bottom:14px;">+ Schedule Village Home Visit</h3>
-    <form onsubmit="workerController.submitAddVisit(event)">
-      <div style="margin-bottom:10px;">
-        <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Household / Family Name *</label>
-        <input type="text" id="visHousehold" class="input-field" placeholder="e.g. House #84, Venkat Rao" required>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
-        <div>
-          <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Family Members</label>
-          <input type="number" id="visMembers" class="input-field" value="4">
-        </div>
-        <div>
-          <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Priority</label>
-          <select id="visPriority" class="input-field">
-            <option value="ANC Follow-up">ANC Follow-up</option>
-            <option value="High-Risk Pregnancy">High-Risk Pregnancy</option>
-            <option value="UIP Immunization">UIP Immunization</option>
-            <option value="NCD Diabetes/BP">NCD Diabetes/BP</option>
-            <option value="General Welfare">General Welfare</option>
-          </select>
-        </div>
-      </div>
-      <div style="margin-bottom:14px;">
-        <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Visit Task / Objective</label>
-        <input type="text" id="visTask" class="input-field" placeholder="e.g. Check IFA intake and blood pressure">
-      </div>
-      <div style="display:flex;gap:8px;justify-content:flex-end;">
-        <button type="button" class="btn-glass" onclick="workerController.closeAddVisitModal()">Cancel</button>
-        <button type="submit" class="auth-btn-primary">+ Add Visit</button>
-      </div>
-    </form>
-  </div>
-</div>
-
-<!-- ADD JAN AUSHADHI MEDICINE MODAL (ADMIN) -->
-<div id="addDrugModal" class="modal-overlay">
-  <div class="modal-card">
-    <h3 style="color:var(--primary-bright);font-size:17px;margin-bottom:14px;">+ Add Jan Aushadhi Medicine</h3>
-    <form onsubmit="adminController.submitAddDrug(event)">
-      <div style="margin-bottom:10px;">
-        <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Generic Medicine Name *</label>
-        <input type="text" id="drugName" class="input-field" placeholder="e.g. Azithromycin 500mg" required>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
-        <div>
-          <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Therapeutic Category</label>
-          <input type="text" id="drugCat" class="input-field" placeholder="e.g. Antibiotic Infection">
-        </div>
-        <div>
-          <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Stock Units</label>
-          <input type="number" id="drugStock" class="input-field" value="250">
-        </div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
-        <div>
-          <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Jan Aushadhi Price (₹)</label>
-          <input type="number" id="drugGenPrice" class="input-field" value="22">
-        </div>
-        <div>
-          <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Branded Market Price (₹)</label>
-          <input type="number" id="drugBrandPrice" class="input-field" value="115">
-        </div>
-      </div>
-      <div style="display:flex;gap:8px;justify-content:flex-end;">
-        <button type="button" class="btn-glass" onclick="adminController.closeAddDrugModal()">Cancel</button>
-        <button type="submit" class="auth-btn-primary">+ Add to Stock</button>
-      </div>
-    </form>
-  </div>
-</div>
-
-
-<!-- SUPABASE SETTINGS MODAL -->
-<div id="supabaseSettingsModal" class="modal-overlay">
-  <div class="modal-card" style="max-width:520px;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-      <div style="display:flex;align-items:center;gap:10px;">
-        <span style="font-size:28px;">⚡</span>
-        <div>
-          <h3 style="color:var(--ink);font-size:17px;font-weight:700;">Supabase Database Settings</h3>
-          <small style="color:var(--muted);">Connect your PostgreSQL cloud instance</small>
-        </div>
-      </div>
-      <button onclick="closeSupabaseSettingsModal()" style="background:none;border:none;font-size:20px;color:var(--muted);cursor:pointer;">✕</button>
-    </div>
-
-    <div style="background:var(--glass-1);border:1px solid var(--glass-border);padding:12px;border-radius:10px;margin-bottom:14px;font-size:12px;color:var(--ink-dim);line-height:1.5;">
-      ℹ️ Run <code style="color:var(--primary-bright);font-weight:700;">supabase/schema.sql</code> and <code style="color:var(--primary-bright);font-weight:700;">supabase/seed.sql</code> in your Supabase SQL Editor, then paste your Project URL & Anon Public API Key below.
-    </div>
-
-    <form onsubmit="handleSaveSupabaseCredentials(event)">
-      <div style="margin-bottom:12px;">
-        <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">Supabase Project URL</label>
-        <input type="url" id="inputSupabaseUrl" class="input-field" placeholder="https://your-project-id.supabase.co" required>
-      </div>
-
-      <div style="margin-bottom:16px;">
-        <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">Supabase Anon Public API Key</label>
-        <input type="password" id="inputSupabaseAnonKey" class="input-field" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6..." required>
-      </div>
-
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
-        <button type="button" class="btn-glass" style="color:#dc2626;" onclick="handleClearSupabaseCredentials()">
-          Disconnect
-        </button>
-        <div style="display:flex;gap:8px;">
-          <button type="button" class="btn-glass" onclick="closeSupabaseSettingsModal()">Cancel</button>
-          <button type="submit" class="auth-btn-primary" style="background:#16a34a;border-color:#15803d;">✓ Connect & Sync</button>
-        </div>
-      </div>
-    </form>
-  </div>
-</div>
-
-
-
-<!-- =========================================================
-     PATIENT / CITIZEN EXCLUSIVE SELF-REGISTRATION MODAL
-     ========================================================= -->
-<div id="registrationModal" class="modal-overlay">
-  <div class="modal-card" style="max-width:520px;">
-    
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-      <div style="display:flex;align-items:center;gap:10px;">
-        <span style="font-size:28px;">🌾</span>
-        <div>
-          <h3 style="color:var(--ink);font-size:18px;font-weight:800;">Citizen & Patient Registration</h3>
-          <small style="color:var(--muted);">National Digital Health Mission (ABDM) ABHA Card Creation</small>
-        </div>
-      </div>
-      <button onclick="closeRegistrationModal()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;">✕</button>
-    </div>
-
-    <form id="regFormPatient" onsubmit="submitPatientRegistration(event)">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
         <div>
-          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Full Name (मरीज का नाम) *</label>
-          <input type="text" id="regPatName" class="input-field" placeholder="e.g. Ramesh Kumar" required>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Child Full Name *</label>
+          <input type="text" id="immChildName" class="input-field" placeholder="e.g. Aarav Kumar" required>
         </div>
         <div>
-          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Mobile Number (मोबाइल नं.) *</label>
-          <input type="tel" id="regPatPhone" class="input-field" placeholder="e.g. 9876543210" maxlength="10" required>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Parent Name *</label>
+          <input type="text" id="immParentName" class="input-field" placeholder="e.g. Ramesh Kumar" required>
         </div>
       </div>
-
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
         <div>
-          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Age (उम्र) *</label>
-          <input type="number" id="regPatAge" class="input-field" placeholder="35" min="1" max="120" required>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Date of Birth *</label>
+          <input type="date" id="immDob" class="input-field" required>
         </div>
         <div>
-          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Gender (लिंग) *</label>
-          <select id="regPatGender" class="input-field" style="height:44px;" required>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Gender *</label>
+          <select id="immGender" class="input-field" style="height:44px;" required>
             <option value="Male">Male (पुरुष)</option>
             <option value="Female">Female (महिला)</option>
-            <option value="Other">Other (अन्य)</option>
-          </select>
-        </div>
-        <div>
-          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Blood Group *</label>
-          <select id="regPatBlood" class="input-field" style="height:44px;" required>
-            <option value="O+">O+</option>
-            <option value="A+">A+</option>
-            <option value="B+">B+</option>
-            <option value="AB+">AB+</option>
-            <option value="O-">O-</option>
-            <option value="A-">A-</option>
-            <option value="B-">B-</option>
-            <option value="AB-">AB-</option>
           </select>
         </div>
       </div>
-
       <div style="margin-bottom:12px;">
-        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Village / Sub-Centre Ward (ग्राम / वार्ड) *</label>
-        <input type="text" id="regPatVillage" class="input-field" placeholder="e.g. Kondapalli Sub-Centre, Ward 4" required>
+        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Village / Ward *</label>
+        <input type="text" id="immVillage" class="input-field" placeholder="e.g. Ward 4, Kondapalli" required>
       </div>
-
-      <div style="margin-bottom:14px;">
-        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Create Account Password or Security PIN *</label>
-        <input type="password" id="regPatPassword" class="input-field" placeholder="Create your private password or PIN" required>
-      </div>
-
-      <div style="background:rgba(22,163,74,0.1);border:1px dashed #16a34a;border-radius:10px;padding:10px;margin-bottom:16px;font-size:12px;color:var(--ink);">
-        ✨ An official <strong>14-digit Ayushman Bharat ABHA Health Card</strong> will be generated automatically and saved to your cloud profile.
-      </div>
-
-      <button type="submit" class="auth-btn-primary" style="width:100%;padding:12px;background:#16a34a;border-color:#15803d;font-size:15px;cursor:pointer;">
-        ✓ Register & Generate ABHA Card
-      </button>
-    </form>
-
-  </div>
-</div>
-
-      <button onclick="closeRegistrationModal()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;">✕</button>
-    </div>
-
-    <!-- ROLE TABS IN REGISTRATION -->
-    <div style="display:grid;grid-template-columns:repeat(4, 1fr);gap:6px;margin-bottom:16px;">
-      <button type="button" class="auth-tab-btn active" id="regTabPatient" onclick="switchRegTab('patient')">
-        <span style="font-size:16px;">🌾</span> <span style="font-size:12px;">Citizen</span>
-      </button>
-      <button type="button" class="auth-tab-btn" id="regTabDoctor" onclick="switchRegTab('doctor')">
-        <span style="font-size:16px;">🩺</span> <span style="font-size:12px;">Doctor</span>
-      </button>
-      <button type="button" class="auth-tab-btn" id="regTabWorker" onclick="switchRegTab('worker')">
-        <span style="font-size:16px;">🤝</span> <span style="font-size:12px;">ASHA</span>
-      </button>
-      <button type="button" class="auth-tab-btn" id="regTabAdmin" onclick="switchRegTab('admin')">
-        <span style="font-size:16px;">👑</span> <span style="font-size:12px;">Admin</span>
-      </button>
-    </div>
-
-    <!-- 1. CITIZEN REGISTRATION FORM -->
-    <form id="regFormPatient" onsubmit="submitRegistration(event, 'patient')">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
-        <div>
-          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Full Name (मरीज का नाम) *</label>
-          <input type="text" id="regPatName" class="input-field" placeholder="e.g. Ramesh Kumar" required>
-        </div>
-        <div>
-          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Mobile Number (मोबाइल नं.) *</label>
-          <input type="tel" id="regPatPhone" class="input-field" placeholder="e.g. 9876543210" maxlength="10" required>
-        </div>
-      </div>
-
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px;">
-        <div>
-          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Age (उम्र) *</label>
-          <input type="number" id="regPatAge" class="input-field" placeholder="35" min="1" max="120" required>
-        </div>
-        <div>
-          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Gender (लिंग) *</label>
-          <select id="regPatGender" class="input-field" style="height:44px;" required>
-            <option value="Male">Male (पुरुष)</option>
-            <option value="Female">Female (महिला)</option>
-            <option value="Other">Other (अन्य)</option>
-          </select>
-        </div>
-        <div>
-          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Blood Group *</label>
-          <select id="regPatBlood" class="input-field" style="height:44px;" required>
-            <option value="O+">O+</option>
-            <option value="A+">A+</option>
-            <option value="B+">B+</option>
-            <option value="AB+">AB+</option>
-            <option value="O-">O-</option>
-            <option value="A-">A-</option>
-            <option value="B-">B-</option>
-            <option value="AB-">AB-</option>
-          </select>
-        </div>
-      </div>
-
-      <div style="margin-bottom:14px;">
-        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Village / Sub-Centre Ward (ग्राम / वार्ड) *</label>
-        <input type="text" id="regPatVillage" class="input-field" placeholder="e.g. Kondapalli Sub-Centre, Ward 4" required>
-      </div>
-
-      <div style="background:rgba(22,163,74,0.1);border:1px dashed #16a34a;border-radius:10px;padding:10px;margin-bottom:16px;font-size:12px;color:var(--ink);">
-        ✨ An official <strong>14-digit Ayushman Bharat ABHA Health Card</strong> will be generated automatically and saved to the cloud.
-      </div>
-
-      <button type="submit" class="auth-btn-primary" style="width:100%;padding:12px;background:#16a34a;border-color:#15803d;font-size:15px;cursor:pointer;">
-        ✓ Register & Generate ABHA Card
-      </button>
-    </form>
-
-    <!-- 2. DOCTOR REGISTRATION FORM -->
-    <form id="regFormDoctor" onsubmit="submitRegistration(event, 'doctor')" style="display:none;">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
-        <div>
-          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Doctor Full Name *</label>
-          <input type="text" id="regDocName" class="input-field" placeholder="e.g. Dr. Priya Sharma" required>
-        </div>
-        <div>
-          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Mobile Number *</label>
-          <input type="tel" id="regDocPhone" class="input-field" placeholder="e.g. 9811122233" maxlength="10" required>
-        </div>
-      </div>
-
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
-        <div>
-          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">MCI / State Council Reg No. *</label>
-          <input type="text" id="regDocRegNo" class="input-field" placeholder="e.g. MCI-AP-48912" required>
-        </div>
-        <div>
-          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Hospital / PHC Location *</label>
-          <input type="text" id="regDocLocation" class="input-field" placeholder="e.g. Kondapalli PHC" required>
-        </div>
-      </div>
-
       <div style="margin-bottom:16px;">
-        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Create Clinical Password *</label>
-        <input type="password" id="regDocPass" class="input-field" placeholder="Create password" required>
-      </div>
-
-      <button type="submit" class="auth-btn-primary" style="width:100%;padding:12px;background:#0284c7;border-color:#0369a1;font-size:15px;cursor:pointer;">
-        🩺 Register Medical Officer Account
-      </button>
-    </form>
-
-    <!-- 3. ASHA WORKER REGISTRATION FORM -->
-    <form id="regFormWorker" onsubmit="submitRegistration(event, 'worker')" style="display:none;">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
-        <div>
-          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">ASHA / ANM Full Name *</label>
-          <input type="text" id="regWorkerName" class="input-field" placeholder="e.g. Lakshmi Didi" required>
-        </div>
-        <div>
-          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Mobile Number *</label>
-          <input type="tel" id="regWorkerPhone" class="input-field" placeholder="e.g. 9833344455" maxlength="10" required>
-        </div>
-      </div>
-
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
-        <div>
-          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Worker Sector / Village Area *</label>
-          <input type="text" id="regWorkerLocation" class="input-field" placeholder="e.g. Sector 4, Kondapalli" required>
-        </div>
-        <div>
-          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">ASHA / ANM Reg ID *</label>
-          <input type="text" id="regWorkerRegNo" class="input-field" placeholder="e.g. ASHA-AP-094" required>
-        </div>
-      </div>
-
-      <div style="margin-bottom:16px;">
-        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Set 4-Digit Passcode / PIN *</label>
-        <input type="password" id="regWorkerPass" class="input-field" placeholder="e.g. 1234" required>
-      </div>
-
-      <button type="submit" class="auth-btn-primary" style="width:100%;padding:12px;background:#d97706;border-color:#b45309;font-size:15px;cursor:pointer;">
-        🤝 Register Frontline ASHA Account
-      </button>
-    </form>
-
-    <!-- 4. HEALTH ADMIN REGISTRATION FORM -->
-    <form id="regFormAdmin" onsubmit="submitRegistration(event, 'admin')" style="display:none;">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
-        <div>
-          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Officer Full Name *</label>
-          <input type="text" id="regAdminName" class="input-field" placeholder="e.g. S. K. Nambiar" required>
-        </div>
-        <div>
-          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Official Phone Number *</label>
-          <input type="tel" id="regAdminPhone" class="input-field" placeholder="e.g. 9855566677" maxlength="10" required>
-        </div>
-      </div>
-
-      <div style="margin-bottom:12px;">
-        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Department / District Headquarters *</label>
-        <input type="text" id="regAdminLocation" class="input-field" placeholder="e.g. District HQ, Vijayawada" required>
-      </div>
-
-      <div style="margin-bottom:16px;">
-        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Set Admin Master Password *</label>
-        <input type="password" id="regAdminPass" class="input-field" placeholder="Create master password" required>
-      </div>
-
-      <button type="submit" class="auth-btn-primary" style="width:100%;padding:12px;background:#db2777;border-color:#be185d;font-size:15px;cursor:pointer;">
-        👑 Register Health Admin Account
-      </button>
-    </form>
-
-  </div>
-</div>
-
-
-<!-- =========================================================
-     MULTI-ROLE PORTAL SELECTION MODAL
-     ========================================================= -->
-<div id="roleChooserModal" class="modal-overlay">
-  <div class="modal-card" style="max-width:460px;text-align:center;">
-    <div style="font-size:36px;margin-bottom:8px;">🔄</div>
-    <h3 style="color:var(--ink);font-size:18px;font-weight:800;margin-bottom:6px;">Multiple Portals Found</h3>
-    <p style="color:var(--muted);font-size:13px;margin-bottom:18px;">Your account is authorized for multiple healthcare roles. Select which portal you wish to enter:</p>
-
-    <div id="roleChooserButtons" style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;"></div>
-
-    <button type="button" class="btn-glass" onclick="closeRoleChooserModal()" style="width:100%;">Cancel</button>
-  </div>
-</div>
-
-
-<!-- =========================================================
-     ADMIN STAFF PROVISIONING & LICENSE ISSUANCE MODAL
-     ========================================================= -->
-<div id="provisionStaffModal" class="modal-overlay">
-  <div class="modal-card" style="max-width:520px;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-      <div style="display:flex;align-items:center;gap:10px;">
-        <span style="font-size:28px;">👑</span>
-        <div>
-          <h3 style="color:var(--ink);font-size:18px;font-weight:800;">Provision Healthcare Personnel</h3>
-          <small style="color:var(--muted);">Create Doctor, ASHA Worker, or Admin with Temporary Credentials</small>
-        </div>
-      </div>
-      <button onclick="adminController.closeProvisionStaffModal()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;">✕</button>
-    </div>
-
-    <form onsubmit="adminController.submitProvisionStaff(event)">
-      <div style="margin-bottom:12px;">
-        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Select Role *</label>
-        <select id="provStaffRole" class="input-field" style="height:44px;" required>
-          <option value="doctor">🩺 Medical Officer / Doctor (MBBS/MD)</option>
-          <option value="worker">🤝 ASHA / ANM Frontline Field Worker</option>
-          <option value="admin">👑 Health Administrator (District HQ)</option>
+        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Administered Vaccine Dosage *</label>
+        <select id="immVaccine" class="input-field" style="height:44px;" required>
+          <option value="BCG + OPV 0 + HepB (Birth)">BCG + OPV 0 + HepB (Birth)</option>
+          <option value="Pentavalent 1 + OPV 1 + Rotavirus 1 (6 Wks)">Pentavalent 1 + OPV 1 + Rotavirus 1 (6 Wks)</option>
+          <option value="Pentavalent 2 + OPV 2 + Rotavirus 2 (10 Wks)">Pentavalent 2 + OPV 2 + Rotavirus 2 (10 Wks)</option>
+          <option value="Pentavalent 3 + OPV 3 + IPV + Rotavirus 3 (14 Wks)">Pentavalent 3 + OPV 3 + IPV + Rotavirus 3 (14 Wks)</option>
+          <option value="MR 1st Dose + JE 1 + Vit A (9 Months)">MR 1st Dose + JE 1 + Vit A (9 Months)</option>
+          <option value="MR 2nd Dose + DPT Booster + OPV Booster (16-24 Months)">MR 2nd Dose + DPT Booster + OPV Booster (16-24 Months)</option>
         </select>
       </div>
-
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
-        <div>
-          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Full Name *</label>
-          <input type="text" id="provStaffName" class="input-field" placeholder="e.g. Dr. Rajesh Verma" required>
-        </div>
-        <div>
-          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Official Mobile Number *</label>
-          <input type="tel" id="provStaffPhone" class="input-field" placeholder="e.g. 9822233344" maxlength="10" required>
-        </div>
-      </div>
-
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
-        <div>
-          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">License / Registration ID *</label>
-          <input type="text" id="provStaffRegNo" class="input-field" placeholder="e.g. MCI-AP-31209">
-        </div>
-        <div>
-          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Assigned Hospital / Sector *</label>
-          <input type="text" id="provStaffLocation" class="input-field" placeholder="e.g. Ibrahimpatnam CHC">
-        </div>
-      </div>
-
-      <div style="margin-bottom:16px;">
-        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Set Initial Temporary Password / PIN *</label>
-        <input type="password" id="provStaffPassword" class="input-field" placeholder="e.g. doc@123" required>
-        <small style="color:var(--muted);display:block;margin-top:3px;">Staff member can change this to a private password upon logging in.</small>
-      </div>
-
       <div style="display:flex;justify-content:flex-end;gap:8px;">
-        <button type="button" class="btn-glass" onclick="adminController.closeProvisionStaffModal()">Cancel</button>
-        <button type="submit" class="auth-btn-primary" style="background:#db2777;border-color:#be185d;">✓ Provision & Save to Cloud</button>
+        <button type="button" class="btn-glass" onclick="workerController.closeAddImmModal()">Cancel</button>
+        <button type="submit" class="auth-btn-primary" style="background:#16a34a;border-color:#15803d;">✓ Save Vaccine Record</button>
       </div>
     </form>
   </div>
 </div>
 
-
-<!-- =========================================================
-     PRIVACY PASSWORD CHANGE MODAL
-     ========================================================= -->
-<div id="changePasswordModal" class="modal-overlay">
-  <div class="modal-card" style="max-width:440px;">
+<!-- ASHA VILLAGE HOME VISIT MODAL -->
+<div id="addVisitModal" class="modal-overlay">
+  <div class="modal-card">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-      <div style="display:flex;align-items:center;gap:10px;">
-        <span style="font-size:26px;">🔑</span>
+      <h3 style="color:var(--ink);font-size:17px;font-weight:700;">Schedule Village Home Visit</h3>
+      <button onclick="workerController.closeAddVisitModal()" style="background:none;border:none;font-size:20px;color:var(--muted);cursor:pointer;">✕</button>
+    </div>
+    <form onsubmit="workerController.submitAddVisit(event)">
+      <div style="margin-bottom:12px;">
+        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Household Address / Resident *</label>
+        <input type="text" id="visHousehold" class="input-field" placeholder="e.g. House #42, Ramesh Kumar" required>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
         <div>
-          <h3 style="color:var(--ink);font-size:17px;font-weight:800;">Change Account Password</h3>
-          <small style="color:var(--muted);">Update your private security credentials</small>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Family Members Count</label>
+          <input type="number" id="visMembers" class="input-field" placeholder="4" min="1" max="20" value="4">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Priority Level</label>
+          <select id="visPriority" class="input-field" style="height:44px;">
+            <option value="Routine Check">Routine Check</option>
+            <option value="ANC Follow-up">ANC Follow-up</option>
+            <option value="High-Risk Pregnancy">High-Risk Pregnancy</option>
+            <option value="NCD Diabetes/BP">NCD Diabetes/BP</option>
+          </select>
         </div>
       </div>
-      <button onclick="closeChangePasswordModal()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;">✕</button>
-    </div>
-
-    <form onsubmit="submitChangePassword(event)">
-      <div style="margin-bottom:12px;">
-        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">New Password / PIN *</label>
-        <input type="password" id="newAccountPassword" class="input-field" placeholder="Enter new private password" required>
-      </div>
-
       <div style="margin-bottom:16px;">
-        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Confirm New Password *</label>
-        <input type="password" id="confirmAccountPassword" class="input-field" placeholder="Re-enter new password" required>
+        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Field Task Description *</label>
+        <input type="text" id="visTask" class="input-field" placeholder="e.g. Check IFA tablet compliance and measure BP" required>
       </div>
-
       <div style="display:flex;justify-content:flex-end;gap:8px;">
-        <button type="button" class="btn-glass" onclick="closeChangePasswordModal()">Cancel</button>
-        <button type="submit" class="auth-btn-primary" style="background:#16a34a;border-color:#15803d;">✓ Update Password</button>
+        <button type="button" class="btn-glass" onclick="workerController.closeAddVisitModal()">Cancel</button>
+        <button type="submit" class="auth-btn-primary" style="background:#0284c7;border-color:#0369a1;">✓ Schedule Visit</button>
       </div>
     </form>
   </div>
 </div>
 
-<!-- TOAST -->
-<div id="toast"></div>
+<!-- ADMIN JAN AUSHADHI MEDICINE MODAL -->
+<div id="addDrugModal" class="modal-overlay">
+  <div class="modal-card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <h3 style="color:var(--ink);font-size:17px;font-weight:700;">Add Generic Medicine to Jan Aushadhi Catalog</h3>
+      <button onclick="adminController.closeAddDrugModal()" style="background:none;border:none;font-size:20px;color:var(--muted);cursor:pointer;">✕</button>
+    </div>
+    <form onsubmit="adminController.submitAddDrug(event)">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Medicine Name & Strength *</label>
+          <input type="text" id="drugName" class="input-field" placeholder="e.g. Azithromycin 500mg" required>
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Therapeutic Category</label>
+          <input type="text" id="drugCat" class="input-field" placeholder="e.g. Antibiotic Infection">
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px;">
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Opening Stock</label>
+          <input type="number" id="drugStock" class="input-field" placeholder="200" value="200">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Jan Aushadhi Price (₹) *</label>
+          <input type="number" step="0.5" id="drugGenPrice" class="input-field" placeholder="18" required>
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Brand Market Price (₹)</label>
+          <input type="number" step="0.5" id="drugBrandPrice" class="input-field" placeholder="85">
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:8px;">
+        <button type="button" class="btn-glass" onclick="adminController.closeAddDrugModal()">Cancel</button>
+        <button type="submit" class="auth-btn-primary" style="background:#16a34a;border-color:#15803d;">✓ Add to Catalog</button>
+      </div>
+    </form>
+  </div>
+</div>
 
-
-<!-- =========================================================
-     PATIENT / CITIZEN EXCLUSIVE SELF-REGISTRATION MODAL
-     ========================================================= -->
+<!-- PATIENT EXCLUSIVE REGISTRATION MODAL -->
 <div id="registrationModal" class="modal-overlay">
   <div class="modal-card" style="max-width:520px;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
@@ -1608,7 +1236,6 @@ body {
       </div>
       <button onclick="closeRegistrationModal()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;">✕</button>
     </div>
-
     <form id="regFormPatient" onsubmit="submitPatientRegistration(event)">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
         <div>
@@ -1620,7 +1247,6 @@ body {
           <input type="tel" id="regPatPhone" class="input-field" placeholder="e.g. 9876543210" maxlength="10" required>
         </div>
       </div>
-
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px;">
         <div>
           <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Age (उम्र) *</label>
@@ -1648,21 +1274,17 @@ body {
           </select>
         </div>
       </div>
-
       <div style="margin-bottom:12px;">
         <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Village / Sub-Centre Ward (ग्राम / वार्ड) *</label>
         <input type="text" id="regPatVillage" class="input-field" placeholder="e.g. Kondapalli Sub-Centre, Ward 4" required>
       </div>
-
       <div style="margin-bottom:14px;">
         <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Create Account Password or Security PIN *</label>
         <input type="password" id="regPatPassword" class="input-field" placeholder="Create your private password or PIN" required>
       </div>
-
       <div style="background:rgba(22,163,74,0.1);border:1px dashed #16a34a;border-radius:10px;padding:10px;margin-bottom:16px;font-size:12px;color:var(--ink);">
         ✨ An official <strong>14-digit Ayushman Bharat ABHA Health Card</strong> will be generated automatically and saved to your cloud profile.
       </div>
-
       <button type="submit" class="auth-btn-primary" style="width:100%;padding:12px;background:#16a34a;border-color:#15803d;font-size:15px;cursor:pointer;">
         ✓ Register & Generate ABHA Card
       </button>
@@ -1670,9 +1292,7 @@ body {
   </div>
 </div>
 
-<!-- =========================================================
-     MULTI-ROLE PORTAL SELECTION MODAL
-     ========================================================= -->
+<!-- MULTI-ROLE PORTAL SELECTION MODAL -->
 <div id="roleChooserModal" class="modal-overlay">
   <div class="modal-card" style="max-width:460px;text-align:center;">
     <div style="font-size:36px;margin-bottom:8px;">🔄</div>
@@ -1683,9 +1303,7 @@ body {
   </div>
 </div>
 
-<!-- =========================================================
-     ADMIN STAFF PROVISIONING MODAL
-     ========================================================= -->
+<!-- ADMIN STAFF PROVISIONING MODAL -->
 <div id="provisionStaffModal" class="modal-overlay">
   <div class="modal-card" style="max-width:520px;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
@@ -1698,7 +1316,6 @@ body {
       </div>
       <button onclick="adminController.closeProvisionStaffModal()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;">✕</button>
     </div>
-
     <form onsubmit="adminController.submitProvisionStaff(event)">
       <div style="margin-bottom:12px;">
         <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Select Role *</label>
@@ -1708,7 +1325,6 @@ body {
           <option value="admin">👑 Health Administrator (District HQ)</option>
         </select>
       </div>
-
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
         <div>
           <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Full Name *</label>
@@ -1719,7 +1335,6 @@ body {
           <input type="tel" id="provStaffPhone" class="input-field" placeholder="e.g. 9822233344" maxlength="10" required>
         </div>
       </div>
-
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
         <div>
           <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">License / Registration ID *</label>
@@ -1730,13 +1345,11 @@ body {
           <input type="text" id="provStaffLocation" class="input-field" placeholder="e.g. Ibrahimpatnam CHC">
         </div>
       </div>
-
       <div style="margin-bottom:16px;">
         <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Set Initial Temporary Password / PIN *</label>
         <input type="password" id="provStaffPassword" class="input-field" placeholder="e.g. doc@123" required>
         <small style="color:var(--muted);display:block;margin-top:3px;">Staff member can change this to a private password upon logging in.</small>
       </div>
-
       <div style="display:flex;justify-content:flex-end;gap:8px;">
         <button type="button" class="btn-glass" onclick="adminController.closeProvisionStaffModal()">Cancel</button>
         <button type="submit" class="auth-btn-primary" style="background:#db2777;border-color:#be185d;">✓ Provision & Save to Cloud</button>
@@ -1745,9 +1358,7 @@ body {
   </div>
 </div>
 
-<!-- =========================================================
-     PRIVACY PASSWORD CHANGE MODAL
-     ========================================================= -->
+<!-- PRIVACY PASSWORD CHANGE MODAL -->
 <div id="changePasswordModal" class="modal-overlay">
   <div class="modal-card" style="max-width:440px;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
@@ -1760,21 +1371,51 @@ body {
       </div>
       <button onclick="closeChangePasswordModal()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;">✕</button>
     </div>
-
     <form onsubmit="submitChangePassword(event)">
       <div style="margin-bottom:12px;">
         <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">New Password / PIN *</label>
         <input type="password" id="newAccountPassword" class="input-field" placeholder="Enter new private password" required>
       </div>
-
       <div style="margin-bottom:16px;">
         <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Confirm New Password *</label>
         <input type="password" id="confirmAccountPassword" class="input-field" placeholder="Re-enter new password" required>
       </div>
-
       <div style="display:flex;justify-content:flex-end;gap:8px;">
         <button type="button" class="btn-glass" onclick="closeChangePasswordModal()">Cancel</button>
         <button type="submit" class="auth-btn-primary" style="background:#16a34a;border-color:#15803d;">✓ Update Password</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- SUPABASE SETTINGS MODAL -->
+<div id="supabaseSettingsModal" class="modal-overlay">
+  <div class="modal-card" style="max-width:520px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:28px;">⚡</span>
+        <div>
+          <h3 style="color:var(--ink);font-size:17px;font-weight:700;">Supabase Database Settings</h3>
+          <small style="color:var(--muted);">Connected PostgreSQL Cloud Instance</small>
+        </div>
+      </div>
+      <button onclick="closeSupabaseSettingsModal()" style="background:none;border:none;font-size:20px;color:var(--muted);cursor:pointer;">✕</button>
+    </div>
+    <form onsubmit="handleSaveSupabaseCredentials(event)">
+      <div style="margin-bottom:12px;">
+        <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">Supabase Project URL</label>
+        <input type="url" id="inputSupabaseUrl" class="input-field" placeholder="https://your-project.supabase.co" required>
+      </div>
+      <div style="margin-bottom:16px;">
+        <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">Supabase Public Key</label>
+        <input type="password" id="inputSupabaseAnonKey" class="input-field" placeholder="API Key" required>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+        <button type="button" class="btn-glass" style="color:#dc2626;" onclick="handleClearSupabaseCredentials()">Disconnect</button>
+        <div style="display:flex;gap:8px;">
+          <button type="button" class="btn-glass" onclick="closeSupabaseSettingsModal()">Cancel</button>
+          <button type="submit" class="auth-btn-primary" style="background:#16a34a;border-color:#15803d;">✓ Connect & Sync</button>
+        </div>
       </div>
     </form>
   </div>
@@ -1813,26 +1454,22 @@ function handleSaveSupabaseCredentials(e) {
   const url = document.getElementById('inputSupabaseUrl').value.trim();
   const anonKey = document.getElementById('inputSupabaseAnonKey').value.trim();
   if (!url || !anonKey) {
-    alert('Please enter both Supabase URL and Anon Key');
+    alert('Please enter both Supabase URL and Key');
     return;
   }
   if (window.SUPABASE_CONFIG) {
     window.SUPABASE_CONFIG.saveCredentials(url, anonKey);
     closeSupabaseSettingsModal();
-    if (typeof window.toast === 'function') {
-      window.toast('⚡ Supabase Connected & Synchronizing!');
-    }
+    if (typeof window.toast === 'function') window.toast('⚡ Supabase Connected & Synchronizing!');
   }
 }
 
 function handleClearSupabaseCredentials() {
-  if (confirm('Disconnect Supabase and switch back to local store?')) {
+  if (confirm('Disconnect Supabase and switch to local store?')) {
     if (window.SUPABASE_CONFIG) {
       window.SUPABASE_CONFIG.clearCredentials();
       closeSupabaseSettingsModal();
-      if (typeof window.toast === 'function') {
-        window.toast('⚙️ Supabase Disconnected');
-      }
+      if (typeof window.toast === 'function') window.toast('⚙️ Supabase Disconnected');
     }
   }
 }
@@ -1879,9 +1516,7 @@ function submitChangePassword(e) {
     const res = window.appStore.changeActiveUserPassword(p1);
     closeChangePasswordModal();
     if (res && res.success) {
-      if (typeof window.toast === 'function') {
-        window.toast('🔑 Password changed successfully & synced to cloud!');
-      }
+      if (typeof window.toast === 'function') window.toast('🔑 Password changed successfully & synced to cloud!');
     } else {
       alert((res && res.message) || 'Failed to update password');
     }
@@ -1916,9 +1551,7 @@ function selectPortalRole(role) {
   if (window.appStore) {
     const res = window.appStore.verifyAndLogin(role, {});
     renderActivePortalView();
-    if (typeof window.toast === 'function') {
-      window.toast('✓ Logged into ' + role.toUpperCase() + ' Portal');
-    }
+    if (typeof window.toast === 'function') window.toast('✓ Logged into ' + role.toUpperCase() + ' Portal');
   }
 }
 
@@ -1938,16 +1571,13 @@ function submitPatientRegistration(e) {
   }
 
   if (window.appStore) {
-    const res = window.appStore.registerNewUser('patient', { name, phone, age, gender, bloodGroup, village, password });
+    const res = window.appStore.registerPatientUser({ name, phone, age, gender, bloodGroup, village, password });
     closeRegistrationModal();
     renderActivePortalView();
-    if (typeof window.toast === 'function') {
-      window.toast('🎉 Welcome ' + res.user.name + '! ABHA Card: ' + res.user.abhaId);
-    }
+    if (typeof window.toast === 'function') window.toast('🎉 Welcome ' + res.user.name + '! ABHA Card: ' + res.user.abhaId);
   }
 }
 
-// Switch Active Login Tab
 function switchLoginTab(role) {
   const roles = ['patient', 'doctor', 'worker', 'admin'];
   roles.forEach(r => {
@@ -1967,7 +1597,7 @@ function switchLoginTab(role) {
 function showLoginError(msg) {
   const b = document.getElementById('loginErrorBanner');
   if (b) {
-    b.textContent = '⚠️ ' + msg;
+    b.textContent = msg;
     b.style.display = 'block';
   }
 }
@@ -1985,12 +1615,10 @@ function sendMockOtp(role) {
     return;
   }
   hideLoginError();
-  if (typeof window.toast === 'function') {
-    window.toast('📲 OTP sent to ' + val + ': 123456');
-  }
+  if (typeof window.toast === 'function') window.toast('📲 OTP sent to ' + val + ': 123456');
 }
 
-// Universal Verification Handler for Patient
+// STRICT AUTHENTICATION HANDLERS
 function handlePatientAuth(e) {
   if (e) e.preventDefault();
   hideLoginError();
@@ -2000,6 +1628,10 @@ function handlePatientAuth(e) {
 
   if (!id) {
     showLoginError('Please enter your Mobile Number or ABHA Health ID.');
+    return;
+  }
+  if (!pass) {
+    showLoginError('Please enter your Password or Security PIN.');
     return;
   }
 
@@ -2013,11 +1645,10 @@ function handlePatientAuth(e) {
     renderActivePortalView();
     if (typeof window.toast === 'function') window.toast('✓ Verified: Welcome ' + (res.user ? res.user.name : 'Citizen'));
   } else {
-    showLoginError(res.message || 'Authentication failed: Invalid credentials.');
+    showLoginError(res.message || '⚠️ Access Denied: Incorrect Mobile Number or Password.');
   }
 }
 
-// Universal Verification Handler for Staff (Doctor, Worker, Admin)
 function handleStaffAuth(e, role) {
   if (e) e.preventDefault();
   hideLoginError();
@@ -2030,6 +1661,10 @@ function handleStaffAuth(e, role) {
 
   if (!id) {
     showLoginError('Please enter your Mobile Number, Staff ID, or Registration Number.');
+    return;
+  }
+  if (!pass) {
+    showLoginError('Please enter your Password or Passcode.');
     return;
   }
 
@@ -2048,23 +1683,16 @@ function handleStaffAuth(e, role) {
 }
 
 function handleLogoClick() {
-  if (typeof window.stopReadAloud === 'function') {
-    window.stopReadAloud();
-  }
+  if (typeof window.stopReadAloud === 'function') window.stopReadAloud();
   doLogout();
 }
 
 function doLogout() {
-  if (window.appStore) {
-    window.appStore.logout();
-  }
+  if (window.appStore) window.appStore.logout();
   renderActivePortalView();
-  if (typeof window.toast === 'function') {
-    window.toast('🚪 Logged out to Healthcare Gateway');
-  }
+  if (typeof window.toast === 'function') window.toast('🚪 Logged out to Healthcare Gateway');
 }
 
-// Render active portal view based on store session
 function renderActivePortalView() {
   const session = window.appStore ? window.appStore.getState().session : { isLoggedIn: false };
   const views = ['Login', 'Patient', 'Doctor', 'Worker', 'Admin'];
@@ -2079,7 +1707,6 @@ function renderActivePortalView() {
     return;
   }
 
-  // Authenticated
   const role = session.role;
   const activeViewName = role.charAt(0).toUpperCase() + role.slice(1);
 
