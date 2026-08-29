@@ -158,56 +158,25 @@
 }
 
 /* =========================================================
-   TRIPLE THEME ENGINE (EMERALD / OLED / DAYLIGHT)
+   THEMES: EMERALD GREEN & CLASSIC
    ========================================================= */
 
-/* 1. Midnight OLED (True Blackout) */
-[data-theme="oled"] {
-  --void-950: #000000 !important;
-  --void-900: #050505 !important;
-  --void-850: #0a0a0a !important;
-  --void-800: #121212 !important;
-  --glass-panel-bg: rgba(10, 10, 10, 0.95) !important;
-  --glass-border: rgba(255, 255, 255, 0.12) !important;
+/* Classic Theme Overrides for Patient Components */
+[data-theme="classic"] .med-dose-item {
+  background: #1e293b !important;
+  border-color: #334155 !important;
 }
 
-/* 2. Daylight Clean Light Theme */
-[data-theme="daylight"] {
-  --void-950: #f8fafc !important;
-  --void-900: #f1f5f9 !important;
-  --void-850: #e2e8f0 !important;
-  --void-800: #cbd5e1 !important;
-  --ink-primary: #0f172a !important;
-  --ink-dim: #334155 !important;
-  --muted: #64748b !important;
-  --glass-panel-bg: rgba(255, 255, 255, 0.88) !important;
-  --glass-border: rgba(15, 23, 42, 0.12) !important;
-  color: #0f172a !important;
+[data-theme="classic"] .family-pill {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
 }
 
-[data-theme="daylight"] .glass-panel {
-  background: rgba(255, 255, 255, 0.9) !important;
-  border-color: rgba(15, 23, 42, 0.12) !important;
-  color: #0f172a !important;
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08) !important;
-}
-
-[data-theme="daylight"] h1,
-[data-theme="daylight"] h2,
-[data-theme="daylight"] h3,
-[data-theme="daylight"] h4,
-[data-theme="daylight"] strong {
-  color: #0f172a !important;
-}
-
-[data-theme="daylight"] .sidebar-rail {
-  background: #ffffff !important;
-  border-right-color: #e2e8f0 !important;
-}
-
-[data-theme="daylight"] .topbar {
-  background: rgba(255, 255, 255, 0.92) !important;
-  border-bottom-color: #e2e8f0 !important;
+[data-theme="classic"] .family-pill.active {
+  background: #0284c7 !important;
+  border-color: #38bdf8 !important;
+  color: #ffffff !important;
 }
 
 /* =========================================================

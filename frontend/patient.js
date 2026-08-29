@@ -243,59 +243,41 @@
     // 1. THEME ENGINE (EMERALD / OLED / DAYLIGHT)
     // -------------------------------------------------------------
     initTheme() {
-      const savedTheme = localStorage.getItem('swasthya_setu_theme') || 'emerald';
-      this.setTheme(savedTheme);
+      const savedTheme = localStorage.getItem('swasthya_setu_theme');
+      const validTheme = (savedTheme === 'classic') ? 'classic' : 'emerald';
+      this.setTheme(validTheme);
     }
 
     setTheme(themeName) {
-      this.data.currentTheme = themeName;
-      localStorage.setItem('swasthya_setu_theme', themeName);
+      const validTheme = (themeName === 'classic') ? 'classic' : 'emerald';
+      this.data.currentTheme = validTheme;
+      localStorage.setItem('swasthya_setu_theme', validTheme);
 
-      document.documentElement.setAttribute('data-theme', themeName);
-      document.body.setAttribute('data-theme', themeName);
-      document.body.className = `theme-${themeName}`;
+      document.documentElement.setAttribute('data-theme', validTheme);
+      document.body.setAttribute('data-theme', validTheme);
+      document.body.className = `theme-${validTheme}`;
 
       const themeLabels = {
-        'violet': '💜 Dark Violet',
-        'black': '⬛ Pure Black',
-        'dark': '🌙 Modern Dark',
-        'emerald': '🌿 Emerald Night',
-        'navy': '🌊 Deep Navy Blue',
-        'gov': '🏛️ Sarkari Blue & White',
-        'daylight': '☀️ Daylight Pearl',
-        'oled': '🌑 Midnight OLED'
+        'emerald': '🌿 Emerald Green',
+        'classic': '🏛️ Classic'
       };
 
       const themeBtn = document.getElementById('themeToggleBtn');
       if (themeBtn) {
-        themeBtn.innerHTML = `<span>${themeLabels[themeName] || themeName}</span>`;
-      }
-
-      const modeBtn = document.getElementById('modeToggleBtn');
-      if (modeBtn) {
-        const isLight = ['daylight', 'gov'].includes(themeName);
-        modeBtn.innerHTML = `<span>${isLight ? '☀️ Light' : '🌙 Dark'}</span>`;
+        themeBtn.innerHTML = `<span>${themeLabels[validTheme] || '🌿 Emerald Green'}</span>`;
       }
     }
 
     getThemeDisplayName(themeName) {
       const themeLabels = {
-        'violet': '💜 Dark Violet',
-        'black': '⬛ Pure Black',
-        'dark': '🌙 Modern Dark',
-        'emerald': '🌿 Emerald Night',
-        'navy': '🌊 Deep Navy Blue',
-        'gov': '🏛️ Sarkari Blue & White',
-        'daylight': '☀️ Daylight Pearl',
-        'oled': '🌑 Midnight OLED'
+        'emerald': '🌿 Emerald Green',
+        'classic': '🏛️ Classic'
       };
-      return themeLabels[themeName] || themeName;
+      return themeLabels[themeName] || '🌿 Emerald Green';
     }
 
     toggleThemeNext() {
-      const themes = ['violet', 'black', 'emerald', 'dark', 'navy', 'gov', 'daylight', 'oled'];
-      const currentIndex = themes.indexOf(this.data.currentTheme);
-      const nextTheme = themes[(currentIndex + 1) % themes.length];
+      const nextTheme = (this.data.currentTheme === 'emerald') ? 'classic' : 'emerald';
       this.setTheme(nextTheme);
       if (typeof window.toast === 'function') {
         window.toast(`Theme: ${this.getThemeDisplayName(nextTheme)}`);
@@ -303,11 +285,7 @@
     }
 
     toggleDarkMode() {
-      const isLight = ['daylight', 'gov'].includes(this.data.currentTheme);
-      this.setTheme(isLight ? 'dark' : 'daylight');
-      if (typeof window.toast === 'function') {
-        window.toast(isLight ? '🌙 Switched to Dark Mode' : '☀️ Switched to Light Mode');
-      }
+      this.toggleThemeNext();
     }
 
     // -------------------------------------------------------------
