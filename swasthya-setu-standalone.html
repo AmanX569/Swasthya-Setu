@@ -30,25 +30,119 @@ if ('caches' in window) {
    3 OPTIMIZED HIGH-CONTRAST GLASS THEMES (CLASSIC · BLACK · NAVY)
    ========================================================= */
 
-/* 1. CLASSIC WHITE & ROYAL BLUE (DEFAULT) */
+/* 1. CLASSIC ROYAL BLUE & SOLID CRISP WHITE (DEFAULT — NO GLASS BLUR) */
 :root, [data-theme="classic"], body[data-theme="classic"], body:not([data-theme="black"]):not([data-theme="navy"]) {
-  --void-950: #f1f5f9;
-  --void-900: #e2e8f0;
-  --glass-1: rgba(255, 255, 255, 0.88);
+  --void-950: #f8fafc;
+  --void-900: #f1f5f9;
+  --glass-1: #ffffff;
   --glass-2: #ffffff;
-  --glass-border: rgba(203, 213, 225, 0.85);
-  --primary: #0052cc;
-  --primary-dark: #003d99;
-  --primary-bright: #0b5ed7;
+  --glass-border: #e2e8f0;
+  --primary: #0284c7;
+  --primary-dark: #0369a1;
+  --primary-bright: #0284c7;
   --accent: #d97706;
   --ink: #0f172a;
   --ink-dim: #334155;
   --muted: #64748b;
   --line: #e2e8f0;
-  --topbar-bg: rgba(255, 255, 255, 0.94);
-  --body-bg: #f1f5f9;
-  --shadow-panel: 0 4px 20px rgba(0, 51, 102, 0.05);
+  --topbar-bg: #ffffff;
+  --body-bg: #f8fafc;
+  --shadow-panel: 0 1px 4px 0 rgba(0, 0, 0, 0.06), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
   color-scheme: light;
+}
+
+/* Crisp Solid Surfaces for Classic Blue & White Theme (Zero Glass Distortion) */
+[data-theme="classic"] body,
+body:not([data-theme="black"]):not([data-theme="navy"]) {
+  background: #f8fafc !important;
+  background-image: none !important;
+}
+
+[data-theme="classic"] .top-appbar,
+body:not([data-theme="black"]):not([data-theme="navy"]) .top-appbar {
+  background: #ffffff !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+}
+
+[data-theme="classic"] .glass-panel,
+[data-theme="classic"] .pillar-card,
+[data-theme="classic"] .auth-form-card,
+[data-theme="classic"] .rx-glass-card,
+body:not([data-theme="black"]):not([data-theme="navy"]) .glass-panel,
+body:not([data-theme="black"]):not([data-theme="navy"]) .pillar-card,
+body:not([data-theme="black"]):not([data-theme="navy"]) .auth-form-card,
+body:not([data-theme="black"]):not([data-theme="navy"]) .rx-glass-card {
+  background: #ffffff !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 16px !important;
+  box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.06), 0 1px 2px -1px rgba(0, 0, 0, 0.04) !important;
+}
+
+[data-theme="classic"] .btn-glass,
+body:not([data-theme="black"]):not([data-theme="navy"]) .btn-glass {
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #0f172a !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+}
+
+[data-theme="classic"] .btn-glass:hover,
+body:not([data-theme="black"]):not([data-theme="navy"]) .btn-glass:hover {
+  background: #f1f5f9 !important;
+  border-color: #94a3b8 !important;
+}
+
+[data-theme="classic"] .input-field,
+body:not([data-theme="black"]):not([data-theme="navy"]) .input-field {
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+[data-theme="classic"] .input-field:focus,
+body:not([data-theme="black"]):not([data-theme="navy"]) .input-field:focus {
+  border-color: #0284c7 !important;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15) !important;
+}
+
+[data-theme="classic"] .modal-overlay,
+body:not([data-theme="black"]):not([data-theme="navy"]) .modal-overlay {
+  background: rgba(15, 23, 42, 0.45) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+[data-theme="classic"] .modal-card,
+body:not([data-theme="black"]):not([data-theme="navy"]) .modal-card {
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12) !important;
+}
+
+[data-theme="classic"] .hero-guide-btn,
+body:not([data-theme="black"]):not([data-theme="navy"]) .hero-guide-btn {
+  background: #ffffff !important;
+  border: 1.5px solid #cbd5e1 !important;
+  color: #0f172a !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+}
+
+[data-theme="classic"] .session-user-badge,
+body:not([data-theme="black"]):not([data-theme="navy"]) .session-user-badge {
+  background: #f1f5f9 !important;
+  color: #0f172a !important;
+  border: 1.5px solid #cbd5e1 !important;
+}
+
+[data-theme="classic"] .faq-item,
+body:not([data-theme="black"]):not([data-theme="navy"]) .faq-item {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
 }
 
 /* 2. PURE BLACK GLASS (AMOLED 100% PITCH BLACK) */
@@ -8889,6 +8983,21 @@ function goToLogin() {
   showView('Login');
 }
 
+
+function updateSupabaseBadgeVisibility() {
+  const supabaseBadge = document.getElementById('supabaseStatusBadge');
+  if (!supabaseBadge) return;
+  const session = window.appStore ? window.appStore.getState().session : { isLoggedIn: false };
+  
+  // Strictly hide Supabase Live/Settings button for Doctor, Patient, and ASHA Worker
+  if (session && session.isLoggedIn && (session.role === 'doctor' || session.role === 'patient' || session.role === 'worker')) {
+    supabaseBadge.style.display = 'none';
+  } else {
+    supabaseBadge.style.display = 'inline-flex';
+  }
+}
+
+
 // Buttery-Smooth Cross-Fade View Transitions
 let isTransitioning = false;
 
@@ -8937,6 +9046,7 @@ function showView(viewName) {
     }
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    updateSupabaseBadgeVisibility();
   };
 
   // Modern View Transition API if supported
@@ -9066,6 +9176,7 @@ function renderActivePortalView() {
     userBadge.textContent = (roleIcons[role] || '👤') + ' ' + (user.name || 'User');
   }
 
+  updateSupabaseBadgeVisibility();
   if (typeof window.scrollTo === 'function') {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
