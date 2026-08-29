@@ -347,6 +347,54 @@
     }
 
 
+    
+    openRequestConsultModal() {
+      const m = document.getElementById('patientRequestConsultModal');
+      const docSelect = document.getElementById('patientConsultDoctorSelect');
+      if (docSelect && this.store) {
+        const doctors = (this.store.getState().staff || []).filter(s => s.role === 'doctor');
+        docSelect.innerHTML = doctors.map(d => `
+          <option value="${d.id || d.staff_code}">🩺 ${d.name} (${d.location || 'PHC/CHC'})</option>
+        `).join('');
+      }
+      if (m) m.style.display = 'flex';
+    }
+
+    closeRequestConsultModal() {
+      const m = document.getElementById('patientRequestConsultModal');
+      if (m) m.style.display = 'none';
+    }
+
+    submitRequestConsult(e) {
+      if (e) e.preventDefault();
+      const complaint = document.getElementById('patReqComplaint').value.trim();
+      const duration = document.getElementById('patReqDuration').value.trim();
+      const bp = document.getElementById('patReqBp').value.trim() || '120/80';
+      const temp = document.getElementById('patReqTemp').value.trim() || '98.6°F';
+      const triage = document.getElementById('patReqTriage').value;
+      const docSelect = document.getElementById('patientConsultDoctorSelect');
+      const doctorId = docSelect ? docSelect.value : null;
+      const doctorName = docSelect && docSelect.options[docSelect.selectedIndex] ? docSelect.options[docSelect.selectedIndex].text : 'Medical Officer';
+
+      if (!complaint) {
+        alert('Please describe your symptoms/illness for the doctor');
+        return;
+      }
+
+      const qItem = this.store.requestDoctorConsult({
+        complaint: complaint + (duration ? ' (Duration: ' + duration + ')' : ''),
+        vitals: { bp, temp, spo2: '98%', pulse: '76 bpm' },
+        triage,
+        assignedDoctorId: doctorId,
+        assignedDoctorName: doctorName
+      });
+
+      this.closeRequestConsultModal();
+      if (typeof window.toast === 'function') {
+        window.toast('🚀 Consultation Request Sent to ' + doctorName + '! Your Token is ' + qItem.token);
+      }
+    }
+
     printAbhaCard() {
       window.print();
     }

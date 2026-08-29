@@ -2655,8 +2655,8 @@ body {
 
         <div style="display:grid;grid-template-columns:1fr auto;gap:8px;margin-bottom:16px;align-items:flex-end;">
           <div>
-            <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">One-Time Password (OTP) *</label>
-            <input type="text" id="patInputOtp" class="input-field" placeholder="Enter 6-digit OTP" value="" placeholder="Enter OTP or Password" maxlength="6" required>
+            <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">Account Password or Security PIN *</label>
+            <input type="text" id="patInputOtp" class="input-field" placeholder="Enter your private password or PIN" type="password" value="" placeholder="Enter OTP or Password" maxlength="6" required>
           </div>
           <button type="button" class="btn-glass" style="height:44px;padding:0 14px;font-size:12px;font-weight:700;" onclick="sendMockOtp('patient')">
             📲 Send OTP
@@ -2805,6 +2805,21 @@ body {
       <div id="patientPrescriptionsContainer"></div>
     </div>
 
+    
+    <!-- DIRECT DOCTOR CONSULTATION REQUEST ACTION BANNER -->
+    <div style="background:linear-gradient(135deg, rgba(2,132,199,0.18), rgba(15,23,42,0.4));border:1.5px solid rgba(2,132,199,0.35);border-radius:16px;padding:16px 20px;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span style="font-size:32px;">🩺</span>
+        <div>
+          <h3 style="font-size:16px;font-weight:800;color:var(--ink);">Need Doctor Consultation?</h3>
+          <small style="color:var(--muted);">Directly select a registered doctor, describe your illness, and join the digital OPD queue instantly.</small>
+        </div>
+      </div>
+      <button class="auth-btn-primary" style="background:linear-gradient(135deg, #0284c7, #0369a1);border:none;padding:10px 18px;font-size:13px;font-weight:800;border-radius:10px;box-shadow:0 4px 14px rgba(2,132,199,0.4);cursor:pointer;" onclick="patientController.openRequestConsultModal()">
+        + Request Doctor Consultation
+      </button>
+    </div>
+
     <!-- DIGITAL ABHA HEALTH CARD -->
     <div class="glass-panel">
       <div class="panel-header">
@@ -2926,6 +2941,13 @@ body {
           <h2 style="font-size:20px;color:var(--ink);font-weight:800;margin-bottom:4px;" data-i18n="worker_title">🤝 ASHA & ANM Frontline Field Hub</h2>
           <small style="color:var(--muted);" data-i18n="worker_subline">Maternal ANC Register, UIP Child Immunization & Village Home Visits</small>
         </div>
+        <div>
+          
+        <button class="auth-btn-primary" style="background:linear-gradient(135deg, #d97706, #b45309);border:none;padding:8px 16px;font-size:13px;font-weight:800;border-radius:10px;box-shadow:0 4px 14px rgba(217,119,6,0.4);cursor:pointer;" onclick="workerController.openRegisterAndReferModal()">
+          + Register & Refer Patient to Doctor
+        </button>
+
+        </div>
       </div>
     </div>
 
@@ -2977,6 +2999,31 @@ body {
             </tr>
           </thead>
           <tbody id="workerImmTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    
+    <!-- ASHA MASTER FRONTLINE FIELD AUDIT REGISTRY -->
+    <div class="glass-panel">
+      <div class="panel-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <div>
+          <h3 class="panel-title">📊 ASHA Frontline Field Data Master Registry</h3>
+          <small style="color:var(--muted);">Consolidated record of all patient registrations, doctor referrals, ANC mothers, vaccines, and home visits</small>
+        </div>
+      </div>
+      <div class="table-responsive">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Record Type</th>
+              <th>Citizen / Beneficiary</th>
+              <th>Contact / Family</th>
+              <th>Clinical / Field Details</th>
+              <th>Date / Status</th>
+            </tr>
+          </thead>
+          <tbody id="ashaMasterRegistryBody"></tbody>
         </table>
       </div>
     </div>
@@ -3601,6 +3648,163 @@ body {
           <button type="button" class="btn-glass" onclick="closeSupabaseSettingsModal()">Cancel</button>
           <button type="submit" class="auth-btn-primary" style="background:#16a34a;border-color:#15803d;">✓ Connect & Sync</button>
         </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<!-- =========================================================
+     ASHA PATIENT REGISTRATION & DOCTOR REFERRAL MODAL
+     ========================================================= -->
+<div id="ashaReferModal" class="modal-overlay">
+  <div class="modal-card" style="max-width:560px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:26px;">🤝</span>
+        <div>
+          <h3 style="color:var(--ink);font-size:17px;font-weight:800;">Register & Refer Patient to Doctor</h3>
+          <small style="color:var(--muted);">ABHA Creation & Direct Teleconsultation OPD Dispatch</small>
+        </div>
+      </div>
+      <button onclick="workerController.closeRegisterAndReferModal()" style="background:none;border:none;font-size:20px;color:var(--muted);cursor:pointer;">✕</button>
+    </div>
+
+    <form onsubmit="workerController.submitRegisterAndRefer(event)">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Patient Full Name *</label>
+          <input type="text" id="refPatName" class="input-field" placeholder="e.g. Kamala Devi" required>
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Mobile Number *</label>
+          <input type="tel" id="refPatPhone" class="input-field" placeholder="e.g. 9844433322" maxlength="10" required>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px;">
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Age *</label>
+          <input type="number" id="refPatAge" class="input-field" placeholder="32" min="1" max="120" required>
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Gender *</label>
+          <select id="refPatGender" class="input-field" style="height:44px;" required>
+            <option value="Female">Female (महिला)</option>
+            <option value="Male">Male (पुरुष)</option>
+            <option value="Other">Other (अन्य)</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Blood Group</label>
+          <select id="refPatBlood" class="input-field" style="height:44px;">
+            <option value="O+">O+</option>
+            <option value="A+">A+</option>
+            <option value="B+">B+</option>
+            <option value="AB+">AB+</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="margin-bottom:12px;">
+        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Village / Ward Address *</label>
+        <input type="text" id="refPatVillage" class="input-field" placeholder="e.g. Kondapalli Ward 3" required>
+      </div>
+
+      <div style="margin-bottom:12px;">
+        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Select Registered Doctor to Refer to *</label>
+        <select id="referDoctorSelect" class="input-field" style="height:44px;" required></select>
+      </div>
+
+      <div style="margin-bottom:12px;">
+        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Patient Symptoms & Illness Details *</label>
+        <textarea id="refPatComplaint" class="input-field" rows="2" placeholder="e.g. Severe abdominal pain and fever since 2 days" required></textarea>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px;">
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">BP Recorded</label>
+          <input type="text" id="refPatBp" class="input-field" placeholder="120/80" value="120/80">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Temp</label>
+          <input type="text" id="refPatTemp" class="input-field" placeholder="98.6°F" value="98.6°F">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Triage Priority</label>
+          <select id="refPatTriage" class="input-field" style="height:44px;">
+            <option value="Yellow">Yellow (Urgent)</option>
+            <option value="Red">Red (Emergency)</option>
+            <option value="Green">Green (Routine)</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;gap:8px;">
+        <button type="button" class="btn-glass" onclick="workerController.closeRegisterAndReferModal()">Cancel</button>
+        <button type="submit" class="auth-btn-primary" style="background:#d97706;border-color:#b45309;">✓ Dispatch Referral to Doctor</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<!-- =========================================================
+     PATIENT DIRECT TELECONSULTATION REQUEST MODAL
+     ========================================================= -->
+<div id="patientRequestConsultModal" class="modal-overlay">
+  <div class="modal-card" style="max-width:540px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:26px;">🩺</span>
+        <div>
+          <h3 style="color:var(--ink);font-size:17px;font-weight:800;">Request Doctor Teleconsultation</h3>
+          <small style="color:var(--muted);">Immediate Connection with Registered Medical Officer</small>
+        </div>
+      </div>
+      <button onclick="patientController.closeRequestConsultModal()" style="background:none;border:none;font-size:20px;color:var(--muted);cursor:pointer;">✕</button>
+    </div>
+
+    <form onsubmit="patientController.submitRequestConsult(event)">
+      <div style="margin-bottom:12px;">
+        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Select Registered Doctor *</label>
+        <select id="patientConsultDoctorSelect" class="input-field" style="height:44px;" required></select>
+      </div>
+
+      <div style="margin-bottom:12px;">
+        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Describe Your Symptoms / Problem *</label>
+        <textarea id="patReqComplaint" class="input-field" rows="3" placeholder="e.g. I have persistent fever, body pain, and dry cough" required></textarea>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Duration of Illness</label>
+          <input type="text" id="patReqDuration" class="input-field" placeholder="e.g. 3 days">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Urgency Level</label>
+          <select id="patReqTriage" class="input-field" style="height:44px;">
+            <option value="Green">Normal / Routine</option>
+            <option value="Yellow">Moderate / Uncomfortable</option>
+            <option value="Red">Severe / Emergency</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Self-Measured BP (Optional)</label>
+          <input type="text" id="patReqBp" class="input-field" placeholder="120/80" value="120/80">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Body Temperature (Optional)</label>
+          <input type="text" id="patReqTemp" class="input-field" placeholder="98.6°F" value="98.6°F">
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;gap:8px;">
+        <button type="button" class="btn-glass" onclick="patientController.closeRequestConsultModal()">Cancel</button>
+        <button type="submit" class="auth-btn-primary" style="background:#0284c7;border-color:#0369a1;">✓ Send Request to Doctor</button>
       </div>
     </form>
   </div>
@@ -4469,6 +4673,119 @@ body {
     }
 
     // Family Member methods
+    
+    // ASHA Registers Patient & Refers to a Specific Registered Doctor
+    addPatientAndReferToDoctor(patientData, referralData) {
+      const abhaId = patientData.abhaId || `14-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}`;
+      const newPatient = {
+        id: 'USR-PAT-' + String(Date.now()).slice(-4),
+        abhaId: abhaId,
+        name: patientData.name || 'Citizen',
+        phone: patientData.phone || '9876543210',
+        age: parseInt(patientData.age, 10) || 30,
+        gender: patientData.gender || 'Male',
+        village: patientData.village || 'Kondapalli Ward',
+        bloodGroup: patientData.bloodGroup || 'O+',
+        password: patientData.password || '123456',
+        role: 'patient'
+      };
+
+      if (!this.state.patients) this.state.patients = [];
+      if (!this.state.patients.some(p => p.phone === newPatient.phone)) {
+        this.state.patients.unshift(newPatient);
+      }
+
+      // Add to doctor queue
+      const tokenNum = String((this.state.consultQueue || []).length + 1).padStart(2, '0');
+      const queueItem = {
+        id: 'Q-' + String(Date.now()).slice(-4),
+        token: `T-${tokenNum}`,
+        patientName: newPatient.name,
+        patientPhone: newPatient.phone,
+        abhaId: newPatient.abhaId,
+        age: newPatient.age,
+        gender: newPatient.gender === 'Male' ? 'M' : 'F',
+        complaint: referralData.complaint || 'Referred for Clinical Examination',
+        vitals: referralData.vitals || { bp: '120/80', spo2: '98%', temp: '98.6°F', pulse: '78 bpm' },
+        triage: referralData.triage || 'Yellow',
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        status: 'Waiting',
+        assignedDoctorId: referralData.assignedDoctorId || null,
+        assignedDoctorName: referralData.assignedDoctorName || 'Assigned Medical Officer',
+        referredBy: (this.state.session && this.state.session.user) ? this.state.session.user.name : 'ASHA Frontline Lead'
+      };
+
+      if (!this.state.consultQueue) this.state.consultQueue = [];
+      this.state.consultQueue.unshift(queueItem);
+
+      // Track in ASHA master registry
+      if (!this.state.ashaRegistry) this.state.ashaRegistry = [];
+      this.state.ashaRegistry.unshift({
+        id: 'REG-' + String(Date.now()).slice(-4),
+        type: 'Patient Referral',
+        patientName: newPatient.name,
+        phone: newPatient.phone,
+        village: newPatient.village,
+        target: queueItem.assignedDoctorName,
+        details: queueItem.complaint + ' (Triage: ' + queueItem.triage + ')',
+        date: new Date().toLocaleDateString(),
+        workerName: queueItem.referredBy
+      });
+
+      this.saveState();
+
+      if (global.supabaseService && global.supabaseService.isOnline) {
+        global.supabaseService.insertProfile(newPatient);
+        global.supabaseService.insertQueuePatient(queueItem);
+      }
+
+      if (global.doctorController && typeof global.doctorController.renderQueue === 'function') {
+        global.doctorController.renderQueue();
+        global.doctorController.renderStats();
+      }
+
+      return { success: true, patient: newPatient, queueItem };
+    }
+
+    // Patient Direct Teleconsultation Request to Doctor
+    requestDoctorConsult(consultData) {
+      const user = this.state.currentUser || (this.state.session ? this.state.session.user : { name: 'Citizen Patient', phone: '9876543210' });
+      const tokenNum = String((this.state.consultQueue || []).length + 1).padStart(2, '0');
+      
+      const queueItem = {
+        id: 'Q-' + String(Date.now()).slice(-4),
+        token: `T-${tokenNum}`,
+        patientName: user.name || 'Citizen Patient',
+        patientPhone: user.phone || '9876543210',
+        abhaId: user.abhaId || '14-8921-4402-9912',
+        age: user.age || 35,
+        gender: (user.gender === 'Female' || user.gender === 'F') ? 'F' : 'M',
+        complaint: consultData.complaint || 'Direct Teleconsultation Request',
+        vitals: consultData.vitals || { bp: '120/80', spo2: '98%', temp: '98.6°F', pulse: '76 bpm' },
+        triage: consultData.triage || 'Green',
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        status: 'Waiting',
+        assignedDoctorId: consultData.assignedDoctorId || null,
+        assignedDoctorName: consultData.assignedDoctorName || 'Medical Officer',
+        referredBy: 'Citizen Direct Request'
+      };
+
+      if (!this.state.consultQueue) this.state.consultQueue = [];
+      this.state.consultQueue.unshift(queueItem);
+      this.saveState();
+
+      if (global.supabaseService && global.supabaseService.isOnline) {
+        global.supabaseService.insertQueuePatient(queueItem);
+      }
+
+      if (global.doctorController && typeof global.doctorController.renderQueue === 'function') {
+        global.doctorController.renderQueue();
+        global.doctorController.renderStats();
+      }
+
+      return queueItem;
+    }
+
     addFamilyMember(member) {
       const id = 'FAM-' + String(Date.now()).slice(-4);
       const abha = member.abhaId || `14-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}`;
@@ -6371,6 +6688,54 @@ body {
     }
 
 
+    
+    openRequestConsultModal() {
+      const m = document.getElementById('patientRequestConsultModal');
+      const docSelect = document.getElementById('patientConsultDoctorSelect');
+      if (docSelect && this.store) {
+        const doctors = (this.store.getState().staff || []).filter(s => s.role === 'doctor');
+        docSelect.innerHTML = doctors.map(d => `
+          <option value="${d.id || d.staff_code}">🩺 ${d.name} (${d.location || 'PHC/CHC'})</option>
+        `).join('');
+      }
+      if (m) m.style.display = 'flex';
+    }
+
+    closeRequestConsultModal() {
+      const m = document.getElementById('patientRequestConsultModal');
+      if (m) m.style.display = 'none';
+    }
+
+    submitRequestConsult(e) {
+      if (e) e.preventDefault();
+      const complaint = document.getElementById('patReqComplaint').value.trim();
+      const duration = document.getElementById('patReqDuration').value.trim();
+      const bp = document.getElementById('patReqBp').value.trim() || '120/80';
+      const temp = document.getElementById('patReqTemp').value.trim() || '98.6°F';
+      const triage = document.getElementById('patReqTriage').value;
+      const docSelect = document.getElementById('patientConsultDoctorSelect');
+      const doctorId = docSelect ? docSelect.value : null;
+      const doctorName = docSelect && docSelect.options[docSelect.selectedIndex] ? docSelect.options[docSelect.selectedIndex].text : 'Medical Officer';
+
+      if (!complaint) {
+        alert('Please describe your symptoms/illness for the doctor');
+        return;
+      }
+
+      const qItem = this.store.requestDoctorConsult({
+        complaint: complaint + (duration ? ' (Duration: ' + duration + ')' : ''),
+        vitals: { bp, temp, spo2: '98%', pulse: '76 bpm' },
+        triage,
+        assignedDoctorId: doctorId,
+        assignedDoctorName: doctorName
+      });
+
+      this.closeRequestConsultModal();
+      if (typeof window.toast === 'function') {
+        window.toast('🚀 Consultation Request Sent to ' + doctorName + '! Your Token is ' + qItem.token);
+      }
+    }
+
     printAbhaCard() {
       window.print();
     }
@@ -6998,6 +7363,134 @@ body {
             </span>
           </td>
           <td style="color:var(--primary-bright);font-weight:600;">${a.nextVisit}</td>
+        </tr>
+      `).join('');
+    }
+
+    
+    // -------------------------------------------------------------
+    // ASHA PATIENT REGISTRATION & DOCTOR REFERRAL
+    // -------------------------------------------------------------
+    openRegisterAndReferModal() {
+      const m = document.getElementById('ashaReferModal');
+      const docSelect = document.getElementById('referDoctorSelect');
+      if (docSelect && this.store) {
+        const doctors = (this.store.getState().staff || []).filter(s => s.role === 'doctor');
+        docSelect.innerHTML = doctors.map(d => `
+          <option value="${d.id || d.staff_code}">🩺 ${d.name} (${d.location || 'PHC/CHC'})</option>
+        `).join('');
+      }
+      if (m) m.style.display = 'flex';
+    }
+
+    closeRegisterAndReferModal() {
+      const m = document.getElementById('ashaReferModal');
+      if (m) m.style.display = 'none';
+    }
+
+    submitRegisterAndRefer(e) {
+      if (e) e.preventDefault();
+      const name = document.getElementById('refPatName').value.trim();
+      const phone = document.getElementById('refPatPhone').value.trim();
+      const age = parseInt(document.getElementById('refPatAge').value, 10) || 30;
+      const gender = document.getElementById('refPatGender').value;
+      const bloodGroup = document.getElementById('refPatBlood').value;
+      const village = document.getElementById('refPatVillage').value.trim();
+      const complaint = document.getElementById('refPatComplaint').value.trim();
+      const bp = document.getElementById('refPatBp').value.trim() || '120/80';
+      const temp = document.getElementById('refPatTemp').value.trim() || '98.6°F';
+      const triage = document.getElementById('refPatTriage').value;
+      const docSelect = document.getElementById('referDoctorSelect');
+      const doctorId = docSelect ? docSelect.value : null;
+      const doctorName = docSelect && docSelect.options[docSelect.selectedIndex] ? docSelect.options[docSelect.selectedIndex].text : 'Medical Officer';
+
+      if (!name || !phone || !complaint) {
+        alert('Please fill in patient name, phone number, and reason for referral');
+        return;
+      }
+
+      const res = this.store.addPatientAndReferToDoctor(
+        { name, phone, age, gender, bloodGroup, village, password: '123' },
+        { complaint, vitals: { bp, temp, spo2: '98%', pulse: '80 bpm' }, triage, assignedDoctorId: doctorId, assignedDoctorName: doctorName }
+      );
+
+      this.closeRegisterAndReferModal();
+      this.renderAll();
+      if (typeof window.toast === 'function') {
+        window.toast('✓ Referred ' + name + ' to ' + doctorName + ' (Token: ' + res.queueItem.token + ')');
+      }
+    }
+
+    // -------------------------------------------------------------
+    // ASHA MASTER FIELD REGISTRY TABLE
+    // -------------------------------------------------------------
+    renderAshaMasterRegistry() {
+      const el = document.getElementById('ashaMasterRegistryBody');
+      if (!el || !this.store) return;
+
+      const state = this.store.getState();
+      const rows = [];
+
+      // Add referrals & patient registrations
+      (state.ashaRegistry || []).forEach(r => {
+        rows.push({
+          type: '🩺 Doctor Referral',
+          name: r.patientName,
+          phone: r.phone,
+          village: r.village,
+          details: r.details + ' → ' + r.target,
+          date: r.date
+        });
+      });
+
+      // Add ANC Records
+      (state.ancRecords || []).forEach(a => {
+        rows.push({
+          type: '🤰 ANC Mother',
+          name: a.motherName,
+          phone: '—',
+          village: a.village,
+          details: 'Weeks: ' + a.weeks + ' · BP: ' + a.bp + ' · ' + a.riskLevel,
+          date: a.nextVisit || 'Active'
+        });
+      });
+
+      // Add UIP Immunizations
+      (state.immunizations || []).forEach(i => {
+        rows.push({
+          type: '👶 UIP Vaccine',
+          name: i.childName,
+          phone: 'Parent: ' + i.parentName,
+          village: i.village,
+          details: i.lastVaccine + ' (' + i.status + ')',
+          date: i.nextDue || 'Recorded'
+        });
+      });
+
+      // Add Home Visits
+      (state.homeVisits || []).forEach(v => {
+        rows.push({
+          type: '🏡 Home Visit',
+          name: v.household,
+          phone: 'Members: ' + v.members,
+          village: 'Assigned Sector',
+          details: v.priority + ' · ' + v.task + ' [' + v.status + ']',
+          date: 'Daily Log'
+        });
+      });
+
+      if (!rows.length) {
+        el.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--muted);">No field entries logged yet.</td></tr>';
+        return;
+      }
+
+      el.innerHTML = rows.map(r => `
+        <tr>
+          <td><strong style="color:var(--primary-bright);font-size:12px;">${r.type}</strong></td>
+          <td><strong style="color:var(--ink);">${r.name}</strong></td>
+          <td style="color:var(--muted);">${r.phone}</td>
+          <td style="color:var(--ink-dim);font-size:12px;">${r.details}</td>
+          <td style="color:var(--muted);font-size:11px;">${r.date}</td>
         </tr>
       `).join('');
     }

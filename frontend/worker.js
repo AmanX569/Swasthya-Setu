@@ -58,6 +58,134 @@
       `).join('');
     }
 
+    
+    // -------------------------------------------------------------
+    // ASHA PATIENT REGISTRATION & DOCTOR REFERRAL
+    // -------------------------------------------------------------
+    openRegisterAndReferModal() {
+      const m = document.getElementById('ashaReferModal');
+      const docSelect = document.getElementById('referDoctorSelect');
+      if (docSelect && this.store) {
+        const doctors = (this.store.getState().staff || []).filter(s => s.role === 'doctor');
+        docSelect.innerHTML = doctors.map(d => `
+          <option value="${d.id || d.staff_code}">🩺 ${d.name} (${d.location || 'PHC/CHC'})</option>
+        `).join('');
+      }
+      if (m) m.style.display = 'flex';
+    }
+
+    closeRegisterAndReferModal() {
+      const m = document.getElementById('ashaReferModal');
+      if (m) m.style.display = 'none';
+    }
+
+    submitRegisterAndRefer(e) {
+      if (e) e.preventDefault();
+      const name = document.getElementById('refPatName').value.trim();
+      const phone = document.getElementById('refPatPhone').value.trim();
+      const age = parseInt(document.getElementById('refPatAge').value, 10) || 30;
+      const gender = document.getElementById('refPatGender').value;
+      const bloodGroup = document.getElementById('refPatBlood').value;
+      const village = document.getElementById('refPatVillage').value.trim();
+      const complaint = document.getElementById('refPatComplaint').value.trim();
+      const bp = document.getElementById('refPatBp').value.trim() || '120/80';
+      const temp = document.getElementById('refPatTemp').value.trim() || '98.6°F';
+      const triage = document.getElementById('refPatTriage').value;
+      const docSelect = document.getElementById('referDoctorSelect');
+      const doctorId = docSelect ? docSelect.value : null;
+      const doctorName = docSelect && docSelect.options[docSelect.selectedIndex] ? docSelect.options[docSelect.selectedIndex].text : 'Medical Officer';
+
+      if (!name || !phone || !complaint) {
+        alert('Please fill in patient name, phone number, and reason for referral');
+        return;
+      }
+
+      const res = this.store.addPatientAndReferToDoctor(
+        { name, phone, age, gender, bloodGroup, village, password: '123' },
+        { complaint, vitals: { bp, temp, spo2: '98%', pulse: '80 bpm' }, triage, assignedDoctorId: doctorId, assignedDoctorName: doctorName }
+      );
+
+      this.closeRegisterAndReferModal();
+      this.renderAll();
+      if (typeof window.toast === 'function') {
+        window.toast('✓ Referred ' + name + ' to ' + doctorName + ' (Token: ' + res.queueItem.token + ')');
+      }
+    }
+
+    // -------------------------------------------------------------
+    // ASHA MASTER FIELD REGISTRY TABLE
+    // -------------------------------------------------------------
+    renderAshaMasterRegistry() {
+      const el = document.getElementById('ashaMasterRegistryBody');
+      if (!el || !this.store) return;
+
+      const state = this.store.getState();
+      const rows = [];
+
+      // Add referrals & patient registrations
+      (state.ashaRegistry || []).forEach(r => {
+        rows.push({
+          type: '🩺 Doctor Referral',
+          name: r.patientName,
+          phone: r.phone,
+          village: r.village,
+          details: r.details + ' → ' + r.target,
+          date: r.date
+        });
+      });
+
+      // Add ANC Records
+      (state.ancRecords || []).forEach(a => {
+        rows.push({
+          type: '🤰 ANC Mother',
+          name: a.motherName,
+          phone: '—',
+          village: a.village,
+          details: 'Weeks: ' + a.weeks + ' · BP: ' + a.bp + ' · ' + a.riskLevel,
+          date: a.nextVisit || 'Active'
+        });
+      });
+
+      // Add UIP Immunizations
+      (state.immunizations || []).forEach(i => {
+        rows.push({
+          type: '👶 UIP Vaccine',
+          name: i.childName,
+          phone: 'Parent: ' + i.parentName,
+          village: i.village,
+          details: i.lastVaccine + ' (' + i.status + ')',
+          date: i.nextDue || 'Recorded'
+        });
+      });
+
+      // Add Home Visits
+      (state.homeVisits || []).forEach(v => {
+        rows.push({
+          type: '🏡 Home Visit',
+          name: v.household,
+          phone: 'Members: ' + v.members,
+          village: 'Assigned Sector',
+          details: v.priority + ' · ' + v.task + ' [' + v.status + ']',
+          date: 'Daily Log'
+        });
+      });
+
+      if (!rows.length) {
+        el.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--muted);">No field entries logged yet.</td></tr>';
+        return;
+      }
+
+      el.innerHTML = rows.map(r => `
+        <tr>
+          <td><strong style="color:var(--primary-bright);font-size:12px;">${r.type}</strong></td>
+          <td><strong style="color:var(--ink);">${r.name}</strong></td>
+          <td style="color:var(--muted);">${r.phone}</td>
+          <td style="color:var(--ink-dim);font-size:12px;">${r.details}</td>
+          <td style="color:var(--muted);font-size:11px;">${r.date}</td>
+        </tr>
+      `).join('');
+    }
+
     openAddAncModal() {
       const m = document.getElementById('addAncModal');
       if (m) m.style.display = 'flex';

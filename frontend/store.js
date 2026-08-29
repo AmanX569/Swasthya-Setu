@@ -343,6 +343,119 @@
     }
 
     // Family Member methods
+    
+    // ASHA Registers Patient & Refers to a Specific Registered Doctor
+    addPatientAndReferToDoctor(patientData, referralData) {
+      const abhaId = patientData.abhaId || `14-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}`;
+      const newPatient = {
+        id: 'USR-PAT-' + String(Date.now()).slice(-4),
+        abhaId: abhaId,
+        name: patientData.name || 'Citizen',
+        phone: patientData.phone || '9876543210',
+        age: parseInt(patientData.age, 10) || 30,
+        gender: patientData.gender || 'Male',
+        village: patientData.village || 'Kondapalli Ward',
+        bloodGroup: patientData.bloodGroup || 'O+',
+        password: patientData.password || '123456',
+        role: 'patient'
+      };
+
+      if (!this.state.patients) this.state.patients = [];
+      if (!this.state.patients.some(p => p.phone === newPatient.phone)) {
+        this.state.patients.unshift(newPatient);
+      }
+
+      // Add to doctor queue
+      const tokenNum = String((this.state.consultQueue || []).length + 1).padStart(2, '0');
+      const queueItem = {
+        id: 'Q-' + String(Date.now()).slice(-4),
+        token: `T-${tokenNum}`,
+        patientName: newPatient.name,
+        patientPhone: newPatient.phone,
+        abhaId: newPatient.abhaId,
+        age: newPatient.age,
+        gender: newPatient.gender === 'Male' ? 'M' : 'F',
+        complaint: referralData.complaint || 'Referred for Clinical Examination',
+        vitals: referralData.vitals || { bp: '120/80', spo2: '98%', temp: '98.6°F', pulse: '78 bpm' },
+        triage: referralData.triage || 'Yellow',
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        status: 'Waiting',
+        assignedDoctorId: referralData.assignedDoctorId || null,
+        assignedDoctorName: referralData.assignedDoctorName || 'Assigned Medical Officer',
+        referredBy: (this.state.session && this.state.session.user) ? this.state.session.user.name : 'ASHA Frontline Lead'
+      };
+
+      if (!this.state.consultQueue) this.state.consultQueue = [];
+      this.state.consultQueue.unshift(queueItem);
+
+      // Track in ASHA master registry
+      if (!this.state.ashaRegistry) this.state.ashaRegistry = [];
+      this.state.ashaRegistry.unshift({
+        id: 'REG-' + String(Date.now()).slice(-4),
+        type: 'Patient Referral',
+        patientName: newPatient.name,
+        phone: newPatient.phone,
+        village: newPatient.village,
+        target: queueItem.assignedDoctorName,
+        details: queueItem.complaint + ' (Triage: ' + queueItem.triage + ')',
+        date: new Date().toLocaleDateString(),
+        workerName: queueItem.referredBy
+      });
+
+      this.saveState();
+
+      if (global.supabaseService && global.supabaseService.isOnline) {
+        global.supabaseService.insertProfile(newPatient);
+        global.supabaseService.insertQueuePatient(queueItem);
+      }
+
+      if (global.doctorController && typeof global.doctorController.renderQueue === 'function') {
+        global.doctorController.renderQueue();
+        global.doctorController.renderStats();
+      }
+
+      return { success: true, patient: newPatient, queueItem };
+    }
+
+    // Patient Direct Teleconsultation Request to Doctor
+    requestDoctorConsult(consultData) {
+      const user = this.state.currentUser || (this.state.session ? this.state.session.user : { name: 'Citizen Patient', phone: '9876543210' });
+      const tokenNum = String((this.state.consultQueue || []).length + 1).padStart(2, '0');
+      
+      const queueItem = {
+        id: 'Q-' + String(Date.now()).slice(-4),
+        token: `T-${tokenNum}`,
+        patientName: user.name || 'Citizen Patient',
+        patientPhone: user.phone || '9876543210',
+        abhaId: user.abhaId || '14-8921-4402-9912',
+        age: user.age || 35,
+        gender: (user.gender === 'Female' || user.gender === 'F') ? 'F' : 'M',
+        complaint: consultData.complaint || 'Direct Teleconsultation Request',
+        vitals: consultData.vitals || { bp: '120/80', spo2: '98%', temp: '98.6°F', pulse: '76 bpm' },
+        triage: consultData.triage || 'Green',
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        status: 'Waiting',
+        assignedDoctorId: consultData.assignedDoctorId || null,
+        assignedDoctorName: consultData.assignedDoctorName || 'Medical Officer',
+        referredBy: 'Citizen Direct Request'
+      };
+
+      if (!this.state.consultQueue) this.state.consultQueue = [];
+      this.state.consultQueue.unshift(queueItem);
+      this.saveState();
+
+      if (global.supabaseService && global.supabaseService.isOnline) {
+        global.supabaseService.insertQueuePatient(queueItem);
+      }
+
+      if (global.doctorController && typeof global.doctorController.renderQueue === 'function') {
+        global.doctorController.renderQueue();
+        global.doctorController.renderStats();
+      }
+
+      return queueItem;
+    }
+
     addFamilyMember(member) {
       const id = 'FAM-' + String(Date.now()).slice(-4);
       const abha = member.abhaId || `14-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}`;
