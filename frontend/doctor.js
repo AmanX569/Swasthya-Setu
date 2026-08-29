@@ -229,7 +229,18 @@
     // -------------------------------------------------------------
     // 100% REGIONAL LANGUAGE PRESCRIPTION HISTORY CARDS
     // -------------------------------------------------------------
-        renderPrescriptionHistory() {
+        deletePrescription(rxId) {
+      if (confirm('Are you sure you want to delete this issued prescription record?')) {
+        if (this.store) {
+          this.store.deletePrescription(rxId);
+          if (typeof window.toast === 'function') {
+            window.toast('🗑️ Prescription record deleted');
+          }
+        }
+      }
+    }
+
+    renderPrescriptionHistory() {
       const el = document.getElementById('doctorPrescriptionsHistory') || document.getElementById('doctorRxHistoryList');
       if (!el || !this.store) return;
       const rxList = this.store.getState().prescriptions || [];
@@ -255,6 +266,9 @@
                 ${(global.patientController && typeof global.patientController.downloadPrescriptionPdf === 'function') ? `
                   <button class="auth-btn-primary" style="padding:6px 10px;font-size:11px;background:#0284c7;border-color:#0369a1;border-radius:6px;cursor:pointer;" onclick="patientController.downloadPrescriptionPdf('${rx.id}')">
                     📥 PDF
+                  </button>
+                  <button class="btn-glass" style="padding:6px 10px;font-size:11px;color:#ef4444;border-color:rgba(239,68,68,0.3);border-radius:6px;cursor:pointer;" onclick="doctorController.deletePrescription('${rx.id}')">
+                    🗑️
                   </button>
                 ` : ''}
               </div>

@@ -167,6 +167,9 @@
                 <button class="btn-glass" style="padding:8px 12px;font-size:12px;font-weight:700;" onclick="patientController.printPrescription('${rx.id}')">
                   🖨️ Print
                 </button>
+                <button class="btn-glass" style="padding:8px 12px;font-size:12px;font-weight:700;color:#ef4444;border-color:rgba(239,68,68,0.3);" onclick="patientController.deletePrescription('${rx.id}')" title="Delete prescription after downloading to free up space">
+                  🗑️ Delete
+                </button>
               </div>
             </div>
 
@@ -227,7 +230,7 @@
         <!-- GOVT HEADER -->
         <div style="border-bottom:3px double #0284c7;padding-bottom:16px;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;">
           <div style="display:flex;align-items:center;gap:12px;">
-            <div style="font-size:36px;">🇮🇳</div>
+            <img src="assets/logo.png" style="width:58px;height:58px;border-radius:50%;object-fit:cover;" alt="Swasthya Setu Logo">
             <div>
               <h2 style="font-size:18px;font-weight:900;color:#0369a1;margin:0;letter-spacing:0.5px;">MINISTRY OF HEALTH & FAMILY WELFARE</h2>
               <small style="font-size:11px;font-weight:700;color:#475569;display:block;">Ayushman Bharat Digital Mission (ABDM) · National Rural Telemedicine Grid</small>
@@ -339,6 +342,17 @@
         win.document.close();
         win.focus();
         setTimeout(() => { win.print(); }, 500);
+      }
+    }
+
+    deletePrescription(rxId) {
+      if (confirm('Are you sure you want to delete this prescription from your health locker?')) {
+        if (this.store) {
+          this.store.deletePrescription(rxId);
+          if (typeof window.toast === 'function') {
+            window.toast('🗑️ Prescription deleted from Health Locker');
+          }
+        }
       }
     }
 

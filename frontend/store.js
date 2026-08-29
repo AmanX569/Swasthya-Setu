@@ -495,6 +495,23 @@
       return newItem;
     }
 
+    deletePrescription(rxId) {
+      console.log('[Store] Deleting prescription:', rxId);
+      this.state.prescriptions = (this.state.prescriptions || []).filter(r => r.id !== rxId && r.token !== rxId);
+      this.saveState();
+
+      if (global.supabaseService && global.supabaseService.isOnline) {
+        global.supabaseService.deletePrescription(rxId);
+      }
+
+      if (global.patientController && typeof global.patientController.renderPrescriptions === 'function') {
+        global.patientController.renderPrescriptions();
+      }
+      if (global.doctorController && typeof global.doctorController.renderPrescriptionHistory === 'function') {
+        global.doctorController.renderPrescriptionHistory();
+      }
+    }
+
     completeConsult(queueId, prescriptionData) {
       console.log('[Store] Completing consultation for Queue ID:', queueId);
       this.state.consultQueue = (this.state.consultQueue || []).filter(q => q.id !== queueId);

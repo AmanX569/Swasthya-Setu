@@ -293,6 +293,12 @@
     }
 
     // Comprehensive Write Methods
+    async deletePrescription(rxId) {
+      if (!this.client) return;
+      console.log('[Supabase] Deleting prescription from Cloud:', rxId);
+      return await this.client.from('prescriptions').delete().or(`id.eq.${rxId},token.eq.${rxId}`);
+    }
+
     async insertPrescription(rx) {
       if (!this.client) return;
       return await this.client.from('prescriptions').insert([{
