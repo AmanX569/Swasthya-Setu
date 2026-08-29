@@ -496,20 +496,26 @@
     }
 
     completeConsult(queueId, prescriptionData) {
+      console.log('[Store] Completing consultation for Queue ID:', queueId);
       this.state.consultQueue = (this.state.consultQueue || []).filter(q => q.id !== queueId);
+      
+      let newRx = null;
       if (prescriptionData) {
-        const rx = {
+        newRx = {
           id: 'RX-' + String(Date.now()).slice(-4),
           date: new Date().toISOString().split('T')[0],
           ...prescriptionData
         };
         if (!this.state.prescriptions) this.state.prescriptions = [];
-        this.state.prescriptions.unshift(rx);
+        this.state.prescriptions.unshift(newRx);
+        
         if (global.supabaseService && global.supabaseService.isOnline) {
-          global.supabaseService.insertPrescription(rx);
+          global.supabaseService.insertPrescription(newRx);
+          global.supabaseService.deleteQueueItem(queueId);
         }
       }
       this.saveState();
+      return newRx;
     }
 
     // ASHA Maternal, Immunization, Visits

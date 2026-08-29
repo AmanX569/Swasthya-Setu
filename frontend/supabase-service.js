@@ -306,6 +306,12 @@
       }]);
     }
 
+    async deleteQueueItem(queueId) {
+      if (!this.client) return;
+      console.log('[Supabase] Removing completed patient from Queue:', queueId);
+      return await this.client.from('consult_queue').delete().eq('id', queueId);
+    }
+
     async insertQueuePatient(item) {
       if (!this.client) return;
       return await this.client.from('consult_queue').insert([{

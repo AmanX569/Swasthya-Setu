@@ -4309,6 +4309,12 @@ body {
       }]);
     }
 
+    async deleteQueueItem(queueId) {
+      if (!this.client) return;
+      console.log('[Supabase] Removing completed patient from Queue:', queueId);
+      return await this.client.from('consult_queue').delete().eq('id', queueId);
+    }
+
     async insertQueuePatient(item) {
       if (!this.client) return;
       return await this.client.from('consult_queue').insert([{
@@ -4959,20 +4965,26 @@ body {
     }
 
     completeConsult(queueId, prescriptionData) {
+      console.log('[Store] Completing consultation for Queue ID:', queueId);
       this.state.consultQueue = (this.state.consultQueue || []).filter(q => q.id !== queueId);
+      
+      let newRx = null;
       if (prescriptionData) {
-        const rx = {
+        newRx = {
           id: 'RX-' + String(Date.now()).slice(-4),
           date: new Date().toISOString().split('T')[0],
           ...prescriptionData
         };
         if (!this.state.prescriptions) this.state.prescriptions = [];
-        this.state.prescriptions.unshift(rx);
+        this.state.prescriptions.unshift(newRx);
+        
         if (global.supabaseService && global.supabaseService.isOnline) {
-          global.supabaseService.insertPrescription(rx);
+          global.supabaseService.insertPrescription(newRx);
+          global.supabaseService.deleteQueueItem(queueId);
         }
       }
       this.saveState();
+      return newRx;
     }
 
     // ASHA Maternal, Immunization, Visits
@@ -7289,38 +7301,54 @@ body {
       this.selectedPatient = null;
     }
 
-    submitPrescription(e) {
+        submitPrescription(e) {
       if (e) e.preventDefault();
-      if (!this.selectedPatient) return;
+      if (!this.selectedPatient) {
+        alert('No patient selected for consultation');
+        return;
+      }
 
-      const diagVal = document.getElementById('rxDiagnosis').value.trim() || 'Acute Viral Fever';
-      const med1Val = document.getElementById('rxMed1').value;
-      const med2Val = document.getElementById('rxMed2').value;
-      const adviceVal = document.getElementById('rxAdvice').value.trim() || 'Drink plenty of clean boiled water. Rest well.';
+      const diagVal = (document.getElementById('rxDiagnosis') ? document.getElementById('rxDiagnosis').value.trim() : '') || 'Acute Viral Pyrexia';
+      const med1Val = document.getElementById('rxMed1') ? document.getElementById('rxMed1').value : 'Paracetamol 650mg';
+      const med2Val = document.getElementById('rxMed2') ? document.getElementById('rxMed2').value : '';
+      const adviceVal = (document.getElementById('rxAdvice') ? document.getElementById('rxAdvice').value.trim() : '') || 'Drink plenty of clean boiled water. Rest well.';
 
       const medicines = [];
-      if (med1Val) medicines.push({ name: med1Val, dosage: '1 tab 3 times daily after food for 3 days', timing: '1-1-1' });
-      if (med2Val) medicines.push({ name: med2Val, dosage: '1 tab at night for 3 days', timing: '0-0-1' });
+      if (med1Val) medicines.push({ name: med1Val, dosage: '1 tab 3 times daily after food for 3 days', timing: '1-1-1', genericPrice: 8, brandPrice: 34 });
+      if (med2Val) medicines.push({ name: med2Val, dosage: '1 tab at night for 3 days', timing: '0-0-1', genericPrice: 4, brandPrice: 22 });
 
-      const sessionUser = this.store.getState().session ? this.store.getState().session.user : null;
-      const activeDoctorName = sessionUser ? sessionUser.name : 'Medical Officer';
-      const activeDoctorReg = sessionUser ? (sessionUser.regNo || sessionUser.reg_no || 'MCI-AP-48912') : 'MCI-AP-48912';
-      const activeDoctorLoc = sessionUser ? (sessionUser.location || 'Primary Health Centre') : 'Primary Health Centre';
+      // Dynamically get logged-in doctor from session
+      const sessionUser = (this.store && this.store.getState().session) ? this.store.getState().session.user : null;
+      const activeDoctorName = (sessionUser && sessionUser.name) ? sessionUser.name : 'Dr. Aaditya';
+      const activeDoctorReg = (sessionUser && (sessionUser.regNo || sessionUser.reg_no)) ? (sessionUser.regNo || sessionUser.reg_no) : 'MCI-AP-99012';
+      const activeDoctorLoc = (sessionUser && sessionUser.location) ? sessionUser.location : 'District Telemedicine OPD';
 
-      this.store.completeConsult(this.selectedPatient.id, {
-        token: this.selectedPatient.token,
-        patientName: this.selectedPatient.patientName,
+      const patientId = this.selectedPatient.id;
+      const patientToken = this.selectedPatient.token;
+      const patientName = this.selectedPatient.patientName;
+
+      const createdRx = this.store.completeConsult(patientId, {
+        token: patientToken,
+        patientName: patientName,
         doctorName: activeDoctorName,
         doctorRegNo: activeDoctorReg,
         doctorLocation: activeDoctorLoc,
         diagnosis: diagVal,
-        medicines,
+        medicines: medicines,
         advice: adviceVal
       });
 
       this.closeConsultModal();
+      this.renderQueue();
+      this.renderStats();
+      this.renderPrescriptionHistory();
+
+      if (global.patientController && typeof global.patientController.renderPrescriptions === 'function') {
+        global.patientController.renderPrescriptions();
+      }
+
       if (typeof window.toast === 'function') {
-        window.toast('✓ ' + this.t('rx_generated_toast', 'Prescription Generated & Saved to Health Locker!'));
+        window.toast('✓ Prescription Issued for ' + patientName + ' (' + (createdRx ? createdRx.id : 'RX') + ')');
       }
     }
 
@@ -7365,79 +7393,59 @@ body {
     // -------------------------------------------------------------
     // 100% REGIONAL LANGUAGE PRESCRIPTION HISTORY CARDS
     // -------------------------------------------------------------
-    renderPrescriptionHistory() {
-      const el = document.getElementById('doctorRxHistoryList');
+        renderPrescriptionHistory() {
+      const el = document.getElementById('doctorPrescriptionsHistory') || document.getElementById('doctorRxHistoryList');
       if (!el || !this.store) return;
       const rxList = this.store.getState().prescriptions || [];
 
       if (!rxList.length) {
-        el.innerHTML = `<div style="text-align:center;padding:16px;color:var(--muted);">${this.t('no_rx_history', 'No recent prescriptions generated yet.')}</div>`;
+        el.innerHTML = `<div style="text-align:center;padding:24px 16px;background:var(--glass-2);border-radius:14px;border:1px dashed var(--glass-border);color:var(--muted);grid-column:1/-1;">No recent prescriptions generated yet.</div>`;
         return;
       }
 
-      el.innerHTML = rxList.slice(0, 5).map(rx => `
-        <div class="rx-glass-card" style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:16px;padding:18px;margin-bottom:14px;box-shadow:var(--shadow-panel);">
-          
-          <!-- RX HEADER -->
-          <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
-            <div style="display:flex;align-items:center;gap:8px;">
-              <span style="font-size:22px;">📝</span>
+      el.innerHTML = rxList.map(rx => {
+        const medsList = Array.isArray(rx.medicines) ? rx.medicines : [];
+        return `
+          <div class="rx-glass-card" style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:16px;padding:18px;box-shadow:var(--shadow-panel);">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
               <div>
                 <strong style="color:var(--primary-bright);font-size:16px;display:block;">${rx.patientName} (${rx.token || 'Rx'})</strong>
-                <small style="color:var(--muted);font-size:11px;">${this.t('doctor_label', 'Doctor')}: ${rx.doctorName || 'Dr. Priya Sharma'}</small>
+                <small style="color:var(--muted);font-size:12px;font-weight:700;">👨‍⚕️ Prescribed by: ${rx.doctorName || 'Medical Officer'}</small>
+              </div>
+              <div style="display:flex;gap:6px;align-items:center;">
+                <span class="badge" style="background:rgba(22,163,74,0.15);color:#16a34a;font-size:11px;font-weight:700;padding:4px 8px;border-radius:12px;">
+                  ✓ ${rx.id || 'e-Rx'}
+                </span>
+                ${(global.patientController && typeof global.patientController.downloadPrescriptionPdf === 'function') ? `
+                  <button class="auth-btn-primary" style="padding:6px 10px;font-size:11px;background:#0284c7;border-color:#0369a1;border-radius:6px;cursor:pointer;" onclick="patientController.downloadPrescriptionPdf('${rx.id}')">
+                    📥 PDF
+                  </button>
+                ` : ''}
               </div>
             </div>
-            <div style="text-align:right;">
-              <span class="badge" style="background:rgba(22,163,74,0.15);color:#16a34a;font-size:11px;font-weight:700;padding:4px 8px;border-radius:12px;border:1px solid rgba(22,163,74,0.3);">
-                ✓ ${this.t('rx_digital_verified', 'Verified e-Rx')}
-              </span>
-              <small style="display:block;color:var(--muted);font-size:11px;margin-top:2px;">${rx.date}</small>
+
+            <div style="margin-bottom:10px;">
+              <span style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;">Clinical Diagnosis:</span>
+              <p style="font-size:14px;color:var(--ink);font-weight:700;margin-top:2px;">🩺 ${rx.diagnosis}</p>
             </div>
-          </div>
 
-          <!-- DIAGNOSIS (100% REGIONAL TRANSLATED) -->
-          <div style="margin-bottom:12px;">
-            <span style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;">${this.t('rx_diagnosis', 'Clinical Diagnosis')}:</span>
-            <p style="font-size:15px;color:var(--ink);font-weight:700;margin-top:2px;">
-              🩺 ${this.tr(rx.diagnosis)}
-            </p>
-          </div>
-
-          <!-- PRESCRIBED MEDICINES (100% REGIONAL TRANSLATED) -->
-          <div style="margin-bottom:12px;">
-            <span style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;">${this.t('rx_medicines', 'Prescribed Generic Medicines')}:</span>
-            <div style="background:var(--glass-1);border:1px solid var(--glass-border);padding:10px 14px;border-radius:12px;margin-top:4px;">
-              ${rx.medicines.map((m, idx) => `
-                <div style="padding:6px 0;${idx > 0 ? 'border-top:1px solid var(--line);' : ''}">
-                  <strong style="color:var(--ink);font-size:14px;display:block;">💊 ${this.tr(m.name)}</strong>
-                  <span style="font-size:12px;color:var(--ink-dim);display:inline-block;margin-top:2px;">
-                    ⏰ ${this.tr(m.dosage)} ${m.timing ? `(${m.timing})` : ''}
-                  </span>
-                </div>
-              `).join('')}
+            <div style="margin-bottom:10px;">
+              <span style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;">Medicines:</span>
+              <div style="background:var(--glass-1);border:1px solid var(--glass-border);padding:8px 12px;border-radius:10px;margin-top:4px;font-size:12px;">
+                ${medsList.map(m => `
+                  <div style="color:var(--ink);padding:2px 0;">• ${m.name || m} (${m.dosage || 'As directed'})</div>
+                `).join('')}
+              </div>
             </div>
+
+            ${rx.advice ? `
+              <div style="font-size:11px;color:var(--ink-dim);background:rgba(2,132,199,0.06);padding:6px 10px;border-radius:6px;">
+                <strong>Advice:</strong> ${rx.advice}
+              </div>
+            ` : ''}
           </div>
-
-          <!-- ADVICE (100% REGIONAL TRANSLATED) -->
-          ${rx.advice ? `
-            <div style="background:rgba(2,132,199,0.06);border:1px dashed var(--glass-border);padding:10px 12px;border-radius:10px;margin-bottom:12px;">
-              <span style="font-size:11px;font-weight:700;color:var(--primary-bright);display:block;">💡 ${this.t('rx_advice', 'Doctor Advice')}:</span>
-              <p style="font-size:13px;color:var(--ink);margin-top:2px;">${this.tr(rx.advice)}</p>
-            </div>
-          ` : ''}
-
-          <!-- ACTIONS -->
-          <div style="display:flex;gap:8px;justify-content:flex-end;">
-            <button class="btn-glass" style="padding:6px 12px;font-size:12px;" onclick="window.print()">
-              🖨️ ${this.t('btn_print_rx', 'Print Rx')}
-            </button>
-            <button class="btn-glass" style="padding:6px 12px;font-size:12px;" onclick="speakText('${this.t('rx_diagnosis', 'Diagnosis')}: ' + '${this.tr(rx.diagnosis)}')">
-              🔊 ${this.t('read_aloud', 'Read Aloud')}
-            </button>
-          </div>
-
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
   }
 
