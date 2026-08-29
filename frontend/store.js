@@ -283,6 +283,9 @@
       };
       this.state.staff.unshift(newStaff);
       this.saveState();
+      if (global.supabaseService && global.supabaseService.isOnline) {
+        global.supabaseService.insertStaff(newStaff);
+      }
       return newStaff;
     }
 
@@ -339,6 +342,9 @@
       };
       this.state.ancRecords.unshift(newRec);
       this.saveState();
+      if (global.supabaseService && global.supabaseService.isOnline) {
+        global.supabaseService.insertAncRecord(newRec);
+      }
       return newRec;
     }
 
@@ -350,6 +356,9 @@
       };
       this.state.immunizations.unshift(newImm);
       this.saveState();
+      if (global.supabaseService && global.supabaseService.isOnline) {
+        global.supabaseService.insertImmunization(newImm);
+      }
       return newImm;
     }
 
@@ -361,6 +370,9 @@
       };
       this.state.homeVisits.unshift(newVis);
       this.saveState();
+      if (global.supabaseService && global.supabaseService.isOnline) {
+        global.supabaseService.insertHomeVisit(newVis);
+      }
       return newVis;
     }
 
@@ -412,6 +424,9 @@
       };
       this.state.medicines.unshift(newMed);
       this.saveState();
+      if (global.supabaseService && global.supabaseService.isOnline) {
+        global.supabaseService.insertMedicine(newMed);
+      }
       return newMed;
     }
   }

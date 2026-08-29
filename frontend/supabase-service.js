@@ -33,7 +33,7 @@
         this.client = global.supabase.createClient(config.url, config.anonKey);
         this.isOnline = true;
         this.updateBadgeUI(true);
-        console.log('✓ [Supabase] Connected to PostgreSQL instance at:', config.url);
+        console.log('✓ [Supabase] Connected to Cloud PostgreSQL instance at:', config.url);
         this.setupRealtimeSubscriptions();
         this.syncInitialData();
         return true;
@@ -63,16 +63,18 @@
       }
     }
 
-    // Synchronize initial data from Supabase to store
+    // Synchronize full state from Supabase to store
     async syncInitialData() {
       if (!this.client || !global.appStore) return;
       try {
-        const [qRes, hospRes, bloodRes, staffRes, ancRes, rxRes, medRes] = await Promise.all([
+        const [qRes, hospRes, bloodRes, staffRes, ancRes, immRes, visRes, rxRes, medRes] = await Promise.all([
           this.client.from('consult_queue').select('*').order('created_at', { ascending: false }),
           this.client.from('hospitals').select('*').order('name'),
           this.client.from('blood_bank').select('*'),
           this.client.from('staff').select('*'),
           this.client.from('anc_records').select('*').order('created_at', { ascending: false }),
+          this.client.from('immunizations').select('*').order('created_at', { ascending: false }),
+          this.client.from('home_visits').select('*').order('created_at', { ascending: false }),
           this.client.from('prescriptions').select('*').order('created_at', { ascending: false }),
           this.client.from('medicines').select('*')
         ]);
@@ -145,6 +147,31 @@
           }));
         }
 
+        if (immRes.data && immRes.data.length) {
+          patch.immunizations = immRes.data.map(i => ({
+            id: i.id,
+            childName: i.child_name,
+            parentName: i.parent_name,
+            dob: i.dob,
+            gender: i.gender,
+            village: i.village,
+            lastVaccine: i.last_vaccine,
+            nextDue: i.next_due,
+            status: i.status
+          }));
+        }
+
+        if (visRes.data && visRes.data.length) {
+          patch.homeVisits = visRes.data.map(v => ({
+            id: v.id,
+            household: v.household,
+            members: v.members,
+            priority: v.priority,
+            task: v.task,
+            status: v.status
+          }));
+        }
+
         if (rxRes.data && rxRes.data.length) {
           patch.prescriptions = rxRes.data.map(r => ({
             id: r.id,
@@ -158,11 +185,24 @@
           }));
         }
 
+        if (medRes.data && medRes.data.length) {
+          patch.medicines = medRes.data.map(m => ({
+            id: m.id,
+            name: m.name,
+            category: m.category,
+            stock: m.stock,
+            unit: m.unit,
+            genericPrice: Number(m.generic_price),
+            brandPrice: Number(m.brand_price),
+            status: m.status
+          }));
+        }
+
         // Apply to store
         Object.assign(global.appStore.state, patch);
         global.appStore.saveState();
 
-        // Trigger active UI re-renders across portals
+        // Trigger active UI re-renders across all portals
         if (global.patientController) {
           if (typeof global.patientController.renderHospitals === 'function') global.patientController.renderHospitals();
           if (typeof global.patientController.renderBloodBank === 'function') global.patientController.renderBloodBank();
@@ -185,43 +225,31 @@
           if (typeof global.adminController.renderMedicines === 'function') global.adminController.renderMedicines();
         }
       } catch (err) {
-        console.warn('[Supabase] Initial sync warning:', err);
+        console.warn('[Supabase] Sync warning:', err);
       }
     }
 
-    // Realtime Subscriptions via WebSockets
+    // Realtime Subscriptions across all tables
     setupRealtimeSubscriptions() {
       if (!this.client) return;
 
-      // Clean old channels
       this.channels.forEach(ch => this.client.removeChannel(ch));
       this.channels = [];
 
-      const queueChannel = this.client.channel('public:consult_queue')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'consult_queue' }, payload => {
-          console.log('[Supabase Realtime] Queue change:', payload);
-          this.syncInitialData();
-        })
-        .subscribe();
+      const tables = ['consult_queue', 'hospitals', 'blood_bank', 'prescriptions', 'anc_records', 'immunizations', 'home_visits', 'medicines', 'staff', 'sos_alerts'];
 
-      const hospitalChannel = this.client.channel('public:hospitals')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'hospitals' }, payload => {
-          console.log('[Supabase Realtime] Hospitals change:', payload);
-          this.syncInitialData();
-        })
-        .subscribe();
-
-      const bloodChannel = this.client.channel('public:blood_bank')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'blood_bank' }, payload => {
-          console.log('[Supabase Realtime] Blood Bank change:', payload);
-          this.syncInitialData();
-        })
-        .subscribe();
-
-      this.channels.push(queueChannel, hospitalChannel, bloodChannel);
+      tables.forEach(table => {
+        const ch = this.client.channel('public:' + table)
+          .on('postgres_changes', { event: '*', schema: 'public', table: table }, payload => {
+            console.log('[Supabase Realtime] Event on ' + table + ':', payload);
+            this.syncInitialData();
+          })
+          .subscribe();
+        this.channels.push(ch);
+      });
     }
 
-    // CRUD Methods
+    // Comprehensive Write Methods
     async insertPrescription(rx) {
       if (!this.client) return;
       return await this.client.from('prescriptions').insert([{
@@ -267,6 +295,76 @@
       return await this.client.from('blood_bank').update({
         units_available: count
       }).eq('blood_group', group);
+    }
+
+    async insertAncRecord(a) {
+      if (!this.client) return;
+      return await this.client.from('anc_records').insert([{
+        mother_name: a.motherName,
+        husband_name: a.husbandName,
+        age: a.age || 24,
+        village: a.village,
+        weeks: a.weeks,
+        edd: a.edd,
+        bp: a.bp,
+        hb: a.hb,
+        ifa_count: a.ifaCount || 90,
+        risk_level: a.riskLevel || 'Normal',
+        next_visit: a.nextVisit
+      }]);
+    }
+
+    async insertImmunization(i) {
+      if (!this.client) return;
+      return await this.client.from('immunizations').insert([{
+        child_name: i.childName,
+        parent_name: i.parentName,
+        dob: i.dob,
+        gender: i.gender,
+        village: i.village,
+        last_vaccine: i.lastVaccine,
+        next_due: i.nextDue,
+        status: i.status || 'Up to Date'
+      }]);
+    }
+
+    async insertHomeVisit(v) {
+      if (!this.client) return;
+      return await this.client.from('home_visits').insert([{
+        household: v.household,
+        members: v.members || 4,
+        priority: v.priority || 'Routine Check',
+        task: v.task,
+        status: v.status || 'Pending'
+      }]);
+    }
+
+    async insertMedicine(m) {
+      if (!this.client) return;
+      return await this.client.from('medicines').insert([{
+        name: m.name,
+        category: m.category,
+        stock: m.stock,
+        unit: m.unit || 'Tablets',
+        generic_price: m.genericPrice,
+        brand_price: m.brandPrice,
+        status: m.status || 'In Stock'
+      }]);
+    }
+
+    async insertStaff(s) {
+      if (!this.client) return;
+      return await this.client.from('staff').insert([{
+        staff_code: s.id,
+        name: s.name,
+        role: s.role,
+        phone: s.phone,
+        location: s.location,
+        status: s.status || 'Active',
+        reg_no: s.regNo,
+        password_hash: s.password || (s.role + '@123'),
+        pin: s.pin || '1234'
+      }]);
     }
 
     async insertSosAlert(alert) {
