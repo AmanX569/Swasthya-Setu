@@ -512,28 +512,68 @@ body {
   display: none;
 }
 
-/* Smooth Page Transitions & Animations */
-@keyframes slideUpFadeIn {
-  0% { opacity: 0; transform: translateY(24px) scale(0.98); }
-  100% { opacity: 1; transform: translateY(0) scale(1); }
+
+/* =========================================================
+   BUTTERY-SMOOTH PAGE TRANSITIONS & FLUID MOTION
+   ========================================================= */
+@keyframes pageEnterSmooth {
+  0% {
+    opacity: 0;
+    transform: translateY(16px) scale(0.985);
+    filter: blur(3px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0px);
+  }
+}
+
+@keyframes pageExitSmooth {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-12px) scale(0.985);
+    filter: blur(3px);
+  }
 }
 
 @keyframes pulseGlow {
-  0%, 100% { box-shadow: 0 0 15px rgba(2, 132, 199, 0.4); }
-  50% { box-shadow: 0 0 30px rgba(2, 132, 199, 0.8); }
+  0%, 100% {
+    box-shadow: 0 0 16px rgba(2, 132, 199, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 32px rgba(2, 132, 199, 0.7);
+  }
 }
 
 @keyframes floatHeroLogo {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-8px); }
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-7px) rotate(1deg); }
+}
+
+.page-enter-smooth {
+  animation: pageEnterSmooth 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity, filter;
+}
+
+.page-exit-smooth {
+  animation: pageExitSmooth 0.18s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  will-change: transform, opacity, filter;
 }
 
 .animated-page {
-  animation: slideUpFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: pageEnterSmooth 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity, filter;
 }
 
 .hero-logo-float {
-  animation: floatHeroLogo 4s ease-in-out infinite;
+  animation: floatHeroLogo 4.5s ease-in-out infinite;
+  will-change: transform;
 }
 
 .hero-cta-btn {
@@ -549,13 +589,19 @@ body {
   align-items: center;
   gap: 10px;
   box-shadow: 0 6px 20px rgba(2, 132, 199, 0.4);
-  transition: all 0.2s ease;
-  animation: pulseGlow 3s infinite;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, filter 0.2s ease;
+  animation: pulseGlow 3.5s infinite;
 }
 
 .hero-cta-btn:hover {
-  transform: translateY(-2px) scale(1.03);
-  filter: brightness(1.1);
+  transform: translateY(-2px) scale(1.025);
+  filter: brightness(1.08);
+  box-shadow: 0 10px 28px rgba(2, 132, 199, 0.5);
+}
+
+.hero-cta-btn:active {
+  transform: translateY(1px) scale(0.96);
+  box-shadow: 0 2px 10px rgba(2, 132, 199, 0.4);
 }
 
 .hero-guide-btn {
@@ -570,7 +616,7 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .hero-guide-btn:hover {
@@ -578,6 +624,11 @@ body {
   border-color: var(--primary-bright);
   transform: translateY(-2px);
 }
+
+.hero-guide-btn:active {
+  transform: translateY(1px) scale(0.97);
+}
+
 
 .pillar-card {
   background: var(--glass-1);
@@ -2464,24 +2515,79 @@ function goToLogin() {
   showView('Login');
 }
 
+// Buttery-Smooth Cross-Fade View Transitions
+let isTransitioning = false;
+
 function showView(viewName) {
+  if (isTransitioning) return;
   const views = ['Home', 'Login', 'Patient', 'Doctor', 'Worker', 'Admin'];
+  
+  // Find current active view
+  let currentActiveEl = null;
   views.forEach(v => {
     const el = document.getElementById('view' + v);
-    if (el) {
-      if (v === viewName) {
-        el.style.display = 'block';
-        el.classList.add('animated-page');
-      } else {
-        el.style.display = 'none';
-      }
+    if (el && el.style.display !== 'none' && el.style.display !== '') {
+      currentActiveEl = el;
     }
   });
 
-  const headerControls = document.getElementById('sessionHeaderControls');
-  const session = window.appStore ? window.appStore.getState().session : { isLoggedIn: false };
-  if (headerControls) {
-    headerControls.style.display = (session && session.isLoggedIn && viewName !== 'Home') ? 'flex' : 'none';
+  const targetEl = document.getElementById('view' + viewName);
+  if (!targetEl) return;
+
+  // If already on target view, just ensure smooth entrance
+  if (currentActiveEl === targetEl) {
+    targetEl.classList.remove('page-exit-smooth');
+    targetEl.classList.add('page-enter-smooth');
+    return;
+  }
+
+  const updateDomViews = () => {
+    views.forEach(v => {
+      const el = document.getElementById('view' + v);
+      if (el) {
+        el.classList.remove('page-exit-smooth');
+        if (v === viewName) {
+          el.style.display = 'block';
+          el.classList.add('page-enter-smooth');
+        } else {
+          el.style.display = 'none';
+          el.classList.remove('page-enter-smooth');
+        }
+      }
+    });
+
+    const headerControls = document.getElementById('sessionHeaderControls');
+    const session = window.appStore ? window.appStore.getState().session : { isLoggedIn: false };
+    if (headerControls) {
+      headerControls.style.display = (session && session.isLoggedIn && viewName !== 'Home') ? 'flex' : 'none';
+    }
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Modern View Transition API if supported
+  if (document.startViewTransition && currentActiveEl) {
+    isTransitioning = true;
+    document.startViewTransition(() => {
+      updateDomViews();
+    }).finished.finally(() => {
+      isTransitioning = false;
+    });
+    return;
+  }
+
+  // Graceful exit-then-enter animation fallback
+  if (currentActiveEl) {
+    isTransitioning = true;
+    currentActiveEl.classList.remove('page-enter-smooth');
+    currentActiveEl.classList.add('page-exit-smooth');
+    
+    setTimeout(() => {
+      updateDomViews();
+      isTransitioning = false;
+    }, 160);
+  } else {
+    updateDomViews();
   }
 }
 
