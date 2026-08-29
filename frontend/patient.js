@@ -70,7 +70,7 @@
         <div class="abha-badge-card" style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:18px;padding:20px;box-shadow:var(--shadow-panel);position:relative;overflow:hidden;">
           <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1.5px solid var(--line);padding-bottom:12px;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
             <div style="display:flex;align-items:center;gap:10px;">
-              <span style="font-size:28px;">🇮🇳</span>
+              <img src="assets/logo.png" style="width:34px;height:34px;border-radius:50%;object-fit:cover;border:1.5px solid var(--primary-bright);" alt="Swasthya Setu Logo">
               <div>
                 <strong style="font-size:15px;color:var(--primary-bright);display:block;">${this.t('abha_nha', 'NATIONAL HEALTH AUTHORITY (ABHA)')}</strong>
                 <small style="color:var(--muted);font-weight:600;">${this.t('abha_gov', 'Government of India')}</small>
