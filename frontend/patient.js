@@ -244,12 +244,12 @@
     // -------------------------------------------------------------
     initTheme() {
       const savedTheme = localStorage.getItem('swasthya_setu_theme');
-      const validTheme = (savedTheme === 'classic') ? 'classic' : 'emerald';
+      const validTheme = (savedTheme === 'emerald') ? 'emerald' : 'classic';
       this.setTheme(validTheme);
     }
 
     setTheme(themeName) {
-      const validTheme = (themeName === 'classic') ? 'classic' : 'emerald';
+      const validTheme = (themeName === 'emerald') ? 'emerald' : 'classic';
       this.data.currentTheme = validTheme;
       localStorage.setItem('swasthya_setu_theme', validTheme);
 
@@ -258,26 +258,26 @@
       document.body.className = `theme-${validTheme}`;
 
       const themeLabels = {
-        'emerald': '🌿 Emerald Green',
-        'classic': '🏛️ Classic'
+        'classic': '🏛️ Classic (White & Blue)',
+        'emerald': '🌿 Emerald Green'
       };
 
       const themeBtn = document.getElementById('themeToggleBtn');
       if (themeBtn) {
-        themeBtn.innerHTML = `<span>${themeLabels[validTheme] || '🌿 Emerald Green'}</span>`;
+        themeBtn.innerHTML = `<span>${themeLabels[validTheme] || '🏛️ Classic'}</span>`;
       }
     }
 
     getThemeDisplayName(themeName) {
       const themeLabels = {
-        'emerald': '🌿 Emerald Green',
-        'classic': '🏛️ Classic'
+        'classic': '🏛️ Classic (White & Blue)',
+        'emerald': '🌿 Emerald Green'
       };
-      return themeLabels[themeName] || '🌿 Emerald Green';
+      return themeLabels[themeName] || '🏛️ Classic (White & Blue)';
     }
 
     toggleThemeNext() {
-      const nextTheme = (this.data.currentTheme === 'emerald') ? 'classic' : 'emerald';
+      const nextTheme = (this.data.currentTheme === 'classic') ? 'emerald' : 'classic';
       this.setTheme(nextTheme);
       if (typeof window.toast === 'function') {
         window.toast(`Theme: ${this.getThemeDisplayName(nextTheme)}`);
