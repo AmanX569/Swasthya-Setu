@@ -3,121 +3,77 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-<title>Swasthya Setu · Rural Healthcare Grid | स्वास्थ्य सेतु</title>
+<title>Swasthya Setu · Rural Care Access Network | स्वास्थ्य सेतु</title>
 <link rel="manifest" href="./manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
-
-
-
-
-
 <style>
 /* =========================================================
-   DESIGN SYSTEM & THEME ARCHITECTURE
-   DEFAULT: CLASSIC (CLINICAL WHITE & ROYAL BLUE)
-   OPTION 2: EMERALD GREEN (DARK FOREST & HEALING MINT)
-========================================================= */
-:root {
-  --void-950: #f8fafc;
-  --void-900: #f1f5f9;
-  --void-850: #e2e8f0;
-  --void-800: #cbd5e1;
-  --void-700: #94a3b8;
+   3 OPTIMIZED GLASS THEMES (CLASSIC · BLACK · NAVY)
+   ========================================================= */
 
-  --glass-1: #ffffff;
-  --glass-2: #ffffff;
-  --glass-3: #ffffff;
-  --glass-border: #cbd5e1;
-  --glass-border-strong: #94a3b8;
-  --rail-glass: #ffffff;
-
+/* 1. CLASSIC WHITE & ROYAL BLUE GLASS (DEFAULT) */
+:root, [data-theme="classic"], body[data-theme="classic"], body:not([data-theme="black"]):not([data-theme="navy"]) {
+  --void-950: #f1f5f9;
+  --void-900: #e2e8f0;
+  --glass-1: rgba(255, 255, 255, 0.85);
+  --glass-2: rgba(255, 255, 255, 0.95);
+  --glass-border: rgba(203, 213, 225, 0.85);
   --primary: #0052cc;
   --primary-dark: #003d99;
   --primary-bright: #0b5ed7;
-  --primary-glow: rgba(11, 94, 215, 0.2);
-
   --accent: #d97706;
-  --danger: #dc2626;
-  --good: #16a34a;
-
   --ink: #0f172a;
   --ink-dim: #334155;
   --muted: #64748b;
   --line: #e2e8f0;
-
-  --radius: 16px;
+  --topbar-bg: rgba(255, 255, 255, 0.92);
+  --body-bg: #f1f5f9;
+  --shadow-panel: 0 4px 20px rgba(0, 51, 102, 0.05);
   color-scheme: light;
 }
 
-[data-theme="classic"], body[data-theme="classic"], body:not([data-theme="emerald"]) {
-  --void-950: #f8fafc;
-  --void-900: #f1f5f9;
-  --glass-1: #ffffff;
-  --glass-border: #cbd5e1;
-  --primary: #0052cc;
-  --primary-bright: #0b5ed7;
-  --ink: #0f172a;
-  --ink-dim: #334155;
-  color-scheme: light;
-}
-
-body[data-theme="classic"], body:not([data-theme="emerald"]) {
-  background-color: #f8fafc !important;
-  background-image:
-    radial-gradient(100% 70% at 15% 0%, rgba(11, 94, 215, 0.04) 0%, transparent 60%),
-    linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%) !important;
-  color: #0f172a !important;
-}
-
-/* 2. EMERALD GREEN THEME */
-[data-theme="emerald"], body[data-theme="emerald"] {
-  --void-950: #04120f;
-  --void-900: #071f1a;
-  --void-850: #092822;
-  --void-800: #0d302a;
-  --glass-1: rgba(220, 252, 243, 0.05);
-  --glass-2: rgba(220, 252, 243, 0.1);
-  --glass-border: rgba(220, 252, 243, 0.14);
-  --rail-glass: rgba(4, 18, 15, 0.95);
+/* 2. PURE BLACK GLASS (AMOLED PITCH BLACK) */
+[data-theme="black"], body[data-theme="black"] {
+  --void-950: #000000;
+  --void-900: #0a0a0a;
+  --glass-1: rgba(18, 18, 18, 0.78);
+  --glass-2: rgba(26, 26, 26, 0.9);
+  --glass-border: rgba(255, 255, 255, 0.14);
   --primary: #10b981;
+  --primary-dark: #064e3b;
   --primary-bright: #34d399;
-  --ink: #f0fdf4;
+  --accent: #f59e0b;
+  --ink: #ffffff;
   --ink-dim: #cbd5e1;
-  --muted: #86a79e;
-  --line: rgba(220, 252, 243, 0.1);
+  --muted: #94a3b8;
+  --line: rgba(255, 255, 255, 0.1);
+  --topbar-bg: rgba(0, 0, 0, 0.92);
+  --body-bg: #000000;
+  --shadow-panel: 0 8px 32px rgba(0, 0, 0, 0.8);
   color-scheme: dark;
 }
 
-body[data-theme="emerald"] {
-  background-color: #04120f !important;
-  background-image:
-    radial-gradient(100% 70% at 15% 0%, rgba(52, 211, 153, 0.14) 0%, transparent 60%),
-    radial-gradient(80% 60% at 85% 10%, rgba(34, 211, 238, 0.12) 0%, transparent 50%),
-    linear-gradient(175deg, #04120f 0%, #071f1a 50%, #04120f 100%) !important;
-  color: #f0fdf4 !important;
-}
-
-body[data-theme="emerald"] .top-appbar {
-  background: rgba(4, 18, 15, 0.95) !important;
-  border-bottom: 1px solid rgba(220, 252, 243, 0.12) !important;
-}
-
-body[data-theme="emerald"] .glass-panel,
-body[data-theme="emerald"] .card-3d,
-body[data-theme="emerald"] .modal-card {
-  background: rgba(7, 31, 26, 0.85) !important;
-  color: #f0fdf4 !important;
-  border: 1px solid rgba(220, 252, 243, 0.15) !important;
-}
-
-body[data-theme="emerald"] h1,
-body[data-theme="emerald"] h2,
-body[data-theme="emerald"] h3,
-body[data-theme="emerald"] h4,
-body[data-theme="emerald"] strong {
-  color: #f0fdf4 !important;
+/* 3. DEEP NAVY BLUE GLASS (MIDNIGHT CLINICAL) */
+[data-theme="navy"], body[data-theme="navy"] {
+  --void-950: #030a16;
+  --void-900: #07152b;
+  --glass-1: rgba(12, 33, 64, 0.72);
+  --glass-2: rgba(16, 42, 80, 0.85);
+  --glass-border: rgba(56, 189, 248, 0.25);
+  --primary: #0284c7;
+  --primary-dark: #0369a1;
+  --primary-bright: #38bdf8;
+  --accent: #f59e0b;
+  --ink: #f8fafc;
+  --ink-dim: #cbd5e1;
+  --muted: #94a3b8;
+  --line: rgba(56, 189, 248, 0.15);
+  --topbar-bg: rgba(3, 10, 22, 0.92);
+  --body-bg: #030a16;
+  --shadow-panel: 0 8px 32px rgba(0, 0, 0, 0.65);
+  color-scheme: dark;
 }
 
 *, *::before, *::after {
@@ -129,29 +85,40 @@ body[data-theme="emerald"] strong {
 html, body {
   min-height: 100vh;
   font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: var(--body-bg);
+  color: var(--ink);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-/* App Header */
+body {
+  background-image:
+    radial-gradient(100% 70% at 15% 0%, rgba(2, 132, 199, 0.05) 0%, transparent 60%),
+    linear-gradient(180deg, var(--body-bg) 0%, var(--void-900) 100%);
+  background-attachment: fixed;
+}
+
+/* Glass Header */
 .top-appbar {
   position: sticky;
   top: 0;
   z-index: 1000;
-  background: #ffffff;
-  border-bottom: 1.5px solid #cbd5e1;
-  padding: 10px 20px;
+  background: var(--topbar-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--glass-border);
+  padding: 10px 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  gap: 12px;
-  box-shadow: 0 2px 10px rgba(0, 51, 102, 0.05);
+  gap: 10px;
 }
 
 .brand-title {
   font-family: 'Fraunces', Georgia, serif;
-  font-size: 20px;
+  font-size: 19px;
   font-weight: 800;
   color: var(--primary);
   display: flex;
@@ -159,13 +126,29 @@ html, body {
   gap: 8px;
 }
 
+/* Mobile-Optimized Scrollable Role Switcher */
+.role-switcher-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.role-switcher-wrapper::-webkit-scrollbar {
+  display: none;
+}
+
 .role-switcher {
   display: flex;
-  background: #f1f5f9;
+  background: rgba(0, 0, 0, 0.05);
   padding: 4px;
   border-radius: 12px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--glass-border);
   gap: 4px;
+  white-space: nowrap;
+}
+
+[data-theme="black"] .role-switcher,
+[data-theme="navy"] .role-switcher {
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .role-btn {
@@ -175,7 +158,7 @@ html, body {
   background: transparent;
   font-size: 13px;
   font-weight: 700;
-  color: #334155;
+  color: var(--ink-dim);
   cursor: pointer;
   transition: all 0.15s ease;
 }
@@ -183,21 +166,22 @@ html, body {
 .role-btn.active {
   background: var(--primary);
   color: #ffffff;
-  box-shadow: 0 2px 6px rgba(0, 82, 204, 0.25);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .top-controls {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .select-control {
-  padding: 7px 12px;
+  padding: 7px 10px;
   border-radius: 8px;
-  border: 1.5px solid #cbd5e1;
-  background: #ffffff;
-  color: #0f172a;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-1);
+  color: var(--ink);
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
@@ -206,27 +190,32 @@ html, body {
 .main-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 20px 16px 80px;
+  padding: 16px 12px 80px;
 }
 
+/* Refined Glass Panels */
 .glass-panel {
-  background: #ffffff;
-  border: 1.5px solid #cbd5e1;
+  background: var(--glass-1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
   border-radius: 16px;
-  padding: 20px;
-  margin-bottom: 20px;
-  box-shadow: 0 4px 16px rgba(0, 51, 102, 0.05);
+  padding: 18px;
+  margin-bottom: 18px;
+  box-shadow: var(--shadow-panel);
 }
 
 .panel-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .panel-title {
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 700;
   color: var(--primary);
   display: flex;
@@ -234,17 +223,17 @@ html, body {
   gap: 8px;
 }
 
-/* Common UI Elements */
+/* Action Buttons */
 .auth-btn-primary {
   background: var(--primary);
   color: #ffffff;
   border: 1px solid var(--primary-dark);
-  padding: 10px 18px;
+  padding: 10px 16px;
   border-radius: 10px;
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0, 82, 204, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   transition: all 0.15s ease;
 }
 
@@ -253,10 +242,10 @@ html, body {
 }
 
 .btn-glass {
-  background: #f1f5f9;
-  color: #0f172a;
-  border: 1.5px solid #cbd5e1;
-  padding: 8px 14px;
+  background: var(--glass-2);
+  color: var(--ink);
+  border: 1px solid var(--glass-border);
+  padding: 8px 12px;
   border-radius: 10px;
   font-size: 13px;
   font-weight: 600;
@@ -265,70 +254,83 @@ html, body {
 }
 
 .btn-glass:hover {
-  background: #e2e8f0;
+  filter: brightness(1.05);
 }
 
 .input-field {
   width: 100%;
-  padding: 10px 14px;
+  padding: 10px 12px;
   border-radius: 10px;
-  border: 1.5px solid #cbd5e1;
-  background: #ffffff;
-  color: #0f172a;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-2);
+  color: var(--ink);
   font-size: 14px;
   outline: none;
 }
 
 .input-field:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(0, 82, 204, 0.15);
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.2);
+}
+
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-top: 10px;
 }
 
 .admin-table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 12px;
+  white-space: nowrap;
 }
 
 .admin-table th {
-  background: #f1f5f9;
+  background: rgba(0, 0, 0, 0.04);
   color: var(--primary);
   font-weight: 700;
   text-align: left;
-  padding: 12px 14px;
-  border-bottom: 1.5px solid #cbd5e1;
+  padding: 10px 12px;
+  border-bottom: 1.5px solid var(--glass-border);
   font-size: 13px;
 }
 
+[data-theme="black"] .admin-table th,
+[data-theme="navy"] .admin-table th {
+  background: rgba(255, 255, 255, 0.05);
+}
+
 .admin-table td {
-  padding: 12px 14px;
-  border-bottom: 1px solid #e2e8f0;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
   font-size: 13px;
+  color: var(--ink);
 }
 
 /* Modals */
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.6);
+  background: rgba(0, 0, 0, 0.65);
   z-index: 10000;
   display: none;
   align-items: center;
   justify-content: center;
   padding: 16px;
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
 
 .modal-card {
-  background: #ffffff;
-  border: 2px solid #cbd5e1;
+  background: var(--glass-2);
+  border: 1.5px solid var(--glass-border);
   border-radius: 20px;
-  max-width: 550px;
+  max-width: 540px;
   width: 100%;
-  padding: 24px;
+  padding: 22px;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
 }
 
 /* Toast */
@@ -338,9 +340,9 @@ html, body {
   right: 24px;
   background: #0f172a;
   color: #ffffff;
-  padding: 12px 20px;
+  padding: 12px 18px;
   border-radius: 12px;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
   z-index: 100000;
@@ -2517,17 +2519,19 @@ html, body {
     <span>🇮🇳</span>
     <div>
       <span data-i18n="app_title">Swasthya Setu</span>
-      <small style="display:block;font-size:11px;color:#64748b;font-family:'Plus Jakarta Sans',sans-serif;" data-i18n="app_tagline">Rural Healthcare Grid</small>
+      <small style="display:block;font-size:10px;color:var(--muted);font-family:'Plus Jakarta Sans',sans-serif;" data-i18n="app_tagline">Rural Healthcare Grid</small>
     </div>
   </div>
 
   <!-- ROLE SWITCHER -->
-  <nav class="role-switcher">
-    <button class="role-btn active" id="roleBtnPatient" onclick="switchRole('patient')" data-i18n="role_patient">🌾 Citizen / Patient</button>
-    <button class="role-btn" id="roleBtnDoctor" onclick="switchRole('doctor')" data-i18n="role_doctor">🩺 Doctor Clinic</button>
-    <button class="role-btn" id="roleBtnWorker" onclick="switchRole('worker')" data-i18n="role_worker">🤝 ASHA Didi</button>
-    <button class="role-btn" id="roleBtnAdmin" onclick="switchRole('admin')" data-i18n="role_admin">👑 Health Admin</button>
-  </nav>
+  <div class="role-switcher-wrapper">
+    <nav class="role-switcher">
+      <button class="role-btn active" id="roleBtnPatient" onclick="switchRole('patient')" data-i18n="role_patient">🌾 Citizen</button>
+      <button class="role-btn" id="roleBtnDoctor" onclick="switchRole('doctor')" data-i18n="role_doctor">🩺 Doctor</button>
+      <button class="role-btn" id="roleBtnWorker" onclick="switchRole('worker')" data-i18n="role_worker">🤝 ASHA</button>
+      <button class="role-btn" id="roleBtnAdmin" onclick="switchRole('admin')" data-i18n="role_admin">👑 Admin</button>
+    </nav>
+  </div>
 
   <!-- CONTROLS -->
   <div class="top-controls">
@@ -2541,11 +2545,11 @@ html, body {
       <option value="kn">ಕನ್ನಡ (Kannada)</option>
     </select>
 
-    <button class="btn-glass" onclick="toggleTheme()" id="themeToggleBtn" data-i18n="btn_theme">
-      🏛️ Classic (White & Blue)
+    <button class="btn-glass" onclick="cycleTheme()" id="themeToggleBtn" data-i18n="btn_theme">
+      🏛️ Classic
     </button>
 
-    <button class="auth-btn-primary" style="background:#dc2626;border-color:#b91c1c;" onclick="patientController.triggerSos()" data-i18n="btn_sos">
+    <button class="auth-btn-primary" style="background:#dc2626;border-color:#b91c1c;padding:8px 14px;" onclick="patientController.triggerSos()" data-i18n="btn_sos">
       🚨 108 SOS
     </button>
   </div>
@@ -2558,14 +2562,14 @@ html, body {
        ========================================================= -->
   <section id="viewPatient">
     <!-- 108 SOS BANNER -->
-    <div style="background:linear-gradient(135deg, #dc2626, #b91c1c);color:#ffffff;border-radius:16px;padding:16px 20px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;box-shadow:0 8px 24px rgba(220,38,38,0.25);">
+    <div style="background:linear-gradient(135deg, #dc2626, #b91c1c);color:#ffffff;border-radius:16px;padding:14px 18px;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;box-shadow:0 8px 24px rgba(220,38,38,0.25);">
       <div>
-        <strong style="font-size:16px;display:block;" data-i18n="emergency_banner">🚑 Immediate 108 Ambulance SOS — Tap to Call or Send GPS</strong>
-        <small style="opacity:0.9;">Direct line to Kondapalli 108 Hub · Priority emergency response</small>
+        <strong style="font-size:15px;display:block;" data-i18n="emergency_banner">🚑 Immediate 108 Ambulance SOS — Tap to Call or Send GPS</strong>
+        <small style="opacity:0.9;font-size:12px;">Direct connection to nearest Rural Emergency Dispatch</small>
       </div>
-      <div style="display:flex;gap:10px;">
-        <a href="tel:108" class="btn-glass" style="background:#ffffff;color:#dc2626;font-weight:700;padding:8px 16px;">📞 Call 108</a>
-        <button class="btn-glass" style="background:rgba(255,255,255,0.2);color:#ffffff;border-color:rgba(255,255,255,0.4);" onclick="patientController.triggerSos()">📍 Send GPS Location</button>
+      <div style="display:flex;gap:8px;">
+        <a href="tel:108" class="btn-glass" style="background:#ffffff;color:#dc2626;font-weight:700;padding:6px 14px;">📞 Call 108</a>
+        <button class="btn-glass" style="background:rgba(255,255,255,0.2);color:#ffffff;border-color:rgba(255,255,255,0.4);" onclick="patientController.triggerSos()">📍 GPS SOS</button>
       </div>
     </div>
 
@@ -2574,7 +2578,7 @@ html, body {
       <div class="panel-header">
         <h2 class="panel-title" data-i18n="abha_title">🆔 Digital ABHA Health Card (आयुष्मान कार्ड)</h2>
       </div>
-      <p style="color:#64748b;font-size:14px;margin-bottom:14px;" data-i18n="abha_desc">
+      <p style="color:var(--muted);font-size:13px;margin-bottom:14px;" data-i18n="abha_desc">
         Your government health identity card. Keep it handy for free consultations and hospital visits.
       </p>
       <div id="abhaCardContainer"></div>
@@ -2585,33 +2589,33 @@ html, body {
       <div class="panel-header">
         <h2 class="panel-title" data-i18n="triage_title">🩺 Visual AI Symptom Triage (लक्षण जांच)</h2>
       </div>
-      <p style="color:#64748b;font-size:14px;margin-bottom:16px;" data-i18n="triage_subtitle">
+      <p style="color:var(--muted);font-size:13px;margin-bottom:14px;" data-i18n="triage_subtitle">
         Tap your symptom for instant first-aid guidance & emergency advice:
       </p>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(170px, 1fr));gap:12px;">
-        <button class="btn-glass" style="padding:16px;text-align:center;font-weight:700;" onclick="patientController.triageSymptom('fever')">
-          <div style="font-size:32px;margin-bottom:6px;">🌡️</div>
-          High Fever & Chills<br><small style="color:#64748b;">तेज बुखार</small>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(130px, 1fr));gap:10px;">
+        <button class="btn-glass" style="padding:14px 8px;text-align:center;font-weight:700;" onclick="patientController.triageSymptom('fever')">
+          <div style="font-size:28px;margin-bottom:4px;">🌡️</div>
+          High Fever<br><small style="color:var(--muted);font-size:11px;">तेज बुखार</small>
         </button>
-        <button class="btn-glass" style="padding:16px;text-align:center;font-weight:700;" onclick="patientController.triageSymptom('snakebite')">
-          <div style="font-size:32px;margin-bottom:6px;">🐍</div>
-          Snake / Insect Bite<br><small style="color:#64748b;">सांप का काटना</small>
+        <button class="btn-glass" style="padding:14px 8px;text-align:center;font-weight:700;" onclick="patientController.triageSymptom('snakebite')">
+          <div style="font-size:28px;margin-bottom:4px;">🐍</div>
+          Snake Bite<br><small style="color:var(--muted);font-size:11px;">सांप काटना</small>
         </button>
-        <button class="btn-glass" style="padding:16px;text-align:center;font-weight:700;" onclick="patientController.triageSymptom('diarrhea')">
-          <div style="font-size:32px;margin-bottom:6px;">💧</div>
-          Diarrhea & Vomiting<br><small style="color:#64748b;">दस्त व उल्टी</small>
+        <button class="btn-glass" style="padding:14px 8px;text-align:center;font-weight:700;" onclick="patientController.triageSymptom('diarrhea')">
+          <div style="font-size:28px;margin-bottom:4px;">💧</div>
+          Diarrhea<br><small style="color:var(--muted);font-size:11px;">दस्त व उल्टी</small>
         </button>
-        <button class="btn-glass" style="padding:16px;text-align:center;font-weight:700;" onclick="patientController.triageSymptom('pregnancy')">
-          <div style="font-size:32px;margin-bottom:6px;">🤰</div>
-          Pregnancy Pain / Labor<br><small style="color:#64748b;">प्रसव दर्द</small>
+        <button class="btn-glass" style="padding:14px 8px;text-align:center;font-weight:700;" onclick="patientController.triageSymptom('pregnancy')">
+          <div style="font-size:28px;margin-bottom:4px;">🤰</div>
+          Pregnancy<br><small style="color:var(--muted);font-size:11px;">प्रसव दर्द</small>
         </button>
-        <button class="btn-glass" style="padding:16px;text-align:center;font-weight:700;" onclick="patientController.triageSymptom('chestpain')">
-          <div style="font-size:32px;margin-bottom:6px;">🫀</div>
-          Chest Tightness / Pain<br><small style="color:#64748b;">छाती में दर्द</small>
+        <button class="btn-glass" style="padding:14px 8px;text-align:center;font-weight:700;" onclick="patientController.triageSymptom('chestpain')">
+          <div style="font-size:28px;margin-bottom:4px;">🫀</div>
+          Chest Pain<br><small style="color:var(--muted);font-size:11px;">छाती में दर्द</small>
         </button>
-        <button class="btn-glass" style="padding:16px;text-align:center;font-weight:700;" onclick="patientController.triageSymptom('breathing')">
-          <div style="font-size:32px;margin-bottom:6px;">😮‍💨</div>
-          Difficulty Breathing<br><small style="color:#64748b;">सांस की तकलीफ</small>
+        <button class="btn-glass" style="padding:14px 8px;text-align:center;font-weight:700;" onclick="patientController.triageSymptom('breathing')">
+          <div style="font-size:28px;margin-bottom:4px;">😮‍💨</div>
+          Breathing<br><small style="color:var(--muted);font-size:11px;">सांस तकलीफ</small>
         </button>
       </div>
       <div id="triageResultContainer"></div>
@@ -2622,8 +2626,8 @@ html, body {
       <div class="panel-header">
         <h2 class="panel-title" data-i18n="meds_title">💊 Jan Aushadhi Generic Medicine Savings</h2>
       </div>
-      <p style="color:#64748b;font-size:14px;margin-bottom:14px;" data-i18n="meds_desc">
-        Save up to 80% with Pradhan Mantri Jan Aushadhi generic medicines. Same formula, lower price.
+      <p style="color:var(--muted);font-size:13px;margin-bottom:14px;" data-i18n="meds_desc">
+        Save up to 80% with Pradhan Mantri Jan Aushadhi generic medicines.
       </p>
       <div id="dailyMedsList"></div>
     </div>
@@ -2632,11 +2636,11 @@ html, body {
     <div class="glass-panel">
       <div class="panel-header">
         <h2 class="panel-title" data-i18n="family_title">👨‍👩‍👧 Family Health Circle (परिवार स्वास्थ्य चक्र)</h2>
-        <button class="auth-btn-primary" style="padding:6px 14px;font-size:12px;" onclick="patientController.openAddFamilyModal()" data-i18n="btn_add_family">
-          + Add Family Member
+        <button class="auth-btn-primary" style="padding:6px 12px;font-size:12px;" onclick="patientController.openAddFamilyModal()" data-i18n="btn_add_family">
+          + Add Member
         </button>
       </div>
-      <div id="familyMembersList" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:12px;"></div>
+      <div id="familyMembersList" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));gap:10px;"></div>
     </div>
 
     <!-- NEARBY HOSPITALS & BLOOD BANK -->
@@ -2645,8 +2649,8 @@ html, body {
         <h2 class="panel-title" data-i18n="hospitals_title">🏥 Live Hospital Beds & Blood Bank Near You</h2>
       </div>
       <div id="hospitalBedsList"></div>
-      <h3 style="font-size:15px;color:#0052cc;margin:18px 0 10px;">🩸 Blood Bank Live Availability (All Groups)</h3>
-      <div id="bloodBankGrid" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(110px, 1fr));gap:10px;"></div>
+      <h3 style="font-size:14px;color:var(--primary);margin:16px 0 10px;">🩸 Blood Bank Live Availability (All Groups)</h3>
+      <div id="bloodBankGrid" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(95px, 1fr));gap:8px;"></div>
     </div>
   </section>
 
@@ -2657,11 +2661,11 @@ html, body {
     <div class="glass-panel">
       <div class="panel-header">
         <h2 class="panel-title" data-i18n="doc_queue_title">📋 Live Teleconsultation Queue (ओपीडी कतार)</h2>
-        <button class="auth-btn-primary" style="padding:6px 14px;font-size:12px;" onclick="doctorController.openAddQueueModal()">
-          + Add Walk-in Patient
+        <button class="auth-btn-primary" style="padding:6px 12px;font-size:12px;" onclick="doctorController.openAddQueueModal()">
+          + Add Patient
         </button>
       </div>
-      <div style="overflow-x:auto;">
+      <div class="table-responsive">
         <table class="admin-table">
           <thead>
             <tr>
@@ -2694,11 +2698,11 @@ html, body {
     <div class="glass-panel">
       <div class="panel-header">
         <h2 class="panel-title" data-i18n="asha_anc_title">🤰 High-Risk Maternal Health Register (ANC)</h2>
-        <button class="auth-btn-primary" style="padding:6px 14px;font-size:12px;" onclick="workerController.openAddAncModal()">
-          + Register Pregnant Mother
+        <button class="auth-btn-primary" style="padding:6px 12px;font-size:12px;" onclick="workerController.openAddAncModal()">
+          + Register Mother
         </button>
       </div>
-      <div style="overflow-x:auto;">
+      <div class="table-responsive">
         <table class="admin-table">
           <thead>
             <tr>
@@ -2706,7 +2710,7 @@ html, body {
               <th>Husband</th>
               <th>Village</th>
               <th>Gestational Age</th>
-              <th>BP & Hemoglobin</th>
+              <th>BP & Hb</th>
               <th>Risk Level</th>
               <th>Next Checkup</th>
             </tr>
@@ -2720,7 +2724,7 @@ html, body {
       <div class="panel-header">
         <h2 class="panel-title" data-i18n="asha_uip_title">💉 Child Immunization Tracker (UIP टीका)</h2>
       </div>
-      <div style="overflow-x:auto;">
+      <div class="table-responsive">
         <table class="admin-table">
           <thead>
             <tr>
@@ -2728,7 +2732,7 @@ html, body {
               <th>Parent</th>
               <th>DOB / Gender</th>
               <th>Last Vaccine</th>
-              <th>Next Due Vaccine</th>
+              <th>Next Due</th>
               <th>Status</th>
             </tr>
           </thead>
@@ -2753,22 +2757,22 @@ html, body {
       <div class="panel-header">
         <h2 class="panel-title" data-i18n="admin_kpi_title">📊 Rural Health Grid Executive Dashboard</h2>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:14px;text-align:center;">
-        <div style="background:#f0f7ff;border:1.5px solid #bae6fd;padding:16px;border-radius:14px;">
-          <small style="color:#0369a1;font-weight:700;">Total Active Staff</small>
-          <strong id="kpiTotalStaff" style="font-size:28px;color:#0052cc;display:block;margin-top:4px;">0</strong>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(160px, 1fr));gap:10px;text-align:center;">
+        <div style="background:var(--glass-2);border:1px solid var(--glass-border);padding:14px;border-radius:12px;">
+          <small style="color:var(--muted);font-weight:700;font-size:12px;">Active Staff</small>
+          <strong id="kpiTotalStaff" style="font-size:24px;color:var(--primary);display:block;margin-top:2px;">0</strong>
         </div>
-        <div style="background:#fefce8;border:1.5px solid #fef08a;padding:16px;border-radius:14px;">
-          <small style="color:#854d0e;font-weight:700;">Patients In Queue</small>
-          <strong id="kpiQueueCount" style="font-size:28px;color:#d97706;display:block;margin-top:4px;">0</strong>
+        <div style="background:var(--glass-2);border:1px solid var(--glass-border);padding:14px;border-radius:12px;">
+          <small style="color:var(--muted);font-weight:700;font-size:12px;">Queue Count</small>
+          <strong id="kpiQueueCount" style="font-size:24px;color:var(--accent);display:block;margin-top:2px;">0</strong>
         </div>
-        <div style="background:#f0fdf4;border:1.5px solid #bbf7d0;padding:16px;border-radius:14px;">
-          <small style="color:#166534;font-weight:700;">Maternal ANC Cases</small>
-          <strong id="kpiAncCount" style="font-size:28px;color:#16a34a;display:block;margin-top:4px;">0</strong>
+        <div style="background:var(--glass-2);border:1px solid var(--glass-border);padding:14px;border-radius:12px;">
+          <small style="color:var(--muted);font-weight:700;font-size:12px;">ANC Mothers</small>
+          <strong id="kpiAncCount" style="font-size:24px;color:#16a34a;display:block;margin-top:2px;">0</strong>
         </div>
-        <div style="background:#fdf2f8;border:1.5px solid #fbcfe8;padding:16px;border-radius:14px;">
-          <small style="color:#9d174d;font-weight:700;">Total Available Beds</small>
-          <strong id="kpiTotalBeds" style="font-size:28px;color:#db2777;display:block;margin-top:4px;">0</strong>
+        <div style="background:var(--glass-2);border:1px solid var(--glass-border);padding:14px;border-radius:12px;">
+          <small style="color:var(--muted);font-weight:700;font-size:12px;">Available Beds</small>
+          <strong id="kpiTotalBeds" style="font-size:24px;color:#db2777;display:block;margin-top:2px;">0</strong>
         </div>
       </div>
     </div>
@@ -2778,25 +2782,24 @@ html, body {
       <div class="panel-header">
         <h2 class="panel-title" data-i18n="admin_staff_title">👥 Healthcare Personnel Registry</h2>
       </div>
-      <!-- INLINE QUICK ADD STAFF -->
-      <form onsubmit="adminController.submitQuickAddStaff(event)" style="background:#f8fafc;border:1.5px solid #cbd5e1;border-radius:12px;padding:12px;margin-bottom:14px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-        <input type="text" id="quickStaffName" class="input-field" style="flex:2;min-width:160px;" placeholder="Staff Full Name (e.g. Dr. Anand)" required>
-        <select id="quickStaffRole" class="input-field" style="flex:1;min-width:120px;">
+      <form onsubmit="adminController.submitQuickAddStaff(event)" style="background:rgba(0,0,0,0.02);border:1px solid var(--glass-border);border-radius:12px;padding:10px;margin-bottom:12px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+        <input type="text" id="quickStaffName" class="input-field" style="flex:2;min-width:140px;" placeholder="Name (e.g. Dr. Anand)" required>
+        <select id="quickStaffRole" class="input-field" style="flex:1;min-width:110px;">
           <option value="doctor">🩺 Doctor</option>
-          <option value="worker">🤝 ASHA / ANM</option>
+          <option value="worker">🤝 ASHA</option>
           <option value="admin">👑 Admin</option>
         </select>
-        <input type="text" id="quickStaffPhone" class="input-field" style="flex:1.5;min-width:120px;" placeholder="Phone (10-Digit)">
-        <input type="text" id="quickStaffLocation" class="input-field" style="flex:1.5;min-width:140px;" placeholder="Village / Sector">
-        <button type="submit" class="auth-btn-primary" style="padding:10px 16px;">+ Add Staff</button>
+        <input type="text" id="quickStaffPhone" class="input-field" style="flex:1.2;min-width:110px;" placeholder="Phone">
+        <input type="text" id="quickStaffLocation" class="input-field" style="flex:1.2;min-width:110px;" placeholder="Sector">
+        <button type="submit" class="auth-btn-primary" style="padding:8px 14px;">+ Add</button>
       </form>
 
-      <div style="overflow-x:auto;">
+      <div class="table-responsive">
         <table class="admin-table">
           <thead>
             <tr>
               <th>ID</th>
-              <th>Name & Registration</th>
+              <th>Name</th>
               <th>Role</th>
               <th>Location</th>
               <th>Phone</th>
@@ -2808,30 +2811,30 @@ html, body {
       </div>
     </div>
 
-    <!-- BEDS & BLOOD MANAGEMENT -->
+    <!-- BEDS & BLOOD -->
     <div class="glass-panel">
       <div class="panel-header">
-        <h2 class="panel-title" data-i18n="admin_beds_title">🏥 Hospital Bed & Oxygen Grid Management</h2>
+        <h2 class="panel-title" data-i18n="admin_beds_title">🏥 Hospital Bed & Oxygen Grid</h2>
       </div>
       <div id="adminBedsGrid"></div>
-      <h3 style="font-size:15px;color:#0052cc;margin:18px 0 10px;" data-i18n="admin_blood_title">🩸 Blood Bank Live Unit Stock</h3>
-      <div id="adminBloodGrid" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(110px, 1fr));gap:10px;"></div>
+      <h3 style="font-size:14px;color:var(--primary);margin:16px 0 10px;" data-i18n="admin_blood_title">🩸 Blood Bank Stock Management</h3>
+      <div id="adminBloodGrid" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(95px, 1fr));gap:8px;"></div>
     </div>
 
-    <!-- DRUG SUPPLY -->
+    <!-- DRUGS -->
     <div class="glass-panel">
       <div class="panel-header">
         <h2 class="panel-title" data-i18n="admin_drugs_title">📦 Jan Aushadhi Medicine Inventory</h2>
       </div>
-      <div style="overflow-x:auto;">
+      <div class="table-responsive">
         <table class="admin-table">
           <thead>
             <tr>
               <th>Medicine Name</th>
               <th>Category</th>
-              <th>Stock Available</th>
-              <th>Generic Price</th>
-              <th>Brand Price</th>
+              <th>Stock</th>
+              <th>Generic</th>
+              <th>Brand</th>
               <th>Status</th>
             </tr>
           </thead>
@@ -2850,15 +2853,15 @@ html, body {
 <!-- ADD FAMILY MODAL -->
 <div id="addFamilyModal" class="modal-overlay">
   <div class="modal-card">
-    <h3 style="color:#0052cc;font-size:18px;margin-bottom:16px;">+ Add Family Member</h3>
+    <h3 style="color:var(--primary);font-size:17px;margin-bottom:14px;">+ Add Family Member</h3>
     <form onsubmit="patientController.submitAddFamily(event)">
-      <div style="margin-bottom:12px;">
-        <label style="font-size:13px;font-weight:600;color:#334155;display:block;margin-bottom:4px;">Full Name *</label>
+      <div style="margin-bottom:10px;">
+        <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Full Name *</label>
         <input type="text" id="famName" class="input-field" placeholder="e.g. Sunita Devi" required>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
         <div>
-          <label style="font-size:13px;font-weight:600;color:#334155;display:block;margin-bottom:4px;">Relation</label>
+          <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Relation</label>
           <select id="famRelation" class="input-field">
             <option value="Spouse">Spouse (पत्नी/पति)</option>
             <option value="Son">Son (पुत्र)</option>
@@ -2869,42 +2872,42 @@ html, body {
           </select>
         </div>
         <div>
-          <label style="font-size:13px;font-weight:600;color:#334155;display:block;margin-bottom:4px;">Age</label>
+          <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Age</label>
           <input type="number" id="famAge" class="input-field" value="25">
         </div>
       </div>
-      <div style="margin-bottom:16px;">
-        <label style="font-size:13px;font-weight:600;color:#334155;display:block;margin-bottom:4px;">Gender</label>
+      <div style="margin-bottom:14px;">
+        <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Gender</label>
         <select id="famGender" class="input-field">
           <option value="Female">Female (महिला)</option>
           <option value="Male">Male (पुरुष)</option>
           <option value="Other">Other</option>
         </select>
       </div>
-      <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <div style="display:flex;gap:8px;justify-content:flex-end;">
         <button type="button" class="btn-glass" onclick="patientController.closeAddFamilyModal()">Cancel</button>
-        <button type="submit" class="auth-btn-primary">+ Add Member</button>
+        <button type="submit" class="auth-btn-primary">+ Add</button>
       </div>
     </form>
   </div>
 </div>
 
-<!-- ADD QUEUE PATIENT MODAL (DOCTOR) -->
+<!-- ADD QUEUE PATIENT MODAL -->
 <div id="addQueueModal" class="modal-overlay">
   <div class="modal-card">
-    <h3 style="color:#0052cc;font-size:18px;margin-bottom:16px;">+ Add Walk-in Patient to Queue</h3>
+    <h3 style="color:var(--primary);font-size:17px;margin-bottom:14px;">+ Add Walk-in Patient</h3>
     <form onsubmit="doctorController.submitAddQueue(event)">
-      <div style="margin-bottom:12px;">
-        <label style="font-size:13px;font-weight:600;color:#334155;display:block;margin-bottom:4px;">Patient Name *</label>
+      <div style="margin-bottom:10px;">
+        <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Patient Name *</label>
         <input type="text" id="qPatientName" class="input-field" placeholder="e.g. Ramesh Kumar" required>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
         <div>
-          <label style="font-size:13px;font-weight:600;color:#334155;display:block;margin-bottom:4px;">Age</label>
+          <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Age</label>
           <input type="number" id="qPatientAge" class="input-field" value="35">
         </div>
         <div>
-          <label style="font-size:13px;font-weight:600;color:#334155;display:block;margin-bottom:4px;">Gender</label>
+          <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Gender</label>
           <select id="qPatientGender" class="input-field">
             <option value="M">Male (पुरुष)</option>
             <option value="F">Female (महिला)</option>
@@ -2912,31 +2915,31 @@ html, body {
           </select>
         </div>
       </div>
-      <div style="margin-bottom:12px;">
-        <label style="font-size:13px;font-weight:600;color:#334155;display:block;margin-bottom:4px;">Chief Complaint</label>
+      <div style="margin-bottom:10px;">
+        <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Complaint</label>
         <input type="text" id="qComplaint" class="input-field" placeholder="e.g. High Fever & Weakness">
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px;">
         <div>
-          <label style="font-size:12px;color:#64748b;display:block;">BP</label>
+          <label style="font-size:11px;color:var(--muted);display:block;">BP</label>
           <input type="text" id="qBp" class="input-field" value="120/80">
         </div>
         <div>
-          <label style="font-size:12px;color:#64748b;display:block;">Temp</label>
+          <label style="font-size:11px;color:var(--muted);display:block;">Temp</label>
           <input type="text" id="qTemp" class="input-field" value="98.6°F">
         </div>
         <div>
-          <label style="font-size:12px;color:#64748b;display:block;">Triage</label>
+          <label style="font-size:11px;color:var(--muted);display:block;">Triage</label>
           <select id="qTriage" class="input-field">
-            <option value="Green">Green (Normal)</option>
-            <option value="Yellow">Yellow (Priority)</option>
-            <option value="Red">Red (Urgent)</option>
+            <option value="Green">Green</option>
+            <option value="Yellow">Yellow</option>
+            <option value="Red">Red</option>
           </select>
         </div>
       </div>
-      <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <div style="display:flex;gap:8px;justify-content:flex-end;">
         <button type="button" class="btn-glass" onclick="doctorController.closeAddQueueModal()">Cancel</button>
-        <button type="submit" class="auth-btn-primary">+ Admit to Queue</button>
+        <button type="submit" class="auth-btn-primary">+ Admit</button>
       </div>
     </form>
   </div>
@@ -2945,90 +2948,89 @@ html, body {
 <!-- DOCTOR CONSULT MODAL -->
 <div id="doctorConsultModal" class="modal-overlay">
   <div class="modal-card">
-    <h3 id="consultActivePatientName" style="color:#0052cc;font-size:18px;margin-bottom:6px;">Consultation & e-Prescription</h3>
-    <p id="consultActiveVitals" style="color:#64748b;font-size:13px;margin-bottom:16px;background:#f8fafc;padding:8px 12px;border-radius:8px;"></p>
+    <h3 id="consultActivePatientName" style="color:var(--primary);font-size:17px;margin-bottom:6px;">Consultation & e-Prescription</h3>
+    <p id="consultActiveVitals" style="color:var(--muted);font-size:12px;margin-bottom:14px;background:rgba(0,0,0,0.03);padding:8px;border-radius:8px;"></p>
     <form onsubmit="doctorController.submitPrescription(event)">
-      <div style="margin-bottom:12px;">
-        <label style="font-size:13px;font-weight:600;color:#334155;display:block;margin-bottom:4px;">Clinical Diagnosis</label>
-        <input type="text" id="rxDiagnosis" class="input-field" value="Acute Viral Fever with Upper Respiratory Tract Symptoms" required>
+      <div style="margin-bottom:10px;">
+        <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Diagnosis</label>
+        <input type="text" id="rxDiagnosis" class="input-field" value="Acute Viral Fever" required>
       </div>
-      <div style="margin-bottom:12px;">
-        <label style="font-size:13px;font-weight:600;color:#334155;display:block;margin-bottom:4px;">Primary Generic Medicine (Jan Aushadhi)</label>
+      <div style="margin-bottom:10px;">
+        <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Primary Generic Medicine</label>
         <select id="rxMed1" class="input-field">
           <option value="Paracetamol 650mg">Paracetamol 650mg Tab (₹8 vs ₹34 Dolo)</option>
-          <option value="Amoxicillin 500mg">Amoxicillin 500mg Cap (₹28 vs ₹110 Augmentin)</option>
-          <option value="Metformin 500mg">Metformin 500mg Tab (₹12 vs ₹58 Glycomet)</option>
-          <option value="Amlodipine 5mg">Amlodipine 5mg Tab (₹6 vs ₹38 Amlong)</option>
-          <option value="ORS Powder Sachets">ORS Sachet Powder (₹5 vs ₹24 Electral)</option>
+          <option value="Amoxicillin 500mg">Amoxicillin 500mg Cap (₹28 vs ₹110)</option>
+          <option value="Metformin 500mg">Metformin 500mg Tab (₹12 vs ₹58)</option>
+          <option value="Amlodipine 5mg">Amlodipine 5mg Tab (₹6 vs ₹38)</option>
+          <option value="ORS Powder Sachets">ORS Sachet Powder (₹5 vs ₹24)</option>
         </select>
       </div>
-      <div style="margin-bottom:12px;">
-        <label style="font-size:13px;font-weight:600;color:#334155;display:block;margin-bottom:4px;">Secondary Medicine / Supplement</label>
+      <div style="margin-bottom:10px;">
+        <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Secondary Medicine</label>
         <select id="rxMed2" class="input-field">
           <option value="Cetirizine 10mg">Cetirizine 10mg Tab (₹4 vs ₹22)</option>
           <option value="Vitamin C + Zinc">Vitamin C + Zinc Tab (₹15 vs ₹75)</option>
-          <option value="Iron & Folic Acid">Iron & Folic Acid IFA Tab (₹4 vs ₹32)</option>
-          <option value="Antacid Gel / Syrup">Antacid Gel 200ml (₹25 vs ₹95)</option>
+          <option value="Iron & Folic Acid">Iron & Folic Acid Tab (₹4 vs ₹32)</option>
         </select>
       </div>
-      <div style="margin-bottom:16px;">
-        <label style="font-size:13px;font-weight:600;color:#334155;display:block;margin-bottom:4px;">Doctor Advice & Follow-up</label>
-        <textarea id="rxAdvice" class="input-field" rows="2">Drink plenty of clean boiled water. Rest well. Report back to PHC if fever lasts beyond 3 days.</textarea>
+      <div style="margin-bottom:14px;">
+        <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Advice</label>
+        <textarea id="rxAdvice" class="input-field" rows="2">Drink plenty of clean boiled water. Rest well.</textarea>
       </div>
-      <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <div style="display:flex;gap:8px;justify-content:flex-end;">
         <button type="button" class="btn-glass" onclick="doctorController.closeConsultModal()">Cancel</button>
-        <button type="submit" class="auth-btn-primary">✓ Generate e-Rx & Complete</button>
+        <button type="submit" class="auth-btn-primary">✓ Generate e-Rx</button>
       </div>
     </form>
   </div>
 </div>
 
-<!-- ADD ANC MODAL (ASHA) -->
+<!-- ADD ANC MODAL -->
 <div id="addAncModal" class="modal-overlay">
   <div class="modal-card">
-    <h3 style="color:#0052cc;font-size:18px;margin-bottom:16px;">+ Register Pregnant Mother (ANC)</h3>
+    <h3 style="color:var(--primary);font-size:17px;margin-bottom:14px;">+ Register Pregnant Mother (ANC)</h3>
     <form onsubmit="workerController.submitAddAnc(event)">
-      <div style="margin-bottom:12px;">
-        <label style="font-size:13px;font-weight:600;color:#334155;display:block;margin-bottom:4px;">Mother Name *</label>
+      <div style="margin-bottom:10px;">
+        <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Mother Name *</label>
         <input type="text" id="ancMotherName" class="input-field" placeholder="e.g. Kavitha M." required>
       </div>
-      <div style="margin-bottom:12px;">
-        <label style="font-size:13px;font-weight:600;color:#334155;display:block;margin-bottom:4px;">Husband Name</label>
+      <div style="margin-bottom:10px;">
+        <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Husband Name</label>
         <input type="text" id="ancHusbandName" class="input-field" placeholder="e.g. Srinivas M.">
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
         <div>
-          <label style="font-size:13px;font-weight:600;color:#334155;display:block;margin-bottom:4px;">Village / Ward</label>
+          <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Village</label>
           <input type="text" id="ancVillage" class="input-field" value="Kondapalli Ward 2">
         </div>
         <div>
-          <label style="font-size:13px;font-weight:600;color:#334155;display:block;margin-bottom:4px;">Gestational Weeks</label>
+          <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Weeks</label>
           <input type="number" id="ancWeeks" class="input-field" value="16">
         </div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
         <div>
-          <label style="font-size:13px;font-weight:600;color:#334155;display:block;margin-bottom:4px;">Blood Pressure</label>
+          <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">BP</label>
           <input type="text" id="ancBp" class="input-field" value="110/70">
         </div>
         <div>
-          <label style="font-size:13px;font-weight:600;color:#334155;display:block;margin-bottom:4px;">Risk Classification</label>
+          <label style="font-size:12px;font-weight:600;color:var(--ink-dim);display:block;margin-bottom:4px;">Risk</label>
           <select id="ancRisk" class="input-field">
-            <option value="Normal">Normal (सामान्य)</option>
+            <option value="Normal">Normal</option>
             <option value="High Risk (Hypertension)">High Risk (Hypertension)</option>
-            <option value="High Risk (Severe Anemia)">High Risk (Severe Anemia)</option>
+            <option value="High Risk (Severe Anemia)">High Risk (Anemia)</option>
           </select>
         </div>
       </div>
-      <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <div style="display:flex;gap:8px;justify-content:flex-end;">
         <button type="button" class="btn-glass" onclick="workerController.closeAddAncModal()">Cancel</button>
-        <button type="submit" class="auth-btn-primary">+ Register Mother</button>
+        <button type="submit" class="auth-btn-primary">+ Register</button>
       </div>
     </form>
   </div>
 </div>
 
-<!-- TOAST NOTIFICATION -->
+<!-- TOAST -->
 <div id="toast"></div>
 
 <!-- APP SCRIPTS -->
@@ -3201,7 +3203,6 @@ html, body {
       });
     }
 
-    // Role, Theme & Language
     setActiveRole(role) {
       this.state.activeRole = role;
       this.saveState();
@@ -3217,7 +3218,6 @@ html, body {
       this.saveState();
     }
 
-    // Family Member methods
     addFamilyMember(member) {
       const id = 'FAM-' + String(Date.now()).slice(-4);
       const abha = member.abhaId || `14-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}`;
@@ -3232,7 +3232,6 @@ html, body {
       this.saveState();
     }
 
-    // Staff methods
     addStaff(staffMember) {
       const prefix = staffMember.role === 'doctor' ? 'DOC' : staffMember.role === 'worker' ? 'ASH' : 'ADM';
       const id = `${prefix}-${String(Date.now()).slice(-4)}`;
@@ -3255,7 +3254,6 @@ html, body {
       this.saveState();
     }
 
-    // Queue & Prescriptions
     addToQueue(item) {
       const tokenNum = String(this.state.consultQueue.length + 1).padStart(2, '0');
       const newItem = {
@@ -3288,7 +3286,6 @@ html, body {
       this.saveState();
     }
 
-    // ASHA Maternal, Immunization, Visits
     addAncRecord(record) {
       const newRec = {
         id: 'ANC-' + String(Date.now()).slice(-4),
@@ -3338,7 +3335,6 @@ html, body {
       }
     }
 
-    // Beds, Blood & Medicines
     updateBedCount(hospId, type, delta) {
       const hosp = this.state.hospitals.find(h => h.id === hospId);
       if (hosp) {
@@ -3760,1107 +3756,343 @@ html, body {
 
 /* --- patient.js --- */
 /**
- * Swasthya Setu - Patient Portal & Community Healthcare Engine
- * 
- * Provides:
- * 1. 🚨 Emergency Response & 108 Ambulance Dispatch HUD (Driver UP 20 G 1082, Live ETA, Speed, Onboard Equipment, Landmark Transmitter, Offline SMS SOS)
- * 2. 🧠 AI Clinical Self-Triage (Symptom Assessment, Red/Yellow/Green Stratification, Pre-Hospital First Aid, Level-of-Care, Vernacular Audio)
- * 3. 📷 AI Prescription OCR Scanner & Jan Aushadhi Generic Savings Calculator (80%+ Savings, 1-Click Schedule Import)
- * 4. 💊 Medication Tracker & Daily Dose Adherence Checklist (Morning/Afternoon/Evening/Night, Jan Aushadhi Kendra Locator)
- * 5. 🏥 Live Hospital Capacity & Bed Availability Tracker (ICU, Oxygen, General Beds, 8 Blood Groups)
- * 6. 👤 Multi-Member Family Profiles & Pilot Village Switcher (Dhampur Kalan, Seohara, Nehtaur, Afzalgarh, Noorpur, Kondapalli)
- * 7. 🎨 Triple Theme Engine (Emerald Night, Midnight OLED, Daylight Light)
+ * =========================================================
+ * SWASTHYA SETU - CITIZEN / PATIENT HUB (patient.js)
+ * 100% Standalone, Pure-Client Rural Care Center
+ * =========================================================
  */
 
 (function(global) {
   'use strict';
 
-  // -------------------------------------------------------------
-  // PATIENT MASTER DATA
-  // -------------------------------------------------------------
-  const patientData = {
-    currentFamilyMember: 'anitha',
-    currentVillage: 'kondapalli',
-    currentTheme: 'emerald',
-
-    // Multi-Member Family Profiles
-    familyMembers: {},
-
-    // Pilot Village Configuration
-    villages: {
-      kondapalli: {
-        name: 'Kondapalli Gramam',
-        district: 'Krishna District, AP',
-        nearestPhc: 'Kondapalli PHC (3.2 km · 6 min)',
-        nearestChc: 'Ibrahimpatnam CHC (11 km · 14 min)',
-        nearestDistrictHosp: 'Vijayawada District Hospital (26 km · 35 min)',
-        coordinates: '16.5744° N, 80.5283° E'
-      },
-      dhampur: {
-        name: 'Dhampur Kalan',
-        district: 'Bijnor District, UP',
-        nearestPhc: 'Dhampur Rural PHC (2.8 km · 5 min)',
-        nearestChc: 'Seohara CHC (14 km · 18 min)',
-        nearestDistrictHosp: 'Bijnor District Hospital (38 km · 45 min)',
-        coordinates: '29.3100° N, 78.5100° E'
-      },
-      seohara: {
-        name: 'Seohara Village',
-        district: 'Bijnor District, UP',
-        nearestPhc: 'Seohara Primary Centre (1.5 km · 4 min)',
-        nearestChc: 'Seohara CHC (4.2 km · 8 min)',
-        nearestDistrictHosp: 'Bijnor District Hospital (32 km · 40 min)',
-        coordinates: '29.2100° N, 78.5800° E'
-      },
-      nehtaur: {
-        name: 'Nehtaur Block',
-        district: 'Bijnor District, UP',
-        nearestPhc: 'Nehtaur Health Post (3.5 km · 7 min)',
-        nearestChc: 'Nehtaur CHC (8.0 km · 12 min)',
-        nearestDistrictHosp: 'Bijnor District Hospital (28 km · 35 min)',
-        coordinates: '29.3300° N, 78.3800° E'
-      },
-      afzalgarh: {
-        name: 'Afzalgarh Rural',
-        district: 'Bijnor District, UP',
-        nearestPhc: 'Afzalgarh Sub-Centre (4.1 km · 8 min)',
-        nearestChc: 'Afzalgarh CHC (12 km · 16 min)',
-        nearestDistrictHosp: 'Kashipur Area Hospital (22 km · 28 min)',
-        coordinates: '29.4000° N, 78.6800° E'
-      },
-      noorpur: {
-        name: 'Noorpur Gram',
-        district: 'Bijnor District, UP',
-        nearestPhc: 'Noorpur PHC (2.1 km · 5 min)',
-        nearestChc: 'Noorpur Community Centre (6.5 km · 10 min)',
-        nearestDistrictHosp: 'Bijnor District Hospital (35 km · 42 min)',
-        coordinates: '29.1500° N, 78.4000° E'
-      }
-    },
-
-    // 108 Emergency Ambulance Dispatch State
-    ambulanceState: {
-      isDispatched: false,
-      status: 'idle', // 'idle', 'dispatched', 'en_route', 'arrived'
-      driverName: 'Ravi Shankar',
-      driverPhone: '+91 9848011223',
-      vehicleNumber: 'UP 20 G 1082',
-      ambulanceType: 'Advanced Life Support (ALS) Unit #04',
-      etaSeconds: 522, // 08:42 min
-      speedKmh: 54,
-      distanceKm: 4.8,
-      onboardEquipment: [
-        { name: 'Oxygen Cylinder (2,000L)', status: 'Active (100% Full)', icon: '💨' },
-        { name: 'Automated External Defibrillator (AED)', status: 'Ready / Standby', icon: '⚡' },
-        { name: 'Portable Multi-Para Monitor & SpO₂', status: 'Active', icon: '📊' },
-        { name: 'Hydraulic Foldable Stretcher', status: 'Onboard Ready', icon: '🛏️' },
-        { name: 'Emergency Trauma & Anti-Venom Kit', status: 'Inspected', icon: '🩹' }
-      ],
-      selectedLandmark: 'Near Old Banyan Tree / Primary School Road'
-    },
-
-    // Daily Medication Schedule & Adherence Checklist
-    medications: [],
-
-    // Jan Aushadhi Pharmacy Locations
-    janAushadhiKendras: [
-      { name: 'PMBJP Kendra - Kondapalli PHC Gate', distance: '0.4 km', timing: '08:00 AM - 08:00 PM', phone: '+91 9848123456', status: 'Open Now · 98% Stock Ready' },
-      { name: 'PMBJP Kendra - Ibrahimpatnam Bus Stand', distance: '4.2 km', timing: '24/7 Emergency Counter', phone: '+91 9848654321', status: 'Open Now · Emergency Delivery Ready' },
-      { name: 'PMBJP Central Medical Depot - Vijayawada', distance: '16.0 km', timing: '09:00 AM - 09:00 PM', phone: '+91 8662456789', status: 'Open · Bulk Supply Hub' }
-    ],
-
-    // Emergency First-Aid Protocols
-    firstAidProtocols: {
-      cpr: {
-        title: 'Adult CPR (हृदय गति रुकना / कार्डिएक अरेस्ट)',
-        steps: [
-          'Call 108 immediately or shout for bystander help.',
-          'Place patient flat on a firm floor. Clear throat/airway.',
-          'Place heel of one hand in the center of the chest. Interlock other hand on top.',
-          'Push hard and fast: 100-120 compressions per minute (to the beat of "Stayin Alive"), at least 2 inches deep.',
-          'Allow chest to fully recoil between compressions. Do not stop until ambulance arrives.'
-        ],
-        hindiAudio: 'वयस्क सीपीआर: तुरंत 108 पर कॉल करें। छाती के बीच में दोनों हाथों से 100 से 120 बार प्रति मिनट की गति से तेज और गहरा दबाव दें।'
-      },
-      snakebite: {
-        title: 'Snakebite Emergency (सांप का काटना)',
-        steps: [
-          'DO NOT cut, suck the wound, or apply ice/tight tourniquet.',
-          'Keep the patient calm and completely still. Immobilize the bitten limb below heart level using a splint or cloth.',
-          'Remove rings, bangles, or tight clothing near the bite area before swelling begins.',
-          'Transport immediately to the nearest PHC/CHC equipped with Anti-Snake Venom (ASV).',
-          'Note the time of bite and physical description of the snake if seen safely.'
-        ],
-        hindiAudio: 'सांप काटने पर मरीज को शांत रखें। घाव को काटें या चूसे नहीं। काटे गए अंग को बिना हिलाए तुरंत एंटी-वेनम वाले अस्पताल ले जाएं।'
-      },
-      heart_attack: {
-        title: 'Acute Chest Pain / Heart Attack (दिल का दौरा)',
-        steps: [
-          'Have the patient sit down in a comfortable "W" posture (back supported, knees bent).',
-          'Loosen tight clothing around neck and chest.',
-          'If patient is not allergic, give 1 chewable Aspirin (300mg / Disprin) to chew immediately.',
-          'Keep patient calm. Do not allow them to walk or climb stairs.',
-          'Trigger 108 ALS Ambulance dispatch immediately.'
-        ],
-        hindiAudio: 'दिल का दौरा: मरीज को सहारा देकर बैठाएं। टाइट कपड़े ढीले करें और 108 एम्बुलेंस का तुरंत इंतजार करें।'
-      },
-      choking: {
-        title: 'Choking / Heimlich Maneuver (गले में कुछ अटकना)',
-        steps: [
-          'Stand behind the person. Lean them slightly forward.',
-          'Make a fist with one hand and place it just above the navel.',
-          'Grasp the fist with your other hand and give quick, upward abdominal thrusts.',
-          'Repeat thrusts until the blocking object is dislodged.',
-          'If person becomes unresponsive, start CPR immediately.'
-        ],
-        hindiAudio: 'गले में सांस अटकने पर व्यक्ति के पीछे खड़े होकर नाभि के ठीक ऊपर दोनों हाथों से अंदर और ऊपर की ओर तेज झटका दें।'
-      }
-    }
-  };
-
-  // -------------------------------------------------------------
-  // PATIENT CONTROLLER
-  // -------------------------------------------------------------
   class PatientController {
     constructor() {
-      this.data = patientData;
-      this.etaInterval = null;
+      this.store = global.appStore;
     }
 
     init() {
-      this.initTheme();
-      this.syncCurrentUserProfile();
-      this.renderFamilySelector();
-      this.renderMedicationTracker();
-      this.renderJanAushadhiCalculator();
-      this.renderLiveHospitalBeds();
-      this.syncLivePatientDatabase();
-    }
-
-    syncCurrentUserProfile() {
-      if (typeof window.authService !== 'undefined' && window.authService.isAuthenticated()) {
-        const u = window.authService.getCurrentUser();
-        if (u && u.name) {
-          const userKey = u.userId ? u.userId.toLowerCase().replace(/[^a-z0-9]/g, '_') : 'self';
-          if (!this.data.familyMembers[userKey]) {
-            this.data.familyMembers[userKey] = {
-              id: u.userId || 'PAT-01',
-              name: u.name,
-              role: 'Self (Primary)',
-              phone: u.phone,
-              age: u.age || 28,
-              gender: u.gender || 'Female',
-              bloodGroup: u.bloodGroup || 'O+',
-              abhaId: u.abha || '14-2938-7710-4521',
-              conditions: u.conditions ? (Array.isArray(u.conditions) ? u.conditions : [u.conditions]) : ['General Health Checkup Active'],
-              avatar: u.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase(),
-              assignedAsha: 'ASHA Field Worker (Ward 6)',
-              emergencyContact: u.emergencyContact || u.phone
-            };
-          }
-          if (!this.data.currentFamilyMember || !this.data.familyMembers[this.data.currentFamilyMember]) {
-            this.data.currentFamilyMember = userKey;
-          }
-        }
+      this.renderAll();
+      if (this.store) {
+        this.store.subscribe(() => this.renderAll());
       }
     }
 
-    syncLivePatientDatabase() {
-      const dbUrl = 'https://swasthya-setu-2b67d-default-rtdb.firebaseio.com';
-      fetch(`${dbUrl}/.json`)
-        .then(r => r.json())
-        .then(data => {
-          if (data && typeof data === 'object') {
-            if (data.patient_family_members) {
-              this.data.familyMembers = { ...this.data.familyMembers, ...data.patient_family_members };
-              this.renderFamilySelector();
-            }
-            if (data.patient_medications) {
-              const meds = Array.isArray(data.patient_medications) ? data.patient_medications : Object.values(data.patient_medications);
-              if (meds.length) {
-                this.data.medications = meds;
-                this.renderMedicationTracker();
-              }
-            }
-            if (data.hospital_bed_grid) {
-              this.renderLiveHospitalBeds();
-            }
-          }
-        })
-        .catch(() => {});
-
-      if (window.firebaseConfigManager && window.firebaseConfigManager.rtdb) {
-        window.firebaseConfigManager.rtdb.ref('patient_medications').on('value', snap => {
-          const val = snap.val();
-          if (val) {
-            this.data.medications = Array.isArray(val) ? val : Object.values(val);
-            this.renderMedicationTracker();
-          }
-        });
-      }
+    renderAll() {
+      this.renderAbhaCard();
+      this.renderFamilyCircle();
+      this.renderDailyMedications();
+      this.renderLiveHospitals();
+      this.renderLiveBloodBank();
     }
 
     // -------------------------------------------------------------
-    // 1. THEME ENGINE (EMERALD / OLED / DAYLIGHT)
+    // 1. ABHA CARD RENDER & PRINT
     // -------------------------------------------------------------
-    initTheme() {
-      const savedTheme = localStorage.getItem('swasthya_setu_theme');
-      const validTheme = (savedTheme === 'emerald') ? 'emerald' : 'classic';
-      this.setTheme(validTheme);
-    }
+    renderAbhaCard() {
+      const el = document.getElementById('abhaCardContainer');
+      if (!el || !this.store) return;
+      const user = this.store.getState().currentUser;
 
-    setTheme(themeName) {
-      const validTheme = (themeName === 'emerald') ? 'emerald' : 'classic';
-      this.data.currentTheme = validTheme;
-      localStorage.setItem('swasthya_setu_theme', validTheme);
-
-      document.documentElement.setAttribute('data-theme', validTheme);
-      document.body.setAttribute('data-theme', validTheme);
-      document.body.className = `theme-${validTheme}`;
-
-      const themeLabels = {
-        'classic': '🏛️ Classic (White & Blue)',
-        'emerald': '🌿 Emerald Green'
-      };
-
-      const themeBtn = document.getElementById('themeToggleBtn');
-      if (themeBtn) {
-        themeBtn.innerHTML = `<span>${themeLabels[validTheme] || '🏛️ Classic'}</span>`;
-      }
-    }
-
-    getThemeDisplayName(themeName) {
-      const themeLabels = {
-        'classic': '🏛️ Classic (White & Blue)',
-        'emerald': '🌿 Emerald Green'
-      };
-      return themeLabels[themeName] || '🏛️ Classic (White & Blue)';
-    }
-
-    toggleThemeNext() {
-      const nextTheme = (this.data.currentTheme === 'classic') ? 'emerald' : 'classic';
-      this.setTheme(nextTheme);
-      if (typeof window.toast === 'function') {
-        window.toast(`Theme: ${this.getThemeDisplayName(nextTheme)}`);
-      }
-    }
-
-    toggleDarkMode() {
-      this.toggleThemeNext();
-    }
-
-    // -------------------------------------------------------------
-    // 2. MULTI-MEMBER FAMILY SELECTOR & VILLAGE SWITCHER
-    // -------------------------------------------------------------
-    selectFamilyMember(memberKey) {
-      this.data.currentFamilyMember = memberKey;
-      const mem = this.data.familyMembers[memberKey];
-      if (!mem) return;
-
-      // Update UI
-      document.querySelectorAll('.family-pill').forEach(pill => {
-        pill.classList.toggle('active', pill.dataset.member === memberKey);
-      });
-
-      // Update welcome banner & active patient state
-      const titleEl = document.getElementById('welcomeTitle');
-      const descEl = document.getElementById('welcomeDesc');
-      if (titleEl) titleEl.textContent = `Care for ${mem.name}`;
-      if (descEl) descEl.textContent = `ABHA ID: ${mem.abhaId} · Blood: ${mem.bloodGroup} · Conditions: ${mem.conditions.join(', ')}`;
-
-      if (typeof window.toast === 'function') {
-        window.toast(`Active Profile: ${mem.name} (${mem.role})`);
-      }
-
-      this.renderFamilySelector();
-    }
-
-    renderFamilySelector() {
-      const container = document.getElementById('familyProfileSelector');
-      if (!container) return;
-
-      this.syncCurrentUserProfile();
-
-      const members = this.data.familyMembers || {};
-      const activeKey = this.data.currentFamilyMember;
-      const memberKeys = Object.keys(members);
-
-      let html = memberKeys.map(key => {
-        const m = members[key];
-        const isActive = key === activeKey;
-        return `
-          <div class="family-pill ${isActive ? 'active' : ''}" data-member="${key}" onclick="patientController.selectFamilyMember('${key}')">
-            <div class="family-avatar">${m.avatar || 'U'}</div>
-            <div>
-              <strong style="display:block;font-size:13px;color:${isActive ? '#03231b' : '#ffffff'};">${m.name}</strong>
-              <small style="font-size:10.5px;color:${isActive ? '#064e3b' : 'var(--muted)'};">${m.role || 'Family Member'} · ${m.bloodGroup || 'O+'}</small>
-            </div>
-          </div>
-        `;
-      }).join('');
-
-      // Always append + Add Family Member card
-      html += `
-        <div class="family-pill" onclick="patientController.openAddFamilyMemberModal()" style="border-style:dashed;border-color:var(--auth-primary-bright);background:rgba(52,211,153,0.08);cursor:pointer;" title="Add a family member to your circle">
-          <div class="family-avatar" style="background:linear-gradient(135deg,#10b981,#34d399);color:#03231b;font-weight:800;font-size:18px;">+</div>
-          <div>
-            <strong style="display:block;font-size:13px;color:#34d399;">+ Add Family Member</strong>
-            <small style="font-size:10.5px;color:var(--muted);">ABHA &amp; Health Circle</small>
-          </div>
-        </div>
-      `;
-
-      container.innerHTML = html;
-    }
-
-    openAddFamilyMemberModal() {
-      const name = prompt('Family Member Full Name: (e.g. Baby Ravi / Ramu K. / Saraswati)');
-      if (!name || name.trim().length < 2) return;
-
-      const role = prompt('Relationship / Family Role: (e.g. Son, Daughter, Spouse, Mother, Father, Self)', 'Child') || 'Family Member';
-      const age = prompt('Age & Gender: (e.g. 8 Months Male / 34 Yrs Female)', '28 Yrs') || 'Adult';
-      const blood = prompt('Blood Group: (e.g. O+, A+, B+, AB+, O-, A-)', 'O+') || 'O+';
-      const condition = prompt('Health Condition or Note:', 'General Health Checkup Active') || 'Healthy';
-
-      const memberKey = 'fam_' + Date.now().toString().slice(-6);
-      const abha = '14-' + Math.floor(1000 + Math.random() * 9000) + '-' + Math.floor(1000 + Math.random() * 9000) + '-' + Math.floor(1000 + Math.random() * 9000);
-
-      const newMember = {
-        id: 'FAM-' + Date.now().toString().slice(-4),
-        name: name.trim(),
-        role: role.trim(),
-        age: age.trim(),
-        bloodGroup: blood.trim(),
-        abhaId: abha,
-        conditions: [condition.trim()],
-        avatar: name.trim().split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase(),
-        assignedAsha: 'ASHA Field Worker (Ward 6)',
-        emergencyContact: 'Family Head'
-      };
-
-      this.data.familyMembers[memberKey] = newMember;
-      this.data.currentFamilyMember = memberKey;
-
-      // Sync to Firebase Realtime Database
-      try {
-        fetch(`https://swasthya-setu-2b67d-default-rtdb.firebaseio.com/patient_family_members/${memberKey}.json`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(newMember)
-        }).catch(() => {});
-
-        // Also add to staff_registry for doctor visibility
-        const staffObj = {
-          id: newMember.id,
-          name: newMember.name,
-          role: 'patient',
-          phone: (window.authService && window.authService.getCurrentUser() ? window.authService.getCurrentUser().phone : '9876543210'),
-          facility: 'Kondapalli PHC',
-          location: 'Kondapalli Sector',
-          status: 'Active',
-          regDate: 'Today',
-          isNew: true,
-          abhaId: newMember.abhaId
-        };
-        fetch(`https://swasthya-setu-2b67d-default-rtdb.firebaseio.com/staff_registry/${staffObj.id}.json`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(staffObj)
-        }).catch(() => {});
-      } catch (e) {}
-
-      if (typeof window.toast === 'function') {
-        window.toast(`✓ Added ${name} to Family Circle with ABHA: ${abha}!`);
-      }
-
-      this.selectFamilyMember(memberKey);
-    }
-
-    selectVillage(villageKey) {
-      this.data.currentVillage = villageKey;
-      const v = this.data.villages[villageKey];
-      if (!v) return;
-
-      if (typeof window.toast === 'function') {
-        window.toast(`📍 Village switched to ${v.name} (${v.district})`);
-      }
-
-      // Update localized distance badges
-      const locBadge = document.getElementById('nearestFacilityBadge');
-      if (locBadge) {
-        locBadge.innerHTML = `● ${v.nearestPhc} (Open)`;
-      }
-
-      this.renderLiveHospitalBeds();
-    }
-
-    // -------------------------------------------------------------
-    // 3. 🚨 108 AMBULANCE DISPATCH & LIVE TRACKING HUD
-    // -------------------------------------------------------------
-    triggerAmbulanceDispatch() {
-      const amb = this.data.ambulanceState;
-      const mem = this.data.familyMembers[this.data.currentFamilyMember];
-      const vil = this.data.villages[this.data.currentVillage];
-
-      amb.isDispatched = true;
-      amb.status = 'dispatched';
-      amb.etaSeconds = 522; // 08:42 min
-
-      if (global.firebaseService) {
-        global.firebaseService.dispatchAmbulance({
-          village: vil.name,
-          landmark: amb.selectedLandmark,
-          patientName: mem.name,
-          patientAbha: mem.abhaId,
-          emergencyContact: mem.emergencyContact
-        });
-      }
-
-      if (typeof window.toast === 'function') {
-        window.toast(`🚨 108 ALS Ambulance dispatched to ${vil.name} for ${mem.name}! Driver Ravi Shankar is en route.`);
-      }
-
-      this.startEtaTimer();
-      this.renderAmbulanceHUD();
-
-      // Switch view to SOS if not already there
-      if (typeof window.switchView === 'function') {
-        window.switchView('sos');
-      }
-    }
-
-    downloadAbhaCard() {
-      if (global.pdfGenerator) {
-        global.pdfGenerator.generateAbhaCard(this.data.currentFamilyMember);
-      }
-    }
-
-    downloadPrescriptionPDF() {
-      if (global.pdfGenerator) {
-        global.pdfGenerator.generatePrescriptionPDF();
-      }
-    }
-
-    startEtaTimer() {
-      if (this.etaInterval) clearInterval(this.etaInterval);
-
-      this.etaInterval = setInterval(() => {
-        const amb = this.data.ambulanceState;
-        if (amb.isDispatched && amb.etaSeconds > 0) {
-          amb.etaSeconds--;
-          this.updateEtaDisplay();
-        }
-      }, 1000);
-    }
-
-    updateEtaDisplay() {
-      const amb = this.data.ambulanceState;
-      const m = Math.floor(amb.etaSeconds / 60);
-      const s = amb.etaSeconds % 60;
-      const etaFormatted = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')} min`;
-
-      const etaEl = document.getElementById('hudEtaValue');
-      if (etaEl) etaEl.textContent = etaFormatted;
-    }
-
-    transmitLandmark(landmarkText) {
-      this.data.ambulanceState.selectedLandmark = landmarkText;
-      if (typeof window.toast === 'function') {
-        window.toast(`📍 Landmark "${landmarkText}" transmitted directly to Driver Ravi's GPS.`);
-      }
-      this.renderAmbulanceHUD();
-    }
-
-    callDriver() {
-      const amb = this.data.ambulanceState;
-      if (typeof window.toast === 'function') {
-        window.toast(`📞 Calling 108 Pilot ${amb.driverName} (${amb.driverPhone})...`);
-      }
-    }
-
-    cancelAmbulanceDispatch() {
-      if (!confirm('Are you sure you want to cancel the 108 Emergency Ambulance dispatch?')) return;
-
-      this.data.ambulanceState.isDispatched = false;
-      this.data.ambulanceState.status = 'idle';
-      if (this.etaInterval) clearInterval(this.etaInterval);
-
-      if (typeof window.toast === 'function') {
-        window.toast('108 Ambulance dispatch cancelled.');
-      }
-
-      this.renderAmbulanceHUD();
-    }
-
-    broadcastFamilySms() {
-      const mem = this.data.familyMembers[this.data.currentFamilyMember];
-      const vil = this.data.villages[this.data.currentVillage];
-
-      const modalHtml = `
-        <div class="modal-overlay open" id="smsBroadcastModal" style="z-index:1400;">
-          <div class="auth-modal-card" style="max-width:520px;">
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
-              <span style="font-size:28px;">📡</span>
+      el.innerHTML = `
+        <div class="abha-badge-card" style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:18px;padding:20px;box-shadow:0 8px 24px rgba(0,0,0,0.06);position:relative;overflow:hidden;">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1.5px solid var(--line);padding-bottom:12px;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="font-size:28px;">🇮🇳</span>
               <div>
-                <h3 class="auth-card-title" style="color:var(--danger-bright);font-size:18px;margin:0;">
-                  EMERGENCY SMS BROADCAST CONFIRMATION
-                </h3>
-                <small style="color:var(--muted);">Automated GPS &amp; ABHA Payload Dispatch</small>
+                <strong style="font-size:16px;color:var(--primary);display:block;">NATIONAL HEALTH AUTHORITY (ABHA)</strong>
+                <small style="color:var(--muted);font-weight:600;">Government of India · राष्ट्रीय स्वास्थ्य प्राधिकरण</small>
               </div>
             </div>
+            <span class="badge" style="background:var(--primary);color:#ffffff;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;">ACTIVE VERIFIED</span>
+          </div>
 
-            <p style="font-size:12.5px;color:var(--ink-dim);margin:0 0 12px;line-height:1.45;">
-              The following high-priority SMS payload has been generated and queued for transmission to your registered emergency contacts and ASHA worker:
-            </p>
-
-            <div style="padding:12px;background:rgba(4,18,15,0.7);border:1px solid rgba(220,252,243,0.15);border-radius:10px;font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#a7f3d0;margin-bottom:14px;word-break:break-all;">
-              [EMERGENCY 108 ALERT]<br>
-              Patient: ${mem.name} (${mem.age} ${mem.gender})<br>
-              Location: ${vil.name} (${vil.coordinates})<br>
-              ABHA: ${mem.abhaId}<br>
-              Condition: ${mem.conditions.join(', ')}<br>
-              108 Vehicle: UP 20 G 1082 (ETA: 8 min)<br>
-              ASHA Alerted: ${mem.assignedAsha}
+          <div style="display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center;">
+            <div style="width:68px;height:68px;background:rgba(0,82,204,0.1);border:1.5px solid var(--primary);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:32px;">
+              👤
             </div>
-
-            <div style="display:flex;gap:10px;">
-              <button class="btn-glass" style="flex:1;" onclick="document.getElementById('smsBroadcastModal').remove()">Close</button>
-              <button class="auth-btn-primary" style="flex:1.4;" onclick="document.getElementById('smsBroadcastModal').remove(); if(typeof toast==='function') toast('✓ Emergency SMS broadcast transmitted to 3 contacts & ASHA Didi.');">
-                <span>📲 Send SMS Alert Now</span>
-              </button>
+            <div>
+              <h3 style="font-size:18px;color:var(--ink);margin-bottom:4px;">${user.name}</h3>
+              <p style="font-size:13px;color:var(--ink-dim);margin-bottom:2px;">Age: ${user.age} Yrs · Gender: ${user.gender} · Blood: <strong>${user.bloodGroup}</strong></p>
+              <p style="font-size:12px;color:var(--muted);">${user.village}</p>
+            </div>
+            <div style="text-align:center;background:var(--glass-1);padding:8px;border-radius:10px;border:1px solid var(--glass-border);">
+              <div style="font-size:28px;line-height:1;">📱</div>
+              <small style="font-size:9px;color:var(--muted);font-weight:700;display:block;margin-top:2px;">QR SCAN</small>
             </div>
           </div>
-        </div>
-      `;
 
-      document.body.insertAdjacentHTML('beforeend', modalHtml);
-    }
-
-    renderAmbulanceHUD() {
-      const container = document.getElementById('view-sos');
-      if (!container) return;
-
-      const amb = this.data.ambulanceState;
-      const mem = this.data.familyMembers[this.data.currentFamilyMember];
-      const vil = this.data.villages[this.data.currentVillage];
-
-      const m = Math.floor(amb.etaSeconds / 60);
-      const s = amb.etaSeconds % 60;
-      const etaFormatted = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')} min`;
-
-      container.innerHTML = `
-        <div class="section-bar" style="margin-top:0">
-          <div class="section-bar-left">
-            <h3 data-i18n="sos_title">🚨 Emergency Response &amp; 108 Ambulance Dispatch · आपातकालीन 108</h3>
-            <button class="voice-speak-btn" onclick="speakText('आपातकालीन 108 एम्बुलेंस सेवा: जीपीएस ट्रैकिंग और चालक से सीधा संपर्क')">🔊</button>
-          </div>
-          <div style="display:flex;gap:8px;">
-            <button class="btn-glass sm" onclick="patientController.broadcastFamilySms()">📲 Family &amp; ASHA SMS Broadcast</button>
-          </div>
-        </div>
-
-        ${amb.isDispatched ? `
-          <!-- LIVE 108 AMBULANCE TRACKING HUD -->
-          <div class="glass-panel ambulance-live-hud" style="padding:24px;border-color:rgba(239,68,68,0.4);background:linear-gradient(145deg, rgba(239,68,68,0.1), rgba(4,18,15,0.85));margin-bottom:20px;">
-            <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:14px;">
-              <div style="display:flex;gap:14px;align-items:center;">
-                <div class="ambulance-icon-live">🚑</div>
-                <div>
-                  <div style="display:flex;align-items:center;gap:8px;">
-                    <h3 style="font-size:22px;color:#ffffff;margin:0;">108 ALS Ambulance En Route</h3>
-                    <span class="admin-status-badge bad">PRIORITY CODE 1</span>
-                  </div>
-                  <p style="font-size:13px;color:var(--ink-dim);margin:4px 0 0;">
-                    Vehicle: <strong>${amb.vehicleNumber}</strong> · ${amb.ambulanceType} · Driver: <strong>${amb.driverName}</strong>
-                  </p>
-                </div>
-              </div>
-
-              <div style="text-align:right;">
-                <span style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;">Estimated Arrival Time</span>
-                <div style="font-family:'Fraunces',serif;font-size:32px;font-weight:800;color:#f87171;" id="hudEtaValue">
-                  ${etaFormatted}
-                </div>
-                <small style="color:var(--auth-primary-bright);font-weight:700;">Distance: ${amb.distanceKm} km · Speed: ${amb.speedKmh} km/h</small>
-              </div>
+          <div style="margin-top:14px;background:var(--primary);color:#ffffff;padding:10px 16px;border-radius:12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+            <div>
+              <small style="font-size:10px;letter-spacing:1px;opacity:0.9;">ABHA NUMBER (14-DIGIT)</small>
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:16px;font-weight:700;letter-spacing:1px;">${user.abhaId}</div>
             </div>
-
-            <!-- Route Progress Bar -->
-            <div class="ambulance-route-bar-wrap" style="margin:18px 0 14px;">
-              <div class="ambulance-progress-fill" style="width:68%;"></div>
-              <div class="route-nodes">
-                <span>📍 Dispatch Depot (CHC)</span>
-                <span>🛣️ Highway Junction</span>
-                <span style="color:#f87171;font-weight:700;">🎯 ${vil.name}</span>
-              </div>
-            </div>
-
-            <!-- Onboard Equipment Status Checklist -->
-            <div style="margin-top:16px;">
-              <span style="font-size:11.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.04em;">
-                Verified Onboard Life Support Equipment:
-              </span>
-              <div class="ambulance-equipment-grid" style="display:grid;grid-template-columns:repeat(3, 1fr);gap:10px;margin-top:8px;">
-                ${amb.onboardEquipment.map(eq => `
-                  <div class="equipment-box" style="padding:8px 10px;background:rgba(4,18,15,0.5);border:1px solid rgba(220,252,243,0.1);border-radius:10px;display:flex;align-items:center;gap:8px;">
-                    <span style="font-size:18px;">${eq.icon}</span>
-                    <div>
-                      <strong style="font-size:11.5px;color:#ffffff;display:block;">${eq.name}</strong>
-                      <small style="font-size:10px;color:#4ade80;">${eq.status}</small>
-                    </div>
-                  </div>
-                `).join('')}
-              </div>
-            </div>
-
-            <!-- Rural Landmark Transmitter -->
-            <div style="margin-top:18px;padding:14px;background:rgba(4,18,15,0.6);border-radius:14px;border:1px solid rgba(220,252,243,0.12);">
-              <span style="font-size:12px;font-weight:700;color:var(--auth-primary-bright);display:block;margin-bottom:6px;">
-                📍 Transmit Rural Navigation Landmark to Driver GPS:
-              </span>
-              <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                <button class="btn-glass sm ${amb.selectedLandmark.includes('Banyan') ? 'active' : ''}" onclick="patientController.transmitLandmark('Near Old Banyan Tree / Primary School Road')">
-                  🌳 Near Old Banyan Tree
-                </button>
-                <button class="btn-glass sm ${amb.selectedLandmark.includes('Canal') ? 'active' : ''}" onclick="patientController.transmitLandmark('Beside Canal Irrigation Bridge')">
-                  🌊 Canal Irrigation Bridge
-                </button>
-                <button class="btn-glass sm ${amb.selectedLandmark.includes('Panchayat') ? 'active' : ''}" onclick="patientController.transmitLandmark('Opposite Gram Panchayat Office')">
-                  🏛️ Gram Panchayat Bhawan
-                </button>
-                <button class="btn-glass sm ${amb.selectedLandmark.includes('Temple') ? 'active' : ''}" onclick="patientController.transmitLandmark('Near Hanuman Mandir Corner')">
-                  🛕 Hanuman Mandir
-                </button>
-              </div>
-            </div>
-
-            <!-- Call & Cancel Controls -->
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:18px;padding-top:14px;border-top:1px solid rgba(220,252,243,0.1);">
-              <button class="auth-btn-primary" style="padding:10px 24px;" onclick="patientController.callDriver()">
-                <span>📞 Call Driver Ravi Shankar (${amb.driverPhone})</span>
-              </button>
-              <button class="btn-glass" style="color:#f87171;" onclick="patientController.cancelAmbulanceDispatch()">
-                <span>✕ Cancel Dispatch</span>
-              </button>
+            <div style="text-align:right;">
+              <small style="font-size:10px;opacity:0.9;">PHONE LINKED</small>
+              <div style="font-size:13px;font-weight:600;">+91 ${user.phone}</div>
             </div>
           </div>
-        ` : `
-          <!-- BIG ONE-TOUCH 108 DISPATCH BUTTON -->
-          <div class="glass-panel" style="padding:32px;text-align:center;margin-bottom:24px;border-color:rgba(239,68,68,0.35);background:radial-gradient(circle at 50% 30%, rgba(239,68,68,0.15), transparent 70%), linear-gradient(165deg, rgba(6,24,20,0.85), rgba(4,18,15,0.95));">
-            <div style="width:90px;height:90px;border-radius:50%;background:linear-gradient(135deg, #ef4444, #dc2626);color:#ffffff;display:grid;place-items:center;font-size:42px;margin:0 auto 16px;box-shadow:0 0 35px rgba(239,68,68,0.6);cursor:pointer;animation:docPulse 1.8s infinite;" onclick="patientController.triggerAmbulanceDispatch()">
-              🚨
-            </div>
-            <h3 style="font-size:24px;color:#ffffff;margin:0 0 6px;">One-Touch 108 Emergency Ambulance</h3>
-            <p style="font-size:13.5px;color:var(--ink-dim);max-width:560px;margin:0 auto 20px;">
-              Instant GPS dispatch of Advanced Life Support (ALS) &amp; Basic Life Support (BLS) ambulances to <strong>${vil.name}</strong> for <strong>${mem.name}</strong>.
-            </p>
-            <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
-              <button class="auth-btn-danger" style="font-size:15px;padding:12px 32px;" onclick="patientController.triggerAmbulanceDispatch()">
-                <span>🚨 DISPATCH 108 AMBULANCE NOW →</span>
-              </button>
-              <button class="btn-glass" onclick="patientController.broadcastFamilySms()">
-                <span>📲 Offline SMS SOS Payload</span>
-              </button>
-            </div>
-          </div>
-        `}
 
-        <!-- National Emergency Speed Dials Grid -->
-        <div style="display:grid;grid-template-columns:repeat(4, 1fr);gap:14px;margin-bottom:24px;">
-          <div class="glass-panel stat-card-3d" style="padding:16px;text-align:center;cursor:pointer;" onclick="if(typeof toast==='function') toast('Dialing 108 Ambulance Dispatch...')">
-            <span style="font-size:28px;">🚑</span>
-            <strong style="display:block;font-size:20px;color:#f87171;margin:4px 0 2px;">108</strong>
-            <small style="color:var(--muted);">Ambulance &amp; Trauma</small>
+          <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="auth-btn-primary" style="flex:1;min-width:180px;padding:10px;font-size:13px;" onclick="patientController.printAbhaCard()">
+              🖨️ Print / Download ABHA Card
+            </button>
+            <button class="btn-glass" style="padding:10px 16px;font-size:13px;" onclick="speakText('Your ABHA ID is ' + '${user.abhaId}' + '. Valid for free healthcare across all government and empaneled hospitals.')">
+              🔊 Read Aloud
+            </button>
           </div>
-
-          <div class="glass-panel stat-card-3d" style="padding:16px;text-align:center;cursor:pointer;" onclick="if(typeof toast==='function') toast('Dialing 112 National Emergency...')">
-            <span style="font-size:28px;">👮</span>
-            <strong style="display:block;font-size:20px;color:#60a5fa;margin:4px 0 2px;">112</strong>
-            <small style="color:var(--muted);">Police &amp; Disaster</small>
-          </div>
-
-          <div class="glass-panel stat-card-3d" style="padding:16px;text-align:center;cursor:pointer;" onclick="if(typeof toast==='function') toast('Dialing 102 Maternal Helpline...')">
-            <span style="font-size:28px;">🤰</span>
-            <strong style="display:block;font-size:20px;color:#f472b6;margin:4px 0 2px;">102</strong>
-            <small style="color:var(--muted);">Maternal &amp; Infant</small>
-          </div>
-
-          <div class="glass-panel stat-card-3d" style="padding:16px;text-align:center;cursor:pointer;" onclick="if(typeof toast==='function') toast('Dialing 1075 National Health Helpline...')">
-            <span style="font-size:28px;">🩺</span>
-            <strong style="display:block;font-size:20px;color:#4ade80;margin:4px 0 2px;">1075</strong>
-            <small style="color:var(--muted);">National Health Helpline</small>
-          </div>
-        </div>
-
-        <!-- Emergency First Aid Interactive Modules -->
-        <div class="section-bar">
-          <div class="section-bar-left">
-            <h3>🩹 Emergency First-Aid Protocols &amp; Action Steps</h3>
-          </div>
-        </div>
-
-        <div style="display:grid;grid-template-columns:repeat(2, 1fr);gap:16px;">
-          ${Object.keys(this.data.firstAidProtocols).map(key => {
-            const p = this.data.firstAidProtocols[key];
-            return `
-              <div class="glass-panel card-3d" style="padding:20px;">
-                <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
-                  <h4 style="font-size:16px;color:#ffffff;margin:0;">${p.title}</h4>
-                  <button class="voice-speak-btn" onclick="speakText('${p.hindiAudio}')" title="Listen in Hindi">🔊</button>
-                </div>
-                <ol style="font-size:12.5px;color:var(--ink-dim);padding-left:18px;margin:0;line-height:1.5;">
-                  ${p.steps.map(s => `<li style="margin-bottom:6px;">${s}</li>`).join('')}
-                </ol>
-              </div>
-            `;
-          }).join('')}
         </div>
       `;
     }
 
+    printAbhaCard() {
+      window.print();
+    }
+
     // -------------------------------------------------------------
-    // 4. 🧠 AI CLINICAL SELF-TRIAGE (GEMINI 3.7 FLASH)
+    // 2. 1-TAP 108 EMERGENCY SOS
     // -------------------------------------------------------------
-    runAITriage(symptomKey) {
-      const triageResults = {
-        chest_pain: {
-          urgency: 'EMERGENCY RED',
-          badgeClass: 'bad',
-          condition: 'Possible Acute Coronary Syndrome / Myocardial Infarction',
-          preHospital: 'Have patient sit upright with back supported. Loosen collar. Give 300mg Aspirin if no allergy. Dispatch 108 immediately.',
-          redFlags: 'Crushing central chest pain radiating to left arm or jaw, cold sweating, shortness of breath.',
-          recommendedCare: 'Tertiary Command: Vijayawada District Hospital (ICU Bed Ready)',
-          audioText: 'गंभीर चेतावनी: दिल का दौरा पड़ने की संभावना है। तुरंत 108 एम्बुलेंस बुलाएं और मरीज को शांत बैठाएं।'
+    triggerSos() {
+      const user = this.store.getState().currentUser;
+      const message = `🚨 EMERGENCY 108 SOS TRIGGERED!\n\nPatient: ${user.name}\nPhone: +91 ${user.phone}\nLocation: ${user.village}\nABHA: ${user.abhaId}\n\nAmbulance dispatched to your GPS location.`;
+      
+      speakText('Emergency 108 ambulance alert sent! Medical dispatch is contacting you now.');
+      if (typeof window.toast === 'function') {
+        window.toast('🚨 Emergency 108 Alert Sent to Ambulance Grid!');
+      }
+      alert(message);
+    }
+
+    // -------------------------------------------------------------
+    // 3. AUDIO-VISUAL SYMPTOM TRIAGE (6 RURAL COMPLAINTS)
+    // -------------------------------------------------------------
+    triageSymptom(type) {
+      const triageData = {
+        fever: {
+          title: '🌡️ High Fever & Chills (तेज बुखार)',
+          color: '#d97706',
+          badge: '🟡 MODERATE · VISIT PHC TODAY',
+          advice: 'Drink plenty of boiled water and ORS. Take Paracetamol 650mg if fever is above 100°F. If fever lasts more than 48 hours, visit Kondapalli PHC for Malaria/Dengue blood test.',
+          audio: 'High fever triage: Drink clean water and ORS. Take Paracetamol. Visit your local PHC if fever persists for two days.'
         },
         snakebite: {
-          urgency: 'EMERGENCY RED',
-          badgeClass: 'bad',
-          condition: 'Potential Neurotoxic or Hemotoxic Snake Envenomation',
-          preHospital: 'Immobilize bitten limb with a splint below heart level. Keep patient absolutely still. Do not cut or suck wound. Rush to nearest ASV-equipped facility.',
-          redFlags: 'Fang marks, rapid local swelling, drooping eyelids (ptosis), difficulty speaking or swallowing.',
-          recommendedCare: 'Ibrahimpatnam CHC (Anti-Snake Venom Available)',
-          audioText: 'सांप काटने की आपात स्थिति: अंग को स्थिर रखें और तुरंत एंटी-वेनम वाले अस्पताल जाएं।'
+          title: '🐍 Snakebite / Scorpion Sting (सांप का काटना)',
+          color: '#dc2626',
+          badge: '🔴 CRITICAL EMERGENCY · GO TO HOSPITAL IMMEDIATELY',
+          advice: 'DO NOT cut, suck, or tie a tight tourniquet. Keep patient calm and completely still. Rush immediately to Ibrahimpatnam CHC or District Hospital for Anti-Snake Venom (ASV). Call 108 now!',
+          audio: 'Critical snakebite emergency! Do not move the affected limb. Go directly to CHC hospital for anti-venom injection.'
         },
-        high_fever: {
-          urgency: 'URGENT YELLOW',
-          badgeClass: 'warn',
-          condition: 'Acute Febrile Illness / Possible Viral or Dengue Syndrome',
-          preHospital: 'Sponge body with normal room-temperature wet cloth. Give oral Paracetamol 500mg. Keep well hydrated with ORS and coconut water.',
-          redFlags: 'Platelet drop, skin rash, persistent vomiting, black stools, body temp above 103°F.',
-          recommendedCare: 'Kondapalli PHC / Sub-Centre Tele-Desk',
-          audioText: 'तेज बुखार: गीले कपड़े से शरीर पोंछें, ओआरएस पिएं और नजदीकी प्राथमिक स्वास्थ्य केंद्र में जांच कराएं।'
+        diarrhea: {
+          title: '💧 Diarrhea & Dehydration (दस्त व उल्टी)',
+          color: '#16a34a',
+          badge: '🟢 SAFE FOR HOME CARE WITH ORS',
+          advice: 'Dissolve 1 packet of ORS in 1 liter clean drinking water. Drink after every loose stool. Give Zinc tablets to children under 5. If extreme lethargy or no urination for 6 hours, visit PHC.',
+          audio: 'Diarrhea care: Drink one liter of ORS water frequently. Keep hydrated with coconut water and rice kanji.'
+        },
+        pregnancy: {
+          title: '🤰 Pregnancy Labor / Bleeding (प्रसव दर्द)',
+          color: '#dc2626',
+          badge: '🔴 EMERGENCY MATERNAL ADMISSION',
+          advice: 'Severe labor pains or bleeding require immediate hospital delivery. Contact Lakshmi Didi (ASHA) immediately and call 108 ambulance for direct transport to Maternity Ward.',
+          audio: 'Maternal alert: Contact your ASHA Didi and take 108 ambulance to hospital delivery ward right away.'
+        },
+        chestpain: {
+          title: '🫀 Severe Chest Pain (छाती में तेज दर्द)',
+          color: '#dc2626',
+          badge: '🔴 CRITICAL EMERGENCY · CARDIAC ALERT',
+          advice: 'Chest tightness, pain radiating to left arm, and cold sweats are heart emergency signs. Chew 1 Aspirin tablet immediately if available and rush to District Hospital via 108.',
+          audio: 'Cardiac emergency: Chew Aspirin if available and call 108 ambulance to reach hospital ICU.'
         },
         breathing: {
-          urgency: 'EMERGENCY RED',
-          badgeClass: 'bad',
-          condition: 'Severe Bronchospasm / Low Oxygen Hypoxia',
-          preHospital: 'Sit patient in tripod posture. Check SpO2 pulse oximeter. Administer high-flow oxygen if available via ASHA kit.',
-          redFlags: 'SpO2 below 92%, cyanosis (blue lips/fingertips), inability to complete sentences.',
-          recommendedCare: 'Ibrahimpatnam CHC / Oxygen Bed',
-          audioText: 'सांस लेने में भारी तकलीफ: मरीज को सीधा बैठाएं और तुरंत ऑक्सीजन सपोर्ट की व्यवस्था करें।'
+          title: '😮‍💨 Difficulty Breathing / Asthma (सांस की तकलीफ)',
+          color: '#d97706',
+          badge: '🟡 URGENT · OXYGEN PHC VISIT',
+          advice: 'Sit upright in an airy place. Use Salbutamol inhaler if prescribed. Visit Kondapalli PHC immediately for oxygen support and nebulization.',
+          audio: 'Breathing difficulty: Sit upright, take inhaler if prescribed, and visit nearest PHC for oxygen support.'
         }
       };
 
-      const res = triageResults[symptomKey] || triageResults['high_fever'];
-      const resultContainer = document.getElementById('triageAIResultBox');
-      if (resultContainer) {
-        resultContainer.innerHTML = `
-          <div class="glass-panel" style="padding:22px;border-color:${res.urgency.includes('RED') ? 'rgba(239,68,68,0.5)' : 'rgba(245,158,11,0.5)'};background:rgba(4,18,15,0.85);margin-top:18px;">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-              <span class="admin-status-badge ${res.badgeClass}" style="font-size:13px;padding:6px 14px;">
-                ${res.urgency}
-              </span>
-              <button class="voice-speak-btn" onclick="speakText('${res.audioText}')" title="Listen in Hindi">🔊</button>
+      const item = triageData[type];
+      if (!item) return;
+
+      const container = document.getElementById('triageResultContainer');
+      if (container) {
+        container.innerHTML = `
+          <div style="background:var(--glass-1);border:2px solid ${item.color};border-radius:16px;padding:20px;margin-top:16px;box-shadow:0 6px 20px rgba(0,0,0,0.08);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+              <h3 style="color:var(--ink);font-size:18px;">${item.title}</h3>
+              <span style="background:${item.color};color:#ffffff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;">${item.badge}</span>
             </div>
-
-            <h4 style="font-size:18px;color:#ffffff;margin:0 0 6px;">${res.condition}</h4>
-            <div style="font-size:12.5px;color:var(--muted);margin-bottom:14px;">Powered by Gemini 3.7 Flash Clinical Guidance Engine</div>
-
-            <div style="padding:12px;background:rgba(4,18,15,0.5);border-radius:10px;margin-bottom:10px;">
-              <strong style="color:var(--auth-primary-bright);font-size:12px;display:block;text-transform:uppercase;">Immediate Pre-Hospital Steps:</strong>
-              <p style="font-size:13px;color:var(--ink-dim);margin:4px 0 0;line-height:1.45;">${res.preHospital}</p>
-            </div>
-
-            <div style="padding:12px;background:rgba(4,18,15,0.5);border-radius:10px;margin-bottom:14px;">
-              <strong style="color:#f87171;font-size:12px;display:block;text-transform:uppercase;">Red Flag Warning Signs:</strong>
-              <p style="font-size:13px;color:var(--ink-dim);margin:4px 0 0;line-height:1.45;">${res.redFlags}</p>
-            </div>
-
-            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;padding-top:12px;border-top:1px solid rgba(220,252,243,0.1);">
-              <span style="font-size:12px;color:var(--ink-dim);">Recommended Care Level: <strong>${res.recommendedCare}</strong></span>
-              ${res.urgency.includes('RED') ? `
-                <button class="auth-btn-danger" style="padding:8px 18px;font-size:12px;" onclick="patientController.triggerAmbulanceDispatch()">
-                  <span>🚨 Trigger 108 Dispatch →</span>
-                </button>
-              ` : `
-                <button class="auth-btn-primary" style="padding:8px 18px;font-size:12px;" onclick="if(typeof switchView==='function') switchView('tele')">
-                  <span>🎥 Connect e-Sanjeevani Teleconsult →</span>
-                </button>
-              `}
+            <p style="font-size:14px;color:var(--ink-dim);line-height:1.6;margin-bottom:16px;">${item.advice}</p>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <button class="auth-btn-primary" style="background:#dc2626;border-color:#b91c1c;padding:8px 16px;font-size:13px;" onclick="patientController.triggerSos()">
+                🚨 Call 108 Ambulance Now
+              </button>
+              <button class="btn-glass" style="padding:8px 16px;font-size:13px;" onclick="speakText('${item.audio}')">
+                🔊 Listen in Audio (बोलकर सुनें)
+              </button>
             </div>
           </div>
         `;
+        speakText(item.audio);
       }
     }
 
     // -------------------------------------------------------------
-    // 5. 📷 AI PRESCRIPTION OCR SCANNER & JAN AUSHADHI CALCULATOR
+    // 4. FAMILY HEALTH CIRCLE
     // -------------------------------------------------------------
-    triggerPrescriptionUpload() {
-      const fileInput = document.getElementById('rxUploadFileInput');
-      if (fileInput) fileInput.click();
-    }
+    renderFamilyCircle() {
+      const el = document.getElementById('familyMembersList');
+      if (!el || !this.store) return;
+      const fams = this.store.getState().familyMembers || [];
 
-    handlePrescriptionUpload(event) {
-      const file = event.target.files && event.target.files[0];
-      if (!file) return;
-
-      if (typeof window.toast === 'function') {
-        window.toast(`📷 Uploaded ${file.name}. Running Gemini OCR...`);
+      if (!fams.length) {
+        el.innerHTML = `<div style="text-align:center;padding:24px;color:var(--muted);">No family members added yet. Tap "+ Add Family Member" below.</div>`;
+        return;
       }
 
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        this.runPrescriptionOCRAnalysis(e.target.result, file.name);
-      };
-      reader.readAsDataURL(file);
-    }
-
-    scanPrescriptionDemo() {
-      this.runPrescriptionOCRAnalysis(null, 'Dr_Varma_Kondapalli_PHC_Rx.jpg');
-    }
-
-    runPrescriptionOCRAnalysis(customImage, fileName) {
-      const scanBox = document.getElementById('rxScanResultArea');
-      if (scanBox) {
-        scanBox.innerHTML = `
-          <div class="glass-panel" style="padding:24px;margin-top:18px;border-color:var(--auth-primary-bright);background:rgba(4,18,15,0.9);text-align:center;">
-            <div class="rx-scan-laser-box" style="position:relative;width:240px;height:140px;margin:0 auto 16px;background:rgba(220,252,243,0.08);border:2px dashed var(--auth-primary-bright);border-radius:12px;display:grid;place-items:center;overflow:hidden;">
-              ${customImage ? `<img src="${customImage}" style="width:100%;height:100%;object-fit:cover;opacity:0.6;">` : `<span style="font-size:36px;">📄</span>`}
-              <div class="ocr-laser-beam"></div>
+      el.innerHTML = fams.map(f => `
+        <div style="background:var(--glass-1);border:1.5px solid var(--glass-border);border-radius:14px;padding:14px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,0.04);">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div style="width:42px;height:42px;background:rgba(0,82,204,0.1);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;">
+              ${f.gender === 'Female' ? '👩' : '👨'}
             </div>
-            <h4 style="font-size:16px;color:#ffffff;margin:0 0 6px;">🧠 Gemini Multimodal OCR Scanning...</h4>
-            <p style="font-size:12.5px;color:var(--auth-primary-bright);margin:0;">Reading doctor handwriting, recognizing generic chemical molecules & matching PMBJP Jan Aushadhi generic catalog...</p>
-          </div>
-        `;
-      }
-
-      setTimeout(() => {
-        if (!scanBox) return;
-
-        const extractedMeds = [
-          {
-            name: 'Ferrous Ascorbate + Folic Acid Tablets',
-            brand: 'Autrin / Orofer XT Caps (30 Tab)',
-            brandPrice: '₹ 180.00',
-            genericPrice: '₹ 32.00',
-            savings: '₹ 148.00 (82%)',
-            dosage: '1 Tab Daily after Dinner',
-            instructions: 'Take with water/lemon juice. Do not take with tea/coffee.'
-          },
-          {
-            name: 'Calcium Carbonate 500mg + Vitamin D3',
-            brand: 'Shelcal 500 Tablets (15 Tab)',
-            brandPrice: '₹ 140.00',
-            genericPrice: '₹ 28.00',
-            savings: '₹ 112.00 (80%)',
-            dosage: '1 Tab Daily after Lunch',
-            instructions: 'Take after meals for optimal absorption.'
-          },
-          {
-            name: 'Pantoprazole Gastro-Resistant 40mg',
-            brand: 'Pan 40 / Pantocid (15 Tab)',
-            brandPrice: '₹ 120.00',
-            genericPrice: '₹ 18.00',
-            savings: '₹ 102.00 (85%)',
-            dosage: '1 Tab Morning (Empty Stomach)',
-            instructions: 'Take 30 minutes before morning breakfast.'
-          }
-        ];
-
-        scanBox.innerHTML = `
-          <div class="glass-panel" style="padding:22px;margin-top:18px;border-color:rgba(95,227,196,0.4);animation:docFadeIn 0.35s ease;">
-            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
-              <div>
-                <span class="admin-status-badge good" style="font-size:11px;margin-bottom:4px;">✓ AI OCR RECOGNITION 100% VERIFIED</span>
-                <h4 style="font-size:18px;color:#ffffff;margin:2px 0 2px;">3 Prescribed Medicines Detected from Scanned Prescription</h4>
-                <small style="color:var(--muted);">Source: ${fileName || 'Prescription Letter'} · Verified by Clinical Formulary</small>
-              </div>
-              <div style="display:flex;gap:8px;">
-                <button class="auth-btn-primary" style="padding:8px 18px;font-size:12.5px;" onclick="patientController.importScannedToMedications()">
-                  <span>➕ Add All to Daily Reminder</span>
-                </button>
-                <button class="btn-glass" style="padding:8px 16px;font-size:12.5px;background:rgba(0,51,102,0.4);border-color:#0b5ed7;" onclick="patientController.downloadPrescriptionPDF()">
-                  <span>📄 Download Clean e-Rx (PDF)</span>
-                </button>
-              </div>
-            </div>
-
-            <!-- Generic Savings Comparison Cards -->
-            <div class="generic-compare-grid" style="display:flex;flex-direction:column;gap:12px;">
-              ${extractedMeds.map((m) => `
-                <div class="generic-compare-card glass-panel" style="padding:16px;">
-                  <div class="compare-col" style="flex:1;">
-                    <span style="font-size:11px;color:var(--muted);text-transform:uppercase;">Branded Medicine Prescribed</span>
-                    <strong style="font-size:14px;color:#ffffff;display:block;margin:2px 0;">${m.brand}</strong>
-                    <div style="font-size:11.5px;color:var(--ink-dim);">${m.dosage}</div>
-                    <div class="price-strike">${m.brandPrice}</div>
-                  </div>
-                  <div style="font-size:24px;color:var(--auth-primary-bright);padding:0 8px;">→</div>
-                  <div class="compare-col generic" style="flex:1.3;background:rgba(16,185,129,0.08);padding:10px 14px;border-radius:12px;border:1px solid rgba(52,211,153,0.3);">
-                    <span style="font-size:11px;color:#a7f3d0;font-weight:700;text-transform:uppercase;">PMBJP Jan Aushadhi Generic Salt</span>
-                    <strong style="font-size:15px;color:#34d399;display:block;margin:2px 0;">${m.name}</strong>
-                    <div style="font-size:11.5px;color:#cbd5e1;margin-bottom:6px;">${m.instructions}</div>
-                    <div style="display:flex;align-items:center;gap:10px;">
-                      <div class="price-big-green">${m.genericPrice}</div>
-                      <span class="status-pill good" style="font-size:11px;">Save ${m.savings}</span>
-                    </div>
-                  </div>
-                </div>
-              `).join('')}
-            </div>
-
-            <!-- Total Savings Banner -->
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:18px;padding:16px;background:rgba(16,185,129,0.15);border-radius:14px;border:1px solid rgba(52,211,153,0.35);">
-              <div>
-                <strong style="font-size:15px;color:#34d399;display:block;">💰 Total Patient Savings: ₹ 362.00 / month (82% Reduction)</strong>
-                <small style="color:var(--ink-dim);">Available at nearest Kondapalli Jan Aushadhi Kendra (1.2 km)</small>
-              </div>
-              <button class="voice-speak-btn" onclick="speakText('पर्चे में 3 दवाइयां पहचानी गईं: आयरन, कैल्शियम और एंटासिड। जन औषधि केंद्र से लेने पर आपको प्रति माह 362 रुपये की 82% बचत होगी।')" title="Listen Dosage Instructions">🔊</button>
+            <div>
+              <strong style="color:var(--ink);font-size:15px;display:block;">${f.name} (${f.relation})</strong>
+              <small style="color:var(--muted);font-family:'IBM Plex Mono',monospace;">ABHA: ${f.abhaId}</small>
             </div>
           </div>
-        `;
-
-        if (typeof window.toast === 'function') {
-          window.toast('✓ Prescription scanned! 3 Medicines extracted with Jan Aushadhi generic mapping.');
-        }
-      }, 900);
+          <div style="text-align:right;">
+            <span class="badge" style="background:rgba(0,82,204,0.1);color:var(--primary);padding:4px 8px;border-radius:12px;font-size:11px;font-weight:600;">${f.status || 'Active'}</span>
+            <button style="display:block;margin-top:4px;color:#dc2626;font-size:11px;cursor:pointer;background:none;border:none;" onclick="patientController.removeFamilyMember('${f.id}')">✕ Remove</button>
+          </div>
+        </div>
+      `).join('');
     }
 
-    importScannedToMedications() {
-      // Add detected medicines if not already in checklist
-      const newMeds = [
-        { id: 'M_PANT', slot: 'morning', name: 'Pantoprazole 40mg (Empty Stomach)', dose: '1 Tab', time: '07:30 AM', instructions: '30 min before breakfast', taken: true, brandName: 'Pan 40', genericName: 'PMBJP Pantoprazole', savings: '₹102' }
-      ];
-      newMeds.forEach(nm => {
-        if (!this.data.medications.find(m => m.id === nm.id)) {
-          this.data.medications.unshift(nm);
-        }
-      });
-      if (typeof window.toast === 'function') {
-        window.toast('✓ Scanned medicines imported into your Daily Dose Checklist.');
+    openAddFamilyModal() {
+      const modal = document.getElementById('addFamilyModal');
+      if (modal) modal.style.display = 'flex';
+    }
+
+    closeAddFamilyModal() {
+      const modal = document.getElementById('addFamilyModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    submitAddFamily(e) {
+      if (e) e.preventDefault();
+      const name = document.getElementById('famName').value.trim();
+      const relation = document.getElementById('famRelation').value;
+      const age = parseInt(document.getElementById('famAge').value, 10) || 25;
+      const gender = document.getElementById('famGender').value;
+
+      if (!name) {
+        alert('Please enter member name');
+        return;
       }
-      this.renderMedicationTracker();
+
+      this.store.addFamilyMember({ name, relation, age, gender });
+      this.closeAddFamilyModal();
+      if (typeof window.toast === 'function') window.toast('✓ Added ' + name + ' to Family Health Circle');
+    }
+
+    removeFamilyMember(id) {
+      if (confirm('Are you sure you want to remove this family member?')) {
+        this.store.deleteFamilyMember(id);
+      }
     }
 
     // -------------------------------------------------------------
-    // 6. 💊 DAILY MEDICATION TRACKER & ADHERENCE CHECKLIST
+    // 5. JAN AUSHADHI MEDICINE TRACKER & SAVINGS
     // -------------------------------------------------------------
-    toggleDoseTaken(medId) {
-      const med = this.data.medications.find(m => m.id === medId);
-      if (med) {
-        med.taken = !med.taken;
-        if (typeof window.toast === 'function') {
-          window.toast(med.taken ? `✓ Marked ${med.name} as taken!` : `Marked ${med.name} as pending`);
-        }
-        this.renderMedicationTracker();
-      }
-    }
+    renderDailyMedications() {
+      const el = document.getElementById('dailyMedsList');
+      if (!el || !this.store) return;
+      const meds = this.store.getState().dailyMedications || [];
 
-    renderMedicationTracker() {
-      const container = document.getElementById('dailyMedicationChecklist');
-      if (!container) return;
-
-      const meds = this.data.medications || [];
-      const takenCount = meds.filter(m => m.taken).length;
-      const progressPercent = meds.length ? Math.round((takenCount / meds.length) * 100) : 0;
-
-      container.innerHTML = `
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      el.innerHTML = meds.map(m => `
+        <div style="background:var(--glass-1);border:1.5px solid var(--glass-border);border-radius:14px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
           <div>
-            <strong style="font-size:14px;color:#ffffff;">Today's Adherence Progress (${takenCount} of ${meds.length} Taken)</strong>
-            <small style="display:block;color:var(--muted);">Dose Adherence Tracker</small>
+            <strong style="color:var(--ink);font-size:15px;display:block;">${m.name}</strong>
+            <small style="color:#16a34a;font-weight:700;">💰 ${m.saving}</small>
           </div>
-          <span style="font-size:16px;font-weight:700;color:var(--auth-primary-bright);font-family:'IBM Plex Mono',monospace;">${progressPercent}%</span>
+          <div style="display:flex;gap:8px;">
+            ${m.morning ? `
+              <button class="btn-glass" style="padding:6px 10px;font-size:12px;background:${m.taken && m.taken.morning ? '#16a34a' : 'transparent'};color:${m.taken && m.taken.morning ? '#ffffff' : 'var(--ink)'};" onclick="patientController.toggleDose('${m.id}', 'morning')">
+                ☀️ ${m.taken && m.taken.morning ? '✓ Taken' : 'Morning'}
+              </button>
+            ` : ''}
+            ${m.noon ? `
+              <button class="btn-glass" style="padding:6px 10px;font-size:12px;background:${m.taken && m.taken.noon ? '#16a34a' : 'transparent'};color:${m.taken && m.taken.noon ? '#ffffff' : 'var(--ink)'};" onclick="patientController.toggleDose('${m.id}', 'noon')">
+                🌤️ ${m.taken && m.taken.noon ? '✓ Taken' : 'Noon'}
+              </button>
+            ` : ''}
+            ${m.night ? `
+              <button class="btn-glass" style="padding:6px 10px;font-size:12px;background:${m.taken && m.taken.night ? '#16a34a' : 'transparent'};color:${m.taken && m.taken.night ? '#ffffff' : 'var(--ink)'};" onclick="patientController.toggleDose('${m.id}', 'night')">
+                🌙 ${m.taken && m.taken.night ? '✓ Taken' : 'Night'}
+              </button>
+            ` : ''}
+          </div>
         </div>
-
-        <div style="height:6px;border-radius:999px;background:rgba(220,252,243,0.1);overflow:hidden;margin-bottom:16px;">
-          <div style="height:100%;width:${progressPercent}%;background:linear-gradient(90deg, #10b981, #34d399);border-radius:999px;transition:width 0.3s ease;"></div>
-        </div>
-
-        <div style="display:flex;flex-direction:column;gap:10px;">
-          ${meds.length ? meds.map(m => `
-            <div class="med-dose-item glass-panel ${m.taken ? 'dose-taken' : ''}" style="padding:12px 14px;border-radius:12px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="patientController.toggleDoseTaken('${m.id}')">
-              <div style="display:flex;gap:12px;align-items:center;">
-                <input type="checkbox" ${m.taken ? 'checked' : ''} style="accent-color:var(--auth-primary-bright);width:18px;height:18px;cursor:pointer;" onclick="event.stopPropagation(); patientController.toggleDoseTaken('${m.id}')">
-                <div>
-                  <strong style="font-size:13.5px;color:${m.taken ? 'var(--muted)' : '#ffffff'};${m.taken ? 'text-decoration:line-through;' : ''}">${m.name} (${m.dose})</strong>
-                  <small style="display:block;color:var(--muted);font-size:11px;">⏰ ${m.time} · ${m.instructions}</small>
-                </div>
-              </div>
-              <span class="admin-status-badge ${m.taken ? 'good' : 'warn'}" style="font-size:10px;">
-                ${m.taken ? '✓ Taken' : 'Pending'}
-              </span>
-            </div>
-          `).join('') : `
-            <div style="text-align:center;padding:24px 16px;color:var(--muted);background:rgba(4,18,15,0.3);border-radius:12px;border:1px dashed var(--auth-border);">
-              No active daily medications logged yet. When a doctor writes an e-Prescription, doses will appear here automatically.
-            </div>
-          `}
-        </div>
-      `;
+      `).join('');
     }
 
-    renderJanAushadhiCalculator() {
-      // Attached to view-medicines
+    toggleDose(medId, time) {
+      this.store.toggleDoseTaken(medId, time);
     }
 
     // -------------------------------------------------------------
-    // 7. 🏥 LIVE HOSPITAL CAPACITY & BED TRACKER
+    // 6. LIVE HOSPITAL BEDS & BLOOD BANK
     // -------------------------------------------------------------
-    renderLiveHospitalBeds() {
-      const container = document.getElementById('liveHospitalBedGridPatient');
-      if (!container) return;
+    renderLiveHospitals() {
+      const el = document.getElementById('hospitalBedsList');
+      if (!el || !this.store) return;
+      const hosps = this.store.getState().hospitals || [];
 
-      const vil = this.data.villages[this.data.currentVillage];
-
-      container.innerHTML = `
-        <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:16px;">
-          <div class="glass-panel card-3d" style="padding:18px;">
-            <div style="font-size:11.5px;color:var(--muted);text-transform:uppercase;">Primary Care · 3.2 km</div>
-            <h4 style="font-size:16px;color:#ffffff;margin:2px 0 8px;">Kondapalli PHC</h4>
-            <div style="display:flex;gap:8px;margin-bottom:10px;">
-              <span class="admin-status-badge good">14 General Beds</span>
-              <span class="admin-status-badge good">2 ICU · O₂ Ready</span>
+      el.innerHTML = hosps.map(h => `
+        <div style="background:var(--glass-1);border:1.5px solid var(--glass-border);border-radius:14px;padding:16px;margin-bottom:12px;">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;flex-wrap:wrap;gap:6px;">
+            <div>
+              <strong style="color:var(--primary);font-size:15px;display:block;">${h.name}</strong>
+              <small style="color:var(--muted);">Distance: ${h.distance} · Doctor: ${h.doctorOnDuty}</small>
             </div>
-            <small style="color:var(--ink-dim);display:block;">Blood Bank: A+, B+, O+ Available</small>
+            <a href="tel:${h.phone}" class="btn-glass" style="padding:4px 10px;font-size:12px;color:var(--primary);">📞 Call ${h.phone}</a>
           </div>
-
-          <div class="glass-panel card-3d" style="padding:18px;">
-            <div style="font-size:11.5px;color:var(--muted);text-transform:uppercase;">Secondary Care · 11 km</div>
-            <h4 style="font-size:16px;color:#ffffff;margin:2px 0 8px;">Ibrahimpatnam CHC</h4>
-            <div style="display:flex;gap:8px;margin-bottom:10px;">
-              <span class="admin-status-badge warn">27 General Beds</span>
-              <span class="admin-status-badge warn">1 ICU Left</span>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(90px, 1fr));gap:8px;margin-top:10px;text-align:center;">
+            <div style="background:rgba(22,163,74,0.08);border:1px solid rgba(22,163,74,0.3);padding:8px;border-radius:10px;">
+              <small style="color:#166534;font-size:11px;display:block;">General</small>
+              <strong style="color:#16a34a;font-size:16px;">${h.genBedsAvail} Avail</strong>
             </div>
-            <small style="color:var(--ink-dim);display:block;">24/7 Medical Officer Onboard</small>
-          </div>
-
-          <div class="glass-panel card-3d" style="padding:18px;">
-            <div style="font-size:11.5px;color:var(--muted);text-transform:uppercase;">Tertiary Command · 26 km</div>
-            <h4 style="font-size:16px;color:#ffffff;margin:2px 0 8px;">Vijayawada District Hospital</h4>
-            <div style="display:flex;gap:8px;margin-bottom:10px;">
-              <span class="admin-status-badge good">92 General Beds</span>
-              <span class="admin-status-badge good">8 ICU Beds</span>
+            <div style="background:rgba(220,38,38,0.08);border:1px solid rgba(220,38,38,0.3);padding:8px;border-radius:10px;">
+              <small style="color:#991b1b;font-size:11px;display:block;">ICU</small>
+              <strong style="color:#dc2626;font-size:16px;">${h.icuBedsAvail} Avail</strong>
             </div>
-            <small style="color:var(--ink-dim);display:block;">All 8 Blood Groups Stocked</small>
+            <div style="background:rgba(2,132,199,0.08);border:1px solid rgba(2,132,199,0.3);padding:8px;border-radius:10px;">
+              <small style="color:#075985;font-size:11px;display:block;">Oxygen</small>
+              <strong style="color:#0284c7;font-size:16px;">${h.oxygenBedsAvail} Avail</strong>
+            </div>
           </div>
         </div>
-      `;
+      `).join('');
+    }
+
+    renderLiveBloodBank() {
+      const el = document.getElementById('bloodBankGrid');
+      if (!el || !this.store) return;
+      const bank = this.store.getState().bloodBank || {};
+
+      el.innerHTML = Object.entries(bank).map(([grp, count]) => `
+        <div style="background:var(--glass-1);border:1.5px solid var(--glass-border);border-radius:12px;padding:10px;text-align:center;">
+          <strong style="color:#dc2626;font-size:16px;display:block;">${grp}</strong>
+          <span style="font-size:14px;color:var(--ink);font-weight:700;">${count} Units</span>
+          <small style="display:block;color:${count > 5 ? '#16a34a' : '#dc2626'};font-size:10px;font-weight:600;margin-top:2px;">
+            ${count > 5 ? '✓ In Stock' : '⚠️ Low'}
+          </small>
+        </div>
+      `).join('');
     }
   }
 
-  // Export singleton
   global.patientController = new PatientController();
 
 })(typeof window !== 'undefined' ? window : this);
@@ -5391,9 +4623,7 @@ html, body {
 })(typeof window !== 'undefined' ? window : this);
 
 
-// =========================================================
-// APP INITIALIZATION & ROLE SWITCHER
-// =========================================================
+// Switch Active Role Tab
 function switchRole(role) {
   const roles = ['patient', 'doctor', 'worker', 'admin'];
   roles.forEach(r => {
@@ -5406,30 +4636,34 @@ function switchRole(role) {
     }
   });
 
-  if (window.appStore) {
-    window.appStore.setActiveRole(role);
-  }
+  if (window.appStore) window.appStore.setActiveRole(role);
 
-  // Trigger controller render
   if (role === 'patient' && window.patientController) window.patientController.renderAll();
   if (role === 'doctor' && window.doctorController) window.doctorController.renderConsultQueue();
   if (role === 'worker' && window.workerController) window.workerController.renderAll();
   if (role === 'admin' && window.adminController) window.adminController.renderAll();
 }
 
-function toggleTheme() {
+// 3 Glass Themes Cycle: Classic -> Black -> Navy -> Classic
+function cycleTheme() {
+  const themes = ['classic', 'black', 'navy'];
+  const labels = {
+    'classic': '🏛️ Classic (White & Blue)',
+    'black': '⬛ Pure Black (Glass)',
+    'navy': '🌊 Deep Navy (Glass)'
+  };
   const current = document.body.getAttribute('data-theme') || 'classic';
-  const next = (current === 'classic') ? 'emerald' : 'classic';
+  const idx = themes.indexOf(current);
+  const next = themes[(idx + 1) % themes.length];
+
   document.documentElement.setAttribute('data-theme', next);
   document.body.setAttribute('data-theme', next);
 
   const btn = document.getElementById('themeToggleBtn');
-  if (btn) {
-    btn.textContent = (next === 'classic') ? '🏛️ Classic (White & Blue)' : '🌿 Emerald Green';
-  }
-  if (window.appStore) {
-    window.appStore.setTheme(next);
-  }
+  if (btn) btn.textContent = labels[next];
+
+  if (window.appStore) window.appStore.setTheme(next);
+  if (typeof window.toast === 'function') window.toast('🎨 ' + labels[next]);
 }
 
 window.toast = function(msg) {
@@ -5438,9 +4672,7 @@ window.toast = function(msg) {
     el.textContent = msg;
     el.style.display = 'block';
     clearTimeout(window._toastTimer);
-    window._toastTimer = setTimeout(() => {
-      el.style.display = 'none';
-    }, 3000);
+    window._toastTimer = setTimeout(() => { el.style.display = 'none'; }, 2800);
   }
 };
 

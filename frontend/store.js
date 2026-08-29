@@ -157,7 +157,6 @@
       });
     }
 
-    // Role, Theme & Language
     setActiveRole(role) {
       this.state.activeRole = role;
       this.saveState();
@@ -173,7 +172,6 @@
       this.saveState();
     }
 
-    // Family Member methods
     addFamilyMember(member) {
       const id = 'FAM-' + String(Date.now()).slice(-4);
       const abha = member.abhaId || `14-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}`;
@@ -188,7 +186,6 @@
       this.saveState();
     }
 
-    // Staff methods
     addStaff(staffMember) {
       const prefix = staffMember.role === 'doctor' ? 'DOC' : staffMember.role === 'worker' ? 'ASH' : 'ADM';
       const id = `${prefix}-${String(Date.now()).slice(-4)}`;
@@ -211,7 +208,6 @@
       this.saveState();
     }
 
-    // Queue & Prescriptions
     addToQueue(item) {
       const tokenNum = String(this.state.consultQueue.length + 1).padStart(2, '0');
       const newItem = {
@@ -244,7 +240,6 @@
       this.saveState();
     }
 
-    // ASHA Maternal, Immunization, Visits
     addAncRecord(record) {
       const newRec = {
         id: 'ANC-' + String(Date.now()).slice(-4),
@@ -294,7 +289,6 @@
       }
     }
 
-    // Beds, Blood & Medicines
     updateBedCount(hospId, type, delta) {
       const hosp = this.state.hospitals.find(h => h.id === hospId);
       if (hosp) {

@@ -1,1105 +1,341 @@
 /**
- * Swasthya Setu - Patient Portal & Community Healthcare Engine
- * 
- * Provides:
- * 1. 🚨 Emergency Response & 108 Ambulance Dispatch HUD (Driver UP 20 G 1082, Live ETA, Speed, Onboard Equipment, Landmark Transmitter, Offline SMS SOS)
- * 2. 🧠 AI Clinical Self-Triage (Symptom Assessment, Red/Yellow/Green Stratification, Pre-Hospital First Aid, Level-of-Care, Vernacular Audio)
- * 3. 📷 AI Prescription OCR Scanner & Jan Aushadhi Generic Savings Calculator (80%+ Savings, 1-Click Schedule Import)
- * 4. 💊 Medication Tracker & Daily Dose Adherence Checklist (Morning/Afternoon/Evening/Night, Jan Aushadhi Kendra Locator)
- * 5. 🏥 Live Hospital Capacity & Bed Availability Tracker (ICU, Oxygen, General Beds, 8 Blood Groups)
- * 6. 👤 Multi-Member Family Profiles & Pilot Village Switcher (Dhampur Kalan, Seohara, Nehtaur, Afzalgarh, Noorpur, Kondapalli)
- * 7. 🎨 Triple Theme Engine (Emerald Night, Midnight OLED, Daylight Light)
+ * =========================================================
+ * SWASTHYA SETU - CITIZEN / PATIENT HUB (patient.js)
+ * 100% Standalone, Pure-Client Rural Care Center
+ * =========================================================
  */
 
 (function(global) {
   'use strict';
 
-  // -------------------------------------------------------------
-  // PATIENT MASTER DATA
-  // -------------------------------------------------------------
-  const patientData = {
-    currentFamilyMember: 'anitha',
-    currentVillage: 'kondapalli',
-    currentTheme: 'emerald',
-
-    // Multi-Member Family Profiles
-    familyMembers: {},
-
-    // Pilot Village Configuration
-    villages: {
-      kondapalli: {
-        name: 'Kondapalli Gramam',
-        district: 'Krishna District, AP',
-        nearestPhc: 'Kondapalli PHC (3.2 km · 6 min)',
-        nearestChc: 'Ibrahimpatnam CHC (11 km · 14 min)',
-        nearestDistrictHosp: 'Vijayawada District Hospital (26 km · 35 min)',
-        coordinates: '16.5744° N, 80.5283° E'
-      },
-      dhampur: {
-        name: 'Dhampur Kalan',
-        district: 'Bijnor District, UP',
-        nearestPhc: 'Dhampur Rural PHC (2.8 km · 5 min)',
-        nearestChc: 'Seohara CHC (14 km · 18 min)',
-        nearestDistrictHosp: 'Bijnor District Hospital (38 km · 45 min)',
-        coordinates: '29.3100° N, 78.5100° E'
-      },
-      seohara: {
-        name: 'Seohara Village',
-        district: 'Bijnor District, UP',
-        nearestPhc: 'Seohara Primary Centre (1.5 km · 4 min)',
-        nearestChc: 'Seohara CHC (4.2 km · 8 min)',
-        nearestDistrictHosp: 'Bijnor District Hospital (32 km · 40 min)',
-        coordinates: '29.2100° N, 78.5800° E'
-      },
-      nehtaur: {
-        name: 'Nehtaur Block',
-        district: 'Bijnor District, UP',
-        nearestPhc: 'Nehtaur Health Post (3.5 km · 7 min)',
-        nearestChc: 'Nehtaur CHC (8.0 km · 12 min)',
-        nearestDistrictHosp: 'Bijnor District Hospital (28 km · 35 min)',
-        coordinates: '29.3300° N, 78.3800° E'
-      },
-      afzalgarh: {
-        name: 'Afzalgarh Rural',
-        district: 'Bijnor District, UP',
-        nearestPhc: 'Afzalgarh Sub-Centre (4.1 km · 8 min)',
-        nearestChc: 'Afzalgarh CHC (12 km · 16 min)',
-        nearestDistrictHosp: 'Kashipur Area Hospital (22 km · 28 min)',
-        coordinates: '29.4000° N, 78.6800° E'
-      },
-      noorpur: {
-        name: 'Noorpur Gram',
-        district: 'Bijnor District, UP',
-        nearestPhc: 'Noorpur PHC (2.1 km · 5 min)',
-        nearestChc: 'Noorpur Community Centre (6.5 km · 10 min)',
-        nearestDistrictHosp: 'Bijnor District Hospital (35 km · 42 min)',
-        coordinates: '29.1500° N, 78.4000° E'
-      }
-    },
-
-    // 108 Emergency Ambulance Dispatch State
-    ambulanceState: {
-      isDispatched: false,
-      status: 'idle', // 'idle', 'dispatched', 'en_route', 'arrived'
-      driverName: 'Ravi Shankar',
-      driverPhone: '+91 9848011223',
-      vehicleNumber: 'UP 20 G 1082',
-      ambulanceType: 'Advanced Life Support (ALS) Unit #04',
-      etaSeconds: 522, // 08:42 min
-      speedKmh: 54,
-      distanceKm: 4.8,
-      onboardEquipment: [
-        { name: 'Oxygen Cylinder (2,000L)', status: 'Active (100% Full)', icon: '💨' },
-        { name: 'Automated External Defibrillator (AED)', status: 'Ready / Standby', icon: '⚡' },
-        { name: 'Portable Multi-Para Monitor & SpO₂', status: 'Active', icon: '📊' },
-        { name: 'Hydraulic Foldable Stretcher', status: 'Onboard Ready', icon: '🛏️' },
-        { name: 'Emergency Trauma & Anti-Venom Kit', status: 'Inspected', icon: '🩹' }
-      ],
-      selectedLandmark: 'Near Old Banyan Tree / Primary School Road'
-    },
-
-    // Daily Medication Schedule & Adherence Checklist
-    medications: [],
-
-    // Jan Aushadhi Pharmacy Locations
-    janAushadhiKendras: [
-      { name: 'PMBJP Kendra - Kondapalli PHC Gate', distance: '0.4 km', timing: '08:00 AM - 08:00 PM', phone: '+91 9848123456', status: 'Open Now · 98% Stock Ready' },
-      { name: 'PMBJP Kendra - Ibrahimpatnam Bus Stand', distance: '4.2 km', timing: '24/7 Emergency Counter', phone: '+91 9848654321', status: 'Open Now · Emergency Delivery Ready' },
-      { name: 'PMBJP Central Medical Depot - Vijayawada', distance: '16.0 km', timing: '09:00 AM - 09:00 PM', phone: '+91 8662456789', status: 'Open · Bulk Supply Hub' }
-    ],
-
-    // Emergency First-Aid Protocols
-    firstAidProtocols: {
-      cpr: {
-        title: 'Adult CPR (हृदय गति रुकना / कार्डिएक अरेस्ट)',
-        steps: [
-          'Call 108 immediately or shout for bystander help.',
-          'Place patient flat on a firm floor. Clear throat/airway.',
-          'Place heel of one hand in the center of the chest. Interlock other hand on top.',
-          'Push hard and fast: 100-120 compressions per minute (to the beat of "Stayin Alive"), at least 2 inches deep.',
-          'Allow chest to fully recoil between compressions. Do not stop until ambulance arrives.'
-        ],
-        hindiAudio: 'वयस्क सीपीआर: तुरंत 108 पर कॉल करें। छाती के बीच में दोनों हाथों से 100 से 120 बार प्रति मिनट की गति से तेज और गहरा दबाव दें।'
-      },
-      snakebite: {
-        title: 'Snakebite Emergency (सांप का काटना)',
-        steps: [
-          'DO NOT cut, suck the wound, or apply ice/tight tourniquet.',
-          'Keep the patient calm and completely still. Immobilize the bitten limb below heart level using a splint or cloth.',
-          'Remove rings, bangles, or tight clothing near the bite area before swelling begins.',
-          'Transport immediately to the nearest PHC/CHC equipped with Anti-Snake Venom (ASV).',
-          'Note the time of bite and physical description of the snake if seen safely.'
-        ],
-        hindiAudio: 'सांप काटने पर मरीज को शांत रखें। घाव को काटें या चूसे नहीं। काटे गए अंग को बिना हिलाए तुरंत एंटी-वेनम वाले अस्पताल ले जाएं।'
-      },
-      heart_attack: {
-        title: 'Acute Chest Pain / Heart Attack (दिल का दौरा)',
-        steps: [
-          'Have the patient sit down in a comfortable "W" posture (back supported, knees bent).',
-          'Loosen tight clothing around neck and chest.',
-          'If patient is not allergic, give 1 chewable Aspirin (300mg / Disprin) to chew immediately.',
-          'Keep patient calm. Do not allow them to walk or climb stairs.',
-          'Trigger 108 ALS Ambulance dispatch immediately.'
-        ],
-        hindiAudio: 'दिल का दौरा: मरीज को सहारा देकर बैठाएं। टाइट कपड़े ढीले करें और 108 एम्बुलेंस का तुरंत इंतजार करें।'
-      },
-      choking: {
-        title: 'Choking / Heimlich Maneuver (गले में कुछ अटकना)',
-        steps: [
-          'Stand behind the person. Lean them slightly forward.',
-          'Make a fist with one hand and place it just above the navel.',
-          'Grasp the fist with your other hand and give quick, upward abdominal thrusts.',
-          'Repeat thrusts until the blocking object is dislodged.',
-          'If person becomes unresponsive, start CPR immediately.'
-        ],
-        hindiAudio: 'गले में सांस अटकने पर व्यक्ति के पीछे खड़े होकर नाभि के ठीक ऊपर दोनों हाथों से अंदर और ऊपर की ओर तेज झटका दें।'
-      }
-    }
-  };
-
-  // -------------------------------------------------------------
-  // PATIENT CONTROLLER
-  // -------------------------------------------------------------
   class PatientController {
     constructor() {
-      this.data = patientData;
-      this.etaInterval = null;
+      this.store = global.appStore;
     }
 
     init() {
-      this.initTheme();
-      this.syncCurrentUserProfile();
-      this.renderFamilySelector();
-      this.renderMedicationTracker();
-      this.renderJanAushadhiCalculator();
-      this.renderLiveHospitalBeds();
-      this.syncLivePatientDatabase();
-    }
-
-    syncCurrentUserProfile() {
-      if (typeof window.authService !== 'undefined' && window.authService.isAuthenticated()) {
-        const u = window.authService.getCurrentUser();
-        if (u && u.name) {
-          const userKey = u.userId ? u.userId.toLowerCase().replace(/[^a-z0-9]/g, '_') : 'self';
-          if (!this.data.familyMembers[userKey]) {
-            this.data.familyMembers[userKey] = {
-              id: u.userId || 'PAT-01',
-              name: u.name,
-              role: 'Self (Primary)',
-              phone: u.phone,
-              age: u.age || 28,
-              gender: u.gender || 'Female',
-              bloodGroup: u.bloodGroup || 'O+',
-              abhaId: u.abha || '14-2938-7710-4521',
-              conditions: u.conditions ? (Array.isArray(u.conditions) ? u.conditions : [u.conditions]) : ['General Health Checkup Active'],
-              avatar: u.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase(),
-              assignedAsha: 'ASHA Field Worker (Ward 6)',
-              emergencyContact: u.emergencyContact || u.phone
-            };
-          }
-          if (!this.data.currentFamilyMember || !this.data.familyMembers[this.data.currentFamilyMember]) {
-            this.data.currentFamilyMember = userKey;
-          }
-        }
+      this.renderAll();
+      if (this.store) {
+        this.store.subscribe(() => this.renderAll());
       }
     }
 
-    syncLivePatientDatabase() {
-      const dbUrl = 'https://swasthya-setu-2b67d-default-rtdb.firebaseio.com';
-      fetch(`${dbUrl}/.json`)
-        .then(r => r.json())
-        .then(data => {
-          if (data && typeof data === 'object') {
-            if (data.patient_family_members) {
-              this.data.familyMembers = { ...this.data.familyMembers, ...data.patient_family_members };
-              this.renderFamilySelector();
-            }
-            if (data.patient_medications) {
-              const meds = Array.isArray(data.patient_medications) ? data.patient_medications : Object.values(data.patient_medications);
-              if (meds.length) {
-                this.data.medications = meds;
-                this.renderMedicationTracker();
-              }
-            }
-            if (data.hospital_bed_grid) {
-              this.renderLiveHospitalBeds();
-            }
-          }
-        })
-        .catch(() => {});
-
-      if (window.firebaseConfigManager && window.firebaseConfigManager.rtdb) {
-        window.firebaseConfigManager.rtdb.ref('patient_medications').on('value', snap => {
-          const val = snap.val();
-          if (val) {
-            this.data.medications = Array.isArray(val) ? val : Object.values(val);
-            this.renderMedicationTracker();
-          }
-        });
-      }
+    renderAll() {
+      this.renderAbhaCard();
+      this.renderFamilyCircle();
+      this.renderDailyMedications();
+      this.renderLiveHospitals();
+      this.renderLiveBloodBank();
     }
 
     // -------------------------------------------------------------
-    // 1. THEME ENGINE (EMERALD / OLED / DAYLIGHT)
+    // 1. ABHA CARD RENDER & PRINT
     // -------------------------------------------------------------
-    initTheme() {
-      const savedTheme = localStorage.getItem('swasthya_setu_theme');
-      const validTheme = (savedTheme === 'emerald') ? 'emerald' : 'classic';
-      this.setTheme(validTheme);
-    }
+    renderAbhaCard() {
+      const el = document.getElementById('abhaCardContainer');
+      if (!el || !this.store) return;
+      const user = this.store.getState().currentUser;
 
-    setTheme(themeName) {
-      const validTheme = (themeName === 'emerald') ? 'emerald' : 'classic';
-      this.data.currentTheme = validTheme;
-      localStorage.setItem('swasthya_setu_theme', validTheme);
-
-      document.documentElement.setAttribute('data-theme', validTheme);
-      document.body.setAttribute('data-theme', validTheme);
-      document.body.className = `theme-${validTheme}`;
-
-      const themeLabels = {
-        'classic': '🏛️ Classic (White & Blue)',
-        'emerald': '🌿 Emerald Green'
-      };
-
-      const themeBtn = document.getElementById('themeToggleBtn');
-      if (themeBtn) {
-        themeBtn.innerHTML = `<span>${themeLabels[validTheme] || '🏛️ Classic'}</span>`;
-      }
-    }
-
-    getThemeDisplayName(themeName) {
-      const themeLabels = {
-        'classic': '🏛️ Classic (White & Blue)',
-        'emerald': '🌿 Emerald Green'
-      };
-      return themeLabels[themeName] || '🏛️ Classic (White & Blue)';
-    }
-
-    toggleThemeNext() {
-      const nextTheme = (this.data.currentTheme === 'classic') ? 'emerald' : 'classic';
-      this.setTheme(nextTheme);
-      if (typeof window.toast === 'function') {
-        window.toast(`Theme: ${this.getThemeDisplayName(nextTheme)}`);
-      }
-    }
-
-    toggleDarkMode() {
-      this.toggleThemeNext();
-    }
-
-    // -------------------------------------------------------------
-    // 2. MULTI-MEMBER FAMILY SELECTOR & VILLAGE SWITCHER
-    // -------------------------------------------------------------
-    selectFamilyMember(memberKey) {
-      this.data.currentFamilyMember = memberKey;
-      const mem = this.data.familyMembers[memberKey];
-      if (!mem) return;
-
-      // Update UI
-      document.querySelectorAll('.family-pill').forEach(pill => {
-        pill.classList.toggle('active', pill.dataset.member === memberKey);
-      });
-
-      // Update welcome banner & active patient state
-      const titleEl = document.getElementById('welcomeTitle');
-      const descEl = document.getElementById('welcomeDesc');
-      if (titleEl) titleEl.textContent = `Care for ${mem.name}`;
-      if (descEl) descEl.textContent = `ABHA ID: ${mem.abhaId} · Blood: ${mem.bloodGroup} · Conditions: ${mem.conditions.join(', ')}`;
-
-      if (typeof window.toast === 'function') {
-        window.toast(`Active Profile: ${mem.name} (${mem.role})`);
-      }
-
-      this.renderFamilySelector();
-    }
-
-    renderFamilySelector() {
-      const container = document.getElementById('familyProfileSelector');
-      if (!container) return;
-
-      this.syncCurrentUserProfile();
-
-      const members = this.data.familyMembers || {};
-      const activeKey = this.data.currentFamilyMember;
-      const memberKeys = Object.keys(members);
-
-      let html = memberKeys.map(key => {
-        const m = members[key];
-        const isActive = key === activeKey;
-        return `
-          <div class="family-pill ${isActive ? 'active' : ''}" data-member="${key}" onclick="patientController.selectFamilyMember('${key}')">
-            <div class="family-avatar">${m.avatar || 'U'}</div>
-            <div>
-              <strong style="display:block;font-size:13px;color:${isActive ? '#03231b' : '#ffffff'};">${m.name}</strong>
-              <small style="font-size:10.5px;color:${isActive ? '#064e3b' : 'var(--muted)'};">${m.role || 'Family Member'} · ${m.bloodGroup || 'O+'}</small>
-            </div>
-          </div>
-        `;
-      }).join('');
-
-      // Always append + Add Family Member card
-      html += `
-        <div class="family-pill" onclick="patientController.openAddFamilyMemberModal()" style="border-style:dashed;border-color:var(--auth-primary-bright);background:rgba(52,211,153,0.08);cursor:pointer;" title="Add a family member to your circle">
-          <div class="family-avatar" style="background:linear-gradient(135deg,#10b981,#34d399);color:#03231b;font-weight:800;font-size:18px;">+</div>
-          <div>
-            <strong style="display:block;font-size:13px;color:#34d399;">+ Add Family Member</strong>
-            <small style="font-size:10.5px;color:var(--muted);">ABHA &amp; Health Circle</small>
-          </div>
-        </div>
-      `;
-
-      container.innerHTML = html;
-    }
-
-    openAddFamilyMemberModal() {
-      const name = prompt('Family Member Full Name: (e.g. Baby Ravi / Ramu K. / Saraswati)');
-      if (!name || name.trim().length < 2) return;
-
-      const role = prompt('Relationship / Family Role: (e.g. Son, Daughter, Spouse, Mother, Father, Self)', 'Child') || 'Family Member';
-      const age = prompt('Age & Gender: (e.g. 8 Months Male / 34 Yrs Female)', '28 Yrs') || 'Adult';
-      const blood = prompt('Blood Group: (e.g. O+, A+, B+, AB+, O-, A-)', 'O+') || 'O+';
-      const condition = prompt('Health Condition or Note:', 'General Health Checkup Active') || 'Healthy';
-
-      const memberKey = 'fam_' + Date.now().toString().slice(-6);
-      const abha = '14-' + Math.floor(1000 + Math.random() * 9000) + '-' + Math.floor(1000 + Math.random() * 9000) + '-' + Math.floor(1000 + Math.random() * 9000);
-
-      const newMember = {
-        id: 'FAM-' + Date.now().toString().slice(-4),
-        name: name.trim(),
-        role: role.trim(),
-        age: age.trim(),
-        bloodGroup: blood.trim(),
-        abhaId: abha,
-        conditions: [condition.trim()],
-        avatar: name.trim().split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase(),
-        assignedAsha: 'ASHA Field Worker (Ward 6)',
-        emergencyContact: 'Family Head'
-      };
-
-      this.data.familyMembers[memberKey] = newMember;
-      this.data.currentFamilyMember = memberKey;
-
-      // Sync to Firebase Realtime Database
-      try {
-        fetch(`https://swasthya-setu-2b67d-default-rtdb.firebaseio.com/patient_family_members/${memberKey}.json`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(newMember)
-        }).catch(() => {});
-
-        // Also add to staff_registry for doctor visibility
-        const staffObj = {
-          id: newMember.id,
-          name: newMember.name,
-          role: 'patient',
-          phone: (window.authService && window.authService.getCurrentUser() ? window.authService.getCurrentUser().phone : '9876543210'),
-          facility: 'Kondapalli PHC',
-          location: 'Kondapalli Sector',
-          status: 'Active',
-          regDate: 'Today',
-          isNew: true,
-          abhaId: newMember.abhaId
-        };
-        fetch(`https://swasthya-setu-2b67d-default-rtdb.firebaseio.com/staff_registry/${staffObj.id}.json`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(staffObj)
-        }).catch(() => {});
-      } catch (e) {}
-
-      if (typeof window.toast === 'function') {
-        window.toast(`✓ Added ${name} to Family Circle with ABHA: ${abha}!`);
-      }
-
-      this.selectFamilyMember(memberKey);
-    }
-
-    selectVillage(villageKey) {
-      this.data.currentVillage = villageKey;
-      const v = this.data.villages[villageKey];
-      if (!v) return;
-
-      if (typeof window.toast === 'function') {
-        window.toast(`📍 Village switched to ${v.name} (${v.district})`);
-      }
-
-      // Update localized distance badges
-      const locBadge = document.getElementById('nearestFacilityBadge');
-      if (locBadge) {
-        locBadge.innerHTML = `● ${v.nearestPhc} (Open)`;
-      }
-
-      this.renderLiveHospitalBeds();
-    }
-
-    // -------------------------------------------------------------
-    // 3. 🚨 108 AMBULANCE DISPATCH & LIVE TRACKING HUD
-    // -------------------------------------------------------------
-    triggerAmbulanceDispatch() {
-      const amb = this.data.ambulanceState;
-      const mem = this.data.familyMembers[this.data.currentFamilyMember];
-      const vil = this.data.villages[this.data.currentVillage];
-
-      amb.isDispatched = true;
-      amb.status = 'dispatched';
-      amb.etaSeconds = 522; // 08:42 min
-
-      if (global.firebaseService) {
-        global.firebaseService.dispatchAmbulance({
-          village: vil.name,
-          landmark: amb.selectedLandmark,
-          patientName: mem.name,
-          patientAbha: mem.abhaId,
-          emergencyContact: mem.emergencyContact
-        });
-      }
-
-      if (typeof window.toast === 'function') {
-        window.toast(`🚨 108 ALS Ambulance dispatched to ${vil.name} for ${mem.name}! Driver Ravi Shankar is en route.`);
-      }
-
-      this.startEtaTimer();
-      this.renderAmbulanceHUD();
-
-      // Switch view to SOS if not already there
-      if (typeof window.switchView === 'function') {
-        window.switchView('sos');
-      }
-    }
-
-    downloadAbhaCard() {
-      if (global.pdfGenerator) {
-        global.pdfGenerator.generateAbhaCard(this.data.currentFamilyMember);
-      }
-    }
-
-    downloadPrescriptionPDF() {
-      if (global.pdfGenerator) {
-        global.pdfGenerator.generatePrescriptionPDF();
-      }
-    }
-
-    startEtaTimer() {
-      if (this.etaInterval) clearInterval(this.etaInterval);
-
-      this.etaInterval = setInterval(() => {
-        const amb = this.data.ambulanceState;
-        if (amb.isDispatched && amb.etaSeconds > 0) {
-          amb.etaSeconds--;
-          this.updateEtaDisplay();
-        }
-      }, 1000);
-    }
-
-    updateEtaDisplay() {
-      const amb = this.data.ambulanceState;
-      const m = Math.floor(amb.etaSeconds / 60);
-      const s = amb.etaSeconds % 60;
-      const etaFormatted = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')} min`;
-
-      const etaEl = document.getElementById('hudEtaValue');
-      if (etaEl) etaEl.textContent = etaFormatted;
-    }
-
-    transmitLandmark(landmarkText) {
-      this.data.ambulanceState.selectedLandmark = landmarkText;
-      if (typeof window.toast === 'function') {
-        window.toast(`📍 Landmark "${landmarkText}" transmitted directly to Driver Ravi's GPS.`);
-      }
-      this.renderAmbulanceHUD();
-    }
-
-    callDriver() {
-      const amb = this.data.ambulanceState;
-      if (typeof window.toast === 'function') {
-        window.toast(`📞 Calling 108 Pilot ${amb.driverName} (${amb.driverPhone})...`);
-      }
-    }
-
-    cancelAmbulanceDispatch() {
-      if (!confirm('Are you sure you want to cancel the 108 Emergency Ambulance dispatch?')) return;
-
-      this.data.ambulanceState.isDispatched = false;
-      this.data.ambulanceState.status = 'idle';
-      if (this.etaInterval) clearInterval(this.etaInterval);
-
-      if (typeof window.toast === 'function') {
-        window.toast('108 Ambulance dispatch cancelled.');
-      }
-
-      this.renderAmbulanceHUD();
-    }
-
-    broadcastFamilySms() {
-      const mem = this.data.familyMembers[this.data.currentFamilyMember];
-      const vil = this.data.villages[this.data.currentVillage];
-
-      const modalHtml = `
-        <div class="modal-overlay open" id="smsBroadcastModal" style="z-index:1400;">
-          <div class="auth-modal-card" style="max-width:520px;">
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
-              <span style="font-size:28px;">📡</span>
+      el.innerHTML = `
+        <div class="abha-badge-card" style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:18px;padding:20px;box-shadow:0 8px 24px rgba(0,0,0,0.06);position:relative;overflow:hidden;">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1.5px solid var(--line);padding-bottom:12px;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="font-size:28px;">🇮🇳</span>
               <div>
-                <h3 class="auth-card-title" style="color:var(--danger-bright);font-size:18px;margin:0;">
-                  EMERGENCY SMS BROADCAST CONFIRMATION
-                </h3>
-                <small style="color:var(--muted);">Automated GPS &amp; ABHA Payload Dispatch</small>
+                <strong style="font-size:16px;color:var(--primary);display:block;">NATIONAL HEALTH AUTHORITY (ABHA)</strong>
+                <small style="color:var(--muted);font-weight:600;">Government of India · राष्ट्रीय स्वास्थ्य प्राधिकरण</small>
               </div>
             </div>
+            <span class="badge" style="background:var(--primary);color:#ffffff;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;">ACTIVE VERIFIED</span>
+          </div>
 
-            <p style="font-size:12.5px;color:var(--ink-dim);margin:0 0 12px;line-height:1.45;">
-              The following high-priority SMS payload has been generated and queued for transmission to your registered emergency contacts and ASHA worker:
-            </p>
-
-            <div style="padding:12px;background:rgba(4,18,15,0.7);border:1px solid rgba(220,252,243,0.15);border-radius:10px;font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#a7f3d0;margin-bottom:14px;word-break:break-all;">
-              [EMERGENCY 108 ALERT]<br>
-              Patient: ${mem.name} (${mem.age} ${mem.gender})<br>
-              Location: ${vil.name} (${vil.coordinates})<br>
-              ABHA: ${mem.abhaId}<br>
-              Condition: ${mem.conditions.join(', ')}<br>
-              108 Vehicle: UP 20 G 1082 (ETA: 8 min)<br>
-              ASHA Alerted: ${mem.assignedAsha}
+          <div style="display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center;">
+            <div style="width:68px;height:68px;background:rgba(0,82,204,0.1);border:1.5px solid var(--primary);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:32px;">
+              👤
             </div>
-
-            <div style="display:flex;gap:10px;">
-              <button class="btn-glass" style="flex:1;" onclick="document.getElementById('smsBroadcastModal').remove()">Close</button>
-              <button class="auth-btn-primary" style="flex:1.4;" onclick="document.getElementById('smsBroadcastModal').remove(); if(typeof toast==='function') toast('✓ Emergency SMS broadcast transmitted to 3 contacts & ASHA Didi.');">
-                <span>📲 Send SMS Alert Now</span>
-              </button>
+            <div>
+              <h3 style="font-size:18px;color:var(--ink);margin-bottom:4px;">${user.name}</h3>
+              <p style="font-size:13px;color:var(--ink-dim);margin-bottom:2px;">Age: ${user.age} Yrs · Gender: ${user.gender} · Blood: <strong>${user.bloodGroup}</strong></p>
+              <p style="font-size:12px;color:var(--muted);">${user.village}</p>
+            </div>
+            <div style="text-align:center;background:var(--glass-1);padding:8px;border-radius:10px;border:1px solid var(--glass-border);">
+              <div style="font-size:28px;line-height:1;">📱</div>
+              <small style="font-size:9px;color:var(--muted);font-weight:700;display:block;margin-top:2px;">QR SCAN</small>
             </div>
           </div>
-        </div>
-      `;
 
-      document.body.insertAdjacentHTML('beforeend', modalHtml);
-    }
-
-    renderAmbulanceHUD() {
-      const container = document.getElementById('view-sos');
-      if (!container) return;
-
-      const amb = this.data.ambulanceState;
-      const mem = this.data.familyMembers[this.data.currentFamilyMember];
-      const vil = this.data.villages[this.data.currentVillage];
-
-      const m = Math.floor(amb.etaSeconds / 60);
-      const s = amb.etaSeconds % 60;
-      const etaFormatted = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')} min`;
-
-      container.innerHTML = `
-        <div class="section-bar" style="margin-top:0">
-          <div class="section-bar-left">
-            <h3 data-i18n="sos_title">🚨 Emergency Response &amp; 108 Ambulance Dispatch · आपातकालीन 108</h3>
-            <button class="voice-speak-btn" onclick="speakText('आपातकालीन 108 एम्बुलेंस सेवा: जीपीएस ट्रैकिंग और चालक से सीधा संपर्क')">🔊</button>
-          </div>
-          <div style="display:flex;gap:8px;">
-            <button class="btn-glass sm" onclick="patientController.broadcastFamilySms()">📲 Family &amp; ASHA SMS Broadcast</button>
-          </div>
-        </div>
-
-        ${amb.isDispatched ? `
-          <!-- LIVE 108 AMBULANCE TRACKING HUD -->
-          <div class="glass-panel ambulance-live-hud" style="padding:24px;border-color:rgba(239,68,68,0.4);background:linear-gradient(145deg, rgba(239,68,68,0.1), rgba(4,18,15,0.85));margin-bottom:20px;">
-            <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:14px;">
-              <div style="display:flex;gap:14px;align-items:center;">
-                <div class="ambulance-icon-live">🚑</div>
-                <div>
-                  <div style="display:flex;align-items:center;gap:8px;">
-                    <h3 style="font-size:22px;color:#ffffff;margin:0;">108 ALS Ambulance En Route</h3>
-                    <span class="admin-status-badge bad">PRIORITY CODE 1</span>
-                  </div>
-                  <p style="font-size:13px;color:var(--ink-dim);margin:4px 0 0;">
-                    Vehicle: <strong>${amb.vehicleNumber}</strong> · ${amb.ambulanceType} · Driver: <strong>${amb.driverName}</strong>
-                  </p>
-                </div>
-              </div>
-
-              <div style="text-align:right;">
-                <span style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;">Estimated Arrival Time</span>
-                <div style="font-family:'Fraunces',serif;font-size:32px;font-weight:800;color:#f87171;" id="hudEtaValue">
-                  ${etaFormatted}
-                </div>
-                <small style="color:var(--auth-primary-bright);font-weight:700;">Distance: ${amb.distanceKm} km · Speed: ${amb.speedKmh} km/h</small>
-              </div>
+          <div style="margin-top:14px;background:var(--primary);color:#ffffff;padding:10px 16px;border-radius:12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+            <div>
+              <small style="font-size:10px;letter-spacing:1px;opacity:0.9;">ABHA NUMBER (14-DIGIT)</small>
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:16px;font-weight:700;letter-spacing:1px;">${user.abhaId}</div>
             </div>
-
-            <!-- Route Progress Bar -->
-            <div class="ambulance-route-bar-wrap" style="margin:18px 0 14px;">
-              <div class="ambulance-progress-fill" style="width:68%;"></div>
-              <div class="route-nodes">
-                <span>📍 Dispatch Depot (CHC)</span>
-                <span>🛣️ Highway Junction</span>
-                <span style="color:#f87171;font-weight:700;">🎯 ${vil.name}</span>
-              </div>
-            </div>
-
-            <!-- Onboard Equipment Status Checklist -->
-            <div style="margin-top:16px;">
-              <span style="font-size:11.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.04em;">
-                Verified Onboard Life Support Equipment:
-              </span>
-              <div class="ambulance-equipment-grid" style="display:grid;grid-template-columns:repeat(3, 1fr);gap:10px;margin-top:8px;">
-                ${amb.onboardEquipment.map(eq => `
-                  <div class="equipment-box" style="padding:8px 10px;background:rgba(4,18,15,0.5);border:1px solid rgba(220,252,243,0.1);border-radius:10px;display:flex;align-items:center;gap:8px;">
-                    <span style="font-size:18px;">${eq.icon}</span>
-                    <div>
-                      <strong style="font-size:11.5px;color:#ffffff;display:block;">${eq.name}</strong>
-                      <small style="font-size:10px;color:#4ade80;">${eq.status}</small>
-                    </div>
-                  </div>
-                `).join('')}
-              </div>
-            </div>
-
-            <!-- Rural Landmark Transmitter -->
-            <div style="margin-top:18px;padding:14px;background:rgba(4,18,15,0.6);border-radius:14px;border:1px solid rgba(220,252,243,0.12);">
-              <span style="font-size:12px;font-weight:700;color:var(--auth-primary-bright);display:block;margin-bottom:6px;">
-                📍 Transmit Rural Navigation Landmark to Driver GPS:
-              </span>
-              <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                <button class="btn-glass sm ${amb.selectedLandmark.includes('Banyan') ? 'active' : ''}" onclick="patientController.transmitLandmark('Near Old Banyan Tree / Primary School Road')">
-                  🌳 Near Old Banyan Tree
-                </button>
-                <button class="btn-glass sm ${amb.selectedLandmark.includes('Canal') ? 'active' : ''}" onclick="patientController.transmitLandmark('Beside Canal Irrigation Bridge')">
-                  🌊 Canal Irrigation Bridge
-                </button>
-                <button class="btn-glass sm ${amb.selectedLandmark.includes('Panchayat') ? 'active' : ''}" onclick="patientController.transmitLandmark('Opposite Gram Panchayat Office')">
-                  🏛️ Gram Panchayat Bhawan
-                </button>
-                <button class="btn-glass sm ${amb.selectedLandmark.includes('Temple') ? 'active' : ''}" onclick="patientController.transmitLandmark('Near Hanuman Mandir Corner')">
-                  🛕 Hanuman Mandir
-                </button>
-              </div>
-            </div>
-
-            <!-- Call & Cancel Controls -->
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:18px;padding-top:14px;border-top:1px solid rgba(220,252,243,0.1);">
-              <button class="auth-btn-primary" style="padding:10px 24px;" onclick="patientController.callDriver()">
-                <span>📞 Call Driver Ravi Shankar (${amb.driverPhone})</span>
-              </button>
-              <button class="btn-glass" style="color:#f87171;" onclick="patientController.cancelAmbulanceDispatch()">
-                <span>✕ Cancel Dispatch</span>
-              </button>
+            <div style="text-align:right;">
+              <small style="font-size:10px;opacity:0.9;">PHONE LINKED</small>
+              <div style="font-size:13px;font-weight:600;">+91 ${user.phone}</div>
             </div>
           </div>
-        ` : `
-          <!-- BIG ONE-TOUCH 108 DISPATCH BUTTON -->
-          <div class="glass-panel" style="padding:32px;text-align:center;margin-bottom:24px;border-color:rgba(239,68,68,0.35);background:radial-gradient(circle at 50% 30%, rgba(239,68,68,0.15), transparent 70%), linear-gradient(165deg, rgba(6,24,20,0.85), rgba(4,18,15,0.95));">
-            <div style="width:90px;height:90px;border-radius:50%;background:linear-gradient(135deg, #ef4444, #dc2626);color:#ffffff;display:grid;place-items:center;font-size:42px;margin:0 auto 16px;box-shadow:0 0 35px rgba(239,68,68,0.6);cursor:pointer;animation:docPulse 1.8s infinite;" onclick="patientController.triggerAmbulanceDispatch()">
-              🚨
-            </div>
-            <h3 style="font-size:24px;color:#ffffff;margin:0 0 6px;">One-Touch 108 Emergency Ambulance</h3>
-            <p style="font-size:13.5px;color:var(--ink-dim);max-width:560px;margin:0 auto 20px;">
-              Instant GPS dispatch of Advanced Life Support (ALS) &amp; Basic Life Support (BLS) ambulances to <strong>${vil.name}</strong> for <strong>${mem.name}</strong>.
-            </p>
-            <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
-              <button class="auth-btn-danger" style="font-size:15px;padding:12px 32px;" onclick="patientController.triggerAmbulanceDispatch()">
-                <span>🚨 DISPATCH 108 AMBULANCE NOW →</span>
-              </button>
-              <button class="btn-glass" onclick="patientController.broadcastFamilySms()">
-                <span>📲 Offline SMS SOS Payload</span>
-              </button>
-            </div>
-          </div>
-        `}
 
-        <!-- National Emergency Speed Dials Grid -->
-        <div style="display:grid;grid-template-columns:repeat(4, 1fr);gap:14px;margin-bottom:24px;">
-          <div class="glass-panel stat-card-3d" style="padding:16px;text-align:center;cursor:pointer;" onclick="if(typeof toast==='function') toast('Dialing 108 Ambulance Dispatch...')">
-            <span style="font-size:28px;">🚑</span>
-            <strong style="display:block;font-size:20px;color:#f87171;margin:4px 0 2px;">108</strong>
-            <small style="color:var(--muted);">Ambulance &amp; Trauma</small>
+          <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="auth-btn-primary" style="flex:1;min-width:180px;padding:10px;font-size:13px;" onclick="patientController.printAbhaCard()">
+              🖨️ Print / Download ABHA Card
+            </button>
+            <button class="btn-glass" style="padding:10px 16px;font-size:13px;" onclick="speakText('Your ABHA ID is ' + '${user.abhaId}' + '. Valid for free healthcare across all government and empaneled hospitals.')">
+              🔊 Read Aloud
+            </button>
           </div>
-
-          <div class="glass-panel stat-card-3d" style="padding:16px;text-align:center;cursor:pointer;" onclick="if(typeof toast==='function') toast('Dialing 112 National Emergency...')">
-            <span style="font-size:28px;">👮</span>
-            <strong style="display:block;font-size:20px;color:#60a5fa;margin:4px 0 2px;">112</strong>
-            <small style="color:var(--muted);">Police &amp; Disaster</small>
-          </div>
-
-          <div class="glass-panel stat-card-3d" style="padding:16px;text-align:center;cursor:pointer;" onclick="if(typeof toast==='function') toast('Dialing 102 Maternal Helpline...')">
-            <span style="font-size:28px;">🤰</span>
-            <strong style="display:block;font-size:20px;color:#f472b6;margin:4px 0 2px;">102</strong>
-            <small style="color:var(--muted);">Maternal &amp; Infant</small>
-          </div>
-
-          <div class="glass-panel stat-card-3d" style="padding:16px;text-align:center;cursor:pointer;" onclick="if(typeof toast==='function') toast('Dialing 1075 National Health Helpline...')">
-            <span style="font-size:28px;">🩺</span>
-            <strong style="display:block;font-size:20px;color:#4ade80;margin:4px 0 2px;">1075</strong>
-            <small style="color:var(--muted);">National Health Helpline</small>
-          </div>
-        </div>
-
-        <!-- Emergency First Aid Interactive Modules -->
-        <div class="section-bar">
-          <div class="section-bar-left">
-            <h3>🩹 Emergency First-Aid Protocols &amp; Action Steps</h3>
-          </div>
-        </div>
-
-        <div style="display:grid;grid-template-columns:repeat(2, 1fr);gap:16px;">
-          ${Object.keys(this.data.firstAidProtocols).map(key => {
-            const p = this.data.firstAidProtocols[key];
-            return `
-              <div class="glass-panel card-3d" style="padding:20px;">
-                <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
-                  <h4 style="font-size:16px;color:#ffffff;margin:0;">${p.title}</h4>
-                  <button class="voice-speak-btn" onclick="speakText('${p.hindiAudio}')" title="Listen in Hindi">🔊</button>
-                </div>
-                <ol style="font-size:12.5px;color:var(--ink-dim);padding-left:18px;margin:0;line-height:1.5;">
-                  ${p.steps.map(s => `<li style="margin-bottom:6px;">${s}</li>`).join('')}
-                </ol>
-              </div>
-            `;
-          }).join('')}
         </div>
       `;
     }
 
+    printAbhaCard() {
+      window.print();
+    }
+
     // -------------------------------------------------------------
-    // 4. 🧠 AI CLINICAL SELF-TRIAGE (GEMINI 3.7 FLASH)
+    // 2. 1-TAP 108 EMERGENCY SOS
     // -------------------------------------------------------------
-    runAITriage(symptomKey) {
-      const triageResults = {
-        chest_pain: {
-          urgency: 'EMERGENCY RED',
-          badgeClass: 'bad',
-          condition: 'Possible Acute Coronary Syndrome / Myocardial Infarction',
-          preHospital: 'Have patient sit upright with back supported. Loosen collar. Give 300mg Aspirin if no allergy. Dispatch 108 immediately.',
-          redFlags: 'Crushing central chest pain radiating to left arm or jaw, cold sweating, shortness of breath.',
-          recommendedCare: 'Tertiary Command: Vijayawada District Hospital (ICU Bed Ready)',
-          audioText: 'गंभीर चेतावनी: दिल का दौरा पड़ने की संभावना है। तुरंत 108 एम्बुलेंस बुलाएं और मरीज को शांत बैठाएं।'
+    triggerSos() {
+      const user = this.store.getState().currentUser;
+      const message = `🚨 EMERGENCY 108 SOS TRIGGERED!\n\nPatient: ${user.name}\nPhone: +91 ${user.phone}\nLocation: ${user.village}\nABHA: ${user.abhaId}\n\nAmbulance dispatched to your GPS location.`;
+      
+      speakText('Emergency 108 ambulance alert sent! Medical dispatch is contacting you now.');
+      if (typeof window.toast === 'function') {
+        window.toast('🚨 Emergency 108 Alert Sent to Ambulance Grid!');
+      }
+      alert(message);
+    }
+
+    // -------------------------------------------------------------
+    // 3. AUDIO-VISUAL SYMPTOM TRIAGE (6 RURAL COMPLAINTS)
+    // -------------------------------------------------------------
+    triageSymptom(type) {
+      const triageData = {
+        fever: {
+          title: '🌡️ High Fever & Chills (तेज बुखार)',
+          color: '#d97706',
+          badge: '🟡 MODERATE · VISIT PHC TODAY',
+          advice: 'Drink plenty of boiled water and ORS. Take Paracetamol 650mg if fever is above 100°F. If fever lasts more than 48 hours, visit Kondapalli PHC for Malaria/Dengue blood test.',
+          audio: 'High fever triage: Drink clean water and ORS. Take Paracetamol. Visit your local PHC if fever persists for two days.'
         },
         snakebite: {
-          urgency: 'EMERGENCY RED',
-          badgeClass: 'bad',
-          condition: 'Potential Neurotoxic or Hemotoxic Snake Envenomation',
-          preHospital: 'Immobilize bitten limb with a splint below heart level. Keep patient absolutely still. Do not cut or suck wound. Rush to nearest ASV-equipped facility.',
-          redFlags: 'Fang marks, rapid local swelling, drooping eyelids (ptosis), difficulty speaking or swallowing.',
-          recommendedCare: 'Ibrahimpatnam CHC (Anti-Snake Venom Available)',
-          audioText: 'सांप काटने की आपात स्थिति: अंग को स्थिर रखें और तुरंत एंटी-वेनम वाले अस्पताल जाएं।'
+          title: '🐍 Snakebite / Scorpion Sting (सांप का काटना)',
+          color: '#dc2626',
+          badge: '🔴 CRITICAL EMERGENCY · GO TO HOSPITAL IMMEDIATELY',
+          advice: 'DO NOT cut, suck, or tie a tight tourniquet. Keep patient calm and completely still. Rush immediately to Ibrahimpatnam CHC or District Hospital for Anti-Snake Venom (ASV). Call 108 now!',
+          audio: 'Critical snakebite emergency! Do not move the affected limb. Go directly to CHC hospital for anti-venom injection.'
         },
-        high_fever: {
-          urgency: 'URGENT YELLOW',
-          badgeClass: 'warn',
-          condition: 'Acute Febrile Illness / Possible Viral or Dengue Syndrome',
-          preHospital: 'Sponge body with normal room-temperature wet cloth. Give oral Paracetamol 500mg. Keep well hydrated with ORS and coconut water.',
-          redFlags: 'Platelet drop, skin rash, persistent vomiting, black stools, body temp above 103°F.',
-          recommendedCare: 'Kondapalli PHC / Sub-Centre Tele-Desk',
-          audioText: 'तेज बुखार: गीले कपड़े से शरीर पोंछें, ओआरएस पिएं और नजदीकी प्राथमिक स्वास्थ्य केंद्र में जांच कराएं।'
+        diarrhea: {
+          title: '💧 Diarrhea & Dehydration (दस्त व उल्टी)',
+          color: '#16a34a',
+          badge: '🟢 SAFE FOR HOME CARE WITH ORS',
+          advice: 'Dissolve 1 packet of ORS in 1 liter clean drinking water. Drink after every loose stool. Give Zinc tablets to children under 5. If extreme lethargy or no urination for 6 hours, visit PHC.',
+          audio: 'Diarrhea care: Drink one liter of ORS water frequently. Keep hydrated with coconut water and rice kanji.'
+        },
+        pregnancy: {
+          title: '🤰 Pregnancy Labor / Bleeding (प्रसव दर्द)',
+          color: '#dc2626',
+          badge: '🔴 EMERGENCY MATERNAL ADMISSION',
+          advice: 'Severe labor pains or bleeding require immediate hospital delivery. Contact Lakshmi Didi (ASHA) immediately and call 108 ambulance for direct transport to Maternity Ward.',
+          audio: 'Maternal alert: Contact your ASHA Didi and take 108 ambulance to hospital delivery ward right away.'
+        },
+        chestpain: {
+          title: '🫀 Severe Chest Pain (छाती में तेज दर्द)',
+          color: '#dc2626',
+          badge: '🔴 CRITICAL EMERGENCY · CARDIAC ALERT',
+          advice: 'Chest tightness, pain radiating to left arm, and cold sweats are heart emergency signs. Chew 1 Aspirin tablet immediately if available and rush to District Hospital via 108.',
+          audio: 'Cardiac emergency: Chew Aspirin if available and call 108 ambulance to reach hospital ICU.'
         },
         breathing: {
-          urgency: 'EMERGENCY RED',
-          badgeClass: 'bad',
-          condition: 'Severe Bronchospasm / Low Oxygen Hypoxia',
-          preHospital: 'Sit patient in tripod posture. Check SpO2 pulse oximeter. Administer high-flow oxygen if available via ASHA kit.',
-          redFlags: 'SpO2 below 92%, cyanosis (blue lips/fingertips), inability to complete sentences.',
-          recommendedCare: 'Ibrahimpatnam CHC / Oxygen Bed',
-          audioText: 'सांस लेने में भारी तकलीफ: मरीज को सीधा बैठाएं और तुरंत ऑक्सीजन सपोर्ट की व्यवस्था करें।'
+          title: '😮‍💨 Difficulty Breathing / Asthma (सांस की तकलीफ)',
+          color: '#d97706',
+          badge: '🟡 URGENT · OXYGEN PHC VISIT',
+          advice: 'Sit upright in an airy place. Use Salbutamol inhaler if prescribed. Visit Kondapalli PHC immediately for oxygen support and nebulization.',
+          audio: 'Breathing difficulty: Sit upright, take inhaler if prescribed, and visit nearest PHC for oxygen support.'
         }
       };
 
-      const res = triageResults[symptomKey] || triageResults['high_fever'];
-      const resultContainer = document.getElementById('triageAIResultBox');
-      if (resultContainer) {
-        resultContainer.innerHTML = `
-          <div class="glass-panel" style="padding:22px;border-color:${res.urgency.includes('RED') ? 'rgba(239,68,68,0.5)' : 'rgba(245,158,11,0.5)'};background:rgba(4,18,15,0.85);margin-top:18px;">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-              <span class="admin-status-badge ${res.badgeClass}" style="font-size:13px;padding:6px 14px;">
-                ${res.urgency}
-              </span>
-              <button class="voice-speak-btn" onclick="speakText('${res.audioText}')" title="Listen in Hindi">🔊</button>
+      const item = triageData[type];
+      if (!item) return;
+
+      const container = document.getElementById('triageResultContainer');
+      if (container) {
+        container.innerHTML = `
+          <div style="background:var(--glass-1);border:2px solid ${item.color};border-radius:16px;padding:20px;margin-top:16px;box-shadow:0 6px 20px rgba(0,0,0,0.08);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+              <h3 style="color:var(--ink);font-size:18px;">${item.title}</h3>
+              <span style="background:${item.color};color:#ffffff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;">${item.badge}</span>
             </div>
-
-            <h4 style="font-size:18px;color:#ffffff;margin:0 0 6px;">${res.condition}</h4>
-            <div style="font-size:12.5px;color:var(--muted);margin-bottom:14px;">Powered by Gemini 3.7 Flash Clinical Guidance Engine</div>
-
-            <div style="padding:12px;background:rgba(4,18,15,0.5);border-radius:10px;margin-bottom:10px;">
-              <strong style="color:var(--auth-primary-bright);font-size:12px;display:block;text-transform:uppercase;">Immediate Pre-Hospital Steps:</strong>
-              <p style="font-size:13px;color:var(--ink-dim);margin:4px 0 0;line-height:1.45;">${res.preHospital}</p>
-            </div>
-
-            <div style="padding:12px;background:rgba(4,18,15,0.5);border-radius:10px;margin-bottom:14px;">
-              <strong style="color:#f87171;font-size:12px;display:block;text-transform:uppercase;">Red Flag Warning Signs:</strong>
-              <p style="font-size:13px;color:var(--ink-dim);margin:4px 0 0;line-height:1.45;">${res.redFlags}</p>
-            </div>
-
-            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;padding-top:12px;border-top:1px solid rgba(220,252,243,0.1);">
-              <span style="font-size:12px;color:var(--ink-dim);">Recommended Care Level: <strong>${res.recommendedCare}</strong></span>
-              ${res.urgency.includes('RED') ? `
-                <button class="auth-btn-danger" style="padding:8px 18px;font-size:12px;" onclick="patientController.triggerAmbulanceDispatch()">
-                  <span>🚨 Trigger 108 Dispatch →</span>
-                </button>
-              ` : `
-                <button class="auth-btn-primary" style="padding:8px 18px;font-size:12px;" onclick="if(typeof switchView==='function') switchView('tele')">
-                  <span>🎥 Connect e-Sanjeevani Teleconsult →</span>
-                </button>
-              `}
+            <p style="font-size:14px;color:var(--ink-dim);line-height:1.6;margin-bottom:16px;">${item.advice}</p>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <button class="auth-btn-primary" style="background:#dc2626;border-color:#b91c1c;padding:8px 16px;font-size:13px;" onclick="patientController.triggerSos()">
+                🚨 Call 108 Ambulance Now
+              </button>
+              <button class="btn-glass" style="padding:8px 16px;font-size:13px;" onclick="speakText('${item.audio}')">
+                🔊 Listen in Audio (बोलकर सुनें)
+              </button>
             </div>
           </div>
         `;
+        speakText(item.audio);
       }
     }
 
     // -------------------------------------------------------------
-    // 5. 📷 AI PRESCRIPTION OCR SCANNER & JAN AUSHADHI CALCULATOR
+    // 4. FAMILY HEALTH CIRCLE
     // -------------------------------------------------------------
-    triggerPrescriptionUpload() {
-      const fileInput = document.getElementById('rxUploadFileInput');
-      if (fileInput) fileInput.click();
-    }
+    renderFamilyCircle() {
+      const el = document.getElementById('familyMembersList');
+      if (!el || !this.store) return;
+      const fams = this.store.getState().familyMembers || [];
 
-    handlePrescriptionUpload(event) {
-      const file = event.target.files && event.target.files[0];
-      if (!file) return;
-
-      if (typeof window.toast === 'function') {
-        window.toast(`📷 Uploaded ${file.name}. Running Gemini OCR...`);
+      if (!fams.length) {
+        el.innerHTML = `<div style="text-align:center;padding:24px;color:var(--muted);">No family members added yet. Tap "+ Add Family Member" below.</div>`;
+        return;
       }
 
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        this.runPrescriptionOCRAnalysis(e.target.result, file.name);
-      };
-      reader.readAsDataURL(file);
-    }
-
-    scanPrescriptionDemo() {
-      this.runPrescriptionOCRAnalysis(null, 'Dr_Varma_Kondapalli_PHC_Rx.jpg');
-    }
-
-    runPrescriptionOCRAnalysis(customImage, fileName) {
-      const scanBox = document.getElementById('rxScanResultArea');
-      if (scanBox) {
-        scanBox.innerHTML = `
-          <div class="glass-panel" style="padding:24px;margin-top:18px;border-color:var(--auth-primary-bright);background:rgba(4,18,15,0.9);text-align:center;">
-            <div class="rx-scan-laser-box" style="position:relative;width:240px;height:140px;margin:0 auto 16px;background:rgba(220,252,243,0.08);border:2px dashed var(--auth-primary-bright);border-radius:12px;display:grid;place-items:center;overflow:hidden;">
-              ${customImage ? `<img src="${customImage}" style="width:100%;height:100%;object-fit:cover;opacity:0.6;">` : `<span style="font-size:36px;">📄</span>`}
-              <div class="ocr-laser-beam"></div>
+      el.innerHTML = fams.map(f => `
+        <div style="background:var(--glass-1);border:1.5px solid var(--glass-border);border-radius:14px;padding:14px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,0.04);">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div style="width:42px;height:42px;background:rgba(0,82,204,0.1);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;">
+              ${f.gender === 'Female' ? '👩' : '👨'}
             </div>
-            <h4 style="font-size:16px;color:#ffffff;margin:0 0 6px;">🧠 Gemini Multimodal OCR Scanning...</h4>
-            <p style="font-size:12.5px;color:var(--auth-primary-bright);margin:0;">Reading doctor handwriting, recognizing generic chemical molecules & matching PMBJP Jan Aushadhi generic catalog...</p>
-          </div>
-        `;
-      }
-
-      setTimeout(() => {
-        if (!scanBox) return;
-
-        const extractedMeds = [
-          {
-            name: 'Ferrous Ascorbate + Folic Acid Tablets',
-            brand: 'Autrin / Orofer XT Caps (30 Tab)',
-            brandPrice: '₹ 180.00',
-            genericPrice: '₹ 32.00',
-            savings: '₹ 148.00 (82%)',
-            dosage: '1 Tab Daily after Dinner',
-            instructions: 'Take with water/lemon juice. Do not take with tea/coffee.'
-          },
-          {
-            name: 'Calcium Carbonate 500mg + Vitamin D3',
-            brand: 'Shelcal 500 Tablets (15 Tab)',
-            brandPrice: '₹ 140.00',
-            genericPrice: '₹ 28.00',
-            savings: '₹ 112.00 (80%)',
-            dosage: '1 Tab Daily after Lunch',
-            instructions: 'Take after meals for optimal absorption.'
-          },
-          {
-            name: 'Pantoprazole Gastro-Resistant 40mg',
-            brand: 'Pan 40 / Pantocid (15 Tab)',
-            brandPrice: '₹ 120.00',
-            genericPrice: '₹ 18.00',
-            savings: '₹ 102.00 (85%)',
-            dosage: '1 Tab Morning (Empty Stomach)',
-            instructions: 'Take 30 minutes before morning breakfast.'
-          }
-        ];
-
-        scanBox.innerHTML = `
-          <div class="glass-panel" style="padding:22px;margin-top:18px;border-color:rgba(95,227,196,0.4);animation:docFadeIn 0.35s ease;">
-            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
-              <div>
-                <span class="admin-status-badge good" style="font-size:11px;margin-bottom:4px;">✓ AI OCR RECOGNITION 100% VERIFIED</span>
-                <h4 style="font-size:18px;color:#ffffff;margin:2px 0 2px;">3 Prescribed Medicines Detected from Scanned Prescription</h4>
-                <small style="color:var(--muted);">Source: ${fileName || 'Prescription Letter'} · Verified by Clinical Formulary</small>
-              </div>
-              <div style="display:flex;gap:8px;">
-                <button class="auth-btn-primary" style="padding:8px 18px;font-size:12.5px;" onclick="patientController.importScannedToMedications()">
-                  <span>➕ Add All to Daily Reminder</span>
-                </button>
-                <button class="btn-glass" style="padding:8px 16px;font-size:12.5px;background:rgba(0,51,102,0.4);border-color:#0b5ed7;" onclick="patientController.downloadPrescriptionPDF()">
-                  <span>📄 Download Clean e-Rx (PDF)</span>
-                </button>
-              </div>
-            </div>
-
-            <!-- Generic Savings Comparison Cards -->
-            <div class="generic-compare-grid" style="display:flex;flex-direction:column;gap:12px;">
-              ${extractedMeds.map((m) => `
-                <div class="generic-compare-card glass-panel" style="padding:16px;">
-                  <div class="compare-col" style="flex:1;">
-                    <span style="font-size:11px;color:var(--muted);text-transform:uppercase;">Branded Medicine Prescribed</span>
-                    <strong style="font-size:14px;color:#ffffff;display:block;margin:2px 0;">${m.brand}</strong>
-                    <div style="font-size:11.5px;color:var(--ink-dim);">${m.dosage}</div>
-                    <div class="price-strike">${m.brandPrice}</div>
-                  </div>
-                  <div style="font-size:24px;color:var(--auth-primary-bright);padding:0 8px;">→</div>
-                  <div class="compare-col generic" style="flex:1.3;background:rgba(16,185,129,0.08);padding:10px 14px;border-radius:12px;border:1px solid rgba(52,211,153,0.3);">
-                    <span style="font-size:11px;color:#a7f3d0;font-weight:700;text-transform:uppercase;">PMBJP Jan Aushadhi Generic Salt</span>
-                    <strong style="font-size:15px;color:#34d399;display:block;margin:2px 0;">${m.name}</strong>
-                    <div style="font-size:11.5px;color:#cbd5e1;margin-bottom:6px;">${m.instructions}</div>
-                    <div style="display:flex;align-items:center;gap:10px;">
-                      <div class="price-big-green">${m.genericPrice}</div>
-                      <span class="status-pill good" style="font-size:11px;">Save ${m.savings}</span>
-                    </div>
-                  </div>
-                </div>
-              `).join('')}
-            </div>
-
-            <!-- Total Savings Banner -->
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:18px;padding:16px;background:rgba(16,185,129,0.15);border-radius:14px;border:1px solid rgba(52,211,153,0.35);">
-              <div>
-                <strong style="font-size:15px;color:#34d399;display:block;">💰 Total Patient Savings: ₹ 362.00 / month (82% Reduction)</strong>
-                <small style="color:var(--ink-dim);">Available at nearest Kondapalli Jan Aushadhi Kendra (1.2 km)</small>
-              </div>
-              <button class="voice-speak-btn" onclick="speakText('पर्चे में 3 दवाइयां पहचानी गईं: आयरन, कैल्शियम और एंटासिड। जन औषधि केंद्र से लेने पर आपको प्रति माह 362 रुपये की 82% बचत होगी।')" title="Listen Dosage Instructions">🔊</button>
+            <div>
+              <strong style="color:var(--ink);font-size:15px;display:block;">${f.name} (${f.relation})</strong>
+              <small style="color:var(--muted);font-family:'IBM Plex Mono',monospace;">ABHA: ${f.abhaId}</small>
             </div>
           </div>
-        `;
-
-        if (typeof window.toast === 'function') {
-          window.toast('✓ Prescription scanned! 3 Medicines extracted with Jan Aushadhi generic mapping.');
-        }
-      }, 900);
+          <div style="text-align:right;">
+            <span class="badge" style="background:rgba(0,82,204,0.1);color:var(--primary);padding:4px 8px;border-radius:12px;font-size:11px;font-weight:600;">${f.status || 'Active'}</span>
+            <button style="display:block;margin-top:4px;color:#dc2626;font-size:11px;cursor:pointer;background:none;border:none;" onclick="patientController.removeFamilyMember('${f.id}')">✕ Remove</button>
+          </div>
+        </div>
+      `).join('');
     }
 
-    importScannedToMedications() {
-      // Add detected medicines if not already in checklist
-      const newMeds = [
-        { id: 'M_PANT', slot: 'morning', name: 'Pantoprazole 40mg (Empty Stomach)', dose: '1 Tab', time: '07:30 AM', instructions: '30 min before breakfast', taken: true, brandName: 'Pan 40', genericName: 'PMBJP Pantoprazole', savings: '₹102' }
-      ];
-      newMeds.forEach(nm => {
-        if (!this.data.medications.find(m => m.id === nm.id)) {
-          this.data.medications.unshift(nm);
-        }
-      });
-      if (typeof window.toast === 'function') {
-        window.toast('✓ Scanned medicines imported into your Daily Dose Checklist.');
+    openAddFamilyModal() {
+      const modal = document.getElementById('addFamilyModal');
+      if (modal) modal.style.display = 'flex';
+    }
+
+    closeAddFamilyModal() {
+      const modal = document.getElementById('addFamilyModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    submitAddFamily(e) {
+      if (e) e.preventDefault();
+      const name = document.getElementById('famName').value.trim();
+      const relation = document.getElementById('famRelation').value;
+      const age = parseInt(document.getElementById('famAge').value, 10) || 25;
+      const gender = document.getElementById('famGender').value;
+
+      if (!name) {
+        alert('Please enter member name');
+        return;
       }
-      this.renderMedicationTracker();
+
+      this.store.addFamilyMember({ name, relation, age, gender });
+      this.closeAddFamilyModal();
+      if (typeof window.toast === 'function') window.toast('✓ Added ' + name + ' to Family Health Circle');
+    }
+
+    removeFamilyMember(id) {
+      if (confirm('Are you sure you want to remove this family member?')) {
+        this.store.deleteFamilyMember(id);
+      }
     }
 
     // -------------------------------------------------------------
-    // 6. 💊 DAILY MEDICATION TRACKER & ADHERENCE CHECKLIST
+    // 5. JAN AUSHADHI MEDICINE TRACKER & SAVINGS
     // -------------------------------------------------------------
-    toggleDoseTaken(medId) {
-      const med = this.data.medications.find(m => m.id === medId);
-      if (med) {
-        med.taken = !med.taken;
-        if (typeof window.toast === 'function') {
-          window.toast(med.taken ? `✓ Marked ${med.name} as taken!` : `Marked ${med.name} as pending`);
-        }
-        this.renderMedicationTracker();
-      }
-    }
+    renderDailyMedications() {
+      const el = document.getElementById('dailyMedsList');
+      if (!el || !this.store) return;
+      const meds = this.store.getState().dailyMedications || [];
 
-    renderMedicationTracker() {
-      const container = document.getElementById('dailyMedicationChecklist');
-      if (!container) return;
-
-      const meds = this.data.medications || [];
-      const takenCount = meds.filter(m => m.taken).length;
-      const progressPercent = meds.length ? Math.round((takenCount / meds.length) * 100) : 0;
-
-      container.innerHTML = `
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      el.innerHTML = meds.map(m => `
+        <div style="background:var(--glass-1);border:1.5px solid var(--glass-border);border-radius:14px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
           <div>
-            <strong style="font-size:14px;color:#ffffff;">Today's Adherence Progress (${takenCount} of ${meds.length} Taken)</strong>
-            <small style="display:block;color:var(--muted);">Dose Adherence Tracker</small>
+            <strong style="color:var(--ink);font-size:15px;display:block;">${m.name}</strong>
+            <small style="color:#16a34a;font-weight:700;">💰 ${m.saving}</small>
           </div>
-          <span style="font-size:16px;font-weight:700;color:var(--auth-primary-bright);font-family:'IBM Plex Mono',monospace;">${progressPercent}%</span>
+          <div style="display:flex;gap:8px;">
+            ${m.morning ? `
+              <button class="btn-glass" style="padding:6px 10px;font-size:12px;background:${m.taken && m.taken.morning ? '#16a34a' : 'transparent'};color:${m.taken && m.taken.morning ? '#ffffff' : 'var(--ink)'};" onclick="patientController.toggleDose('${m.id}', 'morning')">
+                ☀️ ${m.taken && m.taken.morning ? '✓ Taken' : 'Morning'}
+              </button>
+            ` : ''}
+            ${m.noon ? `
+              <button class="btn-glass" style="padding:6px 10px;font-size:12px;background:${m.taken && m.taken.noon ? '#16a34a' : 'transparent'};color:${m.taken && m.taken.noon ? '#ffffff' : 'var(--ink)'};" onclick="patientController.toggleDose('${m.id}', 'noon')">
+                🌤️ ${m.taken && m.taken.noon ? '✓ Taken' : 'Noon'}
+              </button>
+            ` : ''}
+            ${m.night ? `
+              <button class="btn-glass" style="padding:6px 10px;font-size:12px;background:${m.taken && m.taken.night ? '#16a34a' : 'transparent'};color:${m.taken && m.taken.night ? '#ffffff' : 'var(--ink)'};" onclick="patientController.toggleDose('${m.id}', 'night')">
+                🌙 ${m.taken && m.taken.night ? '✓ Taken' : 'Night'}
+              </button>
+            ` : ''}
+          </div>
         </div>
-
-        <div style="height:6px;border-radius:999px;background:rgba(220,252,243,0.1);overflow:hidden;margin-bottom:16px;">
-          <div style="height:100%;width:${progressPercent}%;background:linear-gradient(90deg, #10b981, #34d399);border-radius:999px;transition:width 0.3s ease;"></div>
-        </div>
-
-        <div style="display:flex;flex-direction:column;gap:10px;">
-          ${meds.length ? meds.map(m => `
-            <div class="med-dose-item glass-panel ${m.taken ? 'dose-taken' : ''}" style="padding:12px 14px;border-radius:12px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="patientController.toggleDoseTaken('${m.id}')">
-              <div style="display:flex;gap:12px;align-items:center;">
-                <input type="checkbox" ${m.taken ? 'checked' : ''} style="accent-color:var(--auth-primary-bright);width:18px;height:18px;cursor:pointer;" onclick="event.stopPropagation(); patientController.toggleDoseTaken('${m.id}')">
-                <div>
-                  <strong style="font-size:13.5px;color:${m.taken ? 'var(--muted)' : '#ffffff'};${m.taken ? 'text-decoration:line-through;' : ''}">${m.name} (${m.dose})</strong>
-                  <small style="display:block;color:var(--muted);font-size:11px;">⏰ ${m.time} · ${m.instructions}</small>
-                </div>
-              </div>
-              <span class="admin-status-badge ${m.taken ? 'good' : 'warn'}" style="font-size:10px;">
-                ${m.taken ? '✓ Taken' : 'Pending'}
-              </span>
-            </div>
-          `).join('') : `
-            <div style="text-align:center;padding:24px 16px;color:var(--muted);background:rgba(4,18,15,0.3);border-radius:12px;border:1px dashed var(--auth-border);">
-              No active daily medications logged yet. When a doctor writes an e-Prescription, doses will appear here automatically.
-            </div>
-          `}
-        </div>
-      `;
+      `).join('');
     }
 
-    renderJanAushadhiCalculator() {
-      // Attached to view-medicines
+    toggleDose(medId, time) {
+      this.store.toggleDoseTaken(medId, time);
     }
 
     // -------------------------------------------------------------
-    // 7. 🏥 LIVE HOSPITAL CAPACITY & BED TRACKER
+    // 6. LIVE HOSPITAL BEDS & BLOOD BANK
     // -------------------------------------------------------------
-    renderLiveHospitalBeds() {
-      const container = document.getElementById('liveHospitalBedGridPatient');
-      if (!container) return;
+    renderLiveHospitals() {
+      const el = document.getElementById('hospitalBedsList');
+      if (!el || !this.store) return;
+      const hosps = this.store.getState().hospitals || [];
 
-      const vil = this.data.villages[this.data.currentVillage];
-
-      container.innerHTML = `
-        <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:16px;">
-          <div class="glass-panel card-3d" style="padding:18px;">
-            <div style="font-size:11.5px;color:var(--muted);text-transform:uppercase;">Primary Care · 3.2 km</div>
-            <h4 style="font-size:16px;color:#ffffff;margin:2px 0 8px;">Kondapalli PHC</h4>
-            <div style="display:flex;gap:8px;margin-bottom:10px;">
-              <span class="admin-status-badge good">14 General Beds</span>
-              <span class="admin-status-badge good">2 ICU · O₂ Ready</span>
+      el.innerHTML = hosps.map(h => `
+        <div style="background:var(--glass-1);border:1.5px solid var(--glass-border);border-radius:14px;padding:16px;margin-bottom:12px;">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;flex-wrap:wrap;gap:6px;">
+            <div>
+              <strong style="color:var(--primary);font-size:15px;display:block;">${h.name}</strong>
+              <small style="color:var(--muted);">Distance: ${h.distance} · Doctor: ${h.doctorOnDuty}</small>
             </div>
-            <small style="color:var(--ink-dim);display:block;">Blood Bank: A+, B+, O+ Available</small>
+            <a href="tel:${h.phone}" class="btn-glass" style="padding:4px 10px;font-size:12px;color:var(--primary);">📞 Call ${h.phone}</a>
           </div>
-
-          <div class="glass-panel card-3d" style="padding:18px;">
-            <div style="font-size:11.5px;color:var(--muted);text-transform:uppercase;">Secondary Care · 11 km</div>
-            <h4 style="font-size:16px;color:#ffffff;margin:2px 0 8px;">Ibrahimpatnam CHC</h4>
-            <div style="display:flex;gap:8px;margin-bottom:10px;">
-              <span class="admin-status-badge warn">27 General Beds</span>
-              <span class="admin-status-badge warn">1 ICU Left</span>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(90px, 1fr));gap:8px;margin-top:10px;text-align:center;">
+            <div style="background:rgba(22,163,74,0.08);border:1px solid rgba(22,163,74,0.3);padding:8px;border-radius:10px;">
+              <small style="color:#166534;font-size:11px;display:block;">General</small>
+              <strong style="color:#16a34a;font-size:16px;">${h.genBedsAvail} Avail</strong>
             </div>
-            <small style="color:var(--ink-dim);display:block;">24/7 Medical Officer Onboard</small>
-          </div>
-
-          <div class="glass-panel card-3d" style="padding:18px;">
-            <div style="font-size:11.5px;color:var(--muted);text-transform:uppercase;">Tertiary Command · 26 km</div>
-            <h4 style="font-size:16px;color:#ffffff;margin:2px 0 8px;">Vijayawada District Hospital</h4>
-            <div style="display:flex;gap:8px;margin-bottom:10px;">
-              <span class="admin-status-badge good">92 General Beds</span>
-              <span class="admin-status-badge good">8 ICU Beds</span>
+            <div style="background:rgba(220,38,38,0.08);border:1px solid rgba(220,38,38,0.3);padding:8px;border-radius:10px;">
+              <small style="color:#991b1b;font-size:11px;display:block;">ICU</small>
+              <strong style="color:#dc2626;font-size:16px;">${h.icuBedsAvail} Avail</strong>
             </div>
-            <small style="color:var(--ink-dim);display:block;">All 8 Blood Groups Stocked</small>
+            <div style="background:rgba(2,132,199,0.08);border:1px solid rgba(2,132,199,0.3);padding:8px;border-radius:10px;">
+              <small style="color:#075985;font-size:11px;display:block;">Oxygen</small>
+              <strong style="color:#0284c7;font-size:16px;">${h.oxygenBedsAvail} Avail</strong>
+            </div>
           </div>
         </div>
-      `;
+      `).join('');
+    }
+
+    renderLiveBloodBank() {
+      const el = document.getElementById('bloodBankGrid');
+      if (!el || !this.store) return;
+      const bank = this.store.getState().bloodBank || {};
+
+      el.innerHTML = Object.entries(bank).map(([grp, count]) => `
+        <div style="background:var(--glass-1);border:1.5px solid var(--glass-border);border-radius:12px;padding:10px;text-align:center;">
+          <strong style="color:#dc2626;font-size:16px;display:block;">${grp}</strong>
+          <span style="font-size:14px;color:var(--ink);font-weight:700;">${count} Units</span>
+          <small style="display:block;color:${count > 5 ? '#16a34a' : '#dc2626'};font-size:10px;font-weight:600;margin-top:2px;">
+            ${count > 5 ? '✓ In Stock' : '⚠️ Low'}
+          </small>
+        </div>
+      `).join('');
     }
   }
 
-  // Export singleton
   global.patientController = new PatientController();
 
 })(typeof window !== 'undefined' ? window : this);
