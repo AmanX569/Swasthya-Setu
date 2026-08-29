@@ -2644,18 +2644,21 @@ function _legacyHandleLogoClick() {
 
 function doLogout() {
   if (window.appStore) window.appStore.logout();
-  renderActivePortalView();
+  showView('Login');
   if (typeof window.toast === 'function') window.toast('🚪 Logged out to Healthcare Gateway');
 }
 
 function renderActivePortalView() {
   const session = window.appStore ? window.appStore.getState().session : { isLoggedIn: false };
-  const views = ['Login', 'Patient', 'Doctor', 'Worker', 'Admin'];
+  const views = ['Home', 'Login', 'Patient', 'Doctor', 'Worker', 'Admin'];
 
   if (!session || !session.isLoggedIn) {
     views.forEach(v => {
       const el = document.getElementById('view' + v);
-      if (el) el.style.display = (v === 'Login') ? 'block' : 'none';
+      if (el) {
+        el.style.display = (v === 'Home') ? 'block' : 'none';
+        if (v === 'Home') el.classList.add('page-enter-smooth');
+      }
     });
     const headerControls = document.getElementById('sessionHeaderControls');
     if (headerControls) headerControls.style.display = 'none';
@@ -2665,9 +2668,19 @@ function renderActivePortalView() {
   const role = session.role;
   const activeViewName = role.charAt(0).toUpperCase() + role.slice(1);
 
+  // Directly set display styles for all views to guarantee 100% isolation
   views.forEach(v => {
     const el = document.getElementById('view' + v);
-    if (el) el.style.display = (v === activeViewName) ? 'block' : 'none';
+    if (el) {
+      if (v === activeViewName) {
+        el.style.display = 'block';
+        el.classList.remove('page-exit-smooth');
+        el.classList.add('page-enter-smooth');
+      } else {
+        el.style.display = 'none';
+        el.classList.remove('page-enter-smooth');
+      }
+    }
   });
 
   const headerControls = document.getElementById('sessionHeaderControls');
@@ -2677,6 +2690,10 @@ function renderActivePortalView() {
     const user = session.user || {};
     const roleIcons = { patient: '🌾', doctor: '🩺', worker: '🤝', admin: '👑' };
     userBadge.textContent = (roleIcons[role] || '👤') + ' ' + (user.name || 'User');
+  }
+
+  if (typeof window.scrollTo === 'function') {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   if (role === 'patient' && window.patientController) window.patientController.renderAll();
