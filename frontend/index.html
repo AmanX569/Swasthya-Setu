@@ -391,6 +391,9 @@ body {
     <span id="activeUserBadge" class="badge" style="background:rgba(2,132,199,0.15);color:var(--primary-bright);padding:6px 12px;border-radius:12px;font-size:13px;font-weight:700;border:1px solid var(--glass-border);">
       🌾 Ramesh Kumar
     </span>
+    <button class="btn-glass" style="padding:6px 12px;font-size:12px;color:var(--primary-bright);font-weight:700;" onclick="openChangePasswordModal()">
+      🔑 Change Password
+    </button>
     <button class="btn-glass" style="padding:6px 12px;font-size:12px;color:#ef4444;font-weight:700;" onclick="doLogout()" data-i18n="btn_logout">
       🚪 Log Out / Change Portal
     </button>
@@ -478,13 +481,13 @@ body {
       <form onsubmit="handlePatientAuth(event)">
         <div style="margin-bottom:12px;">
           <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">Mobile Number or ABHA Health ID *</label>
-          <input type="text" id="patInputId" class="input-field" placeholder="e.g. 9876543210 or 14-8921-4402-9912" value="9876543210" required>
+          <input type="text" id="patInputId" class="input-field" placeholder="e.g. 9876543210 or 14-8921-4402-9912" value="" placeholder="Enter 10-digit Mobile or 14-digit ABHA" required>
         </div>
 
         <div style="display:grid;grid-template-columns:1fr auto;gap:8px;margin-bottom:16px;align-items:flex-end;">
           <div>
             <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">One-Time Password (OTP) *</label>
-            <input type="text" id="patInputOtp" class="input-field" placeholder="Enter 6-digit OTP" value="123456" maxlength="6" required>
+            <input type="text" id="patInputOtp" class="input-field" placeholder="Enter 6-digit OTP" value="" placeholder="Enter OTP or Password" maxlength="6" required>
           </div>
           <button type="button" class="btn-glass" style="height:44px;padding:0 14px;font-size:12px;font-weight:700;" onclick="sendMockOtp('patient')">
             📲 Send OTP
@@ -496,10 +499,7 @@ body {
         </button>
       </form>
 
-      <div class="demo-credentials-box">
-        <strong style="color:var(--primary-bright);display:block;margin-bottom:4px;">🔑 Authorized Citizen Test Account:</strong>
-        <span style="font-size:12px;">Mobile: <strong>9876543210</strong> · OTP: <strong>123456</strong></span>
-      </div>
+      
     </div>
 
     <!-- 2. DOCTOR LOGIN FORM -->
@@ -517,12 +517,12 @@ body {
       <form onsubmit="handleStaffAuth(event, 'doctor')">
         <div style="margin-bottom:12px;">
           <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">Doctor Employee ID or MCI Registration No. *</label>
-          <input type="text" id="docInputId" class="input-field" placeholder="e.g. DOC-101 or MCI-AP-48912" value="DOC-101" required>
+          <input type="text" id="docInputId" class="input-field" placeholder="e.g. DOC-101 or MCI-AP-48912" value="" placeholder="e.g. DOC-101 or Registered Phone" required>
         </div>
 
         <div style="margin-bottom:16px;">
           <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">Clinical Password / Security PIN *</label>
-          <input type="password" id="docInputPass" class="input-field" placeholder="Enter clinical password" value="doc@123" required>
+          <input type="password" id="docInputPass" class="input-field" placeholder="Enter clinical password" value="" placeholder="Enter doctor password" required>
         </div>
 
         <button type="submit" class="auth-btn-primary" style="width:100%;padding:12px;background:#0284c7;border-color:#0369a1;font-size:15px;cursor:pointer;">
@@ -530,10 +530,7 @@ body {
         </button>
       </form>
 
-      <div class="demo-credentials-box">
-        <strong style="color:var(--primary-bright);display:block;margin-bottom:4px;">🔑 Authorized Doctor Test Account:</strong>
-        <span style="font-size:12px;">Doctor ID: <strong>DOC-101</strong> · Password: <strong>doc@123</strong> (Dr. Priya Sharma)</span>
-      </div>
+      
     </div>
 
     <!-- 3. ASHA WORKER LOGIN FORM -->
@@ -551,12 +548,12 @@ body {
       <form onsubmit="handleStaffAuth(event, 'worker')">
         <div style="margin-bottom:12px;">
           <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">ASHA Worker ID or Registered Phone *</label>
-          <input type="text" id="workerInputId" class="input-field" placeholder="e.g. ASH-201 or 9833344455" value="ASH-201" required>
+          <input type="text" id="workerInputId" class="input-field" placeholder="e.g. ASH-201 or 9833344455" value="" placeholder="e.g. ASH-201 or Registered Phone" required>
         </div>
 
         <div style="margin-bottom:16px;">
           <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">Sector Passcode / PIN *</label>
-          <input type="password" id="workerInputPass" class="input-field" placeholder="Enter sector passcode" value="asha@123" required>
+          <input type="password" id="workerInputPass" class="input-field" placeholder="Enter sector passcode" value="" placeholder="Enter 4-digit PIN or passcode" required>
         </div>
 
         <button type="submit" class="auth-btn-primary" style="width:100%;padding:12px;background:#d97706;border-color:#b45309;font-size:15px;cursor:pointer;">
@@ -564,10 +561,7 @@ body {
         </button>
       </form>
 
-      <div class="demo-credentials-box">
-        <strong style="color:var(--primary-bright);display:block;margin-bottom:4px;">🔑 Authorized ASHA Test Account:</strong>
-        <span style="font-size:12px;">ASHA ID: <strong>ASH-201</strong> · Passcode: <strong>asha@123</strong> (Lakshmi Didi)</span>
-      </div>
+      
     </div>
 
     <!-- 4. HEALTH ADMIN LOGIN FORM -->
@@ -585,12 +579,12 @@ body {
       <form onsubmit="handleStaffAuth(event, 'admin')">
         <div style="margin-bottom:12px;">
           <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">District Officer ID or Designation *</label>
-          <input type="text" id="adminInputId" class="input-field" placeholder="e.g. ADM-001 or DHO-AP-001" value="ADM-001" required>
+          <input type="text" id="adminInputId" class="input-field" placeholder="e.g. ADM-001 or DHO-AP-001" value="" placeholder="e.g. ADM-001 or Registered Phone" required>
         </div>
 
         <div style="margin-bottom:16px;">
           <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">Admin Master Passcode *</label>
-          <input type="password" id="adminInputPass" class="input-field" placeholder="Enter master passcode" value="admin@123" required>
+          <input type="password" id="adminInputPass" class="input-field" placeholder="Enter master passcode" value="" placeholder="Enter admin master password" required>
         </div>
 
         <button type="submit" class="auth-btn-primary" style="width:100%;padding:12px;background:#db2777;border-color:#be185d;font-size:15px;cursor:pointer;">
@@ -598,10 +592,7 @@ body {
         </button>
       </form>
 
-      <div class="demo-credentials-box">
-        <strong style="color:var(--primary-bright);display:block;margin-bottom:4px;">🔑 Authorized Admin Test Account:</strong>
-        <span style="font-size:12px;">Admin ID: <strong>ADM-001</strong> · Passcode: <strong>admin@123</strong> (District Officer)</span>
-      </div>
+      
     </div>
 
   
@@ -1230,20 +1221,86 @@ body {
 </div>
 
 
+
 <!-- =========================================================
-     MULTI-ROLE NEW USER REGISTRATION MODAL
+     PATIENT / CITIZEN EXCLUSIVE SELF-REGISTRATION MODAL
      ========================================================= -->
 <div id="registrationModal" class="modal-overlay">
-  <div class="modal-card" style="max-width:580px;">
+  <div class="modal-card" style="max-width:520px;">
     
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
       <div style="display:flex;align-items:center;gap:10px;">
-        <span style="font-size:28px;">📝</span>
+        <span style="font-size:28px;">🌾</span>
         <div>
-          <h3 style="color:var(--ink);font-size:18px;font-weight:800;">New User Registration</h3>
-          <small style="color:var(--muted);">National Digital Health Mission (ABDM) Integration</small>
+          <h3 style="color:var(--ink);font-size:18px;font-weight:800;">Citizen & Patient Registration</h3>
+          <small style="color:var(--muted);">National Digital Health Mission (ABDM) ABHA Card Creation</small>
         </div>
       </div>
+      <button onclick="closeRegistrationModal()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;">✕</button>
+    </div>
+
+    <form id="regFormPatient" onsubmit="submitPatientRegistration(event)">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Full Name (मरीज का नाम) *</label>
+          <input type="text" id="regPatName" class="input-field" placeholder="e.g. Ramesh Kumar" required>
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Mobile Number (मोबाइल नं.) *</label>
+          <input type="tel" id="regPatPhone" class="input-field" placeholder="e.g. 9876543210" maxlength="10" required>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px;">
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Age (उम्र) *</label>
+          <input type="number" id="regPatAge" class="input-field" placeholder="35" min="1" max="120" required>
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Gender (लिंग) *</label>
+          <select id="regPatGender" class="input-field" style="height:44px;" required>
+            <option value="Male">Male (पुरुष)</option>
+            <option value="Female">Female (महिला)</option>
+            <option value="Other">Other (अन्य)</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Blood Group *</label>
+          <select id="regPatBlood" class="input-field" style="height:44px;" required>
+            <option value="O+">O+</option>
+            <option value="A+">A+</option>
+            <option value="B+">B+</option>
+            <option value="AB+">AB+</option>
+            <option value="O-">O-</option>
+            <option value="A-">A-</option>
+            <option value="B-">B-</option>
+            <option value="AB-">AB-</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="margin-bottom:12px;">
+        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Village / Sub-Centre Ward (ग्राम / वार्ड) *</label>
+        <input type="text" id="regPatVillage" class="input-field" placeholder="e.g. Kondapalli Sub-Centre, Ward 4" required>
+      </div>
+
+      <div style="margin-bottom:14px;">
+        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Create Account Password or Security PIN *</label>
+        <input type="password" id="regPatPassword" class="input-field" placeholder="Create your private password or PIN" required>
+      </div>
+
+      <div style="background:rgba(22,163,74,0.1);border:1px dashed #16a34a;border-radius:10px;padding:10px;margin-bottom:16px;font-size:12px;color:var(--ink);">
+        ✨ An official <strong>14-digit Ayushman Bharat ABHA Health Card</strong> will be generated automatically and saved to your cloud profile.
+      </div>
+
+      <button type="submit" class="auth-btn-primary" style="width:100%;padding:12px;background:#16a34a;border-color:#15803d;font-size:15px;cursor:pointer;">
+        ✓ Register & Generate ABHA Card
+      </button>
+    </form>
+
+  </div>
+</div>
+
       <button onclick="closeRegistrationModal()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;">✕</button>
     </div>
 
@@ -1414,6 +1471,121 @@ body {
       </button>
     </form>
 
+  </div>
+</div>
+
+
+<!-- =========================================================
+     MULTI-ROLE PORTAL SELECTION MODAL
+     ========================================================= -->
+<div id="roleChooserModal" class="modal-overlay">
+  <div class="modal-card" style="max-width:460px;text-align:center;">
+    <div style="font-size:36px;margin-bottom:8px;">🔄</div>
+    <h3 style="color:var(--ink);font-size:18px;font-weight:800;margin-bottom:6px;">Multiple Portals Found</h3>
+    <p style="color:var(--muted);font-size:13px;margin-bottom:18px;">Your account is authorized for multiple healthcare roles. Select which portal you wish to enter:</p>
+
+    <div id="roleChooserButtons" style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;"></div>
+
+    <button type="button" class="btn-glass" onclick="closeRoleChooserModal()" style="width:100%;">Cancel</button>
+  </div>
+</div>
+
+
+<!-- =========================================================
+     ADMIN STAFF PROVISIONING & LICENSE ISSUANCE MODAL
+     ========================================================= -->
+<div id="provisionStaffModal" class="modal-overlay">
+  <div class="modal-card" style="max-width:520px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:28px;">👑</span>
+        <div>
+          <h3 style="color:var(--ink);font-size:18px;font-weight:800;">Provision Healthcare Personnel</h3>
+          <small style="color:var(--muted);">Create Doctor, ASHA Worker, or Admin with Temporary Credentials</small>
+        </div>
+      </div>
+      <button onclick="adminController.closeProvisionStaffModal()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;">✕</button>
+    </div>
+
+    <form onsubmit="adminController.submitProvisionStaff(event)">
+      <div style="margin-bottom:12px;">
+        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Select Role *</label>
+        <select id="provStaffRole" class="input-field" style="height:44px;" required>
+          <option value="doctor">🩺 Medical Officer / Doctor (MBBS/MD)</option>
+          <option value="worker">🤝 ASHA / ANM Frontline Field Worker</option>
+          <option value="admin">👑 Health Administrator (District HQ)</option>
+        </select>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Full Name *</label>
+          <input type="text" id="provStaffName" class="input-field" placeholder="e.g. Dr. Rajesh Verma" required>
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Official Mobile Number *</label>
+          <input type="tel" id="provStaffPhone" class="input-field" placeholder="e.g. 9822233344" maxlength="10" required>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">License / Registration ID *</label>
+          <input type="text" id="provStaffRegNo" class="input-field" placeholder="e.g. MCI-AP-31209">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Assigned Hospital / Sector *</label>
+          <input type="text" id="provStaffLocation" class="input-field" placeholder="e.g. Ibrahimpatnam CHC">
+        </div>
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Set Initial Temporary Password / PIN *</label>
+        <input type="password" id="provStaffPassword" class="input-field" placeholder="e.g. doc@123" required>
+        <small style="color:var(--muted);display:block;margin-top:3px;">Staff member can change this to a private password upon logging in.</small>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;gap:8px;">
+        <button type="button" class="btn-glass" onclick="adminController.closeProvisionStaffModal()">Cancel</button>
+        <button type="submit" class="auth-btn-primary" style="background:#db2777;border-color:#be185d;">✓ Provision & Save to Cloud</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<!-- =========================================================
+     PRIVACY PASSWORD CHANGE MODAL
+     ========================================================= -->
+<div id="changePasswordModal" class="modal-overlay">
+  <div class="modal-card" style="max-width:440px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:26px;">🔑</span>
+        <div>
+          <h3 style="color:var(--ink);font-size:17px;font-weight:800;">Change Account Password</h3>
+          <small style="color:var(--muted);">Update your private security credentials</small>
+        </div>
+      </div>
+      <button onclick="closeChangePasswordModal()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;">✕</button>
+    </div>
+
+    <form onsubmit="submitChangePassword(event)">
+      <div style="margin-bottom:12px;">
+        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">New Password / PIN *</label>
+        <input type="password" id="newAccountPassword" class="input-field" placeholder="Enter new private password" required>
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Confirm New Password *</label>
+        <input type="password" id="confirmAccountPassword" class="input-field" placeholder="Re-enter new password" required>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;gap:8px;">
+        <button type="button" class="btn-glass" onclick="closeChangePasswordModal()">Cancel</button>
+        <button type="submit" class="auth-btn-primary" style="background:#16a34a;border-color:#15803d;">✓ Update Password</button>
+      </div>
+    </form>
   </div>
 </div>
 

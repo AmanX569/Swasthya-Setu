@@ -216,6 +216,47 @@
       }).join('');
     }
 
+    
+    openProvisionStaffModal() {
+      const m = document.getElementById('provisionStaffModal');
+      if (m) m.style.display = 'flex';
+    }
+
+    closeProvisionStaffModal() {
+      const m = document.getElementById('provisionStaffModal');
+      if (m) m.style.display = 'none';
+    }
+
+    submitProvisionStaff(e) {
+      if (e) e.preventDefault();
+      const role = document.getElementById('provStaffRole').value;
+      const name = document.getElementById('provStaffName').value.trim();
+      const phone = document.getElementById('provStaffPhone').value.trim();
+      const location = document.getElementById('provStaffLocation').value.trim();
+      const regNo = document.getElementById('provStaffRegNo').value.trim();
+      const password = document.getElementById('provStaffPassword').value.trim();
+
+      if (!name || !phone || !password) {
+        alert('Please fill in Name, Phone, and Temporary Password');
+        return;
+      }
+
+      const newMember = this.store.provisionStaffMember(role, {
+        name,
+        phone,
+        location: location || 'District Health Center',
+        regNo: regNo || (role.toUpperCase() + '-AP-' + Math.floor(1000 + Math.random() * 9000)),
+        password
+      });
+
+      this.closeProvisionStaffModal();
+      this.renderStaff();
+      this.renderStats();
+      if (typeof window.toast === 'function') {
+        window.toast('✓ Successfully provisioned ' + role.toUpperCase() + ': ' + newMember.name + ' (' + newMember.id + ')');
+      }
+    }
+
     openAddDrugModal() {
       const m = document.getElementById('addDrugModal');
       if (m) m.style.display = 'flex';

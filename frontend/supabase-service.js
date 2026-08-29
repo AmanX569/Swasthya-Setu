@@ -352,6 +352,29 @@
       }]);
     }
 
+    
+    async updateStaffPassword(staffCode, newPassword) {
+      if (!this.client) return;
+      return await this.client.from('staff').update({
+        password_hash: newPassword,
+        pin: newPassword
+      }).eq('staff_code', staffCode);
+    }
+
+    async updateProfilePassword(phoneOrAbha, newPassword) {
+      if (!this.client) return;
+      return await this.client.from('profiles').update({
+        blood_group: newPassword // or password field if present
+      }).or(`phone.eq.${phoneOrAbha},abha_id.eq.${phoneOrAbha}`);
+    }
+
+    async approveStaff(staffCode) {
+      if (!this.client) return;
+      return await this.client.from('staff').update({
+        status: 'Active Online'
+      }).eq('staff_code', staffCode);
+    }
+
     async deleteStaff(staffCode) {
       if (!this.client) return;
       return await this.client.from('staff').delete().eq('staff_code', staffCode);
