@@ -1,0 +1,425 @@
+{
+  "profiles": [
+    {
+      "id": "a1b2c3d4-0001-4000-8000-000000000001",
+      "abha_id": "14-8921-4402-9912",
+      "phone": "9876543210",
+      "name": "Ramesh Kumar",
+      "age": 38,
+      "gender": "Male",
+      "village": "Kondapalli Sub-Centre, Ward 4",
+      "blood_group": "O+",
+      "role": "patient",
+      "created_at": "2026-08-29T17:30:41.490Z"
+    }
+  ],
+  "staff": [
+    {
+      "id": "s1",
+      "staff_code": "DOC-101",
+      "name": "Dr. Priya Sharma, MBBS, MD",
+      "role": "doctor",
+      "phone": "9811122233",
+      "location": "Kondapalli PHC",
+      "reg_no": "MCI-AP-48912",
+      "status": "Active Online",
+      "password_hash": "doc@123",
+      "pin": "1234"
+    },
+    {
+      "id": "s2",
+      "staff_code": "DOC-102",
+      "name": "Dr. Rajesh Verma, MBBS",
+      "role": "doctor",
+      "phone": "9822233344",
+      "location": "Ibrahimpatnam CHC",
+      "reg_no": "MCI-AP-31209",
+      "status": "In Teleconsult",
+      "password_hash": "doc@123",
+      "pin": "1234"
+    },
+    {
+      "id": "s3",
+      "staff_code": "ASH-201",
+      "name": "Lakshmi Didi (ASHA Lead)",
+      "role": "worker",
+      "phone": "9833344455",
+      "location": "Sector 4, Kondapalli",
+      "reg_no": "ASHA-AP-094",
+      "status": "On Home Visits",
+      "password_hash": "asha@123",
+      "pin": "1234"
+    },
+    {
+      "id": "s4",
+      "staff_code": "ASH-202",
+      "name": "Anitha Rao (ANM)",
+      "role": "worker",
+      "phone": "9844455566",
+      "location": "Sub-Centre 2",
+      "reg_no": "ANM-AP-118",
+      "status": "At Vaccine Camp",
+      "password_hash": "asha@123",
+      "pin": "1234"
+    },
+    {
+      "id": "s5",
+      "staff_code": "ADM-001",
+      "name": "S. K. Nambiar (District Officer)",
+      "role": "admin",
+      "phone": "9855566677",
+      "location": "District HQ, Vijayawada",
+      "reg_no": "DHO-AP-001",
+      "status": "System Active",
+      "password_hash": "admin@123",
+      "pin": "1234"
+    }
+  ],
+  "family_members": [
+    {
+      "id": "f1",
+      "patient_id": "a1b2c3d4-0001-4000-8000-000000000001",
+      "name": "Ramesh Kumar",
+      "relation": "Self",
+      "age": 38,
+      "gender": "Male",
+      "abha_id": "14-8921-4402-9912",
+      "status": "Healthy"
+    },
+    {
+      "id": "f2",
+      "patient_id": "a1b2c3d4-0001-4000-8000-000000000001",
+      "name": "Sunita Devi",
+      "relation": "Spouse",
+      "age": 34,
+      "gender": "Female",
+      "abha_id": "14-3819-5510-7734",
+      "status": "ANC Due"
+    },
+    {
+      "id": "f3",
+      "patient_id": "a1b2c3d4-0001-4000-8000-000000000001",
+      "name": "Aarav Kumar",
+      "relation": "Son",
+      "age": 6,
+      "gender": "Male",
+      "abha_id": "14-9912-1102-3345",
+      "status": "UIP Immunized"
+    }
+  ],
+  "consult_queue": [
+    {
+      "id": "q1",
+      "token": "T-01",
+      "patient_name": "Ramesh Kumar",
+      "age": 38,
+      "gender": "M",
+      "complaint": "High Fever & Body Ache for 3 Days",
+      "bp": "120/80",
+      "spo2": "98%",
+      "temp": "101.4°F",
+      "pulse": "88 bpm",
+      "triage": "Yellow",
+      "queue_time": "10:15 AM",
+      "status": "Waiting",
+      "created_at": "2026-08-29T17:30:41.491Z"
+    },
+    {
+      "id": "q2",
+      "token": "T-02",
+      "patient_name": "Sunita Devi",
+      "age": 34,
+      "gender": "F",
+      "complaint": "2nd Trimester Routine Check & Mild Dizziness",
+      "bp": "110/70",
+      "spo2": "99%",
+      "temp": "98.6°F",
+      "pulse": "76 bpm",
+      "triage": "Green",
+      "queue_time": "10:30 AM",
+      "status": "Waiting",
+      "created_at": "2026-08-29T17:30:41.491Z"
+    },
+    {
+      "id": "q3",
+      "token": "T-03",
+      "patient_name": "Gopal Raju",
+      "age": 52,
+      "gender": "M",
+      "complaint": "Chest Tightness & Breathlessness on Exertion",
+      "bp": "150/95",
+      "spo2": "94%",
+      "temp": "99.1°F",
+      "pulse": "104 bpm",
+      "triage": "Red",
+      "queue_time": "10:45 AM",
+      "status": "Waiting",
+      "created_at": "2026-08-29T17:30:41.491Z"
+    }
+  ],
+  "prescriptions": [
+    {
+      "id": "rx1",
+      "token": "T-01",
+      "patient_name": "Ramesh Kumar",
+      "doctor_name": "Dr. Priya Sharma, MBBS, MD",
+      "rx_date": "2026-08-29",
+      "diagnosis": "Acute Viral Fever with Myalgia",
+      "medicines": [
+        {
+          "name": "Paracetamol 650mg (Jan Aushadhi)",
+          "dosage": "1 tab 3 times daily after food for 3 days",
+          "timing": "1-1-1",
+          "genericPrice": 8,
+          "brandPrice": 34
+        },
+        {
+          "name": "Cetirizine 10mg (Jan Aushadhi)",
+          "dosage": "1 tab at night for 3 days",
+          "timing": "0-0-1",
+          "genericPrice": 4,
+          "brandPrice": 22
+        },
+        {
+          "name": "ORS Sachet Powder",
+          "dosage": "1 packet in 1 liter clean water, sip frequently",
+          "timing": "SOS",
+          "genericPrice": 5,
+          "brandPrice": 24
+        }
+      ],
+      "advice": "Take clean boiled water, rest well. Report back if fever persists beyond 3 days.",
+      "created_at": "2026-08-29T17:30:41.491Z"
+    }
+  ],
+  "anc_records": [
+    {
+      "id": "anc1",
+      "mother_name": "Sunita Devi",
+      "husband_name": "Ramesh Kumar",
+      "age": 34,
+      "village": "Kondapalli Ward 4",
+      "weeks": 24,
+      "edd": "2026-12-14",
+      "bp": "110/70",
+      "hb": "11.2 g/dL",
+      "ifa_count": 90,
+      "risk_level": "Normal",
+      "next_visit": "2026-09-12",
+      "created_at": "2026-08-29T17:30:41.491Z"
+    },
+    {
+      "id": "anc2",
+      "mother_name": "Kavitha M.",
+      "husband_name": "Srinivas M.",
+      "age": 22,
+      "village": "Kondapalli Ward 2",
+      "weeks": 32,
+      "edd": "2026-10-20",
+      "bp": "142/94",
+      "hb": "9.1 g/dL",
+      "ifa_count": 60,
+      "risk_level": "High Risk (Hypertension)",
+      "next_visit": "2026-09-02",
+      "created_at": "2026-08-29T17:30:41.491Z"
+    }
+  ],
+  "immunizations": [
+    {
+      "id": "imm1",
+      "child_name": "Aarav Kumar",
+      "parent_name": "Ramesh Kumar",
+      "dob": "2020-04-10",
+      "gender": "Male",
+      "village": "Ward 4",
+      "last_vaccine": "OPV Booster + DPT 2nd Booster",
+      "next_due": "Completed Core UIP",
+      "status": "Up to Date",
+      "created_at": "2026-08-29T17:30:41.491Z"
+    },
+    {
+      "id": "imm2",
+      "child_name": "Baby of Kavitha",
+      "parent_name": "Kavitha M.",
+      "dob": "2026-02-15",
+      "gender": "Female",
+      "village": "Ward 2",
+      "last_vaccine": "Pentavalent 3 + IPV",
+      "next_due": "MR 1st Dose (9 Months)",
+      "status": "Due in Oct",
+      "created_at": "2026-08-29T17:30:41.491Z"
+    }
+  ],
+  "home_visits": [
+    {
+      "id": "vis1",
+      "household": "House #42, Ramesh Kumar",
+      "members": 3,
+      "priority": "ANC Follow-up",
+      "task": "Check IFA intake & BP measurement",
+      "status": "Completed",
+      "created_at": "2026-08-29T17:30:41.491Z"
+    },
+    {
+      "id": "vis2",
+      "household": "House #58, Kavitha M.",
+      "members": 4,
+      "priority": "High-Risk Pregnancy",
+      "task": "Review CHC referral slip & BP monitor",
+      "status": "Pending",
+      "created_at": "2026-08-29T17:30:41.491Z"
+    },
+    {
+      "id": "vis3",
+      "household": "House #71, Ramu Elder",
+      "members": 2,
+      "priority": "NCD Diabetes/BP",
+      "task": "Glucometer test & Metformin stock check",
+      "status": "Pending",
+      "created_at": "2026-08-29T17:30:41.491Z"
+    }
+  ],
+  "hospitals": [
+    {
+      "id": "hosp1",
+      "name": "Kondapalli Primary Health Centre (PHC)",
+      "type": "PHC",
+      "distance": "1.2 km",
+      "total_beds": 20,
+      "gen_beds_avail": 8,
+      "icu_beds_avail": 2,
+      "oxygen_beds_avail": 6,
+      "doctor_on_duty": "Dr. Priya Sharma",
+      "phone": "0866-281001"
+    },
+    {
+      "id": "hosp2",
+      "name": "Ibrahimpatnam Community Health Centre (CHC)",
+      "type": "CHC",
+      "distance": "6.5 km",
+      "total_beds": 60,
+      "gen_beds_avail": 18,
+      "icu_beds_avail": 5,
+      "oxygen_beds_avail": 14,
+      "doctor_on_duty": "Dr. Rajesh Verma",
+      "phone": "0866-282002"
+    },
+    {
+      "id": "hosp3",
+      "name": "Government General Hospital (GGH), Vijayawada",
+      "type": "District Hospital",
+      "distance": "16.0 km",
+      "total_beds": 500,
+      "gen_beds_avail": 74,
+      "icu_beds_avail": 12,
+      "oxygen_beds_avail": 45,
+      "doctor_on_duty": "Emergency Trauma Team",
+      "phone": "0866-257000"
+    }
+  ],
+  "blood_bank": [
+    {
+      "id": "bb1",
+      "blood_group": "A+",
+      "units_available": 14
+    },
+    {
+      "id": "bb2",
+      "blood_group": "A-",
+      "units_available": 4
+    },
+    {
+      "id": "bb3",
+      "blood_group": "B+",
+      "units_available": 22
+    },
+    {
+      "id": "bb4",
+      "blood_group": "B-",
+      "units_available": 6
+    },
+    {
+      "id": "bb5",
+      "blood_group": "O+",
+      "units_available": 31
+    },
+    {
+      "id": "bb6",
+      "blood_group": "O-",
+      "units_available": 8
+    },
+    {
+      "id": "bb7",
+      "blood_group": "AB+",
+      "units_available": 11
+    },
+    {
+      "id": "bb8",
+      "blood_group": "AB-",
+      "units_available": 3
+    }
+  ],
+  "medicines": [
+    {
+      "id": "m1",
+      "name": "Paracetamol 650mg",
+      "category": "Fever & Pain Relief",
+      "stock": 450,
+      "unit": "Tablets",
+      "generic_price": 8,
+      "brand_price": 34,
+      "status": "In Stock"
+    },
+    {
+      "id": "m2",
+      "name": "Amoxicillin 500mg",
+      "category": "Antibiotic Infection",
+      "stock": 220,
+      "unit": "Capsules",
+      "generic_price": 28,
+      "brand_price": 110,
+      "status": "In Stock"
+    },
+    {
+      "id": "m3",
+      "name": "Metformin 500mg",
+      "category": "Diabetes / Blood Sugar",
+      "stock": 380,
+      "unit": "Tablets",
+      "generic_price": 12,
+      "brand_price": 58,
+      "status": "In Stock"
+    },
+    {
+      "id": "m4",
+      "name": "Amlodipine 5mg",
+      "category": "Hypertension / BP",
+      "stock": 190,
+      "unit": "Tablets",
+      "generic_price": 6,
+      "brand_price": 38,
+      "status": "In Stock"
+    },
+    {
+      "id": "m5",
+      "name": "ORS Powder Sachets",
+      "category": "Dehydration / Diarrhea",
+      "stock": 500,
+      "unit": "Packets",
+      "generic_price": 5,
+      "brand_price": 24,
+      "status": "In Stock"
+    },
+    {
+      "id": "m6",
+      "name": "Iron & Folic Acid (IFA)",
+      "category": "Maternal Nutrition",
+      "stock": 650,
+      "unit": "Tablets",
+      "generic_price": 4,
+      "brand_price": 32,
+      "status": "In Stock"
+    }
+  ],
+  "sos_alerts": []
+}
