@@ -373,43 +373,50 @@ body {
 }
 </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body data-theme="classic">
 
 <!-- TOP APPBAR -->
-<header class="top-appbar">
-  <div class="brand-title" onclick="handleLogoClick()">
-    <span>🇮🇳</span>
+
+<header class="top-appbar" style="background:var(--topbar-bg);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1.5px solid var(--glass-border);padding:12px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;position:sticky;top:0;z-index:1000;box-shadow:0 4px 20px rgba(0,0,0,0.15);">
+  <div class="brand-title" onclick="handleLogoClick()" style="cursor:pointer;display:flex;align-items:center;gap:10px;">
+    <span style="font-size:26px;">🇮🇳</span>
     <div>
-      <span data-i18n="app_title">Swasthya Setu</span>
-      <small style="display:block;font-size:10px;color:var(--muted);font-family:'Plus Jakarta Sans',sans-serif;" data-i18n="app_tagline">Rural Healthcare Grid</small>
+      <div style="font-size:20px;font-weight:900;letter-spacing:0.5px;color:var(--primary-bright);display:flex;align-items:center;gap:6px;">
+        <span data-i18n="app_title">Swasthya Setu</span>
+        <span style="display:inline-block;width:8px;height:8px;background:#22c55e;border-radius:50%;box-shadow:0 0 8px #22c55e;"></span>
+      </div>
+      <small style="display:block;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:0.5px;" data-i18n="app_tagline">RURAL HEALTHCARE CLOUD GRID</small>
     </div>
   </div>
 
-  <!-- ACTIVE SESSION BADGE & LOGOUT BUTTON (SHOWN WHEN LOGGED IN) -->
-  <div id="sessionHeaderControls" style="display:none;align-items:center;gap:8px;flex-wrap:wrap;">
-    <span id="activeUserBadge" class="badge" style="background:rgba(2,132,199,0.15);color:var(--primary-bright);padding:6px 12px;border-radius:12px;font-size:13px;font-weight:700;border:1px solid var(--glass-border);">
-      🌾 Ramesh Kumar
+  <!-- ACTIVE SESSION BADGE & ACTION BUTTONS (HIGH CONTRAST & VISIBLE) -->
+  <div id="sessionHeaderControls" style="display:none;align-items:center;gap:10px;flex-wrap:wrap;">
+    <span id="activeUserBadge" style="background:linear-gradient(135deg, rgba(2,132,199,0.2), rgba(15,23,42,0.6));color:var(--ink);padding:7px 14px;border-radius:12px;font-size:13px;font-weight:800;border:1.5px solid var(--primary-bright);display:inline-flex;align-items:center;gap:6px;box-shadow:0 2px 10px rgba(2,132,199,0.2);">
+      🌾 Citizen User
     </span>
-    <button class="btn-glass" style="padding:6px 12px;font-size:12px;color:var(--primary-bright);font-weight:700;" onclick="openChangePasswordModal()">
-      🔑 Change Password
+
+    <button type="button" class="btn-taskbar-action" style="background:linear-gradient(135deg, #0284c7, #0369a1);color:#ffffff;padding:8px 14px;font-size:12px;font-weight:800;border:none;border-radius:10px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;box-shadow:0 2px 10px rgba(2,132,199,0.35);transition:all 0.2s ease;" onclick="openChangePasswordModal()">
+      <span>🔑</span> <span>Change Password</span>
     </button>
-    <button class="btn-glass" style="padding:6px 12px;font-size:12px;color:#ef4444;font-weight:700;" onclick="doLogout()" data-i18n="btn_logout">
-      🚪 Log Out / Change Portal
+
+    <button type="button" class="btn-taskbar-logout" style="background:linear-gradient(135deg, #ef4444, #dc2626);color:#ffffff;padding:8px 16px;font-size:12px;font-weight:900;border:1px solid #b91c1c;border-radius:10px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;box-shadow:0 2px 12px rgba(239,68,68,0.4);transition:all 0.2s ease;" onclick="doLogout()" data-i18n="btn_logout">
+      <span>🚪</span> <span>Log Out / Switch</span>
     </button>
   </div>
 
-  <!-- CONTROLS -->
-  <div class="top-controls">
-    <button class="btn-glass" id="supabaseStatusBadge" onclick="openSupabaseSettingsModal()" style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:6px 12px;cursor:pointer;">
-      ⚙️ <span>Supabase Setup</span>
+  <!-- TOP TASKBAR SYSTEM CONTROLS -->
+  <div class="top-controls" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+    <button class="btn-glass" id="supabaseStatusBadge" onclick="openSupabaseSettingsModal()" style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:7px 12px;cursor:pointer;border-radius:10px;">
+      ⚙️ <span>Supabase</span>
     </button>
 
-    <button class="btn-glass" id="globalAudioToggleBtn" onclick="toggleReadAloud()" style="display:flex;align-items:center;gap:6px;font-weight:700;">
+    <button class="btn-glass" id="globalAudioToggleBtn" onclick="toggleReadAloud()" style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:7px 12px;border-radius:10px;">
       <span>🔊</span> <span data-i18n="btn_read_aloud">Read Aloud</span>
     </button>
 
-    <select id="langSelect" class="select-control" onchange="onLanguageChange(this.value)">
+    <select id="langSelect" class="select-control" onchange="onLanguageChange(this.value)" style="padding:7px 10px;border-radius:10px;font-weight:700;">
       <option value="en">🌐 English</option>
       <option value="hi">हिंदी (Hindi)</option>
       <option value="te">తెలుగు (Telugu)</option>
@@ -419,15 +426,16 @@ body {
       <option value="kn">ಕನ್ನಡ (Kannada)</option>
     </select>
 
-    <button class="btn-glass" onclick="cycleTheme()" id="themeToggleBtn" data-i18n="theme_classic">
-      🏛️ Classic (White & Blue)
+    <button class="btn-glass" onclick="cycleTheme()" id="themeToggleBtn" data-i18n="theme_classic" style="font-size:12px;font-weight:700;padding:7px 12px;border-radius:10px;">
+      🏛️ Theme
     </button>
 
-    <button class="auth-btn-primary" style="background:#dc2626;border-color:#b91c1c;padding:8px 14px;" onclick="patientController.triggerSos()" data-i18n="btn_sos">
+    <button class="auth-btn-primary" style="background:linear-gradient(135deg, #dc2626, #991b1b);border:none;padding:8px 14px;font-size:12px;font-weight:900;border-radius:10px;box-shadow:0 2px 10px rgba(220,38,38,0.4);" onclick="patientController.triggerSos()" data-i18n="btn_sos">
       🚨 108 SOS
     </button>
   </div>
 </header>
+
 
 <main class="main-container">
 
@@ -618,6 +626,22 @@ body {
         <a href="tel:108" class="btn-glass" style="background:#ffffff;color:#dc2626;font-weight:700;padding:6px 14px;" data-i18n="btn_call_108">📞 Call 108</a>
         <button class="btn-glass" style="background:rgba(255,255,255,0.2);color:#ffffff;border-color:rgba(255,255,255,0.4);" onclick="patientController.triggerSos()" data-i18n="btn_gps_sos">📍 GPS SOS</button>
       </div>
+    </div>
+
+    
+    <!-- REAL-TIME DIGITAL E-PRESCRIPTIONS & CONSULTATION HISTORY -->
+    <div class="glass-panel" id="patientPrescriptionsPanel" style="border:1.5px solid rgba(2,132,199,0.3);background:linear-gradient(145deg, rgba(2,132,199,0.08), rgba(15,23,42,0.3));">
+      <div class="panel-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:24px;">📜</span>
+          <div>
+            <h2 class="panel-title" style="color:var(--ink);font-size:17px;font-weight:800;">My Digital e-Prescriptions & Doctor Advice</h2>
+            <small style="color:var(--muted);">National Rural Telemedicine Consultation Records & Instant PDF Download</small>
+          </div>
+        </div>
+        <span class="badge" style="background:#0284c7;color:#ffffff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:12px;">Live Cloud Synced</span>
+      </div>
+      <div id="patientPrescriptionsContainer"></div>
     </div>
 
     <!-- DIGITAL ABHA HEALTH CARD -->

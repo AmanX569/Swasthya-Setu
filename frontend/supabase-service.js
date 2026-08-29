@@ -261,6 +261,30 @@
         const ch = this.client.channel('public:' + table)
           .on('postgres_changes', { event: '*', schema: 'public', table: table }, payload => {
             console.log('[Supabase Realtime] Event on ' + table + ':', payload);
+            
+            // If new prescription arrived, notify patient immediately
+            if (table === 'prescriptions' && (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE')) {
+              const newRx = payload.new;
+              if (global.toast) {
+                global.toast('🔔 New e-Prescription Received from ' + (newRx.doctor_name || 'Doctor') + '! Tap to View & Download PDF');
+              }
+              // Play audio chime
+              try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
+                osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.3); // A5
+                gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.4);
+              } catch(e) {}
+            }
+
             this.syncInitialData();
           })
           .subscribe();

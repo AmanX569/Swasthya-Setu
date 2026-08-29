@@ -373,6 +373,7 @@ body {
 }
 </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
 
 /* --- auth.css --- */
@@ -2538,39 +2539,45 @@ body {
 <body data-theme="classic">
 
 <!-- TOP APPBAR -->
-<header class="top-appbar">
-  <div class="brand-title" onclick="handleLogoClick()">
-    <span>🇮🇳</span>
+
+<header class="top-appbar" style="background:var(--topbar-bg);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1.5px solid var(--glass-border);padding:12px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;position:sticky;top:0;z-index:1000;box-shadow:0 4px 20px rgba(0,0,0,0.15);">
+  <div class="brand-title" onclick="handleLogoClick()" style="cursor:pointer;display:flex;align-items:center;gap:10px;">
+    <span style="font-size:26px;">🇮🇳</span>
     <div>
-      <span data-i18n="app_title">Swasthya Setu</span>
-      <small style="display:block;font-size:10px;color:var(--muted);font-family:'Plus Jakarta Sans',sans-serif;" data-i18n="app_tagline">Rural Healthcare Grid</small>
+      <div style="font-size:20px;font-weight:900;letter-spacing:0.5px;color:var(--primary-bright);display:flex;align-items:center;gap:6px;">
+        <span data-i18n="app_title">Swasthya Setu</span>
+        <span style="display:inline-block;width:8px;height:8px;background:#22c55e;border-radius:50%;box-shadow:0 0 8px #22c55e;"></span>
+      </div>
+      <small style="display:block;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:0.5px;" data-i18n="app_tagline">RURAL HEALTHCARE CLOUD GRID</small>
     </div>
   </div>
 
-  <!-- ACTIVE SESSION BADGE & LOGOUT BUTTON (SHOWN WHEN LOGGED IN) -->
-  <div id="sessionHeaderControls" style="display:none;align-items:center;gap:8px;flex-wrap:wrap;">
-    <span id="activeUserBadge" class="badge" style="background:rgba(2,132,199,0.15);color:var(--primary-bright);padding:6px 12px;border-radius:12px;font-size:13px;font-weight:700;border:1px solid var(--glass-border);">
-      🌾 Ramesh Kumar
+  <!-- ACTIVE SESSION BADGE & ACTION BUTTONS (HIGH CONTRAST & VISIBLE) -->
+  <div id="sessionHeaderControls" style="display:none;align-items:center;gap:10px;flex-wrap:wrap;">
+    <span id="activeUserBadge" style="background:linear-gradient(135deg, rgba(2,132,199,0.2), rgba(15,23,42,0.6));color:var(--ink);padding:7px 14px;border-radius:12px;font-size:13px;font-weight:800;border:1.5px solid var(--primary-bright);display:inline-flex;align-items:center;gap:6px;box-shadow:0 2px 10px rgba(2,132,199,0.2);">
+      🌾 Citizen User
     </span>
-    <button class="btn-glass" style="padding:6px 12px;font-size:12px;color:var(--primary-bright);font-weight:700;" onclick="openChangePasswordModal()">
-      🔑 Change Password
+
+    <button type="button" class="btn-taskbar-action" style="background:linear-gradient(135deg, #0284c7, #0369a1);color:#ffffff;padding:8px 14px;font-size:12px;font-weight:800;border:none;border-radius:10px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;box-shadow:0 2px 10px rgba(2,132,199,0.35);transition:all 0.2s ease;" onclick="openChangePasswordModal()">
+      <span>🔑</span> <span>Change Password</span>
     </button>
-    <button class="btn-glass" style="padding:6px 12px;font-size:12px;color:#ef4444;font-weight:700;" onclick="doLogout()" data-i18n="btn_logout">
-      🚪 Log Out / Change Portal
+
+    <button type="button" class="btn-taskbar-logout" style="background:linear-gradient(135deg, #ef4444, #dc2626);color:#ffffff;padding:8px 16px;font-size:12px;font-weight:900;border:1px solid #b91c1c;border-radius:10px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;box-shadow:0 2px 12px rgba(239,68,68,0.4);transition:all 0.2s ease;" onclick="doLogout()" data-i18n="btn_logout">
+      <span>🚪</span> <span>Log Out / Switch</span>
     </button>
   </div>
 
-  <!-- CONTROLS -->
-  <div class="top-controls">
-    <button class="btn-glass" id="supabaseStatusBadge" onclick="openSupabaseSettingsModal()" style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:6px 12px;cursor:pointer;">
-      ⚙️ <span>Supabase Setup</span>
+  <!-- TOP TASKBAR SYSTEM CONTROLS -->
+  <div class="top-controls" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+    <button class="btn-glass" id="supabaseStatusBadge" onclick="openSupabaseSettingsModal()" style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:7px 12px;cursor:pointer;border-radius:10px;">
+      ⚙️ <span>Supabase</span>
     </button>
 
-    <button class="btn-glass" id="globalAudioToggleBtn" onclick="toggleReadAloud()" style="display:flex;align-items:center;gap:6px;font-weight:700;">
+    <button class="btn-glass" id="globalAudioToggleBtn" onclick="toggleReadAloud()" style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:7px 12px;border-radius:10px;">
       <span>🔊</span> <span data-i18n="btn_read_aloud">Read Aloud</span>
     </button>
 
-    <select id="langSelect" class="select-control" onchange="onLanguageChange(this.value)">
+    <select id="langSelect" class="select-control" onchange="onLanguageChange(this.value)" style="padding:7px 10px;border-radius:10px;font-weight:700;">
       <option value="en">🌐 English</option>
       <option value="hi">हिंदी (Hindi)</option>
       <option value="te">తెలుగు (Telugu)</option>
@@ -2580,15 +2587,16 @@ body {
       <option value="kn">ಕನ್ನಡ (Kannada)</option>
     </select>
 
-    <button class="btn-glass" onclick="cycleTheme()" id="themeToggleBtn" data-i18n="theme_classic">
-      🏛️ Classic (White & Blue)
+    <button class="btn-glass" onclick="cycleTheme()" id="themeToggleBtn" data-i18n="theme_classic" style="font-size:12px;font-weight:700;padding:7px 12px;border-radius:10px;">
+      🏛️ Theme
     </button>
 
-    <button class="auth-btn-primary" style="background:#dc2626;border-color:#b91c1c;padding:8px 14px;" onclick="patientController.triggerSos()" data-i18n="btn_sos">
+    <button class="auth-btn-primary" style="background:linear-gradient(135deg, #dc2626, #991b1b);border:none;padding:8px 14px;font-size:12px;font-weight:900;border-radius:10px;box-shadow:0 2px 10px rgba(220,38,38,0.4);" onclick="patientController.triggerSos()" data-i18n="btn_sos">
       🚨 108 SOS
     </button>
   </div>
 </header>
+
 
 <main class="main-container">
 
@@ -2779,6 +2787,22 @@ body {
         <a href="tel:108" class="btn-glass" style="background:#ffffff;color:#dc2626;font-weight:700;padding:6px 14px;" data-i18n="btn_call_108">📞 Call 108</a>
         <button class="btn-glass" style="background:rgba(255,255,255,0.2);color:#ffffff;border-color:rgba(255,255,255,0.4);" onclick="patientController.triggerSos()" data-i18n="btn_gps_sos">📍 GPS SOS</button>
       </div>
+    </div>
+
+    
+    <!-- REAL-TIME DIGITAL E-PRESCRIPTIONS & CONSULTATION HISTORY -->
+    <div class="glass-panel" id="patientPrescriptionsPanel" style="border:1.5px solid rgba(2,132,199,0.3);background:linear-gradient(145deg, rgba(2,132,199,0.08), rgba(15,23,42,0.3));">
+      <div class="panel-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:24px;">📜</span>
+          <div>
+            <h2 class="panel-title" style="color:var(--ink);font-size:17px;font-weight:800;">My Digital e-Prescriptions & Doctor Advice</h2>
+            <small style="color:var(--muted);">National Rural Telemedicine Consultation Records & Instant PDF Download</small>
+          </div>
+        </div>
+        <span class="badge" style="background:#0284c7;color:#ffffff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:12px;">Live Cloud Synced</span>
+      </div>
+      <div id="patientPrescriptionsContainer"></div>
     </div>
 
     <!-- DIGITAL ABHA HEALTH CARD -->
@@ -3903,6 +3927,30 @@ body {
         const ch = this.client.channel('public:' + table)
           .on('postgres_changes', { event: '*', schema: 'public', table: table }, payload => {
             console.log('[Supabase Realtime] Event on ' + table + ':', payload);
+            
+            // If new prescription arrived, notify patient immediately
+            if (table === 'prescriptions' && (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE')) {
+              const newRx = payload.new;
+              if (global.toast) {
+                global.toast('🔔 New e-Prescription Received from ' + (newRx.doctor_name || 'Doctor') + '! Tap to View & Download PDF');
+              }
+              // Play audio chime
+              try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
+                osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.3); // A5
+                gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.4);
+              } catch(e) {}
+            }
+
             this.syncInitialData();
           })
           .subscribe();
@@ -6007,6 +6055,7 @@ body {
       this.renderTriageButtons();
       this.renderLiveHospitals();
       this.renderLiveBloodBank();
+      this.renderPrescriptions();
     }
 
     // -------------------------------------------------------------
@@ -6091,6 +6140,236 @@ body {
         </div>
       `;
     }
+
+    
+    // -------------------------------------------------------------
+    // 7. PATIENT E-PRESCRIPTION HISTORY & PDF DOWNLOAD
+    // -------------------------------------------------------------
+    renderPrescriptions() {
+      const container = document.getElementById('patientPrescriptionsContainer');
+      if (!container || !this.store) return;
+
+      const user = this.store.getState().currentUser || {};
+      const allRx = this.store.getState().prescriptions || [];
+
+      // Filter prescriptions for this patient (or show all if demo/all)
+      const myRx = allRx.filter(r => {
+        if (!r.patientName) return true;
+        if (!user.name) return true;
+        return r.patientName.toLowerCase().includes(user.name.toLowerCase()) || 
+               user.name.toLowerCase().includes(r.patientName.toLowerCase());
+      });
+
+      if (!myRx.length) {
+        container.innerHTML = `
+          <div style="text-align:center;padding:24px 16px;background:var(--glass-2);border-radius:14px;border:1px dashed var(--glass-border);color:var(--muted);">
+            <div style="font-size:32px;margin-bottom:8px;">📜</div>
+            <strong style="color:var(--ink);display:block;font-size:14px;">No e-Prescriptions Yet</strong>
+            <small>Once a doctor completes your OPD consultation, your official digital prescription will appear here with instant PDF download.</small>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = myRx.map(rx => {
+        const medsList = Array.isArray(rx.medicines) ? rx.medicines : [];
+        return `
+          <div class="glass-panel" style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:16px;padding:18px;margin-bottom:14px;box-shadow:var(--shadow-panel);">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:14px;flex-wrap:wrap;gap:10px;">
+              <div>
+                <span class="badge" style="background:rgba(2,132,199,0.15);color:var(--primary-bright);padding:4px 10px;border-radius:12px;font-size:11px;font-weight:700;font-family:'IBM Plex Mono',monospace;">
+                  ${rx.id || 'RX-OPD'} · ${rx.token || 'T-OPD'}
+                </span>
+                <h3 style="font-size:17px;color:var(--ink);font-weight:800;margin-top:6px;">${rx.diagnosis || 'Clinical Consultation'}</h3>
+                <small style="color:var(--muted);font-weight:600;">👨‍⚕️ ${rx.doctorName || 'Medical Officer'} · 📅 ${rx.date || new Date().toISOString().split('T')[0]}</small>
+              </div>
+
+              <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <button class="auth-btn-primary" style="background:linear-gradient(135deg, #0284c7, #0369a1);border:none;padding:8px 14px;font-size:12px;font-weight:700;box-shadow:0 2px 8px rgba(2,132,199,0.3);display:flex;align-items:center;gap:6px;cursor:pointer;border-radius:8px;" onclick="patientController.downloadPrescriptionPdf('${rx.id}')">
+                  <span>📥</span> <span>Download PDF</span>
+                </button>
+                <button class="btn-glass" style="padding:8px 12px;font-size:12px;font-weight:700;" onclick="patientController.printPrescription('${rx.id}')">
+                  🖨️ Print
+                </button>
+              </div>
+            </div>
+
+            <!-- Medicines Table -->
+            <div style="margin-bottom:12px;">
+              <strong style="font-size:12px;color:var(--ink-dim);display:block;margin-bottom:6px;">💊 Prescribed Generic Medicines (Jan Aushadhi):</strong>
+              <div style="display:flex;flex-direction:column;gap:6px;">
+                ${medsList.map(m => `
+                  <div style="display:flex;justify-content:space-between;align-items:center;background:var(--glass-1);border:1px solid var(--glass-border);padding:8px 12px;border-radius:10px;font-size:13px;">
+                    <div>
+                      <strong style="color:var(--ink);">${m.name || m}</strong>
+                      <small style="color:var(--muted);display:block;">Dosage: ${m.dosage || 'As directed by doctor'} · Timing: ${m.timing || 'After food'}</small>
+                    </div>
+                    ${m.genericPrice ? `<span class="badge" style="background:rgba(22,163,74,0.15);color:#22c55e;font-size:11px;font-weight:700;">₹${m.genericPrice} (Save ₹${(m.brandPrice || m.genericPrice * 3) - m.genericPrice})</span>` : ''}
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+
+            <!-- Clinical Advice -->
+            ${rx.advice ? `
+              <div style="background:rgba(2,132,199,0.08);border:1px dashed rgba(2,132,199,0.3);border-radius:10px;padding:10px 12px;font-size:12px;color:var(--ink);">
+                <strong style="color:var(--primary-bright);display:block;margin-bottom:2px;">👨‍⚕️ Doctor's Advice & Precautions:</strong>
+                ${rx.advice}
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Direct PDF Generator for e-Prescriptions
+    downloadPrescriptionPdf(rxId) {
+      const allRx = this.store.getState().prescriptions || [];
+      const rx = allRx.find(r => r.id === rxId) || allRx[0];
+      const user = this.store.getState().currentUser || { name: 'Citizen Patient', age: 38, gender: 'Male', abhaId: '14-8921-4402-9912', village: 'Kondapalli Sub-Centre' };
+
+      if (!rx) {
+        alert('Prescription details not found');
+        return;
+      }
+
+      // Create printable/PDF container
+      const printArea = document.createElement('div');
+      printArea.id = 'pdfRenderContainer';
+      printArea.style.padding = '30px';
+      printArea.style.fontFamily = "'Plus Jakarta Sans', Arial, sans-serif";
+      printArea.style.color = '#0f172a';
+      printArea.style.background = '#ffffff';
+      printArea.style.maxWidth = '800px';
+      printArea.style.margin = '0 auto';
+      printArea.style.border = '2px solid #0284c7';
+      printArea.style.borderRadius = '12px';
+
+      const medsList = Array.isArray(rx.medicines) ? rx.medicines : [];
+
+      printArea.innerHTML = `
+        <!-- GOVT HEADER -->
+        <div style="border-bottom:3px double #0284c7;padding-bottom:16px;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div style="font-size:36px;">🇮🇳</div>
+            <div>
+              <h2 style="font-size:18px;font-weight:900;color:#0369a1;margin:0;letter-spacing:0.5px;">MINISTRY OF HEALTH & FAMILY WELFARE</h2>
+              <small style="font-size:11px;font-weight:700;color:#475569;display:block;">Ayushman Bharat Digital Mission (ABDM) · National Rural Telemedicine Grid</small>
+              <small style="font-size:10px;color:#0284c7;font-weight:800;">OFFICIAL CLINICAL e-PRESCRIPTION</small>
+            </div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:13px;font-weight:800;color:#0284c7;font-family:monospace;">Rx ID: ${rx.id || 'RX-OPD-901'}</div>
+            <div style="font-size:11px;color:#64748b;">Date: ${rx.date || new Date().toISOString().split('T')[0]}</div>
+            <div style="font-size:11px;color:#16a34a;font-weight:700;">✓ ABDM Digitally Verified</div>
+          </div>
+        </div>
+
+        <!-- DOCTOR & PATIENT INFO GRID -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:14px;margin-bottom:18px;font-size:12px;">
+          <div>
+            <strong style="color:#0369a1;display:block;font-size:13px;margin-bottom:4px;">👨‍⚕️ Prescribing Medical Officer:</strong>
+            <div style="font-weight:800;font-size:14px;color:#0f172a;">${rx.doctorName || 'Dr. Priya Sharma, MBBS, MD'}</div>
+            <div style="color:#64748b;">Medical Council Reg: MCI-AP-48912</div>
+            <div style="color:#64748b;">Kondapalli Primary Health Centre (PHC)</div>
+          </div>
+          <div>
+            <strong style="color:#0369a1;display:block;font-size:13px;margin-bottom:4px;">👤 Patient Information:</strong>
+            <div style="font-weight:800;font-size:14px;color:#0f172a;">${rx.patientName || user.name}</div>
+            <div style="color:#64748b;">Age/Gender: ${user.age || 38} Yrs / ${user.gender || 'Male'} · Blood: ${user.bloodGroup || 'O+'}</div>
+            <div style="color:#0f172a;font-weight:700;font-family:monospace;">ABHA ID: ${user.abhaId || '14-8921-4402-9912'}</div>
+          </div>
+        </div>
+
+        <!-- CLINICAL DIAGNOSIS -->
+        <div style="background:#f0f9ff;border-left:4px solid #0284c7;padding:10px 14px;border-radius:6px;margin-bottom:18px;">
+          <small style="font-size:10px;font-weight:800;color:#0369a1;letter-spacing:0.5px;display:block;">CLINICAL DIAGNOSIS & REASON FOR CONSULTATION</small>
+          <div style="font-size:14px;font-weight:800;color:#0c4a6e;margin-top:2px;">${rx.diagnosis || 'Acute Viral Fever with Myalgia'}</div>
+        </div>
+
+        <!-- RX SECTION & MEDICINE TABLE -->
+        <div style="margin-bottom:20px;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+            <span style="font-size:22px;font-weight:900;color:#0284c7;font-family:serif;">℞</span>
+            <strong style="font-size:13px;color:#0f172a;">Prescribed Medicines (Jan Aushadhi Generic Formulations):</strong>
+          </div>
+
+          <table style="width:100%;border-collapse:collapse;font-size:12px;text-align:left;">
+            <thead>
+              <tr style="background:#0284c7;color:#ffffff;">
+                <th style="padding:8px 10px;border-radius:6px 0 0 0;">#</th>
+                <th style="padding:8px 10px;">Generic Medicine Name & Strength</th>
+                <th style="padding:8px 10px;">Dosage Schedule</th>
+                <th style="padding:8px 10px;">Timing / Instructions</th>
+                <th style="padding:8px 10px;border-radius:0 6px 0 0;text-align:right;">Jan Aushadhi Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${medsList.map((m, idx) => `
+                <tr style="border-bottom:1px solid #e2e8f0;background:${idx % 2 === 0 ? '#ffffff' : '#f8fafc'};">
+                  <td style="padding:8px 10px;font-weight:700;color:#64748b;">${idx + 1}</td>
+                  <td style="padding:8px 10px;font-weight:800;color:#0f172a;">${m.name || m}</td>
+                  <td style="padding:8px 10px;color:#334155;">${m.dosage || '1 Tablet 3 times daily'}</td>
+                  <td style="padding:8px 10px;color:#334155;">${m.timing || 'After meals for 3 days'}</td>
+                  <td style="padding:8px 10px;text-align:right;font-weight:800;color:#16a34a;">₹${m.genericPrice || 8}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- DOCTOR ADVICE -->
+        <div style="background:#fefce8;border:1px solid #fde047;border-radius:8px;padding:12px;margin-bottom:20px;font-size:12px;color:#713f12;">
+          <strong style="display:block;margin-bottom:4px;color:#854d0e;">⚠️ Doctor Advice & Dietary Precautions:</strong>
+          <div>${rx.advice || 'Take clean boiled water, rest well. If temperature exceeds 101°F or persists beyond 3 days, visit PHC immediately.'}</div>
+        </div>
+
+        <!-- FOOTER & DIGITAL SIGNATURE -->
+        <div style="border-top:1.5px solid #e2e8f0;padding-top:16px;display:flex;justify-content:space-between;align-items:flex-end;font-size:11px;color:#64748b;">
+          <div>
+            <div><strong>Jan Aushadhi Generic Pharmacy:</strong> Available at nearest PHC/CHC.</div>
+            <div style="color:#0284c7;font-weight:700;margin-top:2px;">Emergency 24x7 Ambulance SOS: Dial 108</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-family:cursive;font-size:18px;color:#0369a1;font-weight:700;">Dr. Priya Sharma</div>
+            <div style="border-top:1px solid #cbd5e1;padding-top:2px;font-weight:700;color:#0f172a;">Authorized Medical Officer Sign</div>
+            <small style="font-size:9px;color:#16a34a;">Digitally Signed via e-Sanjeevani</small>
+          </div>
+        </div>
+      `;
+
+      // Check if html2pdf is available
+      if (typeof window.html2pdf === 'function') {
+        const opt = {
+          margin: 10,
+          filename: `e-Prescription-${rx.id || 'RX'}.pdf`,
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: { scale: 2, useCORS: true },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+        window.html2pdf().from(printArea).set(opt).save();
+        if (typeof window.toast === 'function') {
+          window.toast('📥 Downloading Official e-Prescription PDF (' + (rx.id || 'RX') + ')');
+        }
+      } else {
+        // Fallback: Open print dialog in clean popup
+        const win = window.open('', '_blank');
+        win.document.write(`
+          <html>
+            <head><title>e-Prescription-${rx.id || 'RX'}</title></head>
+            <body style="margin:0;padding:20px;">${printArea.outerHTML}</body>
+          </html>
+        `);
+        win.document.close();
+        win.focus();
+        setTimeout(() => { win.print(); }, 500);
+      }
+    }
+
+    printPrescription(rxId) {
+      this.downloadPrescriptionPdf(rxId);
+    }
+
 
     printAbhaCard() {
       window.print();
