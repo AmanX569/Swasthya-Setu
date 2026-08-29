@@ -150,10 +150,17 @@
       if (med1Val) medicines.push({ name: med1Val, dosage: '1 tab 3 times daily after food for 3 days', timing: '1-1-1' });
       if (med2Val) medicines.push({ name: med2Val, dosage: '1 tab at night for 3 days', timing: '0-0-1' });
 
+      const sessionUser = this.store.getState().session ? this.store.getState().session.user : null;
+      const activeDoctorName = sessionUser ? sessionUser.name : 'Medical Officer';
+      const activeDoctorReg = sessionUser ? (sessionUser.regNo || sessionUser.reg_no || 'MCI-AP-48912') : 'MCI-AP-48912';
+      const activeDoctorLoc = sessionUser ? (sessionUser.location || 'Primary Health Centre') : 'Primary Health Centre';
+
       this.store.completeConsult(this.selectedPatient.id, {
         token: this.selectedPatient.token,
         patientName: this.selectedPatient.patientName,
-        doctorName: 'Dr. Priya Sharma, MBBS, MD',
+        doctorName: activeDoctorName,
+        doctorRegNo: activeDoctorReg,
+        doctorLocation: activeDoctorLoc,
         diagnosis: diagVal,
         medicines,
         advice: adviceVal

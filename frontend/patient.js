@@ -245,9 +245,9 @@
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:14px;margin-bottom:18px;font-size:12px;">
           <div>
             <strong style="color:#0369a1;display:block;font-size:13px;margin-bottom:4px;">👨‍⚕️ Prescribing Medical Officer:</strong>
-            <div style="font-weight:800;font-size:14px;color:#0f172a;">${rx.doctorName || 'Dr. Priya Sharma, MBBS, MD'}</div>
-            <div style="color:#64748b;">Medical Council Reg: MCI-AP-48912</div>
-            <div style="color:#64748b;">Kondapalli Primary Health Centre (PHC)</div>
+            <div style="font-weight:800;font-size:14px;color:#0f172a;">${rx.doctorName || 'Medical Officer'}</div>
+            <div style="color:#64748b;">Medical Council Reg: ${rx.doctorRegNo || 'MCI-AP-48912'}</div>
+            <div style="color:#64748b;">${rx.doctorLocation || 'District Health Centre (PHC/CHC)'}</div>
           </div>
           <div>
             <strong style="color:#0369a1;display:block;font-size:13px;margin-bottom:4px;">👤 Patient Information:</strong>
@@ -307,7 +307,7 @@
             <div style="color:#0284c7;font-weight:700;margin-top:2px;">Emergency 24x7 Ambulance SOS: Dial 108</div>
           </div>
           <div style="text-align:center;">
-            <div style="font-family:cursive;font-size:18px;color:#0369a1;font-weight:700;">Dr. Priya Sharma</div>
+            <div style="font-family:cursive;font-size:18px;color:#0369a1;font-weight:700;">${rx.doctorName || 'Authorized Medical Officer'}</div>
             <div style="border-top:1px solid #cbd5e1;padding-top:2px;font-weight:700;color:#0f172a;">Authorized Medical Officer Sign</div>
             <small style="font-size:9px;color:#16a34a;">Digitally Signed via e-Sanjeevani</small>
           </div>
