@@ -3603,8 +3603,28 @@ body {
         // Apply to store
         Object.assign(global.appStore.state, patch);
         global.appStore.saveState();
-        if (typeof window.toast === 'function') {
-          window.toast('✓ Synced live data from Supabase');
+
+        // Trigger active UI re-renders across portals
+        if (global.patientController) {
+          if (typeof global.patientController.renderHospitals === 'function') global.patientController.renderHospitals();
+          if (typeof global.patientController.renderBloodBank === 'function') global.patientController.renderBloodBank();
+        }
+        if (global.doctorController) {
+          if (typeof global.doctorController.renderQueue === 'function') global.doctorController.renderQueue();
+          if (typeof global.doctorController.renderStats === 'function') global.doctorController.renderStats();
+          if (typeof global.doctorController.renderPrescriptions === 'function') global.doctorController.renderPrescriptions();
+        }
+        if (global.workerController) {
+          if (typeof global.workerController.renderAnc === 'function') global.workerController.renderAnc();
+          if (typeof global.workerController.renderImmunizations === 'function') global.workerController.renderImmunizations();
+          if (typeof global.workerController.renderVisits === 'function') global.workerController.renderVisits();
+        }
+        if (global.adminController) {
+          if (typeof global.adminController.renderStats === 'function') global.adminController.renderStats();
+          if (typeof global.adminController.renderStaff === 'function') global.adminController.renderStaff();
+          if (typeof global.adminController.renderHospitals === 'function') global.adminController.renderHospitals();
+          if (typeof global.adminController.renderBloodBank === 'function') global.adminController.renderBloodBank();
+          if (typeof global.adminController.renderMedicines === 'function') global.adminController.renderMedicines();
         }
       } catch (err) {
         console.warn('[Supabase] Initial sync warning:', err);
