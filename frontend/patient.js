@@ -127,7 +127,7 @@
       const user = this.store.getState().currentUser;
       const message = `🚨 EMERGENCY 108 SOS!\n\nPatient: ${user.name}\nPhone: +91 ${user.phone}\nLocation: ${user.village}\nABHA: ${user.abhaId}\n\nEmergency ambulance dispatched.`;
       
-      speakText('Emergency 108 ambulance alert sent! Dispatch is calling your phone now.');
+      // User can trigger speech manually if desired
       if (typeof window.toast === 'function') {
         window.toast('🚨 Emergency 108 Alert Dispatched!');
       }
@@ -205,7 +205,7 @@
             </div>
           </div>
         `;
-        speakText(item.audio);
+        // Manual audio button only
       }
     }
 

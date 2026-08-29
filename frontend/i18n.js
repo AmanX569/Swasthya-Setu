@@ -790,6 +790,324 @@
   const i18n = new I18nEngine();
   global.i18n = i18n;
 
+  // Global Audio Assistant Controller (Start / Stop)
+  global.isAudioPlaying = false;
+
+  global.startReadAloud = function(customText) {
+    if (!('speechSynthesis' in window)) {
+      if (typeof window.toast === 'function') window.toast('Speech synthesis not supported on this device.');
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+
+    let textToRead = customText;
+    if (!textToRead) {
+      // Default: Read current screen summary in active regional language
+      const session = global.appStore ? global.appStore.getState().session : {};
+      const role = session && session.isLoggedIn ? session.role : 'gateway';
+      const lang = global.i18n ? global.i18n.currentLang : 'en';
+
+      const screenSummaries = {
+        en: {
+          gateway: 'Welcome to Swasthya Setu Rural Healthcare Grid. Please select your role to log in: Citizen, Doctor, ASHA, or Admin.',
+          patient: 'Citizen Hub: Your digital ABHA health card is active. 108 Emergency SOS and Jan Aushadhi generic medicines are available.',
+          doctor: 'Doctor Clinic Desk: Teleconsultation OPD queue is ready with active patients waiting.',
+          worker: 'ASHA Frontline Portal: High-risk pregnancy register and child immunization schedules are open.',
+          admin: 'District Health Command Center: Real-time hospital beds, blood units, and staff are active.'
+        },
+        hi: {
+          gateway: 'स्वास्थ्य सेतु ग्रामीण स्वास्थ्य ग्रिड में आपका स्वागत है। लॉगिन करने के लिए अपना पोर्टल चुनें: नागरिक, डॉक्टर, आशा या प्रशासन।',
+          patient: 'नागरिक पोर्टल: आपका डिजिटल आभा कार्ड सक्रिय है। 108 आपातकालीन सेवा और जन औषधि दवाइयां उपलब्ध हैं।',
+          doctor: 'चिकित्सक ओपीडी पोर्टल: मरीज कतार तैयार है और परामर्श के लिए उपलब्ध है।',
+          worker: 'आशा दीदी फील्ड पोर्टल: गर्भवती महिला रजिस्टर और बाल टीकाकरण खुला है।',
+          admin: 'जिला स्वास्थ्य प्रशासन: अस्पताल बेड, ब्लड बैंक और स्वास्थ्य कर्मी सक्रिय हैं।'
+        },
+        te: {
+          gateway: 'స్వాస్థ్య సేతు గ్రామీణ ఆరోగ్య గ్రిడ్‌కు స్వాగతం. మీ పోర్టల్‌ను ఎంచుకోండి.',
+          patient: 'పౌరుల పోర్టల్: మీ డిజిటల్ ఆభా హెల్త్ కార్డు సిద్ధంగా ఉంది. 108 ఎమర్జెన్సీ అందుబాటులో ఉంది.',
+          doctor: 'వైద్యుల క్లినిక్: ఓపీడీ రోగుల క్యూ సిద్ధంగా ఉంది.',
+          worker: 'ఆశా ఫ్రంట్‌లైన్ పోర్టల్: గర్భిణీల రికార్డు మరియు టీకాల వివరాలు ఉన్నాయి.',
+          admin: 'ఆరోగ్య పరిపాలన: ఆసుపత్రి బెడ్లు మరియు బ్లడ్ బ్యాంక్ వివరాలు అందుబాటులో ఉన్నాయి.'
+        },
+        ta: {
+          gateway: 'சுவஸ்த்யா சேது கிராமப்புற சுகாதார கட்டமைப்புக்கு நல்வரவு.',
+          patient: 'நோயாளி போர்டல்: உங்கள் டிஜிட்டல் ஆபா அட்டை மற்றும் 108 அவசர உதவி தயாராக உள்ளது.',
+          doctor: 'மருத்துவர் மருத்துவ போர்டல்: நோயாளி வரிசை தயாராக உள்ளது.',
+          worker: 'ஆஷா களப்பணி போர்டல்: கர்ப்பிணி பெண்கள் மற்றும் தடுப்பூசி பதிவேடு தயாராக உள்ளது.',
+          admin: 'சுகாதார நிர்வாகம்: மருத்துவமனை படுக்கை மற்றும் ரத்த வங்கி விவரங்கள் தயாராக உள்ளன.'
+        },
+        mr: {
+          gateway: 'स्वास्थ्य सेतू ग्रामीण आरोग्य ग्रिड मध्ये आपले स्वागत आहे.',
+          patient: 'नागरिक पोर्टल: आपले डिजिटल आभा कार्ड आणि १०८ रुग्णवाहिका सेवा उपलब्ध आहे.',
+          doctor: 'डॉक्टर क्लिनिकल पोर्टल: ओपीडी रुग्ण रांग उपलब्ध आहे.',
+          worker: 'आशा सेविका पोर्टल: गरोदर माता नोंदवही आणि बाल लसीकरण उपलब्ध आहे.',
+          admin: 'आरोग्य प्रशासन: रुग्णालय बेड आणि रक्तपेढी साठा उपलब्ध आहे.'
+        },
+        bn: {
+          gateway: 'স্বাস্থ্য সেতু গ্রামীণ স্বাস্থ্যসেবা গ্রিডে স্বাগতম।',
+          patient: 'নাগরিক পোর্টাল: আপনার ডিজিটাল আভা কার্ড ও ১০৮ জরুরি সেবা সক্রিয়।',
+          doctor: 'ডাক্তার ক্লিনিক্যাল পোর্টাল: ওপিডি রোগী তালিকা প্রস্তুত।',
+          worker: 'আশা কর্মী পোর্টাল: গর্ভবতী মা ও শিশু টিকাদান রেকর্ড প্রস্তুত।',
+          admin: 'স্বাস্থ্য প্রশাসন: হাসপাতালের বেড ও ব্লাড ব্যাংক তথ্য প্রস্তুত।'
+        },
+        kn: {
+          gateway: 'ಸ್ವಾಸ್ಥ್ಯ ಸೇತು ಗ್ರಾಮೀಣ ಆರೋಗ್ಯ ಜಾಲಕ್ಕೆ ಸುಸ್ವಾಗತ.',
+          patient: 'ನಾಗರಿಕ ಪೋರ್ಟಲ್: ನಿಮ್ಮ ಡಿಜಿಟಲ್ ಆಭಾ ಕಾರ್ಡ್ ಮತ್ತು 108 ತುರ್ತು ಸೇವೆ ಸಿದ್ಧವಾಗಿದೆ.',
+          doctor: 'ವೈದ್ಯರ ಕ್ಲಿನಿಕ್: ರೋಗಿಗಳ ಸರತಿ ಸಾಲು ಸಿದ್ಧವಾಗಿದೆ.',
+          worker: 'ಆಶಾ ಕ್ಷೇತ್ರ ಪೋರ್ಟಲ್: ಗರ್ಭಿಣಿಯರ ಮತ್ತು ಲಸಿಕೆ ದಾಖಲೆ ಸಿದ್ಧವಾಗಿದೆ.',
+          admin: 'ಆರೋಗ್ಯ ಆಡಳಿತ: ಆಸ್ಪತ್ರೆ ಬೆಡ್ ಮತ್ತು ರಕ್ತನಿಧಿ ವಿವರಗಳು ಲಭ್ಯವಿದೆ.'
+        }
+      };
+
+      const langMap = screenSummaries[lang] || screenSummaries.en;
+      textToRead = langMap[role] || langMap.gateway || 'Swasthya Setu';
+    }
+
+    const lang = global.i18n ? global.i18n.currentLang : 'en';
+    const langLocales = {
+      en: 'en-IN',
+      hi: 'hi-IN',
+      te: 'te-IN',
+      ta: 'ta-IN',
+      mr: 'mr-IN',
+      bn: 'bn-IN',
+      kn: 'kn-IN'
+    };
+
+    const utter = new SpeechSynthesisUtterance(textToRead);
+    utter.lang = langLocales[lang] || 'en-IN';
+    utter.rate = 0.90;
+    utter.pitch = 1.0;
+
+    utter.onstart = function() {
+      global.isAudioPlaying = true;
+      updateAudioButtonUI(true);
+      if (typeof window.toast === 'function') {
+        window.toast('🔊 ' + textToRead.slice(0, 35) + '...');
+      }
+    };
+
+    utter.onend = function() {
+      global.isAudioPlaying = false;
+      updateAudioButtonUI(false);
+    };
+
+    utter.onerror = function() {
+      global.isAudioPlaying = false;
+      updateAudioButtonUI(false);
+    };
+
+    window.speechSynthesis.speak(utter);
+  };
+
+  global.stopReadAloud = function() {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
+    global.isAudioPlaying = false;
+    updateAudioButtonUI(false);
+    if (typeof window.toast === 'function') {
+      window.toast('⏹️ Audio Stopped');
+    }
+  };
+
+  global.toggleReadAloud = function() {
+    if (global.isAudioPlaying || (window.speechSynthesis && window.speechSynthesis.speaking)) {
+      global.stopReadAloud();
+    } else {
+      global.startReadAloud();
+    }
+  };
+
+  function updateAudioButtonUI(isPlaying) {
+    const btn = document.getElementById('globalAudioToggleBtn');
+    if (!btn) return;
+    if (isPlaying) {
+      btn.style.background = '#dc2626';
+      btn.style.color = '#ffffff';
+      btn.innerHTML = '<span>⏹️</span> <span data-i18n="btn_stop_audio">Stop Voice</span>';
+    } else {
+      btn.style.background = 'var(--glass-2)';
+      btn.style.color = 'var(--ink)';
+      btn.innerHTML = '<span>🔊</span> <span data-i18n="btn_read_aloud">Read Aloud</span>';
+    }
+    if (global.i18n) global.i18n.applyTranslations(global.i18n.currentLang);
+  }
+
+
+  global.localizeRxText = function(text, lang) {
+    if (!text) return '';
+    lang = lang || (global.i18n ? global.i18n.currentLang : 'en');
+    if (lang === 'en') return text;
+
+    const dict = {
+      // Diagnoses
+      'Acute Viral Fever with Myalgia': {
+        hi: 'तीव्र वायरल बुखार एवं शरीर दर्द',
+        te: 'తీవ్రమైన వైరల్ జ్వరం మరియు ఒంటి నొప్పులు',
+        ta: 'கடுமையான வைரஸ் காய்ச்சல் மற்றும் உடல் வலி',
+        mr: 'तीव्र व्हायरल ताप आणि अंगदुखी',
+        bn: 'তীব্র ভাইরাল জ্বর ও শরীর ব্যথা',
+        kn: 'ತೀವ್ರ ವೈರಲ್ ಜ್ವರ ಮತ್ತು ಮೈಕೈ ನೋವು'
+      },
+      'Acute Viral Fever': {
+        hi: 'तीव्र वायरल बुखार',
+        te: 'తీవ్రమైన వైరల్ జ్వరం',
+        ta: 'கடுமையான வைரஸ் காய்ச்சல்',
+        mr: 'तीव्र व्हायरल ताप',
+        bn: 'তীব্র ভাইরাল জ্বর',
+        kn: 'ತೀವ್ರ ವೈರಲ್ ಜ್ವರ'
+      },
+      'Clinical Review': {
+        hi: 'सामान्य स्वास्थ्य परीक्षण',
+        te: 'సాధారణ ఆరోగ్య పరీక్ష',
+        ta: 'பொது மருத்துவ பரிசோதனை',
+        mr: 'सामान्य आरोग्य तपासणी',
+        bn: 'সাধারণ স্বাস্থ্য পর্যালোচনা',
+        kn: 'ಸಾಮಾನ್ಯ ಆರೋಗ್ಯ ಪರಿಶೀಲನೆ'
+      },
+      'High Fever & Weakness': {
+        hi: 'तेज बुखार और शारीरिक कमजोरी',
+        te: 'తీవ్ర జ్వరం మరియు బలహీనత',
+        ta: 'அதிக காய்ச்சல் மற்றும் சோர்வு',
+        mr: 'तीव्र ताप आणि अशक्तपणा',
+        bn: 'উচ্চ জ্বর ও দুর্বলতা',
+        kn: 'ತೀವ್ರ ಜ್ವರ ಮತ್ತು ದೌರ್ಬಲ್ಯ'
+      },
+      'General Checkup': {
+        hi: 'सामान्य स्वास्थ्य जांच',
+        te: 'సాధారణ ఆరోగ్య తనిఖీ',
+        ta: 'பொது உடற்பரிசோதனை',
+        mr: 'सामान्य आरोग्य तपासणी',
+        bn: 'সাধারণ স্বাস্থ্য পরীক্ষা',
+        kn: 'ಸಾಮಾನ್ಯ ಆರೋಗ್ಯ ತಪಾಸಣೆ'
+      },
+
+      // Medicines
+      'Paracetamol 650mg (Jan Aushadhi)': {
+        hi: 'पैरासिटामोल 650mg (जन औषधि)',
+        te: 'పారాసిటమాల్ 650mg (జన్ ఔషధి)',
+        ta: 'பாராசிட்டமால் 650mg (ஜன் ஔஷதி)',
+        mr: 'पॅरासिटामॉल 650mg (जन औषधी)',
+        bn: 'প্যারাসিটামল 650mg (জন ঔষধি)',
+        kn: 'ಪ್ಯಾರಸಿಟಮಾಲ್ 650mg (ಜನ ಔಷಧಿ)'
+      },
+      'Cetirizine 10mg (Jan Aushadhi)': {
+        hi: 'सेट्रीजीन 10mg (जन औषधि)',
+        te: 'సెటిరిజిన్ 10mg (జన్ ఔషధి)',
+        ta: 'செட்ரிசின் 10mg (ஜன் ஔஷதி)',
+        mr: 'सेट्रीझिन 10mg (जन औषधी)',
+        bn: 'সেটিরিজিন 10mg (জন ঔষধি)',
+        kn: 'ಸೆಟಿರಿಜಿನ್ 10mg (ಜನ ಔಷಧಿ)'
+      },
+      'ORS Sachet Powder': {
+        hi: 'ओआरएस पाउडर पैकेट',
+        te: 'ఓఆర్ఎస్ పౌడర్ ప్యాకెట్',
+        ta: 'ஓஆர்எஸ் பொடி பாக்கெட்',
+        mr: 'ओआरएस पावडर पॅकेट',
+        bn: 'ওআরএস স্যালাইন প্যাকেট',
+        kn: 'ಒಆರ್‌ಎಸ್ ಪೌಡರ್ ಪ್ಯಾಕೆಟ್'
+      },
+      'Amoxicillin 500mg': {
+        hi: 'अमोक्सिसिलिन 500mg (जन औषधि)',
+        te: 'అమోక్సిసిలిన్ 500mg (జన్ ఔషధి)',
+        ta: 'அமோக்சிசிலின் 500mg (ஜன் ஔஷதி)',
+        mr: 'अमोक्सिसिलिन 500mg (जन औषधी)',
+        bn: 'অ্যামোক্সিসিলিন 500mg (জন ঔষধি)',
+        kn: 'ಅಮೋಕ್ಸಿಸಿಲಿನ್ 500mg (ಜನ ಔಷಧಿ)'
+      },
+      'Metformin 500mg': {
+        hi: 'मेटफॉर्मिन 500mg (जन औषधि)',
+        te: 'మెట్‌ఫార్మిన్ 500mg (జన్ ఔషధి)',
+        ta: 'மெட்பார்மின் 500mg (ஜன் ஔஷதி)',
+        mr: 'मेटफॉर्मिन 500mg (जन औषधी)',
+        bn: 'মেটফর্মিন 500mg (জন ঔষধি)',
+        kn: 'ಮೆಟ್‌ಫಾರ್ಮಿನ್ 500mg (ಜನ ಔಷಧಿ)'
+      },
+      'Amlodipine 5mg': {
+        hi: 'एम्लोडिपिन 5mg (जन औषधि)',
+        te: 'ఆమ్లోడిపైన్ 5mg (జన్ ఔషధి)',
+        ta: 'அம்லோடிபின் 5mg (ஜன் ஔஷதி)',
+        mr: 'ॲम्लोडिपिन 5mg (जन औषधी)',
+        bn: 'অ্যামলোডিপাইন 5mg (জন ঔষধি)',
+        kn: 'ಆಮ್ಲೋಡಿಪಿನ್ 5mg (ಜನ ಔಷಧಿ)'
+      },
+
+      // Dosages
+      '1 tab 3 times daily after food for 3 days': {
+        hi: '1 गोली दिन में 3 बार भोजन के बाद (3 दिन)',
+        te: '1 మాత్ర రోజుకు 3 సార్లు భోజనం తర్వాత (3 రోజులు)',
+        ta: '1 மாத்திரை உணவுக்குப் பிறகு தினமும் 3 முறை (3 நாட்கள்)',
+        mr: '1 गोळी जेवणानंतर दिवसातून ३ वेळा (३ दिवस)',
+        bn: '১টি ট্যাবলেট খাবারের পর দিনে ৩ বার (৩ দিন)',
+        kn: '1 ಮಾತ್ರೆ ಊಟದ ನಂತರ ದಿನಕ್ಕೆ 3 ಬಾರಿ (3 ದಿನಗಳು)'
+      },
+      '1 tab at night for 3 days': {
+        hi: '1 गोली रात को सोते समय (3 दिन)',
+        te: '1 మాత్ర రాత్రి నిద్రపోయే ముందు (3 రోజులు)',
+        ta: '1 மாத்திரை இரவில் படுக்கும் முன் (3 நாட்கள்)',
+        mr: '1 गोळी रात्री झोपताना (३ दिवस)',
+        bn: '১টি ট্যাবলেট রাতে ঘুমানোর আগে (৩ দিন)',
+        kn: '1 ಮಾತ್ರೆ ರಾತ್ರಿ ಮಲಗುವ ಮುನ್ನ (3 ದಿನಗಳು)'
+      },
+      '1 packet in 1 liter clean water, sip frequently': {
+        hi: '1 पैकेट 1 लीटर स्वच्छ पानी में घोलकर घूंट-घूंट पिएं',
+        te: '1 ప్యాకెట్ 1 లీటరు శుభ్రమైన నీటిలో కలిపి తరచుగా తాగండి',
+        ta: '1 பாக்கெட் 1 லிட்டர் சுத்தமான நீரில் கலந்து அவ்வப்போது குடிக்கவும்',
+        mr: '1 पाकीट 1 लिटर स्वच्छ पाण्यात मिसळून थोडे थोडे प्या',
+        bn: '১ প্যাকেট ১ লিটার পরিষ্কার জলে গুলে ঘন ঘন পান করুন',
+        kn: '1 ಪ್ಯಾಕೆಟ್ 1 ಲೀಟರ್ ಶುದ್ಧ ನೀರಿನಲ್ಲಿ ಬೆರೆಸಿ ಆಗಾಗ ಕುಡಿಯಿರಿ'
+      },
+      '1 tablet 3 times a day after meals': {
+        hi: '1 गोली दिन में 3 बार भोजन के बाद',
+        te: '1 మాత్ర రోజుకు 3 సార్లు భోజనం తర్వాత',
+        ta: '1 மாத்திரை உணவுக்குப் பிறகு தினமும் 3 முறை',
+        mr: '1 गोळी जेवणानंतर दिवसातून ३ वेळा',
+        bn: '১টি ট্যাবলেট খাবারের পর দিনে ৩ বার',
+        kn: '1 ಮಾತ್ರೆ ಊಟದ ನಂತರ ದಿನಕ್ಕೆ 3 ಬಾರಿ'
+      },
+      '1 tablet twice daily': {
+        hi: '1 गोली दिन में 2 बार (सुबह-शाम)',
+        te: '1 మాత్ర రోజుకు 2 సార్లు (ఉదయం-సాయంత్రం)',
+        ta: '1 மாத்திரை தினமும் 2 முறை (காலை-இரவு)',
+        mr: '1 गोळी दिवसातून २ वेळा (सकाळ-संध्याकाळ)',
+        bn: '১টি ট্যাবলেট দিনে ২ বার (সকাল-রাত)',
+        kn: '1 ಮಾತ್ರೆ ದಿನಕ್ಕೆ 2 ಬಾರಿ (ಬೆಳಿಗ್ಗೆ-ಸಂಜೆ)'
+      },
+
+      // Advice
+      'Take clean boiled water, rest well. Report back if fever persists beyond 3 days.': {
+        hi: 'उबला हुआ साफ पानी पिएं और पर्याप्त विश्राम करें। यदि बुखार 3 दिन से अधिक रहे तो पुनः जांच कराएं।',
+        te: 'కాచి చల్లార్చిన నీటిని తాగండి, తగినంత విశ్రాంతి తీసుకోండి. జ్వరం 3 రోజులకు మించి ఉంటే తిరిగి రండి.',
+        ta: 'சுத்தமான காய்ச்சிய நீரைக் குடிக்கவும், நன்றாக ஓய்வெடுக்கவும். காய்ச்சல் 3 நாட்களுக்கு மேல் நீடித்தால் மீண்டும் வரவும்.',
+        mr: 'उकळलेले स्वच्छ पाणी प्या आणि विश्रांती घ्या. ३ दिवसांनंतरही ताप राहिल्यास पुन्हा भेटा.',
+        bn: 'ফোটানো জল পান করুন এবং পর্যাপ্ত বিশ্রাম নিন। ৩ দিনের বেশি জ্বর থাকলে আবার ডাক্তার দেখান।',
+        kn: 'ಕುದಿಸಿ ಆರಿಸಿದ ಶುದ್ಧ ನೀರನ್ನು ಕುಡಿಯಿರಿ ಮತ್ತು ವಿಶ್ರಾಂತಿ ಪಡೆಯಿರಿ. ಜ್ವರ 3 ದಿನಗಳಿಗಿಂತ ಹೆಚ್ಚಿದ್ದರೆ ಮತ್ತೆ ಭೇಟಿ ನೀಡಿ.'
+      },
+      'Drink plenty of clean boiled water. Rest well.': {
+        hi: 'उबला हुआ साफ पानी पिएं और अच्छा विश्राम करें।',
+        te: 'కాచి చల్లార్చిన నీరు ఎక్కువగా తాగండి, విశ్రాంతి తీసుకోండి.',
+        ta: 'நிறைய காய்ச்சிய நீர் குடிக்கவும். நன்றாக ஓய்வெடுக்கவும்.',
+        mr: 'उकळलेले पाणी भरपूर प्या आणि विश्रांती घ्या.',
+        bn: 'প্রচুর ফোটানো জল পান করুন ও বিশ্রাম নিন।',
+        kn: 'ಸಾಕಷ್ಟು ಕುದಿಸಿದ ನೀರನ್ನು ಕುಡಿಯಿರಿ ಮತ್ತು ವಿಶ್ರಾಂತಿ ಪಡೆಯಿರಿ.'
+      }
+    };
+
+    if (dict[text] && dict[text][lang]) {
+      return dict[text][lang];
+    }
+    // Partial substring match fallback
+    for (const k in dict) {
+      if (text.includes(k) && dict[k][lang]) {
+        return text.replace(k, dict[k][lang]);
+      }
+    }
+    return text;
+  };
+
+
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => i18n.init());
   } else {

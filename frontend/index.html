@@ -377,7 +377,7 @@ body {
 
 <!-- TOP APPBAR -->
 <header class="top-appbar">
-  <div class="brand-title" onclick="doLogout()">
+  <div class="brand-title" onclick="handleLogoClick()">
     <span>🇮🇳</span>
     <div>
       <span data-i18n="app_title">Swasthya Setu</span>
@@ -397,6 +397,10 @@ body {
 
   <!-- CONTROLS -->
   <div class="top-controls">
+    <button class="btn-glass" id="globalAudioToggleBtn" onclick="toggleReadAloud()" style="display:flex;align-items:center;gap:6px;font-weight:700;">
+      <span>🔊</span> <span data-i18n="btn_read_aloud">Read Aloud</span>
+    </button>
+
     <select id="langSelect" class="select-control" onchange="onLanguageChange(this.value)">
       <option value="en">🌐 English</option>
       <option value="hi">हिंदी (Hindi)</option>
@@ -1146,6 +1150,14 @@ function handleStaffAuth(e, role) {
   if (typeof window.toast === 'function') {
     window.toast('✓ Credentials Verified: ' + res.user.name);
   }
+}
+
+
+function handleLogoClick() {
+  if (typeof window.stopReadAloud === 'function') {
+    window.stopReadAloud();
+  }
+  doLogout();
 }
 
 function doLogout() {
