@@ -105,11 +105,11 @@
     }
 
     removeStaff(id) {
-      if (confirm('Are you sure you want to remove this staff member?')) {
+      if (confirm('Are you sure you want to remove this staff member from Registry & Cloud?')) {
         this.store.deleteStaff(id);
-        this.renderStaff();
+        this.renderStaffTable();
         this.renderStats();
-        if (typeof window.toast === 'function') window.toast('✓ Removed staff member in real-time');
+        if (typeof window.toast === 'function') window.toast('✓ Removed staff member from Registry & Cloud');
       }
     }
 

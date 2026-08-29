@@ -377,7 +377,10 @@
 
     async deleteStaff(staffCode) {
       if (!this.client) return;
-      return await this.client.from('staff').delete().eq('staff_code', staffCode);
+      console.log('[Supabase] Deleting staff member from Cloud:', staffCode);
+      const res = await this.client.from('staff').delete().or(`staff_code.eq.${staffCode},id.eq.${staffCode}`);
+      console.log('[Supabase] Staff delete result:', res);
+      return res;
     }
 
     async insertProfile(p) {
