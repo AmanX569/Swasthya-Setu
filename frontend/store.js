@@ -308,6 +308,9 @@
       };
       this.state.consultQueue.push(newItem);
       this.saveState();
+      if (global.supabaseService && global.supabaseService.isOnline) {
+        global.supabaseService.insertQueuePatient(newItem);
+      }
       return newItem;
     }
 
@@ -320,6 +323,9 @@
           ...prescriptionData
         };
         this.state.prescriptions.unshift(rx);
+        if (global.supabaseService && global.supabaseService.isOnline) {
+          global.supabaseService.insertPrescription(rx);
+        }
       }
       this.saveState();
     }
@@ -382,6 +388,9 @@
         if (type === 'icu') hosp.icuBedsAvail = Math.max(0, hosp.icuBedsAvail + delta);
         if (type === 'oxygen') hosp.oxygenBedsAvail = Math.max(0, hosp.oxygenBedsAvail + delta);
         this.saveState();
+        if (global.supabaseService && global.supabaseService.isOnline) {
+          global.supabaseService.updateBedsCount(hosp.id, hosp.genBedsAvail, hosp.icuBedsAvail, hosp.oxygenBedsAvail);
+        }
       }
     }
 
@@ -389,6 +398,9 @@
       if (this.state.bloodBank[group] !== undefined) {
         this.state.bloodBank[group] = Math.max(0, this.state.bloodBank[group] + delta);
         this.saveState();
+        if (global.supabaseService && global.supabaseService.isOnline) {
+          global.supabaseService.updateBloodUnits(group, this.state.bloodBank[group]);
+        }
       }
     }
 

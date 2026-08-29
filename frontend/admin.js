@@ -212,9 +212,7 @@
         `;
       }).join('');
     }
-  }
 
-  
     openAddDrugModal() {
       const m = document.getElementById('addDrugModal');
       if (m) m.style.display = 'flex';
@@ -251,6 +249,7 @@
       this.closeAddDrugModal();
       if (typeof window.toast === 'function') window.toast('✓ Added ' + name + ' to Jan Aushadhi Inventory');
     }
+  }
 
   global.adminController = new AdminController();
 

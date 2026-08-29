@@ -372,6 +372,7 @@ body {
   display: none;
 }
 </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 
 /* --- auth.css --- */
@@ -2558,6 +2559,10 @@ body {
 
   <!-- CONTROLS -->
   <div class="top-controls">
+    <button class="btn-glass" id="supabaseStatusBadge" onclick="openSupabaseSettingsModal()" style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:6px 12px;cursor:pointer;">
+      ⚙️ <span>Supabase Setup</span>
+    </button>
+
     <button class="btn-glass" id="globalAudioToggleBtn" onclick="toggleReadAloud()" style="display:flex;align-items:center;gap:6px;font-weight:700;">
       <span>🔊</span> <span data-i18n="btn_read_aloud">Read Aloud</span>
     </button>
@@ -3334,10 +3339,379 @@ body {
   </div>
 </div>
 
+
+<!-- SUPABASE SETTINGS MODAL -->
+<div id="supabaseSettingsModal" class="modal-overlay">
+  <div class="modal-card" style="max-width:520px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:28px;">⚡</span>
+        <div>
+          <h3 style="color:var(--ink);font-size:17px;font-weight:700;">Supabase Database Settings</h3>
+          <small style="color:var(--muted);">Connect your PostgreSQL cloud instance</small>
+        </div>
+      </div>
+      <button onclick="closeSupabaseSettingsModal()" style="background:none;border:none;font-size:20px;color:var(--muted);cursor:pointer;">✕</button>
+    </div>
+
+    <div style="background:var(--glass-1);border:1px solid var(--glass-border);padding:12px;border-radius:10px;margin-bottom:14px;font-size:12px;color:var(--ink-dim);line-height:1.5;">
+      ℹ️ Run <code style="color:var(--primary-bright);font-weight:700;">supabase/schema.sql</code> and <code style="color:var(--primary-bright);font-weight:700;">supabase/seed.sql</code> in your Supabase SQL Editor, then paste your Project URL & Anon Public API Key below.
+    </div>
+
+    <form onsubmit="handleSaveSupabaseCredentials(event)">
+      <div style="margin-bottom:12px;">
+        <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">Supabase Project URL</label>
+        <input type="url" id="inputSupabaseUrl" class="input-field" placeholder="https://your-project-id.supabase.co" required>
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">Supabase Anon Public API Key</label>
+        <input type="password" id="inputSupabaseAnonKey" class="input-field" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6..." required>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+        <button type="button" class="btn-glass" style="color:#dc2626;" onclick="handleClearSupabaseCredentials()">
+          Disconnect
+        </button>
+        <div style="display:flex;gap:8px;">
+          <button type="button" class="btn-glass" onclick="closeSupabaseSettingsModal()">Cancel</button>
+          <button type="submit" class="auth-btn-primary" style="background:#16a34a;border-color:#15803d;">✓ Connect & Sync</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
 <!-- TOAST -->
 <div id="toast"></div>
 
 <script>
+
+/* ==================== supabase-config.js ==================== */
+/**
+ * =========================================================
+ * SWASTHYA SETU - SUPABASE CONFIGURATION (supabase-config.js)
+ * Configure your Supabase Project URL and Public Anon Key
+ * =========================================================
+ */
+
+(function(global) {
+  'use strict';
+
+  const STORAGE_KEY_URL = 'swasthya_setu_supabase_url';
+  const STORAGE_KEY_KEY = 'swasthya_setu_supabase_key';
+
+  // Default / Demo Supabase configuration (Can be updated via UI modal or localStorage)
+  const savedUrl = localStorage.getItem(STORAGE_KEY_URL);
+  const savedKey = localStorage.getItem(STORAGE_KEY_KEY);
+
+  global.SUPABASE_CONFIG = {
+    url: savedUrl || '',
+    anonKey: savedKey || '',
+
+    isConfigured: function() {
+      return Boolean(this.url && this.anonKey && this.url.startsWith('https://'));
+    },
+
+    saveCredentials: function(url, anonKey) {
+      this.url = (url || '').trim();
+      this.anonKey = (anonKey || '').trim();
+      localStorage.setItem(STORAGE_KEY_URL, this.url);
+      localStorage.setItem(STORAGE_KEY_KEY, this.anonKey);
+      if (global.supabaseService) {
+        global.supabaseService.init();
+      }
+    },
+
+    clearCredentials: function() {
+      this.url = '';
+      this.anonKey = '';
+      localStorage.removeItem(STORAGE_KEY_URL);
+      localStorage.removeItem(STORAGE_KEY_KEY);
+      if (global.supabaseService) {
+        global.supabaseService.client = null;
+      }
+    }
+  };
+
+})(typeof window !== 'undefined' ? window : this);
+
+
+/* ==================== supabase-service.js ==================== */
+/**
+ * =========================================================
+ * SWASTHYA SETU - SUPABASE SERVICE CLIENT (supabase-service.js)
+ * Production-grade PostgreSQL CRUD & Realtime Channels
+ * =========================================================
+ */
+
+(function(global) {
+  'use strict';
+
+  class SupabaseService {
+    constructor() {
+      this.client = null;
+      this.isOnline = false;
+      this.channels = [];
+    }
+
+    init() {
+      const config = global.SUPABASE_CONFIG;
+      if (!config || !config.isConfigured()) {
+        console.info('[Supabase] No credentials configured. Using local reactive store.');
+        this.updateBadgeUI(false);
+        return false;
+      }
+
+      if (typeof global.supabase === 'undefined' || typeof global.supabase.createClient !== 'function') {
+        console.warn('[Supabase] @supabase/supabase-js library not loaded.');
+        this.updateBadgeUI(false);
+        return false;
+      }
+
+      try {
+        this.client = global.supabase.createClient(config.url, config.anonKey);
+        this.isOnline = true;
+        this.updateBadgeUI(true);
+        console.log('✓ [Supabase] Connected to PostgreSQL instance at:', config.url);
+        this.setupRealtimeSubscriptions();
+        this.syncInitialData();
+        return true;
+      } catch (err) {
+        console.error('[Supabase] Initialization failed:', err);
+        this.updateBadgeUI(false);
+        return false;
+      }
+    }
+
+    updateBadgeUI(connected) {
+      const badge = document.getElementById('supabaseStatusBadge');
+      if (badge) {
+        if (connected) {
+          badge.style.display = 'inline-flex';
+          badge.style.background = 'rgba(22,163,74,0.15)';
+          badge.style.color = '#16a34a';
+          badge.style.border = '1px solid rgba(22,163,74,0.3)';
+          badge.innerHTML = '⚡ <span>Supabase Live</span>';
+        } else {
+          badge.style.display = 'inline-flex';
+          badge.style.background = 'var(--glass-2)';
+          badge.style.color = 'var(--muted)';
+          badge.style.border = '1px solid var(--glass-border)';
+          badge.innerHTML = '⚙️ <span>Supabase Setup</span>';
+        }
+      }
+    }
+
+    // Synchronize initial data from Supabase to store
+    async syncInitialData() {
+      if (!this.client || !global.appStore) return;
+      try {
+        const [qRes, hospRes, bloodRes, staffRes, ancRes, rxRes, medRes] = await Promise.all([
+          this.client.from('consult_queue').select('*').order('created_at', { ascending: false }),
+          this.client.from('hospitals').select('*').order('name'),
+          this.client.from('blood_bank').select('*'),
+          this.client.from('staff').select('*'),
+          this.client.from('anc_records').select('*').order('created_at', { ascending: false }),
+          this.client.from('prescriptions').select('*').order('created_at', { ascending: false }),
+          this.client.from('medicines').select('*')
+        ]);
+
+        const patch = {};
+        if (qRes.data && qRes.data.length) {
+          patch.consultQueue = qRes.data.map(q => ({
+            id: q.id,
+            token: q.token,
+            patientName: q.patient_name,
+            age: q.age,
+            gender: q.gender,
+            complaint: q.complaint,
+            vitals: { bp: q.bp, spo2: q.spo2, temp: q.temp, pulse: q.pulse },
+            triage: q.triage,
+            time: q.queue_time,
+            status: q.status
+          }));
+        }
+
+        if (hospRes.data && hospRes.data.length) {
+          patch.hospitals = hospRes.data.map(h => ({
+            id: h.id,
+            name: h.name,
+            type: h.type,
+            distance: h.distance,
+            totalBeds: h.total_beds,
+            genBedsAvail: h.gen_beds_avail,
+            icuBedsAvail: h.icu_beds_avail,
+            oxygenBedsAvail: h.oxygen_beds_avail,
+            doctorOnDuty: h.doctor_on_duty,
+            phone: h.phone
+          }));
+        }
+
+        if (bloodRes.data && bloodRes.data.length) {
+          const bank = {};
+          bloodRes.data.forEach(b => { bank[b.blood_group] = b.units_available; });
+          patch.bloodBank = bank;
+        }
+
+        if (staffRes.data && staffRes.data.length) {
+          patch.staff = staffRes.data.map(s => ({
+            id: s.staff_code,
+            name: s.name,
+            role: s.role,
+            phone: s.phone,
+            location: s.location,
+            status: s.status,
+            regNo: s.reg_no,
+            password: s.password_hash,
+            pin: s.pin
+          }));
+        }
+
+        if (ancRes.data && ancRes.data.length) {
+          patch.ancRecords = ancRes.data.map(a => ({
+            id: a.id,
+            motherName: a.mother_name,
+            husbandName: a.husband_name,
+            age: a.age,
+            village: a.village,
+            weeks: a.weeks,
+            edd: a.edd,
+            bp: a.bp,
+            hb: a.hb,
+            ifaCount: a.ifa_count,
+            riskLevel: a.risk_level,
+            nextVisit: a.next_visit
+          }));
+        }
+
+        if (rxRes.data && rxRes.data.length) {
+          patch.prescriptions = rxRes.data.map(r => ({
+            id: r.id,
+            token: r.token,
+            patientName: r.patient_name,
+            doctorName: r.doctor_name,
+            date: r.rx_date,
+            diagnosis: r.diagnosis,
+            medicines: r.medicines || [],
+            advice: r.advice
+          }));
+        }
+
+        // Apply to store
+        Object.assign(global.appStore.state, patch);
+        global.appStore.saveState();
+        if (typeof window.toast === 'function') {
+          window.toast('✓ Synced live data from Supabase');
+        }
+      } catch (err) {
+        console.warn('[Supabase] Initial sync warning:', err);
+      }
+    }
+
+    // Realtime Subscriptions via WebSockets
+    setupRealtimeSubscriptions() {
+      if (!this.client) return;
+
+      // Clean old channels
+      this.channels.forEach(ch => this.client.removeChannel(ch));
+      this.channels = [];
+
+      const queueChannel = this.client.channel('public:consult_queue')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'consult_queue' }, payload => {
+          console.log('[Supabase Realtime] Queue change:', payload);
+          this.syncInitialData();
+        })
+        .subscribe();
+
+      const hospitalChannel = this.client.channel('public:hospitals')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'hospitals' }, payload => {
+          console.log('[Supabase Realtime] Hospitals change:', payload);
+          this.syncInitialData();
+        })
+        .subscribe();
+
+      const bloodChannel = this.client.channel('public:blood_bank')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'blood_bank' }, payload => {
+          console.log('[Supabase Realtime] Blood Bank change:', payload);
+          this.syncInitialData();
+        })
+        .subscribe();
+
+      this.channels.push(queueChannel, hospitalChannel, bloodChannel);
+    }
+
+    // CRUD Methods
+    async insertPrescription(rx) {
+      if (!this.client) return;
+      return await this.client.from('prescriptions').insert([{
+        token: rx.token,
+        patient_name: rx.patientName,
+        doctor_name: rx.doctorName,
+        rx_date: rx.date,
+        diagnosis: rx.diagnosis,
+        medicines: rx.medicines,
+        advice: rx.advice
+      }]);
+    }
+
+    async insertQueuePatient(item) {
+      if (!this.client) return;
+      return await this.client.from('consult_queue').insert([{
+        token: item.token,
+        patient_name: item.patientName,
+        age: item.age,
+        gender: item.gender,
+        complaint: item.complaint,
+        bp: item.vitals ? item.vitals.bp : '120/80',
+        spo2: item.vitals ? item.vitals.spo2 : '98%',
+        temp: item.vitals ? item.vitals.temp : '98.6°F',
+        pulse: item.vitals ? item.vitals.pulse : '78 bpm',
+        triage: item.triage,
+        queue_time: item.time,
+        status: 'Waiting'
+      }]);
+    }
+
+    async updateBedsCount(hospId, genBeds, icuBeds, oxyBeds) {
+      if (!this.client) return;
+      return await this.client.from('hospitals').update({
+        gen_beds_avail: genBeds,
+        icu_beds_avail: icuBeds,
+        oxygen_beds_avail: oxyBeds
+      }).eq('id', hospId);
+    }
+
+    async updateBloodUnits(group, count) {
+      if (!this.client) return;
+      return await this.client.from('blood_bank').update({
+        units_available: count
+      }).eq('blood_group', group);
+    }
+
+    async insertSosAlert(alert) {
+      if (!this.client) return;
+      return await this.client.from('sos_alerts').insert([{
+        patient_name: alert.name,
+        phone: alert.phone,
+        village: alert.village,
+        abha_id: alert.abhaId,
+        status: 'Dispatched'
+      }]);
+    }
+  }
+
+  global.supabaseService = new SupabaseService();
+
+  // Initialize on load
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => global.supabaseService.init());
+  } else {
+    global.supabaseService.init();
+  }
+
+})(typeof window !== 'undefined' ? window : this);
+
 
 /* ==================== store.js ==================== */
 /**
@@ -3650,6 +4024,9 @@ body {
       };
       this.state.consultQueue.push(newItem);
       this.saveState();
+      if (global.supabaseService && global.supabaseService.isOnline) {
+        global.supabaseService.insertQueuePatient(newItem);
+      }
       return newItem;
     }
 
@@ -3662,6 +4039,9 @@ body {
           ...prescriptionData
         };
         this.state.prescriptions.unshift(rx);
+        if (global.supabaseService && global.supabaseService.isOnline) {
+          global.supabaseService.insertPrescription(rx);
+        }
       }
       this.saveState();
     }
@@ -3724,6 +4104,9 @@ body {
         if (type === 'icu') hosp.icuBedsAvail = Math.max(0, hosp.icuBedsAvail + delta);
         if (type === 'oxygen') hosp.oxygenBedsAvail = Math.max(0, hosp.oxygenBedsAvail + delta);
         this.saveState();
+        if (global.supabaseService && global.supabaseService.isOnline) {
+          global.supabaseService.updateBedsCount(hosp.id, hosp.genBedsAvail, hosp.icuBedsAvail, hosp.oxygenBedsAvail);
+        }
       }
     }
 
@@ -3731,6 +4114,9 @@ body {
       if (this.state.bloodBank[group] !== undefined) {
         this.state.bloodBank[group] = Math.max(0, this.state.bloodBank[group] + delta);
         this.saveState();
+        if (global.supabaseService && global.supabaseService.isOnline) {
+          global.supabaseService.updateBloodUnits(group, this.state.bloodBank[group]);
+        }
       }
     }
 
@@ -6283,9 +6669,7 @@ body {
         `;
       }).join('');
     }
-  }
 
-  
     openAddDrugModal() {
       const m = document.getElementById('addDrugModal');
       if (m) m.style.display = 'flex';
@@ -6322,6 +6706,7 @@ body {
       this.closeAddDrugModal();
       if (typeof window.toast === 'function') window.toast('✓ Added ' + name + ' to Jan Aushadhi Inventory');
     }
+  }
 
   global.adminController = new AdminController();
 
@@ -6336,7 +6721,55 @@ body {
 
 
 
+
+
 <script>
+
+function openSupabaseSettingsModal() {
+  const m = document.getElementById('supabaseSettingsModal');
+  const urlEl = document.getElementById('inputSupabaseUrl');
+  const keyEl = document.getElementById('inputSupabaseAnonKey');
+  if (urlEl && window.SUPABASE_CONFIG) urlEl.value = window.SUPABASE_CONFIG.url || '';
+  if (keyEl && window.SUPABASE_CONFIG) keyEl.value = window.SUPABASE_CONFIG.anonKey || '';
+  if (m) m.style.display = 'flex';
+}
+
+function closeSupabaseSettingsModal() {
+  const m = document.getElementById('supabaseSettingsModal');
+  if (m) m.style.display = 'none';
+}
+
+function handleSaveSupabaseCredentials(e) {
+  if (e) e.preventDefault();
+  const url = document.getElementById('inputSupabaseUrl').value.trim();
+  const anonKey = document.getElementById('inputSupabaseAnonKey').value.trim();
+
+  if (!url || !anonKey) {
+    alert('Please enter both Supabase URL and Anon Key');
+    return;
+  }
+
+  if (window.SUPABASE_CONFIG) {
+    window.SUPABASE_CONFIG.saveCredentials(url, anonKey);
+    closeSupabaseSettingsModal();
+    if (typeof window.toast === 'function') {
+      window.toast('⚡ Supabase Connected & Synchronizing!');
+    }
+  }
+}
+
+function handleClearSupabaseCredentials() {
+  if (confirm('Disconnect Supabase and switch back to local store?')) {
+    if (window.SUPABASE_CONFIG) {
+      window.SUPABASE_CONFIG.clearCredentials();
+      closeSupabaseSettingsModal();
+      if (typeof window.toast === 'function') {
+        window.toast('⚙️ Supabase Disconnected');
+      }
+    }
+  }
+}
+
 // Switch Active Login Tab
 function switchLoginTab(role) {
   const roles = ['patient', 'doctor', 'worker', 'admin'];

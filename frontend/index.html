@@ -372,6 +372,7 @@ body {
   display: none;
 }
 </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body data-theme="classic">
 
@@ -397,6 +398,10 @@ body {
 
   <!-- CONTROLS -->
   <div class="top-controls">
+    <button class="btn-glass" id="supabaseStatusBadge" onclick="openSupabaseSettingsModal()" style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:6px 12px;cursor:pointer;">
+      ⚙️ <span>Supabase Setup</span>
+    </button>
+
     <button class="btn-glass" id="globalAudioToggleBtn" onclick="toggleReadAloud()" style="display:flex;align-items:center;gap:6px;font-weight:700;">
       <span>🔊</span> <span data-i18n="btn_read_aloud">Read Aloud</span>
     </button>
@@ -1173,10 +1178,55 @@ body {
   </div>
 </div>
 
+
+<!-- SUPABASE SETTINGS MODAL -->
+<div id="supabaseSettingsModal" class="modal-overlay">
+  <div class="modal-card" style="max-width:520px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:28px;">⚡</span>
+        <div>
+          <h3 style="color:var(--ink);font-size:17px;font-weight:700;">Supabase Database Settings</h3>
+          <small style="color:var(--muted);">Connect your PostgreSQL cloud instance</small>
+        </div>
+      </div>
+      <button onclick="closeSupabaseSettingsModal()" style="background:none;border:none;font-size:20px;color:var(--muted);cursor:pointer;">✕</button>
+    </div>
+
+    <div style="background:var(--glass-1);border:1px solid var(--glass-border);padding:12px;border-radius:10px;margin-bottom:14px;font-size:12px;color:var(--ink-dim);line-height:1.5;">
+      ℹ️ Run <code style="color:var(--primary-bright);font-weight:700;">supabase/schema.sql</code> and <code style="color:var(--primary-bright);font-weight:700;">supabase/seed.sql</code> in your Supabase SQL Editor, then paste your Project URL & Anon Public API Key below.
+    </div>
+
+    <form onsubmit="handleSaveSupabaseCredentials(event)">
+      <div style="margin-bottom:12px;">
+        <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">Supabase Project URL</label>
+        <input type="url" id="inputSupabaseUrl" class="input-field" placeholder="https://your-project-id.supabase.co" required>
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">Supabase Anon Public API Key</label>
+        <input type="password" id="inputSupabaseAnonKey" class="input-field" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6..." required>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+        <button type="button" class="btn-glass" style="color:#dc2626;" onclick="handleClearSupabaseCredentials()">
+          Disconnect
+        </button>
+        <div style="display:flex;gap:8px;">
+          <button type="button" class="btn-glass" onclick="closeSupabaseSettingsModal()">Cancel</button>
+          <button type="submit" class="auth-btn-primary" style="background:#16a34a;border-color:#15803d;">✓ Connect & Sync</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
 <!-- TOAST -->
 <div id="toast"></div>
 
 <!-- APP SCRIPTS -->
+<script src="supabase-config.js"></script>
+<script src="supabase-service.js"></script>
 <script src="store.js"></script>
 <script src="i18n.js"></script>
 <script src="patient.js"></script>
@@ -1185,6 +1235,52 @@ body {
 <script src="admin.js"></script>
 
 <script>
+
+function openSupabaseSettingsModal() {
+  const m = document.getElementById('supabaseSettingsModal');
+  const urlEl = document.getElementById('inputSupabaseUrl');
+  const keyEl = document.getElementById('inputSupabaseAnonKey');
+  if (urlEl && window.SUPABASE_CONFIG) urlEl.value = window.SUPABASE_CONFIG.url || '';
+  if (keyEl && window.SUPABASE_CONFIG) keyEl.value = window.SUPABASE_CONFIG.anonKey || '';
+  if (m) m.style.display = 'flex';
+}
+
+function closeSupabaseSettingsModal() {
+  const m = document.getElementById('supabaseSettingsModal');
+  if (m) m.style.display = 'none';
+}
+
+function handleSaveSupabaseCredentials(e) {
+  if (e) e.preventDefault();
+  const url = document.getElementById('inputSupabaseUrl').value.trim();
+  const anonKey = document.getElementById('inputSupabaseAnonKey').value.trim();
+
+  if (!url || !anonKey) {
+    alert('Please enter both Supabase URL and Anon Key');
+    return;
+  }
+
+  if (window.SUPABASE_CONFIG) {
+    window.SUPABASE_CONFIG.saveCredentials(url, anonKey);
+    closeSupabaseSettingsModal();
+    if (typeof window.toast === 'function') {
+      window.toast('⚡ Supabase Connected & Synchronizing!');
+    }
+  }
+}
+
+function handleClearSupabaseCredentials() {
+  if (confirm('Disconnect Supabase and switch back to local store?')) {
+    if (window.SUPABASE_CONFIG) {
+      window.SUPABASE_CONFIG.clearCredentials();
+      closeSupabaseSettingsModal();
+      if (typeof window.toast === 'function') {
+        window.toast('⚙️ Supabase Disconnected');
+      }
+    }
+  }
+}
+
 // Switch Active Login Tab
 function switchLoginTab(role) {
   const roles = ['patient', 'doctor', 'worker', 'admin'];
