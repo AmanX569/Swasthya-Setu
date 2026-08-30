@@ -212,99 +212,102 @@
 
         // Direct High-Contrast Vector PDF Generator for e-Prescriptions
     downloadPrescriptionPdf(rxId) {
-      const allRx = this.store.getState().prescriptions || [];
-      const rx = allRx.find(r => r.id === rxId) || allRx[0];
-      const user = this.store.getState().currentUser || { name: 'Citizen Patient', age: 38, gender: 'Male', abhaId: '14-8921-4402-9912', village: 'Kondapalli Sub-Centre' };
+      const allRx = (this.store && this.store.getState().prescriptions) || [];
+      const rx = allRx.find(r => r.id === rxId) || (allRx.length ? allRx[0] : null);
+      const user = (this.store && (this.store.getState().currentUser || (this.store.getState().session && this.store.getState().session.user))) || {
+        name: 'Citizen Patient',
+        age: 38,
+        gender: 'Male',
+        abhaId: '14-8921-4402-9912',
+        village: 'Kondapalli Sub-Centre'
+      };
 
       if (!rx) {
-        alert('Prescription details not found');
+        alert('Prescription record not found.');
         return;
       }
 
-      // Create printable/PDF container with absolute solid styling
+      // Create high-contrast printable document container
       const printArea = document.createElement('div');
       printArea.id = 'pdfRenderContainer_' + Date.now();
       printArea.style.position = 'fixed';
-      printArea.style.left = '0';
-      printArea.style.top = '0';
-      printArea.style.width = '780px';
-      printArea.style.zIndex = '-99999';
-      printArea.style.opacity = '1';
-      printArea.style.padding = '32px';
-      printArea.style.fontFamily = "'Plus Jakarta Sans', Arial, sans-serif";
+      printArea.style.left = '0px';
+      printArea.style.top = '0px';
+      printArea.style.width = '794px';
+      printArea.style.zIndex = '9999999';
+      printArea.style.padding = '32px 36px';
+      printArea.style.fontFamily = "'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
       printArea.style.color = '#0f172a';
       printArea.style.background = '#ffffff';
-      printArea.style.border = '2px solid #0284c7';
-      printArea.style.borderRadius = '12px';
       printArea.style.boxSizing = 'border-box';
 
       const medsList = Array.isArray(rx.medicines) ? rx.medicines : [];
 
       printArea.innerHTML = `
-        <!-- GOVT OFFICIAL HEADER -->
-        <div style="border-bottom:3px double #0284c7;padding-bottom:16px;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;background:#ffffff;">
+        <!-- OFFICIAL GOVT HEALTHCARE HEADER -->
+        <div style="border-bottom:3px solid #0284c7;padding-bottom:14px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;background:#ffffff;">
           <div style="display:flex;align-items:center;gap:12px;">
-            <img src="assets/logo.png" style="width:58px;height:58px;border-radius:50%;object-fit:cover;border:2px solid #0284c7;" alt="Swasthya Setu Logo">
+            <div style="width:54px;height:54px;background:#0284c7;color:#ffffff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:900;border:2px solid #0369a1;">
+              🩺
+            </div>
             <div>
-              <h2 style="font-size:18px;font-weight:900;color:#0369a1;margin:0;letter-spacing:0.5px;">MINISTRY OF HEALTH & FAMILY WELFARE</h2>
-              <small style="font-size:11px;font-weight:700;color:#334155;display:block;">Ayushman Bharat Digital Mission (ABDM) · National Rural Telemedicine Grid</small>
-              <small style="font-size:11px;color:#0284c7;font-weight:900;letter-spacing:0.5px;">OFFICIAL CLINICAL e-PRESCRIPTION</small>
+              <h2 style="font-size:17px;font-weight:900;color:#0369a1;margin:0;letter-spacing:0.3px;">MINISTRY OF HEALTH & FAMILY WELFARE</h2>
+              <div style="font-size:11px;font-weight:700;color:#334155;margin-top:2px;">Ayushman Bharat Digital Mission (ABDM) · National Rural Telemedicine Grid</div>
+              <div style="font-size:11px;color:#0284c7;font-weight:900;margin-top:2px;letter-spacing:0.5px;">OFFICIAL CLINICAL e-PRESCRIPTION</div>
             </div>
           </div>
           <div style="text-align:right;">
-            <div style="font-size:14px;font-weight:900;color:#0284c7;font-family:monospace;">Rx ID: ${rx.id || 'RX-OPD-901'}</div>
-            <div style="font-size:11px;color:#334155;font-weight:600;">Date: ${rx.date || new Date().toISOString().split('T')[0]}</div>
-            <div style="font-size:11px;color:#15803d;font-weight:800;">✓ ABDM Digitally Verified</div>
+            <div style="font-size:13px;font-weight:900;color:#0284c7;font-family:monospace;">Rx ID: ${rx.id || 'RX-OPD-901'}</div>
+            <div style="font-size:11px;color:#334155;font-weight:600;margin-top:2px;">Date: ${rx.date || rx.rx_date || new Date().toISOString().split('T')[0]}</div>
+            <div style="font-size:11px;color:#15803d;font-weight:800;margin-top:2px;">✓ ABDM Digitally Verified</div>
           </div>
         </div>
 
-        <!-- DOCTOR & PATIENT INFO GRID -->
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;background:#f8fafc;border:1.5px solid #cbd5e1;border-radius:10px;padding:14px;margin-bottom:18px;font-size:12px;color:#0f172a;">
+        <!-- DOCTOR & PATIENT DEMOGRAPHICS -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;background:#f8fafc;border:1.5px solid #cbd5e1;border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:12px;color:#0f172a;">
           <div>
-            <strong style="color:#0369a1;display:block;font-size:13px;margin-bottom:4px;">👨‍⚕️ Prescribing Medical Officer:</strong>
+            <strong style="color:#0369a1;display:block;font-size:12px;margin-bottom:3px;">👨‍⚕️ Prescribing Medical Officer:</strong>
             <div style="font-weight:900;font-size:14px;color:#0f172a;">${rx.doctorName || 'Medical Officer'}</div>
-            <div style="color:#475569;font-weight:600;">Medical Council Reg: ${rx.doctorRegNo || 'MCI-AP-48912'}</div>
+            <div style="color:#475569;font-weight:600;margin-top:2px;">Medical Council Reg: ${rx.doctorRegNo || 'MCI-AP-48912'}</div>
             <div style="color:#475569;font-weight:600;">${rx.doctorLocation || 'District Health Centre (PHC/CHC)'}</div>
           </div>
           <div>
-            <strong style="color:#0369a1;display:block;font-size:13px;margin-bottom:4px;">👤 Patient Information:</strong>
+            <strong style="color:#0369a1;display:block;font-size:12px;margin-bottom:3px;">👤 Patient Information:</strong>
             <div style="font-weight:900;font-size:14px;color:#0f172a;">${rx.patientName || user.name}</div>
-            <div style="color:#475569;font-weight:600;">Age/Gender: ${user.age || 38} Yrs / ${user.gender || 'Male'} · Blood: ${user.bloodGroup || 'O+'}</div>
-            <div style="color:#0f172a;font-weight:800;font-family:monospace;">ABHA ID: ${user.abhaId || '14-8921-4402-9912'}</div>
+            <div style="color:#475569;font-weight:600;margin-top:2px;">Age/Gender: ${user.age || 35} Yrs / ${user.gender || 'Male'} · Blood: ${user.bloodGroup || 'O+'}</div>
+            <div style="color:#0f172a;font-weight:800;font-family:monospace;margin-top:2px;">ABHA ID: ${user.abhaId || '14-8921-4402-9912'}</div>
           </div>
         </div>
 
         <!-- CLINICAL DIAGNOSIS -->
-        <div style="background:#f0f9ff;border-left:5px solid #0284c7;border-top:1px solid #bae6fd;border-right:1px solid #bae6fd;border-bottom:1px solid #bae6fd;padding:12px 16px;border-radius:6px;margin-bottom:18px;">
-          <small style="font-size:10px;font-weight:900;color:#0369a1;letter-spacing:0.8px;display:block;text-transform:uppercase;">CLINICAL DIAGNOSIS & REASON FOR CONSULTATION</small>
-          <div style="font-size:15px;font-weight:900;color:#0c4a6e;margin-top:2px;">${rx.diagnosis || 'Acute Viral Fever with Myalgia'}</div>
+        <div style="background:#f0f9ff;border-left:5px solid #0284c7;border-top:1px solid #bae6fd;border-right:1px solid #bae6fd;border-bottom:1px solid #bae6fd;padding:10px 14px;border-radius:6px;margin-bottom:16px;">
+          <div style="font-size:10px;font-weight:900;color:#0369a1;letter-spacing:0.8px;text-transform:uppercase;">CLINICAL DIAGNOSIS & CHIEF COMPLAINT</div>
+          <div style="font-size:14px;font-weight:900;color:#0c4a6e;margin-top:3px;">${rx.diagnosis || 'Acute Viral Infection / Routine Checkup'}</div>
         </div>
 
-        <!-- RX SECTION & MEDICINE TABLE -->
-        <div style="margin-bottom:20px;">
+        <!-- RX MEDICINES TABLE -->
+        <div style="margin-bottom:16px;">
           <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
-            <span style="font-size:24px;font-weight:900;color:#0284c7;font-family:serif;">℞</span>
-            <strong style="font-size:13px;color:#0f172a;letter-spacing:0.3px;">Prescribed Generic Formulations (PMBJP Jan Aushadhi):</strong>
+            <span style="font-size:22px;font-weight:900;color:#0284c7;font-family:serif;">℞</span>
+            <strong style="font-size:13px;color:#0f172a;">Prescribed Generic Medicines (PMBJP Jan Aushadhi):</strong>
           </div>
 
           <table style="width:100%;border-collapse:collapse;font-size:12px;text-align:left;border:1px solid #cbd5e1;">
             <thead>
               <tr style="background:#0284c7;color:#ffffff;">
-                <th style="padding:9px 10px;color:#ffffff;font-weight:800;border:1px solid #0284c7;">#</th>
-                <th style="padding:9px 10px;color:#ffffff;font-weight:800;border:1px solid #0284c7;">Generic Medicine Name & Strength</th>
-                <th style="padding:9px 10px;color:#ffffff;font-weight:800;border:1px solid #0284c7;">Dosage Schedule</th>
-                <th style="padding:9px 10px;color:#ffffff;font-weight:800;border:1px solid #0284c7;">Instructions</th>
-                <th style="padding:9px 10px;color:#ffffff;font-weight:800;text-align:right;border:1px solid #0284c7;">Jan Aushadhi Price</th>
+                <th style="padding:8px 10px;color:#ffffff;font-weight:800;border:1px solid #0284c7;">#</th>
+                <th style="padding:8px 10px;color:#ffffff;font-weight:800;border:1px solid #0284c7;">Generic Medicine Name & Strength</th>
+                <th style="padding:8px 10px;color:#ffffff;font-weight:800;border:1px solid #0284c7;">Dosage Schedule</th>
+                <th style="padding:8px 10px;color:#ffffff;font-weight:800;text-align:right;border:1px solid #0284c7;">Jan Aushadhi Price</th>
               </tr>
             </thead>
             <tbody>
               ${medsList.map((m, idx) => `
                 <tr style="border-bottom:1px solid #cbd5e1;background:${idx % 2 === 0 ? '#ffffff' : '#f8fafc'};">
-                  <td style="padding:9px 10px;font-weight:800;color:#334155;border:1px solid #e2e8f0;">${idx + 1}</td>
-                  <td style="padding:9px 10px;font-weight:900;color:#0f172a;border:1px solid #e2e8f0;">${m.name || m}</td>
-                  <td style="padding:9px 10px;color:#1e293b;font-weight:600;border:1px solid #e2e8f0;">${m.dosage || '1 Tablet 3 times daily'}</td>
-                  <td style="padding:9px 10px;color:#1e293b;font-weight:600;border:1px solid #e2e8f0;">${m.timing || 'After meals for 3 days'}</td>
-                  <td style="padding:9px 10px;text-align:right;font-weight:900;color:#15803d;border:1px solid #e2e8f0;">₹${m.genericPrice || 8}</td>
+                  <td style="padding:8px 10px;font-weight:800;color:#334155;border:1px solid #e2e8f0;">${idx + 1}</td>
+                  <td style="padding:8px 10px;font-weight:900;color:#0f172a;border:1px solid #e2e8f0;">${m.name || m}</td>
+                  <td style="padding:8px 10px;color:#1e293b;font-weight:600;border:1px solid #e2e8f0;">${m.dosage || '1 Tablet 3 times daily after food'}</td>
+                  <td style="padding:8px 10px;text-align:right;font-weight:900;color:#15803d;border:1px solid #e2e8f0;">₹${m.genericPrice || 8}</td>
                 </tr>
               `).join('')}
             </tbody>
@@ -312,38 +315,38 @@
         </div>
 
         <!-- DOCTOR ADVICE -->
-        <div style="background:#fffbeb;border:1.5px solid #fde68a;border-radius:8px;padding:12px 16px;margin-bottom:20px;font-size:12px;color:#78350f;">
-          <strong style="display:block;margin-bottom:4px;color:#92400e;font-size:12px;">⚠️ Doctor Advice & Dietary Precautions:</strong>
-          <div style="font-weight:600;line-height:1.5;">${rx.advice || 'Take clean boiled water, rest well. If temperature exceeds 101°F or persists beyond 3 days, visit PHC immediately.'}</div>
+        <div style="background:#fffbeb;border:1.5px solid #fde68a;border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:12px;color:#78350f;">
+          <strong style="display:block;margin-bottom:2px;color:#92400e;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;">⚠️ Doctor's Advice & Precautions:</strong>
+          <div style="font-weight:600;line-height:1.5;">${rx.advice || 'Drink clean boiled water, rest well. Report back to PHC if fever persists.'}</div>
         </div>
 
-        <!-- FOOTER & DIGITAL SIGNATURE -->
-        <div style="border-top:2px solid #cbd5e1;padding-top:16px;display:flex;justify-content:space-between;align-items:flex-end;font-size:11px;color:#475569;">
+        <!-- FOOTER & SIGNATURE -->
+        <div style="border-top:2px solid #cbd5e1;padding-top:14px;display:flex;justify-content:space-between;align-items:flex-end;font-size:11px;color:#475569;">
           <div>
             <div style="font-weight:700;color:#0f172a;">Jan Aushadhi Generic Pharmacy: Available at nearest PHC/CHC.</div>
             <div style="color:#0284c7;font-weight:800;margin-top:2px;">Emergency 24x7 Ambulance SOS: Dial 108</div>
           </div>
           <div style="text-align:center;">
-            <div style="font-family:cursive, 'Brush Script MT', Arial;font-size:20px;color:#0369a1;font-weight:900;">${rx.doctorName || 'Authorized Medical Officer'}</div>
+            <div style="font-family:cursive, 'Brush Script MT', Arial;font-size:18px;color:#0369a1;font-weight:900;">${rx.doctorName || 'Authorized Medical Officer'}</div>
             <div style="border-top:1px solid #94a3b8;padding-top:2px;font-weight:800;color:#0f172a;">Authorized Medical Officer Sign</div>
             <small style="font-size:9px;color:#15803d;font-weight:800;display:block;margin-top:1px;">Digitally Signed via e-Sanjeevani</small>
           </div>
         </div>
       `;
 
-      // Attach to document body so html2canvas renders perfectly
       document.body.appendChild(printArea);
 
-      // Check if html2pdf is available
       if (typeof window.html2pdf === 'function') {
         const opt = {
           margin: [8, 8, 8, 8],
-          filename: `e-Prescription-${rx.id || 'RX'}.pdf`,
-          image: { type: 'jpeg', quality: 1.0 },
+          filename: `e-Prescription-${rx.id || 'RX-OPD'}.pdf`,
+          image: { type: 'jpeg', quality: 0.98 },
           html2canvas: {
             scale: 2,
             useCORS: true,
-            logging: false,
+            scrollX: 0,
+            scrollY: 0,
+            windowWidth: 800,
             backgroundColor: '#ffffff'
           },
           jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
@@ -359,7 +362,6 @@
           if (printArea.parentNode) printArea.parentNode.removeChild(printArea);
         });
       } else {
-        // Fallback: Open print dialog in clean popup
         const win = window.open('', '_blank');
         win.document.write(`
           <html>
