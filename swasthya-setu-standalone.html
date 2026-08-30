@@ -3507,6 +3507,7 @@ table td strong {
               <th data-i18n="th_complaint">Chief Complaint</th>
               <th data-i18n="th_vitals">Recorded Vitals</th>
               <th data-i18n="th_triage">Triage</th>
+              <th>Queue Time</th>
               <th data-i18n="th_action">Action</th>
             </tr>
           </thead>
@@ -3558,11 +3559,12 @@ table td strong {
           <thead>
             <tr>
               <th>Mother Name</th>
-              <th>Village</th>
+              <th>Husband / Guardian</th>
+              <th>Village / Ward</th>
               <th>Weeks / EDD</th>
-              <th>Vitals (BP/Hb)</th>
-              <th>IFA Stock</th>
-              <th>Risk Level</th>
+              <th>Vitals (BP & Hb)</th>
+              <th>Risk Classification</th>
+              <th>Next Scheduled Visit</th>
             </tr>
           </thead>
           <tbody id="workerAncTableBody"></tbody>
@@ -3583,10 +3585,11 @@ table td strong {
           <thead>
             <tr>
               <th>Child Name</th>
-              <th>Parent</th>
+              <th>Parent / Guardian</th>
               <th>DOB / Age</th>
+              <th>Village / Ward</th>
               <th>Last Vaccine</th>
-              <th>Next Due</th>
+              <th>Next Due Target</th>
               <th>Status</th>
             </tr>
           </thead>
@@ -3608,11 +3611,12 @@ table td strong {
         <table class="admin-table">
           <thead>
             <tr>
-              <th>Record Type</th>
-              <th>Citizen / Beneficiary</th>
-              <th>Contact / Family</th>
-              <th>Clinical / Field Details</th>
-              <th>Date / Status</th>
+              <th>ABHA Health ID</th>
+              <th>Citizen Name</th>
+              <th>Age & Gender</th>
+              <th>Village / Ward</th>
+              <th>Blood Group</th>
+              <th>Contact Phone</th>
             </tr>
           </thead>
           <tbody id="ashaMasterRegistryBody"></tbody>
@@ -3700,12 +3704,13 @@ table td strong {
         <table class="admin-table">
           <thead>
             <tr>
-              <th>Medicine Name</th>
+              <th>Medicine Name & ID</th>
               <th>Category</th>
-              <th>Stock</th>
+              <th>Stock Level</th>
               <th>Jan Aushadhi Price</th>
               <th>Market Brand Price</th>
-              <th>Status</th>
+              <th>Savings / Status</th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody id="adminDrugTableBody"></tbody>
@@ -8756,16 +8761,26 @@ table td strong {
     renderImmunizations() {
       const el = document.getElementById('workerImmTableBody') || document.getElementById('ashaUipTableBody');
       if (!el || !this.store) return;
-      const uips = this.store.getState().immunizations || [];
+      const imms = this.store.getState().immunizations || [];
 
-      el.innerHTML = uips.map(u => `
+      if (!imms.length) {
+        el.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--muted);">No immunization records found. Tap "+ Add Vaccine" above.</td></tr>';
+        return;
+      }
+
+      el.innerHTML = imms.map(i => `
         <tr>
-          <td><strong style="color:var(--ink);font-size:14px;">${u.childName}</strong></td>
-          <td style="color:var(--ink-dim);">${u.parentName}</td>
-          <td style="color:var(--muted);">${u.dob} (${u.gender})</td>
-          <td style="color:var(--ink);">${u.lastVaccine}</td>
-          <td><strong style="color:var(--primary-bright);">${u.nextDue}</strong></td>
-          <td><span class="badge" style="background:rgba(2,132,199,0.15);color:var(--primary-bright);padding:4px 8px;border-radius:12px;font-size:11px;font-weight:700;">${u.status}</span></td>
+          <td><strong style="color:var(--ink);font-size:14px;">${i.childName}</strong></td>
+          <td style="color:var(--ink-dim);">${i.parentName}</td>
+          <td style="color:var(--muted);font-family:'IBM Plex Mono',monospace;">${i.dob}</td>
+          <td style="color:var(--ink-dim);">${i.village || 'Kondapalli'}</td>
+          <td><strong style="color:var(--primary-bright)">${i.lastVaccine}</strong></td>
+          <td style="color:var(--ink-dim);">${i.nextDue}</td>
+          <td>
+            <span class="badge" style="background:rgba(22,163,74,0.15);color:#16a34a;padding:4px 8px;border-radius:12px;font-size:11px;font-weight:700;">
+              ${i.status}
+            </span>
+          </td>
         </tr>
       `).join('');
     }

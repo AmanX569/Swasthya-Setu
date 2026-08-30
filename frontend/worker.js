@@ -237,16 +237,26 @@
     renderImmunizations() {
       const el = document.getElementById('workerImmTableBody') || document.getElementById('ashaUipTableBody');
       if (!el || !this.store) return;
-      const uips = this.store.getState().immunizations || [];
+      const imms = this.store.getState().immunizations || [];
 
-      el.innerHTML = uips.map(u => `
+      if (!imms.length) {
+        el.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--muted);">No immunization records found. Tap "+ Add Vaccine" above.</td></tr>';
+        return;
+      }
+
+      el.innerHTML = imms.map(i => `
         <tr>
-          <td><strong style="color:var(--ink);font-size:14px;">${u.childName}</strong></td>
-          <td style="color:var(--ink-dim);">${u.parentName}</td>
-          <td style="color:var(--muted);">${u.dob} (${u.gender})</td>
-          <td style="color:var(--ink);">${u.lastVaccine}</td>
-          <td><strong style="color:var(--primary-bright);">${u.nextDue}</strong></td>
-          <td><span class="badge" style="background:rgba(2,132,199,0.15);color:var(--primary-bright);padding:4px 8px;border-radius:12px;font-size:11px;font-weight:700;">${u.status}</span></td>
+          <td><strong style="color:var(--ink);font-size:14px;">${i.childName}</strong></td>
+          <td style="color:var(--ink-dim);">${i.parentName}</td>
+          <td style="color:var(--muted);font-family:'IBM Plex Mono',monospace;">${i.dob}</td>
+          <td style="color:var(--ink-dim);">${i.village || 'Kondapalli'}</td>
+          <td><strong style="color:var(--primary-bright)">${i.lastVaccine}</strong></td>
+          <td style="color:var(--ink-dim);">${i.nextDue}</td>
+          <td>
+            <span class="badge" style="background:rgba(22,163,74,0.15);color:#16a34a;padding:4px 8px;border-radius:12px;font-size:11px;font-weight:700;">
+              ${i.status}
+            </span>
+          </td>
         </tr>
       `).join('');
     }
