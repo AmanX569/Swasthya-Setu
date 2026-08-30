@@ -19,7 +19,7 @@
     }
 
     init() {
-      const config = global.supabaseConfig || {};
+      const config = global.SUPABASE_CONFIG || global.supabaseConfig || {};
       if (config.url && config.anonKey && global.supabase && typeof global.supabase.createClient === 'function') {
         try {
           this.client = global.supabase.createClient(config.url, config.anonKey, {
@@ -372,7 +372,7 @@
         const patch = {};
 
         if (profRes.data && profRes.data.length) {
-          patch.patients = profRes.data.map(p => ({
+          const cloudPatients = profRes.data.map(p => ({
             id: p.id,
             abhaId: p.abha_id,
             name: p.name,
@@ -381,26 +381,50 @@
             gender: p.gender,
             village: p.village,
             bloodGroup: p.blood_group,
-            password: '123456'
+            password: p.password_hash || p.password || p.pin || '123456',
+            pin: p.pin || p.password_hash || p.password || '123456'
           }));
+
+          const existingPatients = global.appStore.state.patients || [];
+          cloudPatients.forEach(cp => {
+            const idx = existingPatients.findIndex(ep => ep.phone === cp.phone || ep.abhaId === cp.abhaId || ep.id === cp.id);
+            if (idx >= 0) {
+              existingPatients[idx] = Object.assign({}, existingPatients[idx], cp);
+            } else {
+              existingPatients.push(cp);
+            }
+          });
+          patch.patients = existingPatients;
+
           if (!global.appStore.state.currentUser && patch.patients.length) {
             patch.currentUser = patch.patients[0];
           }
         }
 
         if (staffRes.data && staffRes.data.length) {
-          patch.staff = staffRes.data.map(s => ({
+          const cloudStaff = staffRes.data.map(s => ({
             id: s.staff_code || s.id,
             staff_code: s.staff_code || s.id,
             name: s.name,
             role: s.role,
             phone: s.phone,
-            location: s.location,
-            status: s.status,
-            regNo: s.reg_no,
-            password: s.password_hash || s.pin || (s.role + '@123'),
-            pin: s.pin || '1234'
+            location: s.location || 'District Health Centre',
+            status: s.status || 'Active Online',
+            regNo: s.reg_no || s.regNo || '—',
+            password: s.password_hash || s.password || s.pin || (s.role + '@123'),
+            pin: s.pin || s.password_hash || s.password || '1234'
           }));
+
+          const existingStaff = global.appStore.state.staff || [];
+          cloudStaff.forEach(cs => {
+            const idx = existingStaff.findIndex(es => es.id === cs.id || es.staff_code === cs.id || es.phone === cs.phone);
+            if (idx >= 0) {
+              existingStaff[idx] = Object.assign({}, existingStaff[idx], cs);
+            } else {
+              existingStaff.push(cs);
+            }
+          });
+          patch.staff = existingStaff;
         }
 
         if (qRes.data && qRes.data.length) {
@@ -802,13 +826,13 @@
       try {
         return await this.client.from('profiles').insert([{
           id: p.id,
-          abha_id: p.abhaId,
+          abha_id: p.abhaId || p.abha_id,
           name: p.name,
           phone: p.phone,
           age: p.age,
           gender: p.gender,
           village: p.village,
-          blood_group: p.bloodGroup
+          blood_group: p.bloodGroup || p.blood_group
         }]);
       } catch (e) {
         return this.enqueueOfflineAction('insert_profile', 'profiles', p);

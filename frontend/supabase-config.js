@@ -17,7 +17,7 @@
   const savedUrl = localStorage.getItem(STORAGE_KEY_URL);
   const savedKey = localStorage.getItem(STORAGE_KEY_KEY);
 
-  global.SUPABASE_CONFIG = {
+  const supabaseConfigObj = {
     url: savedUrl || PROJECT_URL,
     anonKey: savedKey || PROJECT_KEY,
 
@@ -45,5 +45,8 @@
       }
     }
   };
+
+  global.SUPABASE_CONFIG = supabaseConfigObj;
+  global.supabaseConfig = supabaseConfigObj;
 
 })(typeof window !== 'undefined' ? window : this);

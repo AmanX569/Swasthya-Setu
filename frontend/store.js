@@ -173,7 +173,7 @@
       const matchedRoles = [];
 
       matchingStaff.forEach(s => {
-        const staffPass = s.password || s.pin || s.password_hash;
+        const staffPass = (s.password || s.pin || s.password_hash || '').trim();
         if (staffPass === inputPass) {
           if (!matchedRoles.some(r => r.role === s.role)) {
             matchedRoles.push({ role: s.role, user: s, label: s.name + ' (' + s.role.toUpperCase() + ')' });
@@ -182,7 +182,7 @@
       });
 
       matchingPatients.forEach(p => {
-        const patPass = p.password || p.pin || '123456';
+        const patPass = (p.password || p.pin || '123456').trim();
         if (patPass === inputPass) {
           if (!matchedRoles.some(r => r.role === 'patient')) {
             matchedRoles.push({ role: 'patient', user: p, label: p.name + ' (CITIZEN)' });
