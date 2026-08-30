@@ -854,6 +854,10 @@ table td strong {
 
   <!-- TOP TASKBAR SYSTEM CONTROLS -->
   <div class="top-controls" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <span class="btn-glass btn-taskbar-item" id="networkStatusBadge" style="display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:800;padding:6px 10px;border-radius:10px;cursor:default;">
+      🟢 Online
+    </span>
+
     <button class="btn-glass btn-taskbar-item" id="btnNavHome" onclick="goToHome()" style="display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;padding:7px 12px;cursor:pointer;border-radius:10px;">
       🏠 <span>Home</span>
     </button>
@@ -2869,6 +2873,19 @@ window.toast = function(msg) {
     window._toastTimer = setTimeout(() => { el.style.display = 'none'; }, 2800);
   }
 };
+
+
+// Register PWA Service Worker for 100% Offline Capability
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').then((reg) => {
+      console.log('[PWA] ServiceWorker registered successfully for offline support:', reg.scope);
+    }).catch((err) => {
+      console.warn('[PWA] ServiceWorker registration warning:', err);
+    });
+  });
+}
+
 
 document.addEventListener('DOMContentLoaded', () => {
   renderActivePortalView();

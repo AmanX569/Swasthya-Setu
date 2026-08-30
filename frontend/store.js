@@ -235,7 +235,7 @@
       this.state.session = { isLoggedIn: true, role: 'patient', user: newPatient };
       this.saveState();
 
-      if (global.supabaseService && global.supabaseService.isOnline) {
+      if (global.supabaseService) {
         global.supabaseService.insertProfile(newPatient);
       }
       return { success: true, user: newPatient };
@@ -260,7 +260,7 @@
           if (p) p.password = newPassword;
         }
         this.saveState();
-        if (global.supabaseService && global.supabaseService.isOnline) {
+        if (global.supabaseService) {
           global.supabaseService.updateProfilePassword(activeUser.phone || activeUser.abhaId, newPassword);
         }
       } else {
@@ -270,7 +270,7 @@
           staffObj.pin = newPassword;
         }
         this.saveState();
-        if (global.supabaseService && global.supabaseService.isOnline) {
+        if (global.supabaseService) {
           global.supabaseService.updateStaffPassword(activeUser.id || activeUser.staff_code, newPassword);
         }
       }
@@ -299,7 +299,7 @@
       this.state.staff.unshift(newStaff);
       this.saveState();
 
-      if (global.supabaseService && global.supabaseService.isOnline) {
+      if (global.supabaseService) {
         global.supabaseService.insertStaff(newStaff);
       }
 
@@ -317,7 +317,7 @@
       this.state.staff = (this.state.staff || []).filter(s => s.id !== id && s.staff_code !== id && s.phone !== id);
       this.saveState();
 
-      if (global.supabaseService && global.supabaseService.isOnline) {
+      if (global.supabaseService) {
         global.supabaseService.deleteStaff(id);
       }
 
@@ -404,7 +404,7 @@
 
       this.saveState();
 
-      if (global.supabaseService && global.supabaseService.isOnline) {
+      if (global.supabaseService) {
         global.supabaseService.insertProfile(newPatient);
         global.supabaseService.insertQueuePatient(queueItem);
       }
@@ -419,7 +419,7 @@
 
     // Patient Direct Teleconsultation Request to Doctor
     requestDoctorConsult(consultData) {
-      const user = this.state.currentUser || (this.state.session ? this.state.session.user : { name: 'Citizen Patient', phone: '9876543210' });
+      const user = this.state.currentUser || (this.state.session && this.state.session.user) || { name: 'Citizen Patient', phone: '9876543210' };
       const tokenNum = String((this.state.consultQueue || []).length + 1).padStart(2, '0');
       
       const queueItem = {
@@ -444,7 +444,7 @@
       this.state.consultQueue.unshift(queueItem);
       this.saveState();
 
-      if (global.supabaseService && global.supabaseService.isOnline) {
+      if (global.supabaseService) {
         global.supabaseService.insertQueuePatient(queueItem);
       }
 
@@ -489,7 +489,7 @@
       if (!this.state.consultQueue) this.state.consultQueue = [];
       this.state.consultQueue.push(newItem);
       this.saveState();
-      if (global.supabaseService && global.supabaseService.isOnline) {
+      if (global.supabaseService) {
         global.supabaseService.insertQueuePatient(newItem);
       }
       return newItem;
@@ -500,7 +500,7 @@
       this.state.prescriptions = (this.state.prescriptions || []).filter(r => r.id !== rxId && r.token !== rxId);
       this.saveState();
 
-      if (global.supabaseService && global.supabaseService.isOnline) {
+      if (global.supabaseService) {
         global.supabaseService.deletePrescription(rxId);
       }
 
@@ -526,7 +526,7 @@
         if (!this.state.prescriptions) this.state.prescriptions = [];
         this.state.prescriptions.unshift(newRx);
         
-        if (global.supabaseService && global.supabaseService.isOnline) {
+        if (global.supabaseService) {
           global.supabaseService.insertPrescription(newRx);
           global.supabaseService.deleteQueueItem(queueId);
         }
@@ -541,7 +541,7 @@
       if (!this.state.ancRecords) this.state.ancRecords = [];
       this.state.ancRecords.unshift(newRec);
       this.saveState();
-      if (global.supabaseService && global.supabaseService.isOnline) {
+      if (global.supabaseService) {
         global.supabaseService.insertAncRecord(newRec);
       }
       return newRec;
@@ -552,7 +552,7 @@
       if (!this.state.immunizations) this.state.immunizations = [];
       this.state.immunizations.unshift(newImm);
       this.saveState();
-      if (global.supabaseService && global.supabaseService.isOnline) {
+      if (global.supabaseService) {
         global.supabaseService.insertImmunization(newImm);
       }
       return newImm;
@@ -563,7 +563,7 @@
       if (!this.state.homeVisits) this.state.homeVisits = [];
       this.state.homeVisits.unshift(newVis);
       this.saveState();
-      if (global.supabaseService && global.supabaseService.isOnline) {
+      if (global.supabaseService) {
         global.supabaseService.insertHomeVisit(newVis);
       }
       return newVis;
@@ -593,7 +593,7 @@
         if (type === 'icu') hosp.icuBedsAvail = Math.max(0, hosp.icuBedsAvail + delta);
         if (type === 'oxygen') hosp.oxygenBedsAvail = Math.max(0, hosp.oxygenBedsAvail + delta);
         this.saveState();
-        if (global.supabaseService && global.supabaseService.isOnline) {
+        if (global.supabaseService) {
           global.supabaseService.updateBedsCount(hosp.id, hosp.genBedsAvail, hosp.icuBedsAvail, hosp.oxygenBedsAvail);
         }
       }
@@ -603,7 +603,7 @@
       if (this.state.bloodBank && this.state.bloodBank[group] !== undefined) {
         this.state.bloodBank[group] = Math.max(0, this.state.bloodBank[group] + delta);
         this.saveState();
-        if (global.supabaseService && global.supabaseService.isOnline) {
+        if (global.supabaseService) {
           global.supabaseService.updateBloodUnits(group, this.state.bloodBank[group]);
         }
       }
@@ -614,7 +614,7 @@
       if (!this.state.medicines) this.state.medicines = [];
       this.state.medicines.unshift(newMed);
       this.saveState();
-      if (global.supabaseService && global.supabaseService.isOnline) {
+      if (global.supabaseService) {
         global.supabaseService.insertMedicine(newMed);
       }
       return newMed;
@@ -624,7 +624,7 @@
       if (!this.state.medicines) return;
       this.state.medicines = this.state.medicines.filter(m => m.id !== id);
       this.saveState();
-      if (global.supabaseService && global.supabaseService.isOnline) {
+      if (global.supabaseService) {
         global.supabaseService.deleteMedicine(id);
       }
     }

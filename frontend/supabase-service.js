@@ -1,7 +1,7 @@
 /**
  * =========================================================
- * SWASTHYA SETU - SUPABASE SERVICE CLIENT (supabase-service.js)
- * Production-grade PostgreSQL CRUD & Realtime Channels
+ * SWASTHYA SETU - SUPABASE CLOUD & OFFLINE SYNC SERVICE
+ * Full Bidirectional Sync, Realtime Streaming & Offline Outbox
  * =========================================================
  */
 
@@ -11,68 +11,357 @@
   class SupabaseService {
     constructor() {
       this.client = null;
-      this.isOnline = false;
+      this.isOnline = navigator.onLine !== false;
       this.channels = [];
+      this.syncInterval = null;
+      this.isSyncingOutbox = false;
+      this.init();
     }
 
     init() {
-      const config = global.SUPABASE_CONFIG;
-      if (!config || !config.isConfigured()) {
-        console.info('[Supabase] No credentials configured. Using local reactive store.');
-        this.updateBadgeUI(false);
-        return false;
+      const config = global.supabaseConfig || {};
+      if (config.url && config.anonKey && global.supabase && typeof global.supabase.createClient === 'function') {
+        try {
+          this.client = global.supabase.createClient(config.url, config.anonKey, {
+            realtime: {
+              params: {
+                eventsPerSecond: 10
+              }
+            }
+          });
+          console.log('[Supabase Service] Initialized Cloud Client successfully');
+          this.checkConnection();
+        } catch (e) {
+          console.warn('[Supabase Service] Client initialization warning:', e);
+        }
       }
 
-      if (typeof global.supabase === 'undefined' || typeof global.supabase.createClient !== 'function') {
-        console.warn('[Supabase] @supabase/supabase-js library not loaded.');
-        this.updateBadgeUI(false);
+      this.initNetworkListeners();
+    }
+
+    initNetworkListeners() {
+      if (typeof window === 'undefined' || typeof window.addEventListener !== 'function') return;
+
+      window.addEventListener('online', () => {
+        console.log('[Network] Internet Connection Restored');
+        this.isOnline = true;
+        this.updateNetworkBadge();
+        if (global.toast) global.toast('📶 Internet Restored: Flushing Offline Outbox to Cloud...');
+        this.checkConnection().then(() => {
+          this.flushOfflineOutbox();
+        });
+      });
+
+      window.addEventListener('offline', () => {
+        console.log('[Network] Internet Connection Lost - Switching to Offline Outbox Mode');
+        this.isOnline = false;
+        this.updateNetworkBadge();
+        if (global.toast) global.toast('🟡 Offline Mode Active: Data will be saved locally & auto-synced when online');
+      });
+
+      // Initial badge update
+      this.updateNetworkBadge();
+
+      // Check pending outbox on startup
+      setTimeout(() => {
+        if (this.isOnline) this.flushOfflineOutbox();
+      }, 2000);
+    }
+
+    updateNetworkBadge() {
+      if (typeof document === 'undefined') return;
+      const badge = document.getElementById('networkStatusBadge');
+      if (!badge) return;
+
+      const outboxCount = this.getPendingOutboxCount();
+
+      if (!navigator.onLine || !this.isOnline) {
+        badge.innerHTML = `🟡 Offline Mode ${outboxCount > 0 ? '(' + outboxCount + ' queued)' : ''}`;
+        badge.style.background = 'rgba(245, 158, 11, 0.18)';
+        badge.style.color = '#d97706';
+        badge.style.borderColor = 'rgba(245, 158, 11, 0.4)';
+      } else if (this.isSyncingOutbox) {
+        badge.innerHTML = `🔄 Syncing (${outboxCount} pending)...`;
+        badge.style.background = 'rgba(2, 132, 199, 0.18)';
+        badge.style.color = '#0284c7';
+        badge.style.borderColor = 'rgba(2, 132, 199, 0.4)';
+      } else {
+        badge.innerHTML = `🟢 Online`;
+        badge.style.background = 'rgba(22, 163, 74, 0.15)';
+        badge.style.color = '#16a34a';
+        badge.style.borderColor = 'rgba(22, 163, 74, 0.35)';
+      }
+    }
+
+    // =========================================================================
+    // OFFLINE OUTBOX MANAGEMENT
+    // =========================================================================
+    getPendingOutbox() {
+      try {
+        const raw = localStorage.getItem('swasthya_setu_outbox');
+        return raw ? JSON.parse(raw) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    getPendingOutboxCount() {
+      return this.getPendingOutbox().length;
+    }
+
+    savePendingOutbox(outbox) {
+      try {
+        localStorage.setItem('swasthya_setu_outbox', JSON.stringify(outbox));
+        this.updateNetworkBadge();
+      } catch (e) {
+        console.error('[Outbox] Failed to save to localStorage:', e);
+      }
+    }
+
+    enqueueOfflineAction(action, table, payload) {
+      const outbox = this.getPendingOutbox();
+      const item = {
+        id: 'OUTBOX-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+        action,
+        table,
+        payload,
+        createdAt: new Date().toISOString()
+      };
+      outbox.push(item);
+      this.savePendingOutbox(outbox);
+      console.log('[Offline Outbox] Enqueued action:', action, 'on table:', table, item);
+
+      if (global.toast) {
+        global.toast('📦 Record queued in Offline Outbox (' + outbox.length + ' pending sync)');
+      }
+      return item;
+    }
+
+    async flushOfflineOutbox() {
+      if (this.isSyncingOutbox) return;
+      const outbox = this.getPendingOutbox();
+      if (!outbox.length || !this.client || !this.isOnline) {
+        this.updateNetworkBadge();
+        return;
+      }
+
+      this.isSyncingOutbox = true;
+      this.updateNetworkBadge();
+      console.log('[Offline Outbox] Flushing ' + outbox.length + ' queued actions to Cloud Database...');
+
+      let successCount = 0;
+      const remaining = [];
+
+      for (const item of outbox) {
+        try {
+          let res = null;
+          const p = item.payload;
+
+          switch (item.action) {
+            case 'insert_profile':
+              res = await this.client.from('profiles').insert([{
+                id: p.id,
+                abha_id: p.abhaId,
+                name: p.name,
+                phone: p.phone,
+                age: p.age,
+                gender: p.gender,
+                village: p.village,
+                blood_group: p.bloodGroup
+              }]);
+              break;
+
+            case 'insert_prescription':
+              res = await this.client.from('prescriptions').insert([{
+                id: p.id,
+                token: p.token,
+                patient_name: p.patientName,
+                doctor_name: p.doctorName,
+                rx_date: p.date,
+                diagnosis: p.diagnosis,
+                medicines: p.medicines,
+                advice: p.advice
+              }]);
+              break;
+
+            case 'delete_prescription':
+              res = await this.client.from('prescriptions').delete().or(`id.eq.${p.rxId},token.eq.${p.rxId}`);
+              break;
+
+            case 'insert_queue':
+              res = await this.client.from('consult_queue').insert([{
+                id: p.id,
+                token: p.token,
+                patient_name: p.patientName,
+                age: p.age,
+                gender: p.gender,
+                complaint: p.complaint,
+                bp: p.vitals ? p.vitals.bp : '120/80',
+                spo2: p.vitals ? p.vitals.spo2 : '98%',
+                temp: p.vitals ? p.vitals.temp : '98.6°F',
+                pulse: p.vitals ? p.vitals.pulse : '78 bpm',
+                triage: p.triage,
+                queue_time: p.time,
+                status: 'Waiting'
+              }]);
+              break;
+
+            case 'delete_queue':
+              res = await this.client.from('consult_queue').delete().eq('id', p.queueId);
+              break;
+
+            case 'insert_anc':
+              res = await this.client.from('anc_records').insert([{
+                id: p.id,
+                mother_name: p.motherName,
+                husband_name: p.husbandName,
+                age: p.age || 24,
+                village: p.village,
+                weeks: p.weeks,
+                edd: p.edd,
+                bp: p.bp,
+                hb: p.hb,
+                ifa_count: p.ifaCount || 90,
+                risk_level: p.riskLevel || 'Normal',
+                next_visit: p.nextVisit
+              }]);
+              break;
+
+            case 'insert_immunization':
+              res = await this.client.from('immunizations').insert([{
+                id: p.id,
+                child_name: p.childName,
+                parent_name: p.parentName,
+                dob: p.dob,
+                gender: p.gender,
+                village: p.village,
+                last_vaccine: p.lastVaccine,
+                next_due: p.nextDue,
+                status: p.status || 'Up to Date'
+              }]);
+              break;
+
+            case 'insert_visit':
+              res = await this.client.from('home_visits').insert([{
+                id: p.id,
+                household: p.household,
+                members: p.members || 4,
+                priority: p.priority || 'Routine Check',
+                task: p.task,
+                status: p.status || 'Pending'
+              }]);
+              break;
+
+            case 'insert_medicine':
+              res = await this.client.from('medicines').insert([{
+                id: p.id,
+                name: p.name,
+                category: p.category,
+                stock: p.stock,
+                unit: p.unit || 'Tablets',
+                generic_price: p.genericPrice,
+                brand_price: p.brandPrice,
+                status: p.status || 'In Stock'
+              }]);
+              break;
+
+            case 'delete_medicine':
+              res = await this.client.from('medicines').delete().eq('id', p.id);
+              break;
+
+            case 'update_beds':
+              res = await this.client.from('hospitals').update({
+                gen_beds_avail: p.genBeds,
+                icu_beds_avail: p.icuBeds,
+                oxygen_beds_avail: p.oxyBeds
+              }).eq('id', p.hospId);
+              break;
+
+            case 'update_blood':
+              res = await this.client.from('blood_bank').update({
+                units_available: p.count
+              }).eq('blood_group', p.group);
+              break;
+
+            case 'insert_staff':
+              res = await this.client.from('staff').insert([{
+                id: p.id,
+                staff_code: p.id,
+                name: p.name,
+                role: p.role,
+                phone: p.phone,
+                location: p.location,
+                status: p.status || 'Active',
+                reg_no: p.regNo,
+                password_hash: p.password || (p.role + '@123'),
+                pin: p.pin || '1234'
+              }]);
+              break;
+
+            case 'delete_staff':
+              res = await this.client.from('staff').delete().or(`id.eq.${p.id},staff_code.eq.${p.id}`);
+              break;
+          }
+
+          if (res && res.error) {
+            console.warn('[Outbox] Error syncing item:', item.action, res.error);
+            remaining.push(item);
+          } else {
+            successCount++;
+          }
+        } catch (err) {
+          console.warn('[Outbox] Network failure during item sync:', item.action, err);
+          remaining.push(item);
+        }
+      }
+
+      this.savePendingOutbox(remaining);
+      this.isSyncingOutbox = false;
+      this.updateNetworkBadge();
+
+      if (successCount > 0) {
+        console.log('[Offline Outbox] Successfully flushed ' + successCount + ' items to Cloud Database');
+        if (global.toast) {
+          global.toast('⚡ ' + successCount + ' offline records successfully synchronized to National Cloud!');
+        }
+        // Fetch latest cloud state and re-render all active portals
+        this.syncInitialData();
+      }
+    }
+
+    async checkConnection() {
+      if (!this.client || !navigator.onLine) {
+        this.isOnline = false;
+        this.updateNetworkBadge();
         return false;
       }
 
       try {
-        this.client = global.supabase.createClient(config.url, config.anonKey);
+        const { data, error } = await this.client.from('hospitals').select('id').limit(1);
+        if (error) throw error;
         this.isOnline = true;
-        this.updateBadgeUI(true);
-        console.log('✓ [Supabase] Connected to Cloud PostgreSQL at:', config.url);
+        this.updateNetworkBadge();
         this.setupRealtimeSubscriptions();
         this.syncInitialData();
         return true;
       } catch (err) {
-        console.error('[Supabase] Initialization failed:', err);
-        this.updateBadgeUI(false);
+        console.warn('[Supabase Service] Cloud database not reachable, working offline:', err.message);
+        this.isOnline = false;
+        this.updateNetworkBadge();
         return false;
       }
     }
 
-    updateBadgeUI(connected) {
-      const badge = document.getElementById('supabaseStatusBadge');
-      if (badge) {
-        if (connected) {
-          badge.style.display = 'inline-flex';
-          badge.style.background = 'rgba(22,163,74,0.15)';
-          badge.style.color = '#16a34a';
-          badge.style.border = '1px solid rgba(22,163,74,0.3)';
-          badge.innerHTML = '⚡ <span>Supabase Live</span>';
-        } else {
-          badge.style.display = 'inline-flex';
-          badge.style.background = 'var(--glass-2)';
-          badge.style.color = 'var(--muted)';
-          badge.style.border = '1px solid var(--glass-border)';
-          badge.innerHTML = '⚙️ <span>Supabase Setup</span>';
-        }
-      }
-    }
-
-    // Synchronize full state from Supabase Cloud to store
     async syncInitialData() {
-      if (!this.client || !global.appStore) return;
+      if (!this.client || !this.isOnline || !global.appStore) return;
+
       try {
-        const [qRes, hospRes, bloodRes, staffRes, profRes, ancRes, immRes, visRes, rxRes, medRes] = await Promise.all([
-          this.client.from('consult_queue').select('*').order('created_at', { ascending: false }),
-          this.client.from('hospitals').select('*').order('name'),
-          this.client.from('blood_bank').select('*'),
-          this.client.from('staff').select('*'),
+        const [profRes, staffRes, qRes, hospRes, bloodRes, ancRes, immRes, visRes, rxRes, medRes] = await Promise.all([
           this.client.from('profiles').select('*'),
+          this.client.from('staff').select('*'),
+          this.client.from('consult_queue').select('*').order('created_at', { ascending: true }),
+          this.client.from('hospitals').select('*'),
+          this.client.from('blood_bank').select('*'),
           this.client.from('anc_records').select('*').order('created_at', { ascending: false }),
           this.client.from('immunizations').select('*').order('created_at', { ascending: false }),
           this.client.from('home_visits').select('*').order('created_at', { ascending: false }),
@@ -207,56 +496,54 @@
 
         if (medRes.data && medRes.data.length) {
           patch.medicines = medRes.data.map(m => ({
-            id: m.id,
+            id: m.id || ('DRUG-' + String(Date.now()).slice(-4)),
             name: m.name,
             category: m.category,
             stock: m.stock,
             unit: m.unit,
-            genericPrice: Number(m.generic_price),
-            brandPrice: Number(m.brand_price),
-            status: m.status
+            genericPrice: Number(m.generic_price || m.genericPrice || 10),
+            brandPrice: Number(m.brand_price || m.brandPrice || 50),
+            status: m.status || 'In Stock'
           }));
         }
 
         Object.assign(global.appStore.state, patch);
         global.appStore.saveState();
 
-        // Trigger active UI re-renders across all portals
+        // Re-render UI components across all portals
         if (global.patientController) {
-          if (typeof global.patientController.renderHospitals === 'function') global.patientController.renderHospitals();
-          if (typeof global.patientController.renderBloodBank === 'function') global.patientController.renderBloodBank();
-        }
-        if (global.adminController && typeof global.adminController.renderAdminMedicines === 'function') {
-          global.adminController.renderAdminMedicines();
-        }
-        if (global.patientController && typeof global.patientController.renderDailyMeds === 'function') {
-          global.patientController.renderDailyMeds();
+          if (typeof global.patientController.renderDailyMedications === 'function') global.patientController.renderDailyMedications();
+          if (typeof global.patientController.renderFamilyCircle === 'function') global.patientController.renderFamilyCircle();
+          if (typeof global.patientController.renderLiveHospitals === 'function') global.patientController.renderLiveHospitals();
+          if (typeof global.patientController.renderLiveBloodBank === 'function') global.patientController.renderLiveBloodBank();
+          if (typeof global.patientController.renderPrescriptions === 'function') global.patientController.renderPrescriptions();
         }
         if (global.doctorController) {
           if (typeof global.doctorController.renderQueue === 'function') global.doctorController.renderQueue();
-          if (typeof global.doctorController.renderStats === 'function') global.doctorController.renderStats();
-          if (typeof global.doctorController.renderPrescriptions === 'function') global.doctorController.renderPrescriptions();
+          if (typeof global.doctorController.renderPrescriptionHistory === 'function') global.doctorController.renderPrescriptionHistory();
         }
         if (global.workerController) {
-          if (typeof global.workerController.renderAnc === 'function') global.workerController.renderAnc();
-          if (typeof global.workerController.renderImmunizations === 'function') global.workerController.renderImmunizations();
-          if (typeof global.workerController.renderVisits === 'function') global.workerController.renderVisits();
+          if (typeof global.workerController.renderAncTable === 'function') global.workerController.renderAncTable();
+          if (typeof global.workerController.renderUipTable === 'function') global.workerController.renderUipTable();
+          if (typeof global.workerController.renderHomeVisits === 'function') global.workerController.renderHomeVisits();
+          if (typeof global.workerController.renderMasterRegistry === 'function') global.workerController.renderMasterRegistry();
         }
         if (global.adminController) {
-          if (typeof global.adminController.renderStats === 'function') global.adminController.renderStats();
+          if (typeof global.adminController.renderAdminMedicines === 'function') global.adminController.renderAdminMedicines();
           if (typeof global.adminController.renderStaffTable === 'function') global.adminController.renderStaffTable();
-          if (typeof global.adminController.renderHospitals === 'function') global.adminController.renderHospitals();
-          if (typeof global.adminController.renderBloodBank === 'function') global.adminController.renderBloodBank();
-          if (typeof global.adminController.renderMedicines === 'function') global.adminController.renderMedicines();
+          if (typeof global.adminController.renderAdminBeds === 'function') global.adminController.renderAdminBeds();
+          if (typeof global.adminController.renderAdminBlood === 'function') global.adminController.renderAdminBlood();
+          if (typeof global.adminController.renderKpis === 'function') global.adminController.renderKpis();
         }
+
+        console.log('[Supabase Cloud] State successfully synchronized with Cloud Database');
       } catch (err) {
-        console.warn('[Supabase] Sync warning:', err);
+        console.warn('[Supabase Cloud] Synchronization warning:', err.message);
       }
     }
 
-    // Realtime Subscriptions across all tables
     setupRealtimeSubscriptions() {
-      if (!this.client) return;
+      if (!this.client || !this.isOnline) return;
 
       this.channels.forEach(ch => this.client.removeChannel(ch));
       this.channels = [];
@@ -274,21 +561,6 @@
               if (global.toast) {
                 global.toast('🔔 New e-Prescription Received from ' + (newRx.doctor_name || 'Doctor') + '! Tap to View & Download PDF');
               }
-              // Play audio chime
-              try {
-                const ctx = new (window.AudioContext || window.webkitAudioContext)();
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
-                osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.3); // A5
-                gain.gain.setValueAtTime(0.3, ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
-                osc.connect(gain);
-                gain.connect(ctx.destination);
-                osc.start();
-                osc.stop(ctx.currentTime + 0.4);
-              } catch(e) {}
             }
 
             this.syncInitialData();
@@ -298,184 +570,252 @@
       });
     }
 
-    // Comprehensive Write Methods
+    // =========================================================================
+    // WRITE OPERATIONS WITH RESILIENT OFFLINE FALLBACK
+    // =========================================================================
     async deletePrescription(rxId) {
-      if (!this.client) return;
-      console.log('[Supabase] Deleting prescription from Cloud:', rxId);
-      return await this.client.from('prescriptions').delete().or(`id.eq.${rxId},token.eq.${rxId}`);
+      if (!this.client || !this.isOnline) {
+        return this.enqueueOfflineAction('delete_prescription', 'prescriptions', { rxId });
+      }
+      try {
+        return await this.client.from('prescriptions').delete().or(`id.eq.${rxId},token.eq.${rxId}`);
+      } catch (e) {
+        return this.enqueueOfflineAction('delete_prescription', 'prescriptions', { rxId });
+      }
     }
 
     async insertPrescription(rx) {
-      if (!this.client) return;
-      return await this.client.from('prescriptions').insert([{
-        token: rx.token,
-        patient_name: rx.patientName,
-        doctor_name: rx.doctorName,
-        rx_date: rx.date,
-        diagnosis: rx.diagnosis,
-        medicines: rx.medicines,
-        advice: rx.advice
-      }]);
+      if (!this.client || !this.isOnline) {
+        return this.enqueueOfflineAction('insert_prescription', 'prescriptions', rx);
+      }
+      try {
+        return await this.client.from('prescriptions').insert([{
+          id: rx.id,
+          token: rx.token,
+          patient_name: rx.patientName,
+          doctor_name: rx.doctorName,
+          rx_date: rx.date,
+          diagnosis: rx.diagnosis,
+          medicines: rx.medicines,
+          advice: rx.advice
+        }]);
+      } catch (e) {
+        return this.enqueueOfflineAction('insert_prescription', 'prescriptions', rx);
+      }
     }
 
     async deleteQueueItem(queueId) {
-      if (!this.client) return;
-      console.log('[Supabase] Removing completed patient from Queue:', queueId);
-      return await this.client.from('consult_queue').delete().eq('id', queueId);
+      if (!this.client || !this.isOnline) {
+        return this.enqueueOfflineAction('delete_queue', 'consult_queue', { queueId });
+      }
+      try {
+        return await this.client.from('consult_queue').delete().eq('id', queueId);
+      } catch (e) {
+        return this.enqueueOfflineAction('delete_queue', 'consult_queue', { queueId });
+      }
     }
 
     async insertQueuePatient(item) {
-      if (!this.client) return;
-      return await this.client.from('consult_queue').insert([{
-        token: item.token,
-        patient_name: item.patientName,
-        age: item.age,
-        gender: item.gender,
-        complaint: item.complaint,
-        bp: item.vitals ? item.vitals.bp : '120/80',
-        spo2: item.vitals ? item.vitals.spo2 : '98%',
-        temp: item.vitals ? item.vitals.temp : '98.6°F',
-        pulse: item.vitals ? item.vitals.pulse : '78 bpm',
-        triage: item.triage,
-        queue_time: item.time,
-        status: 'Waiting'
-      }]);
+      if (!this.client || !this.isOnline) {
+        return this.enqueueOfflineAction('insert_queue', 'consult_queue', item);
+      }
+      try {
+        return await this.client.from('consult_queue').insert([{
+          id: item.id,
+          token: item.token,
+          patient_name: item.patientName,
+          age: item.age,
+          gender: item.gender,
+          complaint: item.complaint,
+          bp: item.vitals ? item.vitals.bp : '120/80',
+          spo2: item.vitals ? item.vitals.spo2 : '98%',
+          temp: item.vitals ? item.vitals.temp : '98.6°F',
+          pulse: item.vitals ? item.vitals.pulse : '78 bpm',
+          triage: item.triage,
+          queue_time: item.time,
+          status: 'Waiting'
+        }]);
+      } catch (e) {
+        return this.enqueueOfflineAction('insert_queue', 'consult_queue', item);
+      }
     }
 
     async updateBedsCount(hospId, genBeds, icuBeds, oxyBeds) {
-      if (!this.client) return;
-      return await this.client.from('hospitals').update({
-        gen_beds_avail: genBeds,
-        icu_beds_avail: icuBeds,
-        oxygen_beds_avail: oxyBeds
-      }).eq('id', hospId);
+      if (!this.client || !this.isOnline) {
+        return this.enqueueOfflineAction('update_beds', 'hospitals', { hospId, genBeds, icuBeds, oxyBeds });
+      }
+      try {
+        return await this.client.from('hospitals').update({
+          gen_beds_avail: genBeds,
+          icu_beds_avail: icuBeds,
+          oxygen_beds_avail: oxyBeds
+        }).eq('id', hospId);
+      } catch (e) {
+        return this.enqueueOfflineAction('update_beds', 'hospitals', { hospId, genBeds, icuBeds, oxyBeds });
+      }
     }
 
     async updateBloodUnits(group, count) {
-      if (!this.client) return;
-      return await this.client.from('blood_bank').update({
-        units_available: count
-      }).eq('blood_group', group);
+      if (!this.client || !this.isOnline) {
+        return this.enqueueOfflineAction('update_blood', 'blood_bank', { group, count });
+      }
+      try {
+        return await this.client.from('blood_bank').update({
+          units_available: count
+        }).eq('blood_group', group);
+      } catch (e) {
+        return this.enqueueOfflineAction('update_blood', 'blood_bank', { group, count });
+      }
     }
 
     async insertAncRecord(a) {
-      if (!this.client) return;
-      return await this.client.from('anc_records').insert([{
-        mother_name: a.motherName,
-        husband_name: a.husbandName,
-        age: a.age || 24,
-        village: a.village,
-        weeks: a.weeks,
-        edd: a.edd,
-        bp: a.bp,
-        hb: a.hb,
-        ifa_count: a.ifaCount || 90,
-        risk_level: a.riskLevel || 'Normal',
-        next_visit: a.nextVisit
-      }]);
+      if (!this.client || !this.isOnline) {
+        return this.enqueueOfflineAction('insert_anc', 'anc_records', a);
+      }
+      try {
+        return await this.client.from('anc_records').insert([{
+          id: a.id,
+          mother_name: a.motherName,
+          husband_name: a.husbandName,
+          age: a.age || 24,
+          village: a.village,
+          weeks: a.weeks,
+          edd: a.edd,
+          bp: a.bp,
+          hb: a.hb,
+          ifa_count: a.ifaCount || 90,
+          risk_level: a.riskLevel || 'Normal',
+          next_visit: a.nextVisit
+        }]);
+      } catch (e) {
+        return this.enqueueOfflineAction('insert_anc', 'anc_records', a);
+      }
     }
 
     async insertImmunization(i) {
-      if (!this.client) return;
-      return await this.client.from('immunizations').insert([{
-        child_name: i.childName,
-        parent_name: i.parentName,
-        dob: i.dob,
-        gender: i.gender,
-        village: i.village,
-        last_vaccine: i.lastVaccine,
-        next_due: i.nextDue,
-        status: i.status || 'Up to Date'
-      }]);
+      if (!this.client || !this.isOnline) {
+        return this.enqueueOfflineAction('insert_immunization', 'immunizations', i);
+      }
+      try {
+        return await this.client.from('immunizations').insert([{
+          id: i.id,
+          child_name: i.childName,
+          parent_name: i.parentName,
+          dob: i.dob,
+          gender: i.gender,
+          village: i.village,
+          last_vaccine: i.lastVaccine,
+          next_due: i.nextDue,
+          status: i.status || 'Up to Date'
+        }]);
+      } catch (e) {
+        return this.enqueueOfflineAction('insert_immunization', 'immunizations', i);
+      }
     }
 
     async insertHomeVisit(v) {
-      if (!this.client) return;
-      return await this.client.from('home_visits').insert([{
-        household: v.household,
-        members: v.members || 4,
-        priority: v.priority || 'Routine Check',
-        task: v.task,
-        status: v.status || 'Pending'
-      }]);
-    }
-
-    async deleteMedicine(id) {
-      if (!this.client) return;
-      console.log('[Supabase] Deleting medicine:', id);
-      return await this.client.from('medicines').delete().eq('id', id);
+      if (!this.client || !this.isOnline) {
+        return this.enqueueOfflineAction('insert_visit', 'home_visits', v);
+      }
+      try {
+        return await this.client.from('home_visits').insert([{
+          id: v.id,
+          household: v.household,
+          members: v.members || 4,
+          priority: v.priority || 'Routine Check',
+          task: v.task,
+          status: v.status || 'Pending'
+        }]);
+      } catch (e) {
+        return this.enqueueOfflineAction('insert_visit', 'home_visits', v);
+      }
     }
 
     async insertMedicine(m) {
-      if (!this.client) return;
-      return await this.client.from('medicines').insert([{
-        name: m.name,
-        category: m.category,
-        stock: m.stock,
-        unit: m.unit || 'Tablets',
-        generic_price: m.genericPrice,
-        brand_price: m.brandPrice,
-        status: m.status || 'In Stock'
-      }]);
+      if (!this.client || !this.isOnline) {
+        return this.enqueueOfflineAction('insert_medicine', 'medicines', m);
+      }
+      try {
+        return await this.client.from('medicines').insert([{
+          id: m.id,
+          name: m.name,
+          category: m.category,
+          stock: m.stock,
+          unit: m.unit || 'Tablets',
+          generic_price: m.genericPrice,
+          brand_price: m.brandPrice,
+          status: m.status || 'In Stock'
+        }]);
+      } catch (e) {
+        return this.enqueueOfflineAction('insert_medicine', 'medicines', m);
+      }
+    }
+
+    async deleteMedicine(id) {
+      if (!this.client || !this.isOnline) {
+        return this.enqueueOfflineAction('delete_medicine', 'medicines', { id });
+      }
+      try {
+        return await this.client.from('medicines').delete().eq('id', id);
+      } catch (e) {
+        return this.enqueueOfflineAction('delete_medicine', 'medicines', { id });
+      }
     }
 
     async insertStaff(s) {
-      if (!this.client) return;
-      return await this.client.from('staff').insert([{
-        staff_code: s.id,
-        name: s.name,
-        role: s.role,
-        phone: s.phone,
-        location: s.location,
-        status: s.status || 'Active',
-        reg_no: s.regNo,
-        password_hash: s.password || (s.role + '@123'),
-        pin: s.pin || '1234'
-      }]);
+      if (!this.client || !this.isOnline) {
+        return this.enqueueOfflineAction('insert_staff', 'staff', s);
+      }
+      try {
+        return await this.client.from('staff').insert([{
+          id: s.id,
+          staff_code: s.id,
+          name: s.name,
+          role: s.role,
+          phone: s.phone,
+          location: s.location,
+          status: s.status || 'Active',
+          reg_no: s.regNo,
+          password_hash: s.password || (s.role + '@123'),
+          pin: s.pin || '1234'
+        }]);
+      } catch (e) {
+        return this.enqueueOfflineAction('insert_staff', 'staff', s);
+      }
     }
 
-    async deleteStaff(staffCode) {
-      if (!this.client) return;
-      console.log('[Supabase] Deleting staff member from Cloud:', staffCode);
-      return await this.client.from('staff').delete().or(`staff_code.eq.${staffCode},id.eq.${staffCode},phone.eq.${staffCode}`);
-    }
-
-    async updateStaffPassword(staffCode, newPassword) {
-      if (!this.client) return;
-      return await this.client.from('staff').update({
-        password_hash: newPassword,
-        pin: newPassword
-      }).or(`staff_code.eq.${staffCode},id.eq.${staffCode},phone.eq.${staffCode}`);
+    async deleteStaff(id) {
+      if (!this.client || !this.isOnline) {
+        return this.enqueueOfflineAction('delete_staff', 'staff', { id });
+      }
+      try {
+        return await this.client.from('staff').delete().or(`id.eq.${id},staff_code.eq.${id}`);
+      } catch (e) {
+        return this.enqueueOfflineAction('delete_staff', 'staff', { id });
+      }
     }
 
     async insertProfile(p) {
-      if (!this.client) return;
-      return await this.client.from('profiles').insert([{
-        abha_id: p.abhaId,
-        phone: p.phone,
-        name: p.name,
-        age: p.age,
-        gender: p.gender,
-        village: p.village,
-        blood_group: p.bloodGroup,
-        role: 'patient'
-      }]);
-    }
-
-    async updateProfilePassword(phoneOrAbha, newPassword) {
-      if (!this.client) return;
-      return await this.client.from('profiles').update({
-        blood_group: newPassword
-      }).or(`phone.eq.${phoneOrAbha},abha_id.eq.${phoneOrAbha}`);
+      if (!this.client || !this.isOnline) {
+        return this.enqueueOfflineAction('insert_profile', 'profiles', p);
+      }
+      try {
+        return await this.client.from('profiles').insert([{
+          id: p.id,
+          abha_id: p.abhaId,
+          name: p.name,
+          phone: p.phone,
+          age: p.age,
+          gender: p.gender,
+          village: p.village,
+          blood_group: p.bloodGroup
+        }]);
+      } catch (e) {
+        return this.enqueueOfflineAction('insert_profile', 'profiles', p);
+      }
     }
   }
 
   global.supabaseService = new SupabaseService();
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => global.supabaseService.init());
-  } else {
-    global.supabaseService.init();
-  }
 
 })(typeof window !== 'undefined' ? window : this);
