@@ -609,8 +609,8 @@
       }
     }
 
-    addMedicine(med) {
-      const newMed = { id: 'DRUG-' + String(Date.now()).slice(-4), status: 'In Stock', ...med };
+        addMedicine(med) {
+      const newMed = { id: med.id || ('DRUG-' + String(Date.now()).slice(-4)), status: 'In Stock', ...med };
       if (!this.state.medicines) this.state.medicines = [];
       this.state.medicines.unshift(newMed);
       this.saveState();
@@ -618,6 +618,15 @@
         global.supabaseService.insertMedicine(newMed);
       }
       return newMed;
+    }
+
+    deleteMedicine(id) {
+      if (!this.state.medicines) return;
+      this.state.medicines = this.state.medicines.filter(m => m.id !== id);
+      this.saveState();
+      if (global.supabaseService && global.supabaseService.isOnline) {
+        global.supabaseService.deleteMedicine(id);
+      }
     }
   }
 

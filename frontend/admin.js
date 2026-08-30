@@ -176,84 +176,53 @@
       this.store.updateBloodStock(grp, delta);
     }
 
-    renderAdminMedicines() {
-      const el = document.getElementById('adminMedicinesTableBody');
+        renderAdminMedicines() {
+      const el = document.getElementById('adminDrugTableBody') || document.getElementById('adminMedicinesTableBody');
       if (!el || !this.store) return;
       const meds = this.store.getState().medicines || [];
 
-      const medKeyMap = {
-        'DRUG-01': 'med_paracetamol',
-        'DRUG-02': 'med_amoxicillin',
-        'DRUG-03': 'med_metformin',
-        'DRUG-04': 'med_amlodipine',
-        'DRUG-05': 'med_ors',
-        'DRUG-06': 'med_ifa'
-      };
-
-      const catKeyMap = {
-        'DRUG-01': 'cat_fever',
-        'DRUG-02': 'cat_antibiotic',
-        'DRUG-03': 'cat_diabetes',
-        'DRUG-04': 'cat_bp',
-        'DRUG-05': 'cat_dehydration',
-        'DRUG-06': 'cat_maternal'
-      };
+      if (!meds.length) {
+        el.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--muted);">No medicines in Jan Aushadhi Catalog. Click "+ Add Medicine" to add.</td></tr>';
+        return;
+      }
 
       el.innerHTML = meds.map(m => {
-        const localizedName = this.t(medKeyMap[m.id], m.name);
-        const localizedCat = this.t(catKeyMap[m.id], m.category);
+        const savings = Math.max(0, (m.brandPrice || 0) - (m.genericPrice || 0));
+        const savingsPct = m.brandPrice > 0 ? Math.round((savings / m.brandPrice) * 100) : 0;
 
         return `
           <tr>
-            <td><strong style="color:var(--ink);font-size:14px;">${localizedName}</strong></td>
-            <td style="color:var(--muted);">${localizedCat}</td>
-            <td><strong style="color:var(--ink)">${m.stock}</strong> <small style="color:var(--muted)">${m.unit}</small></td>
-            <td style="color:#16a34a;font-weight:700;">₹${m.genericPrice}</td>
-            <td style="text-decoration:line-through;color:var(--muted);">₹${m.brandPrice}</td>
-            <td><span class="badge" style="background:rgba(22,163,74,0.15);color:#22c55e;padding:4px 8px;border-radius:12px;font-size:11px;font-weight:700;">${m.status}</span></td>
+            <td>
+              <strong style="color:var(--ink);font-size:14px;display:block;">${m.name}</strong>
+              <small style="color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:11px;">${m.id || 'DRUG'}</small>
+            </td>
+            <td style="color:var(--ink-dim);font-weight:600;">${m.category || 'General Medicine'}</td>
+            <td><strong style="color:var(--ink);font-weight:800;">${m.stock || 100}</strong> <small style="color:var(--muted);">${m.unit || 'Tablets'}</small></td>
+            <td style="color:#15803d;font-weight:900;font-size:14px;">₹${m.genericPrice}</td>
+            <td style="text-decoration:line-through;color:var(--muted);font-size:13px;">₹${m.brandPrice}</td>
+            <td>
+              <span class="badge" style="background:rgba(22,163,74,0.15);color:#15803d;padding:4px 8px;border-radius:12px;font-size:11px;font-weight:800;">
+                ${savingsPct > 0 ? savingsPct + '% OFF' : 'In Stock'}
+              </span>
+            </td>
+            <td>
+              <button style="color:#ef4444;background:none;border:none;cursor:pointer;font-size:12px;font-weight:800;" onclick="adminController.removeMedicine('${m.id}')" title="Delete Medicine">✕ Remove</button>
+            </td>
           </tr>
         `;
       }).join('');
     }
 
-    
-    openProvisionStaffModal() {
-      const m = document.getElementById('provisionStaffModal');
-      if (m) m.style.display = 'flex';
-    }
-
-    closeProvisionStaffModal() {
-      const m = document.getElementById('provisionStaffModal');
-      if (m) m.style.display = 'none';
-    }
-
-    submitProvisionStaff(e) {
-      if (e) e.preventDefault();
-      const role = document.getElementById('provStaffRole').value;
-      const name = document.getElementById('provStaffName').value.trim();
-      const phone = document.getElementById('provStaffPhone').value.trim();
-      const location = document.getElementById('provStaffLocation').value.trim();
-      const regNo = document.getElementById('provStaffRegNo').value.trim();
-      const password = document.getElementById('provStaffPassword').value.trim();
-
-      if (!name || !phone || !password) {
-        alert('Please fill in Name, Phone, and Temporary Password');
-        return;
-      }
-
-      const newMember = this.store.provisionStaffMember(role, {
-        name,
-        phone,
-        location: location || 'District Health Center',
-        regNo: regNo || (role.toUpperCase() + '-AP-' + Math.floor(1000 + Math.random() * 9000)),
-        password
-      });
-
-      this.closeProvisionStaffModal();
-      this.renderStaff();
-      this.renderStats();
-      if (typeof window.toast === 'function') {
-        window.toast('✓ Successfully provisioned ' + role.toUpperCase() + ': ' + newMember.name + ' (' + newMember.id + ')');
+    removeMedicine(id) {
+      if (confirm('Are you sure you want to remove this medicine from Jan Aushadhi catalog?')) {
+        this.store.deleteMedicine(id);
+        this.renderAdminMedicines();
+        if (global.patientController && typeof global.patientController.renderDailyMedications === 'function') {
+          global.patientController.renderDailyMedications();
+        }
+        if (typeof window.toast === 'function') {
+          window.toast('✓ Removed medicine from Jan Aushadhi Inventory');
+        }
       }
     }
 
@@ -267,7 +236,7 @@
       if (m) m.style.display = 'none';
     }
 
-        submitAddDrug(e) {
+    submitAddDrug(e) {
       if (e) e.preventDefault();
       const name = document.getElementById('drugName').value.trim();
       const category = document.getElementById('drugCat').value.trim();
@@ -293,7 +262,7 @@
       // Clear input fields
       document.getElementById('drugName').value = '';
       document.getElementById('drugCat').value = '';
-      document.getElementById('drugStock').value = '';
+      document.getElementById('drugStock').value = '200';
       document.getElementById('drugGenPrice').value = '';
       document.getElementById('drugBrandPrice').value = '';
 
@@ -303,12 +272,12 @@
       this.renderAdminMedicines();
 
       // Immediately re-render Patient Jan Aushadhi generic catalog on the spot
-      if (global.patientController && typeof global.patientController.renderDailyMeds === 'function') {
-        global.patientController.renderDailyMeds();
+      if (global.patientController && typeof global.patientController.renderDailyMedications === 'function') {
+        global.patientController.renderDailyMedications();
       }
 
       if (typeof window.toast === 'function') {
-        window.toast('✓ Added ' + name + ' to Jan Aushadhi Inventory & Synced to Database');
+        window.toast('✓ Added ' + name + ' (₹' + genericPrice + ') to Jan Aushadhi Inventory & Synced to Database');
       }
     }
   }

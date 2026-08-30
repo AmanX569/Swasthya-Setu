@@ -103,25 +103,38 @@
         adviceInput.value = this.t('default_advice_fever', 'Drink plenty of clean boiled water. Rest well.');
       }
 
-      // Localize Dropdown Select Options for Medicines
+            // Localize Dropdown Select Options for Medicines dynamically from Store
+      const allMeds = (this.store ? this.store.getState().medicines : []) || [];
       const med1Select = document.getElementById('rxMed1');
       if (med1Select) {
-        med1Select.innerHTML = `
-          <option value="Paracetamol 650mg">${this.t('opt_para', 'Paracetamol 650mg Tab (₹8 vs ₹34 Dolo)')}</option>
-          <option value="Amoxicillin 500mg">${this.t('opt_amox', 'Amoxicillin 500mg Cap (₹28 vs ₹110)')}</option>
-          <option value="Metformin 500mg">${this.t('opt_met', 'Metformin 500mg Tab (₹12 vs ₹58)')}</option>
-          <option value="Amlodipine 5mg">${this.t('opt_amlo', 'Amlodipine 5mg Tab (₹6 vs ₹38)')}</option>
-          <option value="ORS Powder Sachets">${this.t('opt_ors', 'ORS Sachet Powder (₹5 vs ₹24)')}</option>
-        `;
+        if (allMeds.length) {
+          med1Select.innerHTML = allMeds.map(m => `
+            <option value="${m.name}" data-gen="${m.genericPrice}" data-brand="${m.brandPrice}">${m.name} (₹${m.genericPrice} vs ₹${m.brandPrice || (m.genericPrice * 4)})</option>
+          `).join('');
+        } else {
+          med1Select.innerHTML = `
+            <option value="Paracetamol 650mg">${this.t('opt_para', 'Paracetamol 650mg Tab (₹8 vs ₹34 Dolo)')}</option>
+            <option value="Amoxicillin 500mg">${this.t('opt_amox', 'Amoxicillin 500mg Cap (₹28 vs ₹110)')}</option>
+            <option value="Metformin 500mg">${this.t('opt_met', 'Metformin 500mg Tab (₹12 vs ₹58)')}</option>
+            <option value="Amlodipine 5mg">${this.t('opt_amlo', 'Amlodipine 5mg Tab (₹6 vs ₹38)')}</option>
+            <option value="ORS Powder Sachets">${this.t('opt_ors', 'ORS Sachet Powder (₹5 vs ₹24)')}</option>
+          `;
+        }
       }
 
       const med2Select = document.getElementById('rxMed2');
       if (med2Select) {
-        med2Select.innerHTML = `
-          <option value="Cetirizine 10mg">${this.t('opt_cetz', 'Cetirizine 10mg Tab (₹4 vs ₹22)')}</option>
-          <option value="Vitamin C + Zinc">${this.t('opt_vitc', 'Vitamin C + Zinc Tab (₹15 vs ₹75)')}</option>
-          <option value="Iron & Folic Acid">${this.t('opt_ifa', 'Iron & Folic Acid Tab (₹4 vs ₹32)')}</option>
-        `;
+        if (allMeds.length) {
+          med2Select.innerHTML = `<option value="">-- None (Single Medicine) --</option>` + allMeds.map(m => `
+            <option value="${m.name}" data-gen="${m.genericPrice}" data-brand="${m.brandPrice}">${m.name} (₹${m.genericPrice} vs ₹${m.brandPrice || (m.genericPrice * 4)})</option>
+          `).join('');
+        } else {
+          med2Select.innerHTML = `
+            <option value="Cetirizine 10mg">${this.t('opt_cetz', 'Cetirizine 10mg Tab (₹4 vs ₹22)')}</option>
+            <option value="Vitamin C + Zinc">${this.t('opt_vitc', 'Vitamin C + Zinc Tab (₹15 vs ₹75)')}</option>
+            <option value="Iron & Folic Acid">${this.t('opt_ifa', 'Iron & Folic Acid Tab (₹4 vs ₹32)')}</option>
+          `;
+        }
       }
 
       // Apply any data-i18n inside modal
@@ -135,57 +148,6 @@
       const modal = document.getElementById('doctorConsultModal');
       if (modal) modal.style.display = 'none';
       this.selectedPatient = null;
-    }
-
-        submitPrescription(e) {
-      if (e) e.preventDefault();
-      if (!this.selectedPatient) {
-        alert('No patient selected for consultation');
-        return;
-      }
-
-      const diagVal = (document.getElementById('rxDiagnosis') ? document.getElementById('rxDiagnosis').value.trim() : '') || 'Acute Viral Pyrexia';
-      const med1Val = document.getElementById('rxMed1') ? document.getElementById('rxMed1').value : 'Paracetamol 650mg';
-      const med2Val = document.getElementById('rxMed2') ? document.getElementById('rxMed2').value : '';
-      const adviceVal = (document.getElementById('rxAdvice') ? document.getElementById('rxAdvice').value.trim() : '') || 'Drink plenty of clean boiled water. Rest well.';
-
-      const medicines = [];
-      if (med1Val) medicines.push({ name: med1Val, dosage: '1 tab 3 times daily after food for 3 days', timing: '1-1-1', genericPrice: 8, brandPrice: 34 });
-      if (med2Val) medicines.push({ name: med2Val, dosage: '1 tab at night for 3 days', timing: '0-0-1', genericPrice: 4, brandPrice: 22 });
-
-      // Dynamically get logged-in doctor from session
-      const sessionUser = (this.store && this.store.getState().session) ? this.store.getState().session.user : null;
-      const activeDoctorName = (sessionUser && sessionUser.name) ? sessionUser.name : 'Dr. Aaditya';
-      const activeDoctorReg = (sessionUser && (sessionUser.regNo || sessionUser.reg_no)) ? (sessionUser.regNo || sessionUser.reg_no) : 'MCI-AP-99012';
-      const activeDoctorLoc = (sessionUser && sessionUser.location) ? sessionUser.location : 'District Telemedicine OPD';
-
-      const patientId = this.selectedPatient.id;
-      const patientToken = this.selectedPatient.token;
-      const patientName = this.selectedPatient.patientName;
-
-      const createdRx = this.store.completeConsult(patientId, {
-        token: patientToken,
-        patientName: patientName,
-        doctorName: activeDoctorName,
-        doctorRegNo: activeDoctorReg,
-        doctorLocation: activeDoctorLoc,
-        diagnosis: diagVal,
-        medicines: medicines,
-        advice: adviceVal
-      });
-
-      this.closeConsultModal();
-      this.renderQueue();
-      this.renderStats();
-      this.renderPrescriptionHistory();
-
-      if (global.patientController && typeof global.patientController.renderPrescriptions === 'function') {
-        global.patientController.renderPrescriptions();
-      }
-
-      if (typeof window.toast === 'function') {
-        window.toast('✓ Prescription Issued for ' + patientName + ' (' + (createdRx ? createdRx.id : 'RX') + ')');
-      }
     }
 
     openAddQueueModal() {

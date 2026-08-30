@@ -400,6 +400,12 @@
       }]);
     }
 
+    async deleteMedicine(id) {
+      if (!this.client) return;
+      console.log('[Supabase] Deleting medicine:', id);
+      return await this.client.from('medicines').delete().eq('id', id);
+    }
+
     async insertMedicine(m) {
       if (!this.client) return;
       return await this.client.from('medicines').insert([{

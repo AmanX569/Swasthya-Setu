@@ -590,52 +590,47 @@
     }
 
     // -------------------------------------------------------------
-    // 6. JAN AUSHADHI MEDICINE TRACKER & SAVINGS (100% TRANSLATED)
+    // 6. JAN AUSHADHI MEDICINE TRACKER & SAVINGS (DYNAMIC CATALOG)
     // -------------------------------------------------------------
     renderDailyMedications() {
       const el = document.getElementById('dailyMedsList');
       if (!el || !this.store) return;
-      const meds = this.store.getState().dailyMedications || [];
+      const meds = this.store.getState().medicines || [];
 
-      const medKeyMap = {
-        'MED-01': { key: 'med_paracetamol', amount: '26', defaultName: 'Paracetamol 650mg (Jan Aushadhi)' },
-        'MED-02': { key: 'med_calcium', amount: '45', defaultName: 'Calcium + Vit D3 (Jan Aushadhi)' },
-        'MED-03': { key: 'med_ifa', amount: '30', defaultName: 'Iron & Folic Acid IFA (Govt PHC)' }
-      };
+      if (!meds.length) {
+        el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);">No medicines in Jan Aushadhi catalog.</div>';
+        return;
+      }
 
       const savedWord = this.t('saved_text', 'saved');
       const morningLabel = this.t('dose_morning', '☀️ Morning');
       const noonLabel = this.t('dose_noon', '🌤️ Noon');
       const nightLabel = this.t('dose_night', '🌙 Night');
-      const takenLabel = this.t('dose_taken', '✓ Taken');
 
       el.innerHTML = meds.map(m => {
-        const meta = medKeyMap[m.id] || { key: '', amount: '25', defaultName: m.name };
-        const localizedName = this.t(meta.key, meta.defaultName);
-        const savingText = `💰 ₹${meta.amount} ${savedWord}`;
+        const savings = Math.max(0, (m.brandPrice || 0) - (m.genericPrice || 0));
+        const savingsPct = m.brandPrice > 0 ? Math.round((savings / m.brandPrice) * 100) : 0;
+        const savingText = `💰 ₹${savings} ${savedWord} (${savingsPct}% OFF)`;
 
         return `
           <div style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:14px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;box-shadow:var(--shadow-panel);">
             <div>
-              <strong style="color:var(--ink);font-size:15px;display:block;">${localizedName}</strong>
-              <small style="color:#16a34a;font-weight:700;">${savingText}</small>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <strong style="color:var(--ink);font-size:15px;">${m.name}</strong>
+                <span class="badge" style="background:rgba(22,163,74,0.15);color:#15803d;padding:2px 6px;border-radius:8px;font-size:10px;font-weight:800;">PMBJP</span>
+              </div>
+              <small style="color:var(--muted);display:block;margin-top:2px;">Category: ${m.category || 'General Medicine'} · Stock: ${m.stock || 100} ${m.unit || 'Tablets'}</small>
+              <div style="font-size:12px;margin-top:4px;">
+                <strong style="color:#15803d;font-size:14px;">₹${m.genericPrice}</strong>
+                ${m.brandPrice ? `<span style="text-decoration:line-through;color:var(--muted);margin-left:6px;font-size:12px;">₹${m.brandPrice}</span>` : ''}
+                ${savings > 0 ? `<span style="background:rgba(22,163,74,0.15);color:#15803d;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:800;margin-left:8px;">${savingText}</span>` : ''}
+              </div>
             </div>
-            <div style="display:flex;gap:8px;">
-              ${m.morning ? `
-                <button class="btn-glass" style="padding:6px 10px;font-size:12px;background:${m.taken && m.taken.morning ? '#16a34a' : 'var(--glass-1)'};color:${m.taken && m.taken.morning ? '#ffffff' : 'var(--ink)'};border-color:${m.taken && m.taken.morning ? '#16a34a' : 'var(--glass-border)'};" onclick="patientController.toggleDose('${m.id}', 'morning')">
-                  ${m.taken && m.taken.morning ? takenLabel : morningLabel}
-                </button>
-              ` : ''}
-              ${m.noon ? `
-                <button class="btn-glass" style="padding:6px 10px;font-size:12px;background:${m.taken && m.taken.noon ? '#16a34a' : 'var(--glass-1)'};color:${m.taken && m.taken.noon ? '#ffffff' : 'var(--ink)'};border-color:${m.taken && m.taken.noon ? '#16a34a' : 'var(--glass-border)'};" onclick="patientController.toggleDose('${m.id}', 'noon')">
-                  ${m.taken && m.taken.noon ? takenLabel : noonLabel}
-                </button>
-              ` : ''}
-              ${m.night ? `
-                <button class="btn-glass" style="padding:6px 10px;font-size:12px;background:${m.taken && m.taken.night ? '#16a34a' : 'var(--glass-1)'};color:${m.taken && m.taken.night ? '#ffffff' : 'var(--ink)'};border-color:${m.taken && m.taken.night ? '#16a34a' : 'var(--glass-border)'};" onclick="patientController.toggleDose('${m.id}', 'night')">
-                  ${m.taken && m.taken.night ? takenLabel : nightLabel}
-                </button>
-              ` : ''}
+
+            <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+              <button class="btn-glass" style="padding:6px 10px;font-size:11px;font-weight:700;" onclick="patientController.toggleDose('${m.id}', 'morning')">${morningLabel}</button>
+              <button class="btn-glass" style="padding:6px 10px;font-size:11px;font-weight:700;" onclick="patientController.toggleDose('${m.id}', 'noon')">${noonLabel}</button>
+              <button class="btn-glass" style="padding:6px 10px;font-size:11px;font-weight:700;" onclick="patientController.toggleDose('${m.id}', 'night')">${nightLabel}</button>
             </div>
           </div>
         `;
