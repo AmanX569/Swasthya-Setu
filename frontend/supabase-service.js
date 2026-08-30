@@ -318,6 +318,11 @@
         }
         // Fetch latest cloud state and re-render all active portals
         this.syncInitialData();
+        if (!this.syncInterval) {
+          this.syncInterval = setInterval(() => {
+            if (this.isOnline && this.client) this.syncInitialData();
+          }, 8000);
+        }
       }
     }
 
