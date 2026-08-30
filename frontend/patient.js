@@ -397,9 +397,15 @@
       const m = document.getElementById('patientRequestConsultModal');
       const docSelect = document.getElementById('patientConsultDoctorSelect');
       if (docSelect && this.store) {
-        const doctors = (this.store.getState().staff || []).filter(s => s.role === 'doctor');
+        let doctors = (this.store.getState().staff || []).filter(s => s.role === 'doctor');
+        if (!doctors.length) {
+          doctors = [
+            { id: 'DOC-9766', staff_code: 'DOC-9766', name: 'Dr. Aaditya', location: 'VIT AP Health Centre' },
+            { id: 'DOC-7896', staff_code: 'DOC-7896', name: 'Dr. Chetan', location: 'CHC District Hospital' }
+          ];
+        }
         docSelect.innerHTML = doctors.map(d => `
-          <option value="${d.id || d.staff_code}">🩺 ${d.name} (${d.location || 'PHC/CHC'})</option>
+          <option value="${d.staff_code || d.id}">🩺 ${d.name} (${d.location || 'PHC/CHC'})</option>
         `).join('');
       }
       if (m) m.style.display = 'flex';
@@ -412,17 +418,28 @@
 
     submitRequestConsult(e) {
       if (e) e.preventDefault();
-      const complaint = document.getElementById('patReqComplaint').value.trim();
-      const duration = document.getElementById('patReqDuration').value.trim();
-      const bp = document.getElementById('patReqBp').value.trim() || '120/80';
-      const temp = document.getElementById('patReqTemp').value.trim() || '98.6°F';
-      const triage = document.getElementById('patReqTriage').value;
+      const complaintInput = document.getElementById('patReqComplaint');
+      const durationInput = document.getElementById('patReqDuration');
+      const bpInput = document.getElementById('patReqBp');
+      const tempInput = document.getElementById('patReqTemp');
+      const triageSelect = document.getElementById('patReqTriage');
       const docSelect = document.getElementById('patientConsultDoctorSelect');
-      const doctorId = docSelect ? docSelect.value : null;
-      const doctorName = docSelect && docSelect.options[docSelect.selectedIndex] ? docSelect.options[docSelect.selectedIndex].text : 'Medical Officer';
+
+      const complaint = complaintInput ? complaintInput.value.trim() : '';
+      const duration = durationInput ? durationInput.value.trim() : '';
+      const bp = (bpInput && bpInput.value.trim()) || '120/80';
+      const temp = (tempInput && tempInput.value.trim()) || '98.6°F';
+      const triage = (triageSelect && triageSelect.value) || 'Green';
+      
+      let doctorId = null;
+      let doctorName = 'Assigned Medical Officer';
+      if (docSelect && docSelect.options && docSelect.selectedIndex >= 0) {
+        doctorId = docSelect.value;
+        doctorName = docSelect.options[docSelect.selectedIndex].text.replace(/^[^w]+/, '');
+      }
 
       if (!complaint) {
-        alert('Please describe your symptoms/illness for the doctor');
+        alert('Please describe your symptoms/illness for the doctor.');
         return;
       }
 
@@ -434,9 +451,12 @@
         assignedDoctorName: doctorName
       });
 
+      if (complaintInput) complaintInput.value = '';
+      if (durationInput) durationInput.value = '';
       this.closeRequestConsultModal();
+
       if (typeof window.toast === 'function') {
-        window.toast('🚀 Consultation Request Sent to ' + doctorName + '! Your Token is ' + qItem.token);
+        window.toast('🚀 Consultation request sent! Token ' + qItem.token + ' joined OPD Queue for ' + doctorName);
       }
     }
 
@@ -583,10 +603,15 @@
 
     submitAddFamily(e) {
       if (e) e.preventDefault();
-      const name = document.getElementById('famName').value.trim();
-      const relation = document.getElementById('famRelation').value;
-      const age = parseInt(document.getElementById('famAge').value, 10) || 25;
-      const gender = document.getElementById('famGender').value;
+      const nameInput = document.getElementById('famName');
+      const relationInput = document.getElementById('famRelation');
+      const ageInput = document.getElementById('famAge');
+      const genderInput = document.getElementById('famGender');
+
+      const name = nameInput ? nameInput.value.trim() : '';
+      const relation = relationInput ? relationInput.value : 'Spouse';
+      const age = parseInt(ageInput ? ageInput.value : '25', 10) || 25;
+      const gender = genderInput ? genderInput.value : 'Female';
 
       if (!name) {
         alert('Please enter member name');
@@ -594,14 +619,26 @@
       }
 
       const newFam = this.store.addFamilyMember({ name, relation, age, gender });
-      document.getElementById('famName').value = '';
-      document.getElementById('famAge').value = '';
+      if (nameInput) nameInput.value = '';
+      if (ageInput) ageInput.value = '';
       this.closeAddFamilyModal();
       
       // Immediately re-render Family Circle on the spot
       this.renderFamilyCircle();
       if (typeof window.toast === 'function') {
         window.toast('✓ Added ' + name + ' (' + relation + ') to Family Health Circle');
+      }
+    }
+
+    removeFamilyMember(id) {
+      if (confirm('Are you sure you want to remove this member from your Family Health Circle?')) {
+        if (this.store) {
+          this.store.deleteFamilyMember(id);
+          this.renderFamilyCircle();
+          if (typeof window.toast === 'function') {
+            window.toast('🗑️ Family member removed successfully');
+          }
+        }
       }
     }
 

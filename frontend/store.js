@@ -409,9 +409,10 @@
         global.supabaseService.insertQueuePatient(queueItem);
       }
 
-      if (global.doctorController && typeof global.doctorController.renderQueue === 'function') {
-        global.doctorController.renderQueue();
-        global.doctorController.renderStats();
+      if (global.doctorController) {
+        if (typeof global.doctorController.renderQueue === 'function') global.doctorController.renderQueue();
+        if (typeof global.doctorController.renderKpis === 'function') global.doctorController.renderKpis();
+        if (typeof global.doctorController.renderStats === 'function') global.doctorController.renderStats();
       }
 
       return { success: true, patient: newPatient, queueItem };
@@ -448,9 +449,10 @@
         global.supabaseService.insertQueuePatient(queueItem);
       }
 
-      if (global.doctorController && typeof global.doctorController.renderQueue === 'function') {
-        global.doctorController.renderQueue();
-        global.doctorController.renderStats();
+      if (global.doctorController) {
+        if (typeof global.doctorController.renderQueue === 'function') global.doctorController.renderQueue();
+        if (typeof global.doctorController.renderKpis === 'function') global.doctorController.renderKpis();
+        if (typeof global.doctorController.renderStats === 'function') global.doctorController.renderStats();
       }
 
       return queueItem;

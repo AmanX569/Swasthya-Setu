@@ -620,14 +620,17 @@
       }
     }
 
-    async deleteQueueItem(queueId) {
+    async deleteQueueItem(queueId, token) {
       if (!this.client || !this.isOnline) {
-        return this.enqueueOfflineAction('delete_queue', 'consult_queue', { queueId });
+        return this.enqueueOfflineAction('delete_queue', 'consult_queue', { queueId, token });
       }
       try {
-        return await this.client.from('consult_queue').delete().eq('id', queueId);
+        if (token) {
+          return await this.client.from('consult_queue').delete().eq('token', token);
+        }
+        return await this.client.from('consult_queue').delete().or(`id.eq.${queueId},token.eq.${queueId}`);
       } catch (e) {
-        return this.enqueueOfflineAction('delete_queue', 'consult_queue', { queueId });
+        return this.enqueueOfflineAction('delete_queue', 'consult_queue', { queueId, token });
       }
     }
 
@@ -637,18 +640,17 @@
       }
       try {
         return await this.client.from('consult_queue').insert([{
-          id: item.id,
-          token: item.token,
-          patient_name: item.patientName,
-          age: item.age,
-          gender: item.gender,
-          complaint: item.complaint,
+          token: item.token || 'T-01',
+          patient_name: item.patientName || item.patient_name || 'Citizen Patient',
+          age: item.age || 30,
+          gender: item.gender || 'M',
+          complaint: item.complaint || 'General Consultation',
           bp: item.vitals ? item.vitals.bp : '120/80',
           spo2: item.vitals ? item.vitals.spo2 : '98%',
           temp: item.vitals ? item.vitals.temp : '98.6°F',
           pulse: item.vitals ? item.vitals.pulse : '78 bpm',
-          triage: item.triage,
-          queue_time: item.time,
+          triage: item.triage || 'Green',
+          queue_time: item.time || item.queue_time || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           status: 'Waiting'
         }]);
       } catch (e) {
