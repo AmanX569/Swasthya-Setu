@@ -1,7 +1,7 @@
 /**
  * =========================================================
  * SWASTHYA SETU - HEALTH ADMINISTRATION DESK (admin.js)
- * High-Contrast Glass Support & Dynamic Inventory
+ * Full Online/Offline Provisioning, Hospital Beds & Drug Supply
  * =========================================================
  */
 
@@ -67,13 +67,13 @@
       const staffList = this.store.getState().staff || [];
 
       if (!staffList.length) {
-        el.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--muted);">No staff registered yet. Add staff above.</td></tr>`;
+        el.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--muted);">No staff registered yet. Click "+ Provision New Staff" above.</td></tr>`;
         return;
       }
 
       el.innerHTML = staffList.map(s => `
         <tr>
-          <td><strong style="color:var(--primary-bright);font-family:'IBM Plex Mono',monospace;font-size:13px;">${s.id}</strong></td>
+          <td><strong style="color:var(--primary-bright);font-family:'IBM Plex Mono',monospace;font-size:13px;">${s.id || s.staff_code}</strong></td>
           <td>
             <strong style="color:var(--ink);display:block;font-size:14px;">${s.name}</strong>
             <small style="color:var(--muted);">${s.regNo || '—'}</small>
@@ -83,45 +83,67 @@
               ${s.role === 'doctor' ? '🩺 Doctor' : s.role === 'worker' ? '🤝 ASHA / ANM' : '👑 Administrator'}
             </span>
           </td>
-          <td style="color:var(--ink-dim);">${s.location}</td>
+          <td style="color:var(--ink-dim);">${s.location || 'District Center'}</td>
           <td style="color:var(--muted);">+91 ${s.phone}</td>
           <td>
-            <button style="color:#ef4444;background:none;border:none;cursor:pointer;font-size:12px;font-weight:700;" onclick="adminController.removeStaff('${s.id}')">✕ Remove</button>
+            <button style="color:#ef4444;background:none;border:none;cursor:pointer;font-size:12px;font-weight:700;" onclick="adminController.removeStaff('${s.id || s.staff_code}')">✕ Remove</button>
           </td>
         </tr>
       `).join('');
     }
 
-    submitQuickAddStaff(e) {
-      if (e) e.preventDefault();
-      const name = document.getElementById('quickStaffName').value.trim();
-      const role = document.getElementById('quickStaffRole').value;
-      const phone = document.getElementById('quickStaffPhone').value.trim();
-      const location = document.getElementById('quickStaffLocation').value.trim();
+    openProvisionStaffModal() {
+      const m = document.getElementById('provisionStaffModal');
+      if (m) m.style.display = 'flex';
+    }
 
-      if (!name) {
-        alert('Please enter staff name');
+    closeProvisionStaffModal() {
+      const m = document.getElementById('provisionStaffModal');
+      if (m) m.style.display = 'none';
+    }
+
+    submitProvisionStaff(e) {
+      if (e) e.preventDefault();
+      const role = document.getElementById('provStaffRole').value;
+      const name = document.getElementById('provStaffName').value.trim();
+      const phone = document.getElementById('provStaffPhone').value.trim();
+      const regNo = document.getElementById('provStaffRegNo') ? document.getElementById('provStaffRegNo').value.trim() : '';
+      const location = document.getElementById('provStaffLocation') ? document.getElementById('provStaffLocation').value.trim() : 'District Health Center';
+      const password = document.getElementById('provStaffPassword') ? document.getElementById('provStaffPassword').value.trim() : (role + '@123');
+
+      if (!name || !phone) {
+        alert('Please enter Name and Official Mobile number');
         return;
       }
 
-      this.store.addStaff({
+      const newMember = this.store.provisionStaffMember(role, {
         name,
-        role,
-        phone: phone || '9876543210',
-        location: location || 'Kondapalli Sector'
+        phone,
+        location: location || 'District Health Center',
+        regNo: regNo || (role.toUpperCase() + '-AP-' + Math.floor(1000 + Math.random() * 9000)),
+        password: password || (role + '@123')
       });
 
-      document.getElementById('quickStaffName').value = '';
-      document.getElementById('quickStaffPhone').value = '';
-      document.getElementById('quickStaffLocation').value = '';
-      if (typeof window.toast === 'function') window.toast('✓ Added ' + name + ' to Staff Registry');
+      document.getElementById('provStaffName').value = '';
+      document.getElementById('provStaffPhone').value = '';
+      if (document.getElementById('provStaffRegNo')) document.getElementById('provStaffRegNo').value = '';
+      if (document.getElementById('provStaffLocation')) document.getElementById('provStaffLocation').value = '';
+      if (document.getElementById('provStaffPassword')) document.getElementById('provStaffPassword').value = '';
+
+      this.closeProvisionStaffModal();
+      this.renderStaffTable();
+      this.renderKpis();
+
+      if (typeof window.toast === 'function') {
+        window.toast('✓ Successfully provisioned ' + role.toUpperCase() + ': ' + newMember.name + ' (' + newMember.id + ')');
+      }
     }
 
     removeStaff(id) {
       if (confirm('Are you sure you want to remove this staff member from Registry & Cloud?')) {
         this.store.deleteStaff(id);
         this.renderStaffTable();
-        this.renderStats();
+        this.renderKpis();
         if (typeof window.toast === 'function') window.toast('✓ Removed staff member from Registry & Cloud');
       }
     }
@@ -166,6 +188,8 @@
 
     updateBeds(hospId, type, delta) {
       this.store.updateBedCount(hospId, type, delta);
+      this.renderAdminBeds();
+      this.renderKpis();
     }
 
     renderAdminBlood() {
@@ -187,9 +211,10 @@
 
     updateBlood(grp, delta) {
       this.store.updateBloodStock(grp, delta);
+      this.renderAdminBlood();
     }
 
-        renderAdminMedicines() {
+    renderAdminMedicines() {
       const el = document.getElementById('adminDrugTableBody') || document.getElementById('adminMedicinesTableBody');
       if (!el || !this.store) return;
       const meds = this.store.getState().medicines || [];
@@ -272,7 +297,6 @@
         status: 'In Stock'
       });
 
-      // Clear input fields
       document.getElementById('drugName').value = '';
       document.getElementById('drugCat').value = '';
       document.getElementById('drugStock').value = '200';
@@ -280,11 +304,8 @@
       document.getElementById('drugBrandPrice').value = '';
 
       this.closeAddDrugModal();
-      
-      // Immediately re-render Admin medicines table on the spot
       this.renderAdminMedicines();
 
-      // Immediately re-render Patient Jan Aushadhi generic catalog on the spot
       if (global.patientController && typeof global.patientController.renderDailyMedications === 'function') {
         global.patientController.renderDailyMedications();
       }

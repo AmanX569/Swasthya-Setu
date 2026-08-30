@@ -28,7 +28,12 @@
       this.renderAncRecords();
       this.renderImmunizations();
       this.renderHomeVisits();
+      this.renderMasterRegistry();
     }
+
+    renderAncTable() { this.renderAncRecords(); }
+    renderUipTable() { this.renderImmunizations(); }
+    renderStats() { this.renderAll(); }
 
     // 1. ANC High-Risk Mothers
     renderAncRecords() {
@@ -345,9 +350,31 @@
       this.closeAddVisitModal();
       
       this.renderHomeVisits();
-      this.renderStats();
+      if (typeof this.renderStats === 'function') this.renderStats();
       this.renderMasterRegistry();
       if (typeof window.toast === 'function') window.toast('✓ Scheduled home visit for ' + household);
+    }
+
+    renderMasterRegistry() {
+      const el = document.getElementById('ashaMasterRegistryBody');
+      if (!el || !this.store) return;
+      const patients = this.store.getState().patients || [];
+
+      if (!patients.length) {
+        el.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--muted);">No village residents registered yet.</td></tr>';
+        return;
+      }
+
+      el.innerHTML = patients.map(p => `
+        <tr>
+          <td><strong style="color:var(--primary-bright);font-family:'IBM Plex Mono',monospace;font-size:12px;">${p.abhaId || '14-XXXX'}</strong></td>
+          <td><strong style="color:var(--ink);font-size:13px;">${p.name}</strong></td>
+          <td style="color:var(--ink-dim);">${p.age} Yrs / ${p.gender}</td>
+          <td style="color:var(--muted);">${p.village || 'Kondapalli'}</td>
+          <td><span class="badge" style="background:rgba(2,132,199,0.12);color:var(--primary-bright);padding:2px 6px;border-radius:10px;font-size:11px;">${p.bloodGroup || 'O+'}</span></td>
+          <td style="color:var(--muted);">${p.phone}</td>
+        </tr>
+      `).join('');
     }
   }
 

@@ -8206,6 +8206,12 @@ table td strong {
       return global.localizeComplaintText ? global.localizeComplaintText(text) : text;
     }
 
+    renderQueue() { this.renderConsultQueue(); }
+    renderAll() {
+      this.renderConsultQueue();
+      this.renderPrescriptionHistory();
+    }
+
     renderConsultQueue() {
       const el = document.getElementById('doctorQueueTableBody');
       if (!el || !this.store) return;
@@ -8432,6 +8438,63 @@ table td strong {
         `;
       }).join('');
     }
+    submitPrescription(e) {
+      if (e) e.preventDefault();
+      const patient = this.selectedPatient || { id: 'Q-01', patientName: 'Citizen Patient', age: 35, gender: 'M' };
+      const diagnosis = document.getElementById('rxDiagnosis') ? document.getElementById('rxDiagnosis').value.trim() : 'Clinical Evaluation';
+      const advice = document.getElementById('rxAdvice') ? document.getElementById('rxAdvice').value.trim() : 'Take prescribed doses and rest.';
+      
+      const med1Select = document.getElementById('rxMed1');
+      const med2Select = document.getElementById('rxMed2');
+
+      const medicines = [];
+      if (med1Select && med1Select.value) {
+        const opt = med1Select.options ? med1Select.options[med1Select.selectedIndex] : null;
+        const genPrice = opt && opt.getAttribute && opt.getAttribute('data-gen') ? parseFloat(opt.getAttribute('data-gen')) : 15;
+        medicines.push({
+          name: med1Select.value,
+          genericPrice: genPrice || 15,
+          dosage: '1 Tab Morning & Night after food'
+        });
+      }
+
+      if (med2Select && med2Select.value) {
+        const opt = med2Select.options ? med2Select.options[med2Select.selectedIndex] : null;
+        const genPrice = opt && opt.getAttribute && opt.getAttribute('data-gen') ? parseFloat(opt.getAttribute('data-gen')) : 10;
+        medicines.push({
+          name: med2Select.value,
+          genericPrice: genPrice || 10,
+          dosage: '1 Tab Noon after food'
+        });
+      }
+
+      if (!diagnosis) {
+        alert('Please enter clinical diagnosis');
+        return;
+      }
+
+      const activeDoctor = (this.store && this.store.getState().session && this.store.getState().session.user) || { name: 'Dr. Aarav Sharma', location: 'District CHC' };
+
+      const newRx = this.store.completeConsult(patient.id, {
+        doctorName: activeDoctor.name || 'Dr. Medical Officer',
+        patientName: patient.patientName,
+        diagnosis,
+        advice,
+        medicines: medicines.length ? medicines : [{ name: 'Paracetamol 650mg', genericPrice: 8, dosage: '1 Tab TDS' }]
+      });
+
+      this.closeConsultModal();
+      this.renderQueue();
+      this.renderPrescriptionHistory();
+
+      if (global.patientController && typeof global.patientController.renderPrescriptions === 'function') {
+        global.patientController.renderPrescriptions();
+      }
+
+      if (typeof window.toast === 'function') {
+        window.toast('✓ Issued e-Prescription for ' + patient.patientName + ' (Rx ID: ' + newRx.id + ')');
+      }
+    }
   }
 
   global.doctorController = new DoctorController();
@@ -8470,7 +8533,12 @@ table td strong {
       this.renderAncRecords();
       this.renderImmunizations();
       this.renderHomeVisits();
+      this.renderMasterRegistry();
     }
+
+    renderAncTable() { this.renderAncRecords(); }
+    renderUipTable() { this.renderImmunizations(); }
+    renderStats() { this.renderAll(); }
 
     // 1. ANC High-Risk Mothers
     renderAncRecords() {
@@ -8787,9 +8855,31 @@ table td strong {
       this.closeAddVisitModal();
       
       this.renderHomeVisits();
-      this.renderStats();
+      if (typeof this.renderStats === 'function') this.renderStats();
       this.renderMasterRegistry();
       if (typeof window.toast === 'function') window.toast('✓ Scheduled home visit for ' + household);
+    }
+
+    renderMasterRegistry() {
+      const el = document.getElementById('ashaMasterRegistryBody');
+      if (!el || !this.store) return;
+      const patients = this.store.getState().patients || [];
+
+      if (!patients.length) {
+        el.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--muted);">No village residents registered yet.</td></tr>';
+        return;
+      }
+
+      el.innerHTML = patients.map(p => `
+        <tr>
+          <td><strong style="color:var(--primary-bright);font-family:'IBM Plex Mono',monospace;font-size:12px;">${p.abhaId || '14-XXXX'}</strong></td>
+          <td><strong style="color:var(--ink);font-size:13px;">${p.name}</strong></td>
+          <td style="color:var(--ink-dim);">${p.age} Yrs / ${p.gender}</td>
+          <td style="color:var(--muted);">${p.village || 'Kondapalli'}</td>
+          <td><span class="badge" style="background:rgba(2,132,199,0.12);color:var(--primary-bright);padding:2px 6px;border-radius:10px;font-size:11px;">${p.bloodGroup || 'O+'}</span></td>
+          <td style="color:var(--muted);">${p.phone}</td>
+        </tr>
+      `).join('');
     }
   }
 
@@ -8802,7 +8892,7 @@ table td strong {
 /**
  * =========================================================
  * SWASTHYA SETU - HEALTH ADMINISTRATION DESK (admin.js)
- * High-Contrast Glass Support & Dynamic Inventory
+ * Full Online/Offline Provisioning, Hospital Beds & Drug Supply
  * =========================================================
  */
 
@@ -8868,13 +8958,13 @@ table td strong {
       const staffList = this.store.getState().staff || [];
 
       if (!staffList.length) {
-        el.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--muted);">No staff registered yet. Add staff above.</td></tr>`;
+        el.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--muted);">No staff registered yet. Click "+ Provision New Staff" above.</td></tr>`;
         return;
       }
 
       el.innerHTML = staffList.map(s => `
         <tr>
-          <td><strong style="color:var(--primary-bright);font-family:'IBM Plex Mono',monospace;font-size:13px;">${s.id}</strong></td>
+          <td><strong style="color:var(--primary-bright);font-family:'IBM Plex Mono',monospace;font-size:13px;">${s.id || s.staff_code}</strong></td>
           <td>
             <strong style="color:var(--ink);display:block;font-size:14px;">${s.name}</strong>
             <small style="color:var(--muted);">${s.regNo || '—'}</small>
@@ -8884,45 +8974,67 @@ table td strong {
               ${s.role === 'doctor' ? '🩺 Doctor' : s.role === 'worker' ? '🤝 ASHA / ANM' : '👑 Administrator'}
             </span>
           </td>
-          <td style="color:var(--ink-dim);">${s.location}</td>
+          <td style="color:var(--ink-dim);">${s.location || 'District Center'}</td>
           <td style="color:var(--muted);">+91 ${s.phone}</td>
           <td>
-            <button style="color:#ef4444;background:none;border:none;cursor:pointer;font-size:12px;font-weight:700;" onclick="adminController.removeStaff('${s.id}')">✕ Remove</button>
+            <button style="color:#ef4444;background:none;border:none;cursor:pointer;font-size:12px;font-weight:700;" onclick="adminController.removeStaff('${s.id || s.staff_code}')">✕ Remove</button>
           </td>
         </tr>
       `).join('');
     }
 
-    submitQuickAddStaff(e) {
-      if (e) e.preventDefault();
-      const name = document.getElementById('quickStaffName').value.trim();
-      const role = document.getElementById('quickStaffRole').value;
-      const phone = document.getElementById('quickStaffPhone').value.trim();
-      const location = document.getElementById('quickStaffLocation').value.trim();
+    openProvisionStaffModal() {
+      const m = document.getElementById('provisionStaffModal');
+      if (m) m.style.display = 'flex';
+    }
 
-      if (!name) {
-        alert('Please enter staff name');
+    closeProvisionStaffModal() {
+      const m = document.getElementById('provisionStaffModal');
+      if (m) m.style.display = 'none';
+    }
+
+    submitProvisionStaff(e) {
+      if (e) e.preventDefault();
+      const role = document.getElementById('provStaffRole').value;
+      const name = document.getElementById('provStaffName').value.trim();
+      const phone = document.getElementById('provStaffPhone').value.trim();
+      const regNo = document.getElementById('provStaffRegNo') ? document.getElementById('provStaffRegNo').value.trim() : '';
+      const location = document.getElementById('provStaffLocation') ? document.getElementById('provStaffLocation').value.trim() : 'District Health Center';
+      const password = document.getElementById('provStaffPassword') ? document.getElementById('provStaffPassword').value.trim() : (role + '@123');
+
+      if (!name || !phone) {
+        alert('Please enter Name and Official Mobile number');
         return;
       }
 
-      this.store.addStaff({
+      const newMember = this.store.provisionStaffMember(role, {
         name,
-        role,
-        phone: phone || '9876543210',
-        location: location || 'Kondapalli Sector'
+        phone,
+        location: location || 'District Health Center',
+        regNo: regNo || (role.toUpperCase() + '-AP-' + Math.floor(1000 + Math.random() * 9000)),
+        password: password || (role + '@123')
       });
 
-      document.getElementById('quickStaffName').value = '';
-      document.getElementById('quickStaffPhone').value = '';
-      document.getElementById('quickStaffLocation').value = '';
-      if (typeof window.toast === 'function') window.toast('✓ Added ' + name + ' to Staff Registry');
+      document.getElementById('provStaffName').value = '';
+      document.getElementById('provStaffPhone').value = '';
+      if (document.getElementById('provStaffRegNo')) document.getElementById('provStaffRegNo').value = '';
+      if (document.getElementById('provStaffLocation')) document.getElementById('provStaffLocation').value = '';
+      if (document.getElementById('provStaffPassword')) document.getElementById('provStaffPassword').value = '';
+
+      this.closeProvisionStaffModal();
+      this.renderStaffTable();
+      this.renderKpis();
+
+      if (typeof window.toast === 'function') {
+        window.toast('✓ Successfully provisioned ' + role.toUpperCase() + ': ' + newMember.name + ' (' + newMember.id + ')');
+      }
     }
 
     removeStaff(id) {
       if (confirm('Are you sure you want to remove this staff member from Registry & Cloud?')) {
         this.store.deleteStaff(id);
         this.renderStaffTable();
-        this.renderStats();
+        this.renderKpis();
         if (typeof window.toast === 'function') window.toast('✓ Removed staff member from Registry & Cloud');
       }
     }
@@ -8967,6 +9079,8 @@ table td strong {
 
     updateBeds(hospId, type, delta) {
       this.store.updateBedCount(hospId, type, delta);
+      this.renderAdminBeds();
+      this.renderKpis();
     }
 
     renderAdminBlood() {
@@ -8988,9 +9102,10 @@ table td strong {
 
     updateBlood(grp, delta) {
       this.store.updateBloodStock(grp, delta);
+      this.renderAdminBlood();
     }
 
-        renderAdminMedicines() {
+    renderAdminMedicines() {
       const el = document.getElementById('adminDrugTableBody') || document.getElementById('adminMedicinesTableBody');
       if (!el || !this.store) return;
       const meds = this.store.getState().medicines || [];
@@ -9073,7 +9188,6 @@ table td strong {
         status: 'In Stock'
       });
 
-      // Clear input fields
       document.getElementById('drugName').value = '';
       document.getElementById('drugCat').value = '';
       document.getElementById('drugStock').value = '200';
@@ -9081,11 +9195,8 @@ table td strong {
       document.getElementById('drugBrandPrice').value = '';
 
       this.closeAddDrugModal();
-      
-      // Immediately re-render Admin medicines table on the spot
       this.renderAdminMedicines();
 
-      // Immediately re-render Patient Jan Aushadhi generic catalog on the spot
       if (global.patientController && typeof global.patientController.renderDailyMedications === 'function') {
         global.patientController.renderDailyMedications();
       }

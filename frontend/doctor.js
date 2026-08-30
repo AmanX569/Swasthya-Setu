@@ -33,6 +33,12 @@
       return global.localizeComplaintText ? global.localizeComplaintText(text) : text;
     }
 
+    renderQueue() { this.renderConsultQueue(); }
+    renderAll() {
+      this.renderConsultQueue();
+      this.renderPrescriptionHistory();
+    }
+
     renderConsultQueue() {
       const el = document.getElementById('doctorQueueTableBody');
       if (!el || !this.store) return;
@@ -258,6 +264,63 @@
           </div>
         `;
       }).join('');
+    }
+    submitPrescription(e) {
+      if (e) e.preventDefault();
+      const patient = this.selectedPatient || { id: 'Q-01', patientName: 'Citizen Patient', age: 35, gender: 'M' };
+      const diagnosis = document.getElementById('rxDiagnosis') ? document.getElementById('rxDiagnosis').value.trim() : 'Clinical Evaluation';
+      const advice = document.getElementById('rxAdvice') ? document.getElementById('rxAdvice').value.trim() : 'Take prescribed doses and rest.';
+      
+      const med1Select = document.getElementById('rxMed1');
+      const med2Select = document.getElementById('rxMed2');
+
+      const medicines = [];
+      if (med1Select && med1Select.value) {
+        const opt = med1Select.options ? med1Select.options[med1Select.selectedIndex] : null;
+        const genPrice = opt && opt.getAttribute && opt.getAttribute('data-gen') ? parseFloat(opt.getAttribute('data-gen')) : 15;
+        medicines.push({
+          name: med1Select.value,
+          genericPrice: genPrice || 15,
+          dosage: '1 Tab Morning & Night after food'
+        });
+      }
+
+      if (med2Select && med2Select.value) {
+        const opt = med2Select.options ? med2Select.options[med2Select.selectedIndex] : null;
+        const genPrice = opt && opt.getAttribute && opt.getAttribute('data-gen') ? parseFloat(opt.getAttribute('data-gen')) : 10;
+        medicines.push({
+          name: med2Select.value,
+          genericPrice: genPrice || 10,
+          dosage: '1 Tab Noon after food'
+        });
+      }
+
+      if (!diagnosis) {
+        alert('Please enter clinical diagnosis');
+        return;
+      }
+
+      const activeDoctor = (this.store && this.store.getState().session && this.store.getState().session.user) || { name: 'Dr. Aarav Sharma', location: 'District CHC' };
+
+      const newRx = this.store.completeConsult(patient.id, {
+        doctorName: activeDoctor.name || 'Dr. Medical Officer',
+        patientName: patient.patientName,
+        diagnosis,
+        advice,
+        medicines: medicines.length ? medicines : [{ name: 'Paracetamol 650mg', genericPrice: 8, dosage: '1 Tab TDS' }]
+      });
+
+      this.closeConsultModal();
+      this.renderQueue();
+      this.renderPrescriptionHistory();
+
+      if (global.patientController && typeof global.patientController.renderPrescriptions === 'function') {
+        global.patientController.renderPrescriptions();
+      }
+
+      if (typeof window.toast === 'function') {
+        window.toast('✓ Issued e-Prescription for ' + patient.patientName + ' (Rx ID: ' + newRx.id + ')');
+      }
     }
   }
 
