@@ -173,13 +173,12 @@
 
             case 'insert_prescription':
               res = await this.client.from('prescriptions').insert([{
-                id: p.id,
-                token: p.token,
-                patient_name: p.patientName,
-                doctor_name: p.doctorName,
-                rx_date: p.date,
+                token: p.token || 'Rx',
+                patient_name: p.patientName || p.patient_name,
+                doctor_name: p.doctorName || p.doctor_name,
+                rx_date: p.date || p.rx_date || new Date().toISOString().split('T')[0],
                 diagnosis: p.diagnosis,
-                medicines: p.medicines,
+                medicines: p.medicines || [],
                 advice: p.advice
               }]);
               break;
@@ -190,9 +189,8 @@
 
             case 'insert_queue':
               res = await this.client.from('consult_queue').insert([{
-                id: p.id,
-                token: p.token,
-                patient_name: p.patientName,
+                token: p.token || 'T-01',
+                patient_name: p.patientName || p.patient_name,
                 age: p.age,
                 gender: p.gender,
                 complaint: p.complaint,
@@ -200,8 +198,8 @@
                 spo2: p.vitals ? p.vitals.spo2 : '98%',
                 temp: p.vitals ? p.vitals.temp : '98.6°F',
                 pulse: p.vitals ? p.vitals.pulse : '78 bpm',
-                triage: p.triage,
-                queue_time: p.time,
+                triage: p.triage || 'Green',
+                queue_time: p.time || p.queue_time || '10:00 AM',
                 status: 'Waiting'
               }]);
               break;
@@ -212,38 +210,35 @@
 
             case 'insert_anc':
               res = await this.client.from('anc_records').insert([{
-                id: p.id,
-                mother_name: p.motherName,
-                husband_name: p.husbandName,
+                mother_name: p.motherName || p.mother_name,
+                husband_name: p.husbandName || p.husband_name,
                 age: p.age || 24,
                 village: p.village,
                 weeks: p.weeks,
                 edd: p.edd,
                 bp: p.bp,
                 hb: p.hb,
-                ifa_count: p.ifaCount || 90,
-                risk_level: p.riskLevel || 'Normal',
-                next_visit: p.nextVisit
+                ifa_count: p.ifaCount || p.ifa_count || 90,
+                risk_level: p.riskLevel || p.risk_level || 'Normal',
+                next_visit: p.nextVisit || p.next_visit
               }]);
               break;
 
             case 'insert_immunization':
               res = await this.client.from('immunizations').insert([{
-                id: p.id,
-                child_name: p.childName,
-                parent_name: p.parentName,
+                child_name: p.childName || p.child_name,
+                parent_name: p.parentName || p.parent_name,
                 dob: p.dob,
                 gender: p.gender,
                 village: p.village,
-                last_vaccine: p.lastVaccine,
-                next_due: p.nextDue,
+                last_vaccine: p.lastVaccine || p.last_vaccine,
+                next_due: p.nextDue || p.next_due,
                 status: p.status || 'Up to Date'
               }]);
               break;
 
             case 'insert_visit':
               res = await this.client.from('home_visits').insert([{
-                id: p.id,
                 household: p.household,
                 members: p.members || 4,
                 priority: p.priority || 'Routine Check',
@@ -254,13 +249,12 @@
 
             case 'insert_medicine':
               res = await this.client.from('medicines').insert([{
-                id: p.id,
                 name: p.name,
                 category: p.category,
                 stock: p.stock,
                 unit: p.unit || 'Tablets',
-                generic_price: p.genericPrice,
-                brand_price: p.brandPrice,
+                generic_price: p.genericPrice || p.generic_price,
+                brand_price: p.brandPrice || p.brand_price,
                 status: p.status || 'In Stock'
               }]);
               break;
@@ -285,16 +279,15 @@
 
             case 'insert_staff':
               res = await this.client.from('staff').insert([{
-                id: p.id,
-                staff_code: p.id,
+                staff_code: p.staff_code || p.id,
                 name: p.name,
                 role: p.role,
                 phone: p.phone,
                 location: p.location,
-                status: p.status || 'Active',
-                reg_no: p.regNo,
-                password_hash: p.password || (p.role + '@123'),
-                pin: p.pin || '1234'
+                status: p.status || 'Active Online',
+                reg_no: p.regNo || p.reg_no,
+                password_hash: p.password || p.password_hash || (p.role + '@123'),
+                pin: p.pin || p.password || '1234'
               }]);
               break;
 
@@ -614,13 +607,12 @@
       }
       try {
         return await this.client.from('prescriptions').insert([{
-          id: rx.id,
-          token: rx.token,
-          patient_name: rx.patientName,
-          doctor_name: rx.doctorName,
-          rx_date: rx.date,
+          token: rx.token || 'Rx',
+          patient_name: rx.patientName || rx.patient_name,
+          doctor_name: rx.doctorName || rx.doctor_name,
+          rx_date: rx.date || rx.rx_date || new Date().toISOString().split('T')[0],
           diagnosis: rx.diagnosis,
-          medicines: rx.medicines,
+          medicines: rx.medicines || [],
           advice: rx.advice
         }]);
       } catch (e) {
@@ -698,18 +690,17 @@
       }
       try {
         return await this.client.from('anc_records').insert([{
-          id: a.id,
-          mother_name: a.motherName,
-          husband_name: a.husbandName,
+          mother_name: a.motherName || a.mother_name,
+          husband_name: a.husbandName || a.husband_name,
           age: a.age || 24,
           village: a.village,
           weeks: a.weeks,
           edd: a.edd,
           bp: a.bp,
           hb: a.hb,
-          ifa_count: a.ifaCount || 90,
-          risk_level: a.riskLevel || 'Normal',
-          next_visit: a.nextVisit
+          ifa_count: a.ifaCount || a.ifa_count || 90,
+          risk_level: a.riskLevel || a.risk_level || 'Normal',
+          next_visit: a.nextVisit || a.next_visit
         }]);
       } catch (e) {
         return this.enqueueOfflineAction('insert_anc', 'anc_records', a);
@@ -722,14 +713,13 @@
       }
       try {
         return await this.client.from('immunizations').insert([{
-          id: i.id,
-          child_name: i.childName,
-          parent_name: i.parentName,
+          child_name: i.childName || i.child_name,
+          parent_name: i.parentName || i.parent_name,
           dob: i.dob,
           gender: i.gender,
           village: i.village,
-          last_vaccine: i.lastVaccine,
-          next_due: i.nextDue,
+          last_vaccine: i.lastVaccine || i.last_vaccine,
+          next_due: i.nextDue || i.next_due,
           status: i.status || 'Up to Date'
         }]);
       } catch (e) {
@@ -743,7 +733,6 @@
       }
       try {
         return await this.client.from('home_visits').insert([{
-          id: v.id,
           household: v.household,
           members: v.members || 4,
           priority: v.priority || 'Routine Check',
@@ -761,13 +750,12 @@
       }
       try {
         return await this.client.from('medicines').insert([{
-          id: m.id,
           name: m.name,
           category: m.category,
           stock: m.stock,
           unit: m.unit || 'Tablets',
-          generic_price: m.genericPrice,
-          brand_price: m.brandPrice,
+          generic_price: m.genericPrice || m.generic_price,
+          brand_price: m.brandPrice || m.brand_price,
           status: m.status || 'In Stock'
         }]);
       } catch (e) {
@@ -792,16 +780,15 @@
       }
       try {
         return await this.client.from('staff').insert([{
-          id: s.id,
-          staff_code: s.id,
+          staff_code: s.staff_code || s.id,
           name: s.name,
           role: s.role,
           phone: s.phone,
-          location: s.location,
-          status: s.status || 'Active',
-          reg_no: s.regNo,
-          password_hash: s.password || (s.role + '@123'),
-          pin: s.pin || '1234'
+          location: s.location || 'District Health Centre',
+          status: s.status || 'Active Online',
+          reg_no: s.regNo || s.reg_no,
+          password_hash: s.password || s.password_hash || (s.role + '@123'),
+          pin: s.pin || s.password || '1234'
         }]);
       } catch (e) {
         return this.enqueueOfflineAction('insert_staff', 'staff', s);
