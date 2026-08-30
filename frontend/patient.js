@@ -62,11 +62,20 @@
     // 2. ABHA CARD RENDER & PRINT
     // -------------------------------------------------------------
     renderAbhaCard() {
-      const el = document.getElementById('abhaCardContainer');
-      if (!el || !this.store) return;
-      const user = this.store.getState().currentUser;
+      const container = document.getElementById('abhaCardContainer');
+      if (!container || !this.store) return;
+      const state = this.store.getState();
+      const user = state.currentUser || (state.session ? state.session.user : null) || {
+        name: 'Citizen Patient',
+        phone: '9876543210',
+        age: 38,
+        gender: 'Male',
+        village: 'Kondapalli Sub-Centre',
+        bloodGroup: 'O+',
+        abhaId: '14-8921-4402-9912'
+      };
 
-      el.innerHTML = `
+      container.innerHTML = `
         <div class="abha-badge-card" style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:18px;padding:20px;box-shadow:var(--shadow-panel);position:relative;overflow:hidden;">
           <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1.5px solid var(--line);padding-bottom:12px;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
             <div style="display:flex;align-items:center;gap:10px;">
@@ -439,7 +448,13 @@
     // 3. 1-TAP 108 EMERGENCY SOS
     // -------------------------------------------------------------
     triggerSos() {
-      const user = this.store.getState().currentUser;
+      const state = this.store.getState();
+      const user = state.currentUser || (state.session ? state.session.user : null) || {
+        name: 'Citizen Patient',
+        phone: '9876543210',
+        village: 'Kondapalli Ward 4',
+        abhaId: '14-8921-4402-9912'
+      };
       const message = `🚨 EMERGENCY 108 SOS!\n\nPatient: ${user.name}\nPhone: +91 ${user.phone}\nLocation: ${user.village}\nABHA: ${user.abhaId}\n\nEmergency ambulance dispatched.`;
       
       // User can trigger speech manually if desired
@@ -528,12 +543,12 @@
     // 5. FAMILY HEALTH CIRCLE
     // -------------------------------------------------------------
     renderFamilyCircle() {
-      const el = document.getElementById('familyMembersList');
+      const el = document.getElementById('familyMembersGrid') || document.getElementById('familyMembersList');
       if (!el || !this.store) return;
       const fams = this.store.getState().familyMembers || [];
 
       if (!fams.length) {
-        el.innerHTML = `<div style="text-align:center;padding:20px;color:var(--muted);">No family members added yet. Tap "+ Add Member" below.</div>`;
+        el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);grid-column:1/-1;">No family members added yet. Tap "+ Add Member" above.</div>';
         return;
       }
 
@@ -545,7 +560,7 @@
             </div>
             <div>
               <strong style="color:var(--ink);font-size:15px;display:block;">${f.name} (${f.relation})</strong>
-              <small style="color:var(--muted);font-family:'IBM Plex Mono',monospace;">ABHA: ${f.abhaId}</small>
+              <small style="color:var(--muted);font-family:'IBM Plex Mono',monospace;">Age: ${f.age} · ABHA: ${f.abhaId || '14-XXXX'}</small>
             </div>
           </div>
           <div style="text-align:right;">
@@ -578,14 +593,15 @@
         return;
       }
 
-      this.store.addFamilyMember({ name, relation, age, gender });
+      const newFam = this.store.addFamilyMember({ name, relation, age, gender });
+      document.getElementById('famName').value = '';
+      document.getElementById('famAge').value = '';
       this.closeAddFamilyModal();
-      if (typeof window.toast === 'function') window.toast('✓ Added ' + name + ' to Family Health Circle');
-    }
-
-    removeFamilyMember(id) {
-      if (confirm('Are you sure you want to remove this family member?')) {
-        this.store.deleteFamilyMember(id);
+      
+      // Immediately re-render Family Circle on the spot
+      this.renderFamilyCircle();
+      if (typeof window.toast === 'function') {
+        window.toast('✓ Added ' + name + ' (' + relation + ') to Family Health Circle');
       }
     }
 
@@ -593,7 +609,7 @@
     // 6. JAN AUSHADHI MEDICINE TRACKER & SAVINGS (DYNAMIC CATALOG)
     // -------------------------------------------------------------
     renderDailyMedications() {
-      const el = document.getElementById('dailyMedsList');
+      const el = document.getElementById('dailyMedsContainer') || document.getElementById('dailyMedsList');
       if (!el || !this.store) return;
       const meds = this.store.getState().medicines || [];
 
@@ -645,7 +661,7 @@
     // 7. LIVE HOSPITAL BEDS & BLOOD BANK
     // -------------------------------------------------------------
     renderLiveHospitals() {
-      const el = document.getElementById('hospitalBedsList');
+      const el = document.getElementById('hospitalBedsContainer') || document.getElementById('hospitalBedsList');
       if (!el || !this.store) return;
       const hosps = this.store.getState().hospitals || [];
 

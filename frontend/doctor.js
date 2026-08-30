@@ -80,13 +80,13 @@
       this.selectedPatient = q;
 
       // Localize Modal Title
-      const titleEl = document.getElementById('consultActivePatientName');
+      const titleEl = document.getElementById('consultPatientHeader') || document.getElementById('consultActivePatientName');
       if (titleEl) {
         titleEl.innerHTML = `${this.t('consulting_label', 'Consulting')}: <strong style="color:var(--primary-bright);">${q.patientName} (${q.token})</strong> — ${q.age} ${this.t('years_short', 'Yrs')}, ${q.gender}`;
       }
 
       // Localize Vitals & Chief Complaint Box
-      const vitalsEl = document.getElementById('consultActiveVitals');
+      const vitalsEl = document.getElementById('consultRecordedComplaint') || document.getElementById('consultActiveVitals');
       if (vitalsEl) {
         vitalsEl.innerHTML = `<strong>${this.t('complaint_label', 'Chief Complaint')}:</strong> ${this.tr(q.complaint)}<br><span style="opacity:0.85;">BP: ${q.vitals.bp}, SpO2: ${q.vitals.spo2}, Temp: ${q.vitals.temp}, Pulse: ${q.vitals.pulse}</span>`;
       }

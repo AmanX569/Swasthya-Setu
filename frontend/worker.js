@@ -32,7 +32,7 @@
 
     // 1. ANC High-Risk Mothers
     renderAncRecords() {
-      const el = document.getElementById('ashaAncTableBody');
+      const el = document.getElementById('workerAncTableBody') || document.getElementById('ashaAncTableBody');
       if (!el || !this.store) return;
       const ancs = this.store.getState().ancRecords || [];
 
@@ -230,7 +230,7 @@
 
     // 2. Child UIP Immunization
     renderImmunizations() {
-      const el = document.getElementById('ashaUipTableBody');
+      const el = document.getElementById('workerImmTableBody') || document.getElementById('ashaUipTableBody');
       if (!el || !this.store) return;
       const uips = this.store.getState().immunizations || [];
 
@@ -287,59 +287,67 @@
 
     // 3. Home Visits
     renderHomeVisits() {
-      const el = document.getElementById('ashaVisitsList');
+      const el = document.getElementById('workerHomeVisitsGrid') || document.getElementById('workerVisitsList') || document.getElementById('ashaVisitsList');
       if (!el || !this.store) return;
       const visits = this.store.getState().homeVisits || [];
 
+      if (!visits.length) {
+        el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);grid-column:1/-1;">No home visits scheduled for today. Tap "+ Add Visit" above.</div>';
+        return;
+      }
+
       el.innerHTML = visits.map(v => `
-        <div style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:14px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;box-shadow:var(--shadow-panel);">
+        <div style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:14px;padding:14px;box-shadow:var(--shadow-panel);display:flex;flex-direction:column;justify-content:space-between;">
           <div>
-            <strong style="color:var(--ink);font-size:15px;display:block;">${v.household}</strong>
-            <small style="color:var(--primary-bright);font-weight:700;">Priority: ${v.priority}</small>
-            <p style="font-size:13px;color:var(--ink-dim);margin-top:2px;">Task: ${v.task}</p>
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+              <strong style="color:var(--ink);font-size:15px;">${v.household}</strong>
+              <span class="badge" style="background:${v.priority.includes('High') ? 'rgba(239,68,68,0.15)' : 'rgba(2,132,199,0.15)'};color:${v.priority.includes('High') ? '#ef4444' : 'var(--primary-bright)'};padding:3px 8px;border-radius:10px;font-size:11px;font-weight:700;">
+                ${v.priority}
+              </span>
+            </div>
+            <p style="font-size:13px;color:var(--ink-dim);margin-bottom:10px;line-height:1.4;">📋 ${v.task}</p>
           </div>
-          <button class="btn-glass" style="padding:8px 14px;font-size:12px;background:${v.status === 'Completed' ? '#16a34a' : 'var(--glass-1)'};color:${v.status === 'Completed' ? '#ffffff' : 'var(--ink)'};border-color:${v.status === 'Completed' ? '#16a34a' : 'var(--glass-border)'};cursor:pointer;" onclick="workerController.toggleVisit('${v.id}')">
-            ${v.status === 'Completed' ? '✓ Completed' : 'Mark Done'}
-          </button>
+          <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding-top:8px;margin-top:8px;">
+            <small style="color:var(--muted);">Members: ${v.members || 4}</small>
+            <button class="btn-glass" style="padding:4px 10px;font-size:11px;font-weight:700;background:${v.status === 'Completed' ? '#16a34a' : 'var(--glass-1)'};color:${v.status === 'Completed' ? '#ffffff' : 'var(--ink)'};border-color:${v.status === 'Completed' ? '#16a34a' : 'var(--glass-border)'};" onclick="workerController.toggleVisit('${v.id}')">
+              ${v.status === 'Completed' ? '✓ Completed' : 'Mark Done'}
+            </button>
+          </div>
         </div>
       `).join('');
     }
 
-    toggleVisit(id) {
-      this.store.toggleHomeVisit(id);
-    }
-
     openAddVisitModal() {
-      const m = document.getElementById('addVisitModal');
-      if (m) m.style.display = 'flex';
+      const modal = document.getElementById('addVisitModal');
+      if (modal) modal.style.display = 'flex';
     }
 
     closeAddVisitModal() {
-      const m = document.getElementById('addVisitModal');
-      if (m) m.style.display = 'none';
+      const modal = document.getElementById('addVisitModal');
+      if (modal) modal.style.display = 'none';
     }
 
     submitAddVisit(e) {
       if (e) e.preventDefault();
       const household = document.getElementById('visHousehold').value.trim();
-      const members = parseInt(document.getElementById('visMembers').value, 10) || 3;
+      const members = parseInt(document.getElementById('visMembers').value, 10) || 4;
       const priority = document.getElementById('visPriority').value;
       const task = document.getElementById('visTask').value.trim();
 
-      if (!household) {
-        alert('Please enter household name');
+      if (!household || !task) {
+        alert('Please enter resident name/household and task description');
         return;
       }
 
-      this.store.addHomeVisit({
-        household,
-        members,
-        priority,
-        task: task || 'Routine Health Visit & Vitals Check'
-      });
-
+      this.store.addHomeVisit({ household, members, priority, task });
+      document.getElementById('visHousehold').value = '';
+      document.getElementById('visTask').value = '';
       this.closeAddVisitModal();
-      if (typeof window.toast === 'function') window.toast('✓ Added Home Visit for ' + household);
+      
+      this.renderHomeVisits();
+      this.renderStats();
+      this.renderMasterRegistry();
+      if (typeof window.toast === 'function') window.toast('✓ Scheduled home visit for ' + household);
     }
   }
 

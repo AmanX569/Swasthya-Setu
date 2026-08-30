@@ -33,19 +33,32 @@
     }
 
     renderKpis() {
+      const elGrid = document.getElementById('adminStatsGrid');
+      if (!elGrid || !this.store) return;
       const state = this.store.getState();
-      const elStaff = document.getElementById('kpiTotalStaff');
-      if (elStaff) elStaff.textContent = (state.staff || []).length;
+      const staffCount = (state.staff || []).length;
+      const queueCount = (state.consultQueue || []).length;
+      const ancCount = (state.ancRecords || []).length;
+      const totalBeds = (state.hospitals || []).reduce((acc, h) => acc + (h.genBedsAvail || 0) + (h.icuBedsAvail || 0) + (h.oxygenBedsAvail || 0), 0);
 
-      const elQueue = document.getElementById('kpiQueueCount');
-      if (elQueue) elQueue.textContent = (state.consultQueue || []).length;
-
-      const elAnc = document.getElementById('kpiAncCount');
-      if (elAnc) elAnc.textContent = (state.ancRecords || []).length;
-
-      const totalBeds = (state.hospitals || []).reduce((acc, h) => acc + h.genBedsAvail + h.icuBedsAvail + h.oxygenBedsAvail, 0);
-      const elBeds = document.getElementById('kpiTotalBeds');
-      if (elBeds) elBeds.textContent = totalBeds;
+      elGrid.innerHTML = `
+        <div style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:14px;padding:14px;text-align:center;box-shadow:var(--shadow-panel);">
+          <small style="color:var(--muted);font-size:11px;font-weight:700;display:block;text-transform:uppercase;">Active Medical Staff</small>
+          <strong style="font-size:24px;color:var(--primary-bright);font-weight:900;">${staffCount}</strong>
+        </div>
+        <div style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:14px;padding:14px;text-align:center;box-shadow:var(--shadow-panel);">
+          <small style="color:var(--muted);font-size:11px;font-weight:700;display:block;text-transform:uppercase;">Live Teleconsult Queue</small>
+          <strong style="font-size:24px;color:#d97706;font-weight:900;">${queueCount}</strong>
+        </div>
+        <div style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:14px;padding:14px;text-align:center;box-shadow:var(--shadow-panel);">
+          <small style="color:var(--muted);font-size:11px;font-weight:700;display:block;text-transform:uppercase;">High-Risk ANC Mothers</small>
+          <strong style="font-size:24px;color:#db2777;font-weight:900;">${ancCount}</strong>
+        </div>
+        <div style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:14px;padding:14px;text-align:center;box-shadow:var(--shadow-panel);">
+          <small style="color:var(--muted);font-size:11px;font-weight:700;display:block;text-transform:uppercase;">Available Govt Beds</small>
+          <strong style="font-size:24px;color:#16a34a;font-weight:900;">${totalBeds}</strong>
+        </div>
+      `;
     }
 
     renderStaffTable() {

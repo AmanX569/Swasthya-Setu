@@ -7166,11 +7166,20 @@ table td strong {
     // 2. ABHA CARD RENDER & PRINT
     // -------------------------------------------------------------
     renderAbhaCard() {
-      const el = document.getElementById('abhaCardContainer');
-      if (!el || !this.store) return;
-      const user = this.store.getState().currentUser;
+      const container = document.getElementById('abhaCardContainer');
+      if (!container || !this.store) return;
+      const state = this.store.getState();
+      const user = state.currentUser || (state.session ? state.session.user : null) || {
+        name: 'Citizen Patient',
+        phone: '9876543210',
+        age: 38,
+        gender: 'Male',
+        village: 'Kondapalli Sub-Centre',
+        bloodGroup: 'O+',
+        abhaId: '14-8921-4402-9912'
+      };
 
-      el.innerHTML = `
+      container.innerHTML = `
         <div class="abha-badge-card" style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:18px;padding:20px;box-shadow:var(--shadow-panel);position:relative;overflow:hidden;">
           <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1.5px solid var(--line);padding-bottom:12px;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
             <div style="display:flex;align-items:center;gap:10px;">
@@ -7543,7 +7552,13 @@ table td strong {
     // 3. 1-TAP 108 EMERGENCY SOS
     // -------------------------------------------------------------
     triggerSos() {
-      const user = this.store.getState().currentUser;
+      const state = this.store.getState();
+      const user = state.currentUser || (state.session ? state.session.user : null) || {
+        name: 'Citizen Patient',
+        phone: '9876543210',
+        village: 'Kondapalli Ward 4',
+        abhaId: '14-8921-4402-9912'
+      };
       const message = `🚨 EMERGENCY 108 SOS!\n\nPatient: ${user.name}\nPhone: +91 ${user.phone}\nLocation: ${user.village}\nABHA: ${user.abhaId}\n\nEmergency ambulance dispatched.`;
       
       // User can trigger speech manually if desired
@@ -7632,12 +7647,12 @@ table td strong {
     // 5. FAMILY HEALTH CIRCLE
     // -------------------------------------------------------------
     renderFamilyCircle() {
-      const el = document.getElementById('familyMembersList');
+      const el = document.getElementById('familyMembersGrid') || document.getElementById('familyMembersList');
       if (!el || !this.store) return;
       const fams = this.store.getState().familyMembers || [];
 
       if (!fams.length) {
-        el.innerHTML = `<div style="text-align:center;padding:20px;color:var(--muted);">No family members added yet. Tap "+ Add Member" below.</div>`;
+        el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);grid-column:1/-1;">No family members added yet. Tap "+ Add Member" above.</div>';
         return;
       }
 
@@ -7649,7 +7664,7 @@ table td strong {
             </div>
             <div>
               <strong style="color:var(--ink);font-size:15px;display:block;">${f.name} (${f.relation})</strong>
-              <small style="color:var(--muted);font-family:'IBM Plex Mono',monospace;">ABHA: ${f.abhaId}</small>
+              <small style="color:var(--muted);font-family:'IBM Plex Mono',monospace;">Age: ${f.age} · ABHA: ${f.abhaId || '14-XXXX'}</small>
             </div>
           </div>
           <div style="text-align:right;">
@@ -7682,14 +7697,15 @@ table td strong {
         return;
       }
 
-      this.store.addFamilyMember({ name, relation, age, gender });
+      const newFam = this.store.addFamilyMember({ name, relation, age, gender });
+      document.getElementById('famName').value = '';
+      document.getElementById('famAge').value = '';
       this.closeAddFamilyModal();
-      if (typeof window.toast === 'function') window.toast('✓ Added ' + name + ' to Family Health Circle');
-    }
-
-    removeFamilyMember(id) {
-      if (confirm('Are you sure you want to remove this family member?')) {
-        this.store.deleteFamilyMember(id);
+      
+      // Immediately re-render Family Circle on the spot
+      this.renderFamilyCircle();
+      if (typeof window.toast === 'function') {
+        window.toast('✓ Added ' + name + ' (' + relation + ') to Family Health Circle');
       }
     }
 
@@ -7697,7 +7713,7 @@ table td strong {
     // 6. JAN AUSHADHI MEDICINE TRACKER & SAVINGS (DYNAMIC CATALOG)
     // -------------------------------------------------------------
     renderDailyMedications() {
-      const el = document.getElementById('dailyMedsList');
+      const el = document.getElementById('dailyMedsContainer') || document.getElementById('dailyMedsList');
       if (!el || !this.store) return;
       const meds = this.store.getState().medicines || [];
 
@@ -7749,7 +7765,7 @@ table td strong {
     // 7. LIVE HOSPITAL BEDS & BLOOD BANK
     // -------------------------------------------------------------
     renderLiveHospitals() {
-      const el = document.getElementById('hospitalBedsList');
+      const el = document.getElementById('hospitalBedsContainer') || document.getElementById('hospitalBedsList');
       if (!el || !this.store) return;
       const hosps = this.store.getState().hospitals || [];
 
@@ -7893,13 +7909,13 @@ table td strong {
       this.selectedPatient = q;
 
       // Localize Modal Title
-      const titleEl = document.getElementById('consultActivePatientName');
+      const titleEl = document.getElementById('consultPatientHeader') || document.getElementById('consultActivePatientName');
       if (titleEl) {
         titleEl.innerHTML = `${this.t('consulting_label', 'Consulting')}: <strong style="color:var(--primary-bright);">${q.patientName} (${q.token})</strong> — ${q.age} ${this.t('years_short', 'Yrs')}, ${q.gender}`;
       }
 
       // Localize Vitals & Chief Complaint Box
-      const vitalsEl = document.getElementById('consultActiveVitals');
+      const vitalsEl = document.getElementById('consultRecordedComplaint') || document.getElementById('consultActiveVitals');
       if (vitalsEl) {
         vitalsEl.innerHTML = `<strong>${this.t('complaint_label', 'Chief Complaint')}:</strong> ${this.tr(q.complaint)}<br><span style="opacity:0.85;">BP: ${q.vitals.bp}, SpO2: ${q.vitals.spo2}, Temp: ${q.vitals.temp}, Pulse: ${q.vitals.pulse}</span>`;
       }
@@ -8114,7 +8130,7 @@ table td strong {
 
     // 1. ANC High-Risk Mothers
     renderAncRecords() {
-      const el = document.getElementById('ashaAncTableBody');
+      const el = document.getElementById('workerAncTableBody') || document.getElementById('ashaAncTableBody');
       if (!el || !this.store) return;
       const ancs = this.store.getState().ancRecords || [];
 
@@ -8312,7 +8328,7 @@ table td strong {
 
     // 2. Child UIP Immunization
     renderImmunizations() {
-      const el = document.getElementById('ashaUipTableBody');
+      const el = document.getElementById('workerImmTableBody') || document.getElementById('ashaUipTableBody');
       if (!el || !this.store) return;
       const uips = this.store.getState().immunizations || [];
 
@@ -8369,59 +8385,67 @@ table td strong {
 
     // 3. Home Visits
     renderHomeVisits() {
-      const el = document.getElementById('ashaVisitsList');
+      const el = document.getElementById('workerHomeVisitsGrid') || document.getElementById('workerVisitsList') || document.getElementById('ashaVisitsList');
       if (!el || !this.store) return;
       const visits = this.store.getState().homeVisits || [];
 
+      if (!visits.length) {
+        el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);grid-column:1/-1;">No home visits scheduled for today. Tap "+ Add Visit" above.</div>';
+        return;
+      }
+
       el.innerHTML = visits.map(v => `
-        <div style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:14px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;box-shadow:var(--shadow-panel);">
+        <div style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:14px;padding:14px;box-shadow:var(--shadow-panel);display:flex;flex-direction:column;justify-content:space-between;">
           <div>
-            <strong style="color:var(--ink);font-size:15px;display:block;">${v.household}</strong>
-            <small style="color:var(--primary-bright);font-weight:700;">Priority: ${v.priority}</small>
-            <p style="font-size:13px;color:var(--ink-dim);margin-top:2px;">Task: ${v.task}</p>
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+              <strong style="color:var(--ink);font-size:15px;">${v.household}</strong>
+              <span class="badge" style="background:${v.priority.includes('High') ? 'rgba(239,68,68,0.15)' : 'rgba(2,132,199,0.15)'};color:${v.priority.includes('High') ? '#ef4444' : 'var(--primary-bright)'};padding:3px 8px;border-radius:10px;font-size:11px;font-weight:700;">
+                ${v.priority}
+              </span>
+            </div>
+            <p style="font-size:13px;color:var(--ink-dim);margin-bottom:10px;line-height:1.4;">📋 ${v.task}</p>
           </div>
-          <button class="btn-glass" style="padding:8px 14px;font-size:12px;background:${v.status === 'Completed' ? '#16a34a' : 'var(--glass-1)'};color:${v.status === 'Completed' ? '#ffffff' : 'var(--ink)'};border-color:${v.status === 'Completed' ? '#16a34a' : 'var(--glass-border)'};cursor:pointer;" onclick="workerController.toggleVisit('${v.id}')">
-            ${v.status === 'Completed' ? '✓ Completed' : 'Mark Done'}
-          </button>
+          <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding-top:8px;margin-top:8px;">
+            <small style="color:var(--muted);">Members: ${v.members || 4}</small>
+            <button class="btn-glass" style="padding:4px 10px;font-size:11px;font-weight:700;background:${v.status === 'Completed' ? '#16a34a' : 'var(--glass-1)'};color:${v.status === 'Completed' ? '#ffffff' : 'var(--ink)'};border-color:${v.status === 'Completed' ? '#16a34a' : 'var(--glass-border)'};" onclick="workerController.toggleVisit('${v.id}')">
+              ${v.status === 'Completed' ? '✓ Completed' : 'Mark Done'}
+            </button>
+          </div>
         </div>
       `).join('');
     }
 
-    toggleVisit(id) {
-      this.store.toggleHomeVisit(id);
-    }
-
     openAddVisitModal() {
-      const m = document.getElementById('addVisitModal');
-      if (m) m.style.display = 'flex';
+      const modal = document.getElementById('addVisitModal');
+      if (modal) modal.style.display = 'flex';
     }
 
     closeAddVisitModal() {
-      const m = document.getElementById('addVisitModal');
-      if (m) m.style.display = 'none';
+      const modal = document.getElementById('addVisitModal');
+      if (modal) modal.style.display = 'none';
     }
 
     submitAddVisit(e) {
       if (e) e.preventDefault();
       const household = document.getElementById('visHousehold').value.trim();
-      const members = parseInt(document.getElementById('visMembers').value, 10) || 3;
+      const members = parseInt(document.getElementById('visMembers').value, 10) || 4;
       const priority = document.getElementById('visPriority').value;
       const task = document.getElementById('visTask').value.trim();
 
-      if (!household) {
-        alert('Please enter household name');
+      if (!household || !task) {
+        alert('Please enter resident name/household and task description');
         return;
       }
 
-      this.store.addHomeVisit({
-        household,
-        members,
-        priority,
-        task: task || 'Routine Health Visit & Vitals Check'
-      });
-
+      this.store.addHomeVisit({ household, members, priority, task });
+      document.getElementById('visHousehold').value = '';
+      document.getElementById('visTask').value = '';
       this.closeAddVisitModal();
-      if (typeof window.toast === 'function') window.toast('✓ Added Home Visit for ' + household);
+      
+      this.renderHomeVisits();
+      this.renderStats();
+      this.renderMasterRegistry();
+      if (typeof window.toast === 'function') window.toast('✓ Scheduled home visit for ' + household);
     }
   }
 
@@ -8466,19 +8490,32 @@ table td strong {
     }
 
     renderKpis() {
+      const elGrid = document.getElementById('adminStatsGrid');
+      if (!elGrid || !this.store) return;
       const state = this.store.getState();
-      const elStaff = document.getElementById('kpiTotalStaff');
-      if (elStaff) elStaff.textContent = (state.staff || []).length;
+      const staffCount = (state.staff || []).length;
+      const queueCount = (state.consultQueue || []).length;
+      const ancCount = (state.ancRecords || []).length;
+      const totalBeds = (state.hospitals || []).reduce((acc, h) => acc + (h.genBedsAvail || 0) + (h.icuBedsAvail || 0) + (h.oxygenBedsAvail || 0), 0);
 
-      const elQueue = document.getElementById('kpiQueueCount');
-      if (elQueue) elQueue.textContent = (state.consultQueue || []).length;
-
-      const elAnc = document.getElementById('kpiAncCount');
-      if (elAnc) elAnc.textContent = (state.ancRecords || []).length;
-
-      const totalBeds = (state.hospitals || []).reduce((acc, h) => acc + h.genBedsAvail + h.icuBedsAvail + h.oxygenBedsAvail, 0);
-      const elBeds = document.getElementById('kpiTotalBeds');
-      if (elBeds) elBeds.textContent = totalBeds;
+      elGrid.innerHTML = `
+        <div style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:14px;padding:14px;text-align:center;box-shadow:var(--shadow-panel);">
+          <small style="color:var(--muted);font-size:11px;font-weight:700;display:block;text-transform:uppercase;">Active Medical Staff</small>
+          <strong style="font-size:24px;color:var(--primary-bright);font-weight:900;">${staffCount}</strong>
+        </div>
+        <div style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:14px;padding:14px;text-align:center;box-shadow:var(--shadow-panel);">
+          <small style="color:var(--muted);font-size:11px;font-weight:700;display:block;text-transform:uppercase;">Live Teleconsult Queue</small>
+          <strong style="font-size:24px;color:#d97706;font-weight:900;">${queueCount}</strong>
+        </div>
+        <div style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:14px;padding:14px;text-align:center;box-shadow:var(--shadow-panel);">
+          <small style="color:var(--muted);font-size:11px;font-weight:700;display:block;text-transform:uppercase;">High-Risk ANC Mothers</small>
+          <strong style="font-size:24px;color:#db2777;font-weight:900;">${ancCount}</strong>
+        </div>
+        <div style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:14px;padding:14px;text-align:center;box-shadow:var(--shadow-panel);">
+          <small style="color:var(--muted);font-size:11px;font-weight:700;display:block;text-transform:uppercase;">Available Govt Beds</small>
+          <strong style="font-size:24px;color:#16a34a;font-weight:900;">${totalBeds}</strong>
+        </div>
+      `;
     }
 
     renderStaffTable() {
