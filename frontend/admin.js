@@ -267,7 +267,7 @@
       if (m) m.style.display = 'none';
     }
 
-    submitAddDrug(e) {
+        submitAddDrug(e) {
       if (e) e.preventDefault();
       const name = document.getElementById('drugName').value.trim();
       const category = document.getElementById('drugCat').value.trim();
@@ -280,7 +280,7 @@
         return;
       }
 
-      this.store.addMedicine({
+      const newMed = this.store.addMedicine({
         name,
         category: category || 'General Medicine',
         stock,
@@ -290,8 +290,26 @@
         status: 'In Stock'
       });
 
+      // Clear input fields
+      document.getElementById('drugName').value = '';
+      document.getElementById('drugCat').value = '';
+      document.getElementById('drugStock').value = '';
+      document.getElementById('drugGenPrice').value = '';
+      document.getElementById('drugBrandPrice').value = '';
+
       this.closeAddDrugModal();
-      if (typeof window.toast === 'function') window.toast('✓ Added ' + name + ' to Jan Aushadhi Inventory');
+      
+      // Immediately re-render Admin medicines table on the spot
+      this.renderAdminMedicines();
+
+      // Immediately re-render Patient Jan Aushadhi generic catalog on the spot
+      if (global.patientController && typeof global.patientController.renderDailyMeds === 'function') {
+        global.patientController.renderDailyMeds();
+      }
+
+      if (typeof window.toast === 'function') {
+        window.toast('✓ Added ' + name + ' to Jan Aushadhi Inventory & Synced to Database');
+      }
     }
   }
 

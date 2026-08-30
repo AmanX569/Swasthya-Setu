@@ -226,6 +226,12 @@
           if (typeof global.patientController.renderHospitals === 'function') global.patientController.renderHospitals();
           if (typeof global.patientController.renderBloodBank === 'function') global.patientController.renderBloodBank();
         }
+        if (global.adminController && typeof global.adminController.renderAdminMedicines === 'function') {
+          global.adminController.renderAdminMedicines();
+        }
+        if (global.patientController && typeof global.patientController.renderDailyMeds === 'function') {
+          global.patientController.renderDailyMeds();
+        }
         if (global.doctorController) {
           if (typeof global.doctorController.renderQueue === 'function') global.doctorController.renderQueue();
           if (typeof global.doctorController.renderStats === 'function') global.doctorController.renderStats();
