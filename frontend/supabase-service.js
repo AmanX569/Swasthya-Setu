@@ -160,14 +160,13 @@
           switch (item.action) {
             case 'insert_profile':
               res = await this.client.from('profiles').insert([{
-                id: p.id,
-                abha_id: p.abhaId,
+                abha_id: p.abhaId || p.abha_id,
                 name: p.name,
                 phone: p.phone,
                 age: p.age,
                 gender: p.gender,
                 village: p.village,
-                blood_group: p.bloodGroup
+                blood_group: p.bloodGroup || p.blood_group
               }]);
               break;
 
@@ -814,7 +813,6 @@
       }
       try {
         return await this.client.from('profiles').insert([{
-          id: p.id,
           abha_id: p.abhaId || p.abha_id,
           name: p.name,
           phone: p.phone,
