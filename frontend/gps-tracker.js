@@ -1,30 +1,28 @@
 /**
  * =========================================================
  * SWASTHYA SETU - REAL-TIME GPS & 108 AMBULANCE TRACKER (gps-tracker.js)
- * Google Maps Styled High-Definition Interactive Engine with Fullscreen Mode,
- * Live Traffic Overlay, Turn-by-Turn Navigation HUD & Hospital Geo-Pins
+ * Genuine Google Maps Tiled Navigation Engine (Roads, Satellite, Terrain)
+ * 100% Fullscreen Mode with Instant Minimize Controls & 108 Dispatch
  * =========================================================
  */
 
 (function(global) {
   'use strict';
 
-  // Default Regional Hospital Coordinates (Kondapalli & Krishna District, AP)
+  // Regional Center: Kondapalli / Ibrahimpatnam / Vijayawada / AIIMS Mangalagiri
   const DEFAULT_REGION = {
     lat: 16.6186,
     lng: 80.5364,
-    zoom: 14
+    zoom: 13
   };
 
   const HOSPITALS_GEO = [
     {
       id: 'HOSP-01',
       name: 'Kondapalli Primary Health Centre (PHC)',
-      type: 'PHC (24x7 Emergency)',
+      type: 'PHC (24x7 Emergency & Maternity)',
       lat: 16.6225,
       lng: 80.5412,
-      x: 74, // SVG coordinate percentage
-      y: 26,
       rating: '4.8 ★★★★★',
       beds: { gen: 8, icu: 2, oxygen: 6 },
       phone: '0866-281001',
@@ -36,8 +34,6 @@
       type: 'CHC (Trauma & Critical Care)',
       lat: 16.5910,
       lng: 80.5180,
-      x: 20,
-      y: 72,
       rating: '4.7 ★★★★★',
       beds: { gen: 18, icu: 5, oxygen: 14 },
       phone: '0866-282002',
@@ -49,40 +45,59 @@
       type: 'District Multi-Specialty Hospital',
       lat: 16.5062,
       lng: 80.6480,
-      x: 88,
-      y: 80,
       rating: '4.9 ★★★★★',
       beds: { gen: 74, icu: 12, oxygen: 45 },
       phone: '0866-257000',
       doctor: 'Emergency Trauma Team'
+    },
+    {
+      id: 'HOSP-04',
+      name: 'AIIMS Mangalagiri (Apex Medical Institute)',
+      type: 'National Super-Specialty Hospital',
+      lat: 16.4380,
+      lng: 80.5750,
+      rating: '5.0 ★★★★★',
+      beds: { gen: 120, icu: 35, oxygen: 90 },
+      phone: '08645-293900',
+      doctor: 'AIIMS Critical Care Unit'
     }
   ];
 
+  // Tile Providers (Google Maps Official Tiles & CartoDB High-Speed CDN)
+  const TILE_LAYERS = {
+    streets: {
+      url: 'https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',
+      fallbackUrl: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+      maxZoom: 20,
+      attribution: '© Google Maps · Swasthya Setu ABDM Grid'
+    },
+    satellite: {
+      url: 'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', // Google Hybrid Satellite
+      fallbackUrl: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+      maxZoom: 20,
+      attribution: '© Google Satellite Imagery · ABDM Grid'
+    },
+    terrain: {
+      url: 'https://mt1.google.com/vt/lyrs=p&x={x}&y={y}&z={z}', // Google Terrain
+      fallbackUrl: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+      maxZoom: 20,
+      attribution: '© Google Maps Terrain · ABDM Grid'
+    }
+  };
+
   class GpsTrackingController {
     constructor() {
-      this.maps = {};
+      this.maps = {}; // Store Leaflet instances by container ID
+      this.currentLayerKey = 'streets';
       this.patientCoords = { lat: DEFAULT_REGION.lat, lng: DEFAULT_REGION.lng };
       this.hasRealGps = false;
-      this.zoomLevel = 1;
-      this.mapMode = 'streets'; // 'streets' | 'satellite' | 'terrain'
-      this.trafficEnabled = true;
       this.isFullscreen = false;
-      this.selectedHospital = null;
       
       this.dispatchState = {
         isActive: false,
-        stage: 'idle', // 'idle' | 'dispatched' | 'enroute' | 'arrived' | 'transit'
-        ambulancePos: { x: 74, y: 26 }, // Starts at Kondapalli PHC
-        patientPos: { x: 48, y: 46 }, // Patient location
-        routePoints: [
-          { x: 74, y: 26, turn: 'Start from Kondapalli PHC Base' },
-          { x: 69, y: 31, turn: 'Merge onto NH-65 Express Highway' },
-          { x: 64, y: 35, turn: 'Continue straight on NH-65 (50 km/h)' },
-          { x: 59, y: 39, turn: 'Take exit towards Sector 4 Village Link' },
-          { x: 55, y: 42, turn: 'In 200m, turn left onto Hospital Rd' },
-          { x: 51, y: 44, turn: 'Approaching Patient Doorstep' },
-          { x: 48, y: 46, turn: 'Ambulance Arrived at Patient Location' }
-        ],
+        stage: 'idle', // 'idle' | 'enroute' | 'arrived'
+        ambulanceCoords: null,
+        routePath: [],
         stepIndex: 0,
         distanceKm: 3.4,
         etaMinutes: 4,
@@ -97,13 +112,36 @@
         timerId: null
       };
 
+      this.ensureLeafletLoaded();
       this.initGeolocation();
       this.setupEscKey();
     }
 
-    // -------------------------------------------------------------
-    // 1. DEVICE GEOLOCATION
-    // -------------------------------------------------------------
+    ensureLeafletLoaded() {
+      if (typeof document === 'undefined') return;
+
+      // Check Leaflet CSS
+      if (!document.getElementById('leafletCssTag')) {
+        const link = document.createElement('link');
+        link.id = 'leafletCssTag';
+        link.rel = 'stylesheet';
+        link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+        document.head.appendChild(link);
+      }
+
+      // Check Leaflet Script
+      if (typeof global.L === 'undefined' && !document.getElementById('leafletJsTag')) {
+        const script = document.createElement('script');
+        script.id = 'leafletJsTag';
+        script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+        script.onload = () => {
+          console.log('[GPS Engine] Leaflet Maps Library Loaded Successfully.');
+          this.initMap('patientLiveGpsMap');
+        };
+        document.head.appendChild(script);
+      }
+    }
+
     initGeolocation() {
       if (typeof navigator !== 'undefined' && 'geolocation' in navigator) {
         navigator.geolocation.getCurrentPosition(
@@ -113,11 +151,11 @@
               lng: pos.coords.longitude
             };
             this.hasRealGps = true;
-            console.log('[GPS] Real device coordinates acquired:', this.patientCoords);
-            this.renderAllContainers();
+            console.log('[GPS] Acquired live device location:', this.patientCoords);
+            this.updateAllMapLocations();
           },
           (err) => {
-            console.warn('[GPS] Geolocation fallback to regional grid:', err.message);
+            console.warn('[GPS] Geolocation default regional center:', err.message);
           },
           { enableHighAccuracy: true, timeout: 8000, maximumAge: 30000 }
         );
@@ -147,325 +185,407 @@
     }
 
     // -------------------------------------------------------------
-    // 2. GOOGLE MAPS VISUAL ENGINE & FULLSCREEN
+    // 2. LEAFLET GOOGLE MAPS ENGINE
     // -------------------------------------------------------------
     initMap(containerId) {
       if (typeof document === 'undefined') return;
       const container = document.getElementById(containerId);
       if (!container) return;
 
-      this.renderGoogleMap(containerId);
-      this.updateUiCards();
+      // If Leaflet is not yet ready, retry shortly
+      if (typeof global.L === 'undefined') {
+        setTimeout(() => this.initMap(containerId), 200);
+        return;
+      }
+
+      try {
+        // Setup wrapper structure with Google Maps HUD
+        if (!container.querySelector('.gmaps-leaflet-canvas')) {
+          this.buildMapHtmlStructure(container, containerId);
+        }
+
+        const mapCanvasEl = container.querySelector('.gmaps-leaflet-canvas');
+        if (!mapCanvasEl) return;
+
+        // Clean up existing map instance if any
+        if (this.maps[containerId]) {
+          try { this.maps[containerId].map.remove(); } catch (e) {}
+          delete this.maps[containerId];
+        }
+
+        const centerLat = this.patientCoords.lat;
+        const centerLng = this.patientCoords.lng;
+
+        const map = global.L.map(mapCanvasEl, {
+          center: [centerLat, centerLng],
+          zoom: DEFAULT_REGION.zoom,
+          zoomControl: false,
+          attributionControl: false
+        });
+
+        // Add Google Maps Tile Layer
+        const tileConfig = TILE_LAYERS[this.currentLayerKey] || TILE_LAYERS.streets;
+        const tileLayer = global.L.tileLayer(tileConfig.url, {
+          maxZoom: tileConfig.maxZoom,
+          subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+        }).addTo(map);
+
+        const instance = {
+          map,
+          tileLayer,
+          patientMarker: null,
+          patientPulseCircle: null,
+          ambulanceMarker: null,
+          routeLine: null,
+          hospitalMarkers: []
+        };
+
+        // Render Patient Live Location
+        this.renderPatientOnMap(instance);
+
+        // Render Hospitals Geo-Pins
+        this.renderHospitalsOnMap(instance);
+
+        // If 108 Dispatch is active, render ambulance & route
+        if (this.dispatchState.isActive) {
+          this.renderDispatchOnMap(instance);
+        }
+
+        this.maps[containerId] = instance;
+
+        setTimeout(() => {
+          map.invalidateSize();
+        }, 250);
+
+      } catch (err) {
+        console.error('[GPS Map Error]', err);
+      }
     }
 
-    renderAllContainers() {
-      ['patientLiveGpsMap', 'sosEmergencyLiveMap', 'adminLiveFleetMap'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) this.renderGoogleMap(id);
+    buildMapHtmlStructure(container, containerId) {
+      container.style.position = 'relative';
+      container.style.overflow = 'hidden';
+
+      container.innerHTML = `
+        <!-- GOOGLE MAPS FLOATING TOP HUD -->
+        <div class="gmaps-top-hud" style="position:absolute;top:12px;left:14px;right:14px;z-index:999;display:flex;justify-content:space-between;align-items:center;pointer-events:none;gap:10px;">
+          
+          <!-- SEARCH & ADDRESS PILL -->
+          <div style="pointer-events:auto;background:#ffffff;border-radius:28px;box-shadow:0 2px 10px rgba(0,0,0,0.25);padding:7px 16px;display:flex;align-items:center;gap:10px;border:1px solid #dadce0;max-width:380px;">
+            <span style="font-size:16px;color:#ea4335;">📍</span>
+            <div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+              <strong style="color:#202124;font-size:12.5px;display:block;overflow:hidden;text-overflow:ellipsis;">Kondapalli, Krishna District</strong>
+              <small style="color:#5f6368;font-size:10px;">${this.patientCoords.lat.toFixed(4)}° N, ${this.patientCoords.lng.toFixed(4)}° E · GPS Live</small>
+            </div>
+          </div>
+
+          <!-- FULLSCREEN & MINIMIZE CONTROLS -->
+          <div style="pointer-events:auto;display:flex;align-items:center;gap:8px;">
+            <button onclick="gpsTrackingController.toggleFullscreen('${containerId}')" class="gmaps-fs-btn" style="background:#ffffff;border:none;border-radius:20px;box-shadow:0 2px 10px rgba(0,0,0,0.25);padding:7px 16px;font-size:12.5px;font-weight:700;color:#1a73e8;cursor:pointer;display:flex;align-items:center;gap:6px;border:1px solid #dadce0;transition:all 0.2s ease;">
+              <span class="fs-icon" style="font-size:16px;">⛶</span>
+              <span class="fs-text">Fullscreen</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- GOOGLE MAPS LAYER SWITCHER (MAP / SATELLITE / TERRAIN) -->
+        <div style="position:absolute;top:70px;left:14px;z-index:999;display:flex;background:#ffffff;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.2);overflow:hidden;border:1px solid #dadce0;">
+          <button onclick="gpsTrackingController.switchTileLayer('streets', '${containerId}')" style="background:${this.currentLayerKey === 'streets' ? '#e8f0fe' : '#ffffff'};color:${this.currentLayerKey === 'streets' ? '#1a73e8' : '#3c4043'};border:none;padding:6px 12px;font-size:11.5px;font-weight:700;cursor:pointer;border-right:1px solid #dadce0;">
+            🗺️ Map
+          </button>
+          <button onclick="gpsTrackingController.switchTileLayer('satellite', '${containerId}')" style="background:${this.currentLayerKey === 'satellite' ? '#e8f0fe' : '#ffffff'};color:${this.currentLayerKey === 'satellite' ? '#1a73e8' : '#3c4043'};border:none;padding:6px 12px;font-size:11.5px;font-weight:700;cursor:pointer;border-right:1px solid #dadce0;">
+            🛰️ Satellite
+          </button>
+          <button onclick="gpsTrackingController.switchTileLayer('terrain', '${containerId}')" style="background:${this.currentLayerKey === 'terrain' ? '#e8f0fe' : '#ffffff'};color:${this.currentLayerKey === 'terrain' ? '#1a73e8' : '#3c4043'};border:none;padding:6px 12px;font-size:11.5px;font-weight:700;cursor:pointer;">
+            🏔️ Terrain
+          </button>
+        </div>
+
+        <!-- FLOATING BOTTOM RIGHT ZOOM & RECENTER -->
+        <div style="position:absolute;bottom:24px;right:14px;z-index:999;display:flex;flex-direction:column;gap:8px;">
+          <div style="background:#ffffff;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.25);overflow:hidden;border:1px solid #dadce0;display:flex;flex-direction:column;">
+            <button onclick="gpsTrackingController.zoomIn('${containerId}')" title="Zoom in" style="background:#ffffff;border:none;width:38px;height:38px;font-size:20px;font-weight:700;color:#5f6368;cursor:pointer;border-bottom:1px solid #dadce0;display:flex;align-items:center;justify-content:center;">+</button>
+            <button onclick="gpsTrackingController.zoomOut('${containerId}')" title="Zoom out" style="background:#ffffff;border:none;width:38px;height:38px;font-size:20px;font-weight:700;color:#5f6368;cursor:pointer;display:flex;align-items:center;justify-content:center;">−</button>
+          </div>
+          <button onclick="gpsTrackingController.recenterMap('${containerId}')" title="My Location" style="background:#ffffff;border:none;border-radius:50%;width:40px;height:40px;box-shadow:0 2px 8px rgba(0,0,0,0.25);font-size:18px;color:#1a73e8;cursor:pointer;display:flex;align-items:center;justify-content:center;border:1px solid #dadce0;">
+            🎯
+          </button>
+        </div>
+
+        <!-- GOOGLE ATTRIBUTION -->
+        <div style="position:absolute;bottom:4px;left:14px;z-index:998;background:rgba(255,255,255,0.85);padding:2px 8px;border-radius:4px;font-size:10px;color:#5f6368;">
+          Google Maps · Swasthya Setu Telemedicine Grid
+        </div>
+
+        <!-- LEAFLET CANVAS CONTAINER -->
+        <div class="gmaps-leaflet-canvas" style="width:100%;height:100%;min-height:360px;"></div>
+      `;
+    }
+
+    switchTileLayer(layerKey, containerId) {
+      this.currentLayerKey = layerKey;
+      const inst = this.maps[containerId];
+      if (inst && inst.map && inst.tileLayer) {
+        inst.map.removeLayer(inst.tileLayer);
+        const tileConfig = TILE_LAYERS[layerKey] || TILE_LAYERS.streets;
+        inst.tileLayer = global.L.tileLayer(tileConfig.url, {
+          maxZoom: tileConfig.maxZoom,
+          subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+        }).addTo(inst.map);
+      }
+      this.initMap(containerId);
+    }
+
+    renderPatientOnMap(instance) {
+      if (!instance || !instance.map || typeof global.L === 'undefined') return;
+
+      const pLat = this.patientCoords.lat;
+      const pLng = this.patientCoords.lng;
+
+      // Google Maps Authentic Red Teardrop Marker
+      const patientIcon = global.L.divIcon({
+        className: 'custom-patient-pin',
+        html: `
+          <div style="position:relative;text-align:center;transform:translate(-50%, -100%);">
+            <svg width="34" height="44" viewBox="0 0 24 32" fill="none" style="filter:drop-shadow(0 3px 6px rgba(0,0,0,0.4));">
+              <path d="M12 0C5.37 0 0 5.37 0 12c0 9 12 20 12 20s12-11 12-20c0-6.63-5.37-12-12-12z" fill="#ea4335"/>
+              <circle cx="12" cy="11" r="5" fill="#ffffff"/>
+              <circle cx="12" cy="11" r="3" fill="#1a73e8"/>
+            </svg>
+            <div style="background:#ffffff;color:#202124;font-size:10px;font-weight:800;padding:2px 8px;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,0.25);border:1px solid #dadce0;white-space:nowrap;margin-top:-4px;">
+              📍 You (Patient)
+            </div>
+          </div>
+        `,
+        iconSize: [0, 0]
+      });
+
+      instance.patientMarker = global.L.marker([pLat, pLng], { icon: patientIcon }).addTo(instance.map);
+      
+      // Add pulsing accuracy circle
+      instance.patientPulseCircle = global.L.circle([pLat, pLng], {
+        radius: 350,
+        color: '#1a73e8',
+        fillColor: '#1a73e8',
+        fillOpacity: 0.15,
+        weight: 1.5
+      }).addTo(instance.map);
+
+      instance.patientMarker.bindPopup(`
+        <div style="font-family:'Plus Jakarta Sans',sans-serif;padding:6px;min-width:180px;">
+          <strong style="color:#ea4335;font-size:13px;display:block;">📍 Live Patient GPS Location</strong>
+          <small style="color:#5f6368;display:block;margin-top:2px;">${pLat.toFixed(4)}° N, ${pLng.toFixed(4)}° E</small>
+          <div style="font-size:11px;color:#137333;font-weight:700;margin-top:4px;">🟢 4G Network & GPS Active</div>
+        </div>
+      `);
+    }
+
+    renderHospitalsOnMap(instance) {
+      if (!instance || !instance.map || typeof global.L === 'undefined') return;
+
+      HOSPITALS_GEO.forEach(h => {
+        const hospIcon = global.L.divIcon({
+          className: 'custom-hosp-pin',
+          html: `
+            <div style="position:relative;text-align:center;transform:translate(-50%, -100%);">
+              <div style="width:36px;height:36px;background:#ffffff;border-radius:50%;box-shadow:0 3px 10px rgba(0,0,0,0.3);border:2px solid #ea4335;display:flex;align-items:center;justify-content:center;margin:0 auto;cursor:pointer;transition:transform 0.2s ease;">
+                <span style="font-size:18px;">🏥</span>
+              </div>
+              <div style="background:#ffffff;color:#202124;font-size:10px;font-weight:800;padding:2px 8px;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,0.25);border:1px solid #dadce0;white-space:nowrap;margin-top:2px;">
+                ${h.name.split(' ')[0]} <span style="color:#137333;">(${h.beds.oxygen} O2)</span>
+              </div>
+            </div>
+          `,
+          iconSize: [0, 0]
+        });
+
+        const marker = global.L.marker([h.lat, h.lng], { icon: hospIcon }).addTo(instance.map);
+        
+        marker.bindPopup(`
+          <div style="font-family:'Plus Jakarta Sans',sans-serif;padding:6px;min-width:220px;">
+            <strong style="color:#202124;font-size:14px;display:block;">${h.name}</strong>
+            <div style="color:#e37400;font-size:11.5px;font-weight:700;margin-top:2px;">${h.rating} · ${h.type}</div>
+            <div style="background:#f8f9fa;border-radius:8px;padding:8px;margin:8px 0;font-size:11.5px;display:grid;grid-template-columns:repeat(3,1fr);gap:4px;text-align:center;">
+              <div><small style="color:#5f6368;font-size:9.5px;display:block;">Gen Beds</small><strong style="color:#137333;">${h.beds.gen} Avail</strong></div>
+              <div><small style="color:#5f6368;font-size:9.5px;display:block;">ICU Beds</small><strong style="color:#d93025;">${h.beds.icu} Avail</strong></div>
+              <div><small style="color:#5f6368;font-size:9.5px;display:block;">Oxygen</small><strong style="color:#1a73e8;">${h.beds.oxygen} Units</strong></div>
+            </div>
+            <div style="font-size:11px;color:#5f6368;margin-bottom:8px;">🩺 <strong>On Duty:</strong> ${h.doctor}</div>
+            <a href="tel:${h.phone}" style="display:inline-block;background:#1a73e8;color:#ffffff;text-decoration:none;padding:6px 14px;border-radius:18px;font-size:11.5px;font-weight:700;box-shadow:0 2px 6px rgba(26,115,232,0.4);">
+              📞 Call ${h.phone}
+            </a>
+          </div>
+        `);
+
+        instance.hospitalMarkers.push(marker);
       });
     }
 
+    renderDispatchOnMap(instance) {
+      if (!instance || !instance.map || typeof global.L === 'undefined') return;
+
+      const ambCoords = this.dispatchState.ambulanceCoords || [HOSPITALS_GEO[0].lat, HOSPITALS_GEO[0].lng];
+
+      const ambIcon = global.L.divIcon({
+        className: 'custom-amb-pin',
+        html: `
+          <div style="position:relative;text-align:center;transform:translate(-50%, -50%);">
+            <div style="position:relative;width:52px;height:52px;display:flex;align-items:center;justify-content:center;margin:0 auto;">
+              <div style="position:absolute;width:100%;height:100%;border-radius:50%;background:rgba(26,115,232,0.3);animation:ambFlash 0.8s infinite;"></div>
+              <div style="background:#ffffff;border:2.5px solid #1a73e8;width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 4px 16px rgba(26,115,232,0.6);z-index:2;">
+                🚑
+              </div>
+            </div>
+            <div style="background:#1a73e8;color:#ffffff;font-size:10px;font-weight:900;padding:2px 8px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.3);white-space:nowrap;margin-top:2px;">
+              ${this.dispatchState.stage === 'arrived' ? '🎉 ARRIVED' : '108 AMBULANCE (EN ROUTE)'}
+            </div>
+          </div>
+        `,
+        iconSize: [0, 0]
+      });
+
+      if (!instance.ambulanceMarker) {
+        instance.ambulanceMarker = global.L.marker(ambCoords, { icon: ambIcon, zIndexOffset: 1000 }).addTo(instance.map);
+      } else {
+        instance.ambulanceMarker.setLatLng(ambCoords);
+      }
+
+      if (this.dispatchState.routePath.length) {
+        if (!instance.routeLine) {
+          instance.routeLine = global.L.polyline(this.dispatchState.routePath, {
+            color: '#1a73e8',
+            weight: 5,
+            opacity: 0.9,
+            dashArray: '8, 8',
+            lineJoin: 'round'
+          }).addTo(instance.map);
+        } else {
+          instance.routeLine.setLatLngs(this.dispatchState.routePath);
+        }
+      }
+    }
+
+    // -------------------------------------------------------------
+    // 3. FULLSCREEN MODE WITH ROCK-SOLID MINIMIZE
+    // -------------------------------------------------------------
     toggleFullscreen(containerId) {
-      this.isFullscreen = !this.isFullscreen;
       const container = document.getElementById(containerId);
       if (!container) return;
+
+      this.isFullscreen = !this.isFullscreen;
 
       if (this.isFullscreen) {
         container.classList.add('map-fullscreen-active');
         document.body.style.overflow = 'hidden';
-        if (global.toast) global.toast('⛶ Fullscreen Mode (Press ESC to exit)');
+
+        // Update button text & icon
+        const fsBtnText = container.querySelector('.fs-text');
+        const fsBtnIcon = container.querySelector('.fs-icon');
+        if (fsBtnText) fsBtnText.textContent = 'Minimize / Exit (ESC)';
+        if (fsBtnIcon) fsBtnIcon.textContent = '✕';
+
+        if (global.toast) global.toast('⛶ Fullscreen Active (Click Minimize or press ESC)');
       } else {
         container.classList.remove('map-fullscreen-active');
         document.body.style.overflow = '';
+
+        const fsBtnText = container.querySelector('.fs-text');
+        const fsBtnIcon = container.querySelector('.fs-icon');
+        if (fsBtnText) fsBtnText.textContent = 'Fullscreen';
+        if (fsBtnIcon) fsBtnIcon.textContent = '⛶';
       }
 
-      this.renderGoogleMap(containerId);
+      // Trigger map canvas resize
+      const inst = this.maps[containerId];
+      if (inst && inst.map) {
+        setTimeout(() => {
+          inst.map.invalidateSize();
+          inst.map.setView([this.patientCoords.lat, this.patientCoords.lng], this.isFullscreen ? 14 : DEFAULT_REGION.zoom);
+        }, 150);
+      }
     }
 
     exitFullscreen() {
       this.isFullscreen = false;
-      document.querySelectorAll('.map-fullscreen-active').forEach(el => el.classList.remove('map-fullscreen-active'));
+      document.querySelectorAll('.map-fullscreen-active').forEach(el => {
+        el.classList.remove('map-fullscreen-active');
+        const fsBtnText = el.querySelector('.fs-text');
+        const fsBtnIcon = el.querySelector('.fs-icon');
+        if (fsBtnText) fsBtnText.textContent = 'Fullscreen';
+        if (fsBtnIcon) fsBtnIcon.textContent = '⛶';
+      });
       document.body.style.overflow = '';
-      this.renderAllContainers();
-    }
 
-    setMapMode(mode, containerId) {
-      this.mapMode = mode;
-      this.renderGoogleMap(containerId);
-    }
-
-    toggleTraffic(containerId) {
-      this.trafficEnabled = !this.trafficEnabled;
-      this.renderGoogleMap(containerId);
-      if (global.toast) global.toast(this.trafficEnabled ? '🚦 Live Traffic Layer ON' : '⚪ Traffic Layer OFF');
+      Object.values(this.maps).forEach(inst => {
+        if (inst && inst.map) {
+          setTimeout(() => inst.map.invalidateSize(), 150);
+        }
+      });
     }
 
     zoomIn(containerId) {
-      if (this.zoomLevel < 1.6) {
-        this.zoomLevel += 0.2;
-        this.renderGoogleMap(containerId);
-      }
+      const inst = this.maps[containerId];
+      if (inst && inst.map) inst.map.zoomIn();
     }
 
     zoomOut(containerId) {
-      if (this.zoomLevel > 0.8) {
-        this.zoomLevel -= 0.2;
-        this.renderGoogleMap(containerId);
-      }
+      const inst = this.maps[containerId];
+      if (inst && inst.map) inst.map.zoomOut();
     }
 
     recenterMap(containerId) {
-      this.zoomLevel = 1;
-      this.selectedHospital = null;
-      this.renderGoogleMap(containerId);
-      if (global.toast) global.toast('🎯 Map centered on your live GPS location.');
+      const inst = this.maps[containerId];
+      if (inst && inst.map) {
+        inst.map.setView([this.patientCoords.lat, this.patientCoords.lng], DEFAULT_REGION.zoom);
+        if (global.toast) global.toast('🎯 Centered on your live GPS location');
+      }
     }
 
-    renderGoogleMap(containerId) {
-      const container = document.getElementById(containerId);
-      if (!container) return;
-
-      const pPos = this.dispatchState.patientPos;
-      const ambPos = this.dispatchState.ambulancePos;
-      const isDispatched = this.dispatchState.isActive;
-      const stage = this.dispatchState.stage;
-      const currentStep = this.dispatchState.routePoints[this.dispatchState.stepIndex] || this.dispatchState.routePoints[0];
-
-      // Google Maps Palette Definitions
-      const isSat = (this.mapMode === 'satellite');
-      const isTerrain = (this.mapMode === 'terrain');
-
-      const bgColor = isSat ? '#141d26' : (isTerrain ? '#f4f1ea' : '#f2efe9');
-      const landColor = isSat ? '#1e293b' : (isTerrain ? '#e8e5dc' : '#ede8e1');
-      const highwayFill = isSat ? '#ea580c' : '#fbd561';
-      const highwayStroke = isSat ? '#c2410c' : '#e6a817';
-      const roadFill = isSat ? '#475569' : '#ffffff';
-      const roadStroke = isSat ? '#334155' : '#cbd5e1';
-      const waterColor = isSat ? '#0284c7' : '#aadaff';
-      const parkColor = isSat ? '#14532d' : '#cdeece';
-
-      container.innerHTML = `
-        <div style="position:relative;width:100%;height:100%;min-height:360px;background:${bgColor};border-radius:${this.isFullscreen ? '0' : '14px'};overflow:hidden;box-shadow:${this.isFullscreen ? 'none' : '0 4px 20px rgba(0,0,0,0.12)'};font-family:'Plus Jakarta Sans',Roboto,Arial,sans-serif;user-select:none;">
-          
-          <!-- GOOGLE MAPS FLOATING TOP SEARCH / LOCATION BAR -->
-          <div style="position:absolute;top:12px;left:14px;right:14px;z-index:30;display:flex;justify-content:space-between;align-items:center;pointer-events:none;gap:10px;">
-            
-            <!-- SEARCH PILL -->
-            <div style="pointer-events:auto;background:#ffffff;border-radius:28px;box-shadow:0 2px 8px rgba(0,0,0,0.22);padding:7px 16px;display:flex;align-items:center;gap:10px;max-width:380px;border:1px solid #e2e8f0;">
-              <span style="font-size:16px;color:#1a73e8;">📍</span>
-              <div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
-                <strong style="color:#202124;font-size:12.5px;display:block;overflow:hidden;text-overflow:ellipsis;">Kondapalli Sector 4, Krishna Dist</strong>
-                <small style="color:#5f6368;font-size:10px;">${this.patientCoords.lat.toFixed(4)}° N, ${this.patientCoords.lng.toFixed(4)}° E · GPS 4G Live</small>
-              </div>
-            </div>
-
-            <!-- FULLSCREEN & EXIT CONTROLS -->
-            <div style="pointer-events:auto;display:flex;align-items:center;gap:6px;">
-              <button onclick="gpsTrackingController.toggleFullscreen('${containerId}')" title="${this.isFullscreen ? 'Exit Fullscreen (ESC)' : 'Full Screen Map'}" style="background:#ffffff;border:none;border-radius:20px;box-shadow:0 2px 8px rgba(0,0,0,0.22);padding:7px 14px;font-size:12px;font-weight:700;color:#1a73e8;cursor:pointer;display:flex;align-items:center;gap:6px;border:1px solid #e2e8f0;transition:all 0.2s ease;">
-                <span style="font-size:15px;">${this.isFullscreen ? '✕' : '⛶'}</span>
-                <span>${this.isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- GOOGLE MAPS FLOATING LAYER SWITCHER (MAP / SATELLITE / TERRAIN) -->
-          <div style="position:absolute;top:70px;left:14px;z-index:30;display:flex;background:#ffffff;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,0.2);overflow:hidden;border:1px solid #dadce0;">
-            <button onclick="gpsTrackingController.setMapMode('streets', '${containerId}')" style="background:${this.mapMode === 'streets' ? '#e8f0fe' : '#ffffff'};color:${this.mapMode === 'streets' ? '#1a73e8' : '#3c4043'};border:none;padding:6px 12px;font-size:11.5px;font-weight:700;cursor:pointer;border-right:1px solid #dadce0;">
-              🗺️ Map
-            </button>
-            <button onclick="gpsTrackingController.setMapMode('satellite', '${containerId}')" style="background:${this.mapMode === 'satellite' ? '#e8f0fe' : '#ffffff'};color:${this.mapMode === 'satellite' ? '#1a73e8' : '#3c4043'};border:none;padding:6px 12px;font-size:11.5px;font-weight:700;cursor:pointer;border-right:1px solid #dadce0;">
-              🛰️ Satellite
-            </button>
-            <button onclick="gpsTrackingController.toggleTraffic('${containerId}')" style="background:${this.trafficEnabled ? '#e6f4ea' : '#ffffff'};color:${this.trafficEnabled ? '#137333' : '#3c4043'};border:none;padding:6px 12px;font-size:11.5px;font-weight:700;cursor:pointer;">
-              🚦 Traffic
-            </button>
-          </div>
-
-          <!-- TURN-BY-TURN NAVIGATION PROMPT (WHEN 108 DISPATCH ACTIVE) -->
-          ${isDispatched ? `
-            <div style="position:absolute;top:70px;right:14px;z-index:30;background:#1a73e8;color:#ffffff;border-radius:12px;box-shadow:0 4px 14px rgba(26,115,232,0.45);padding:8px 14px;display:flex;align-items:center;gap:10px;max-width:320px;animation:slideDown 0.3s ease;">
-              <span style="font-size:22px;">↗️</span>
-              <div>
-                <strong style="font-size:12px;display:block;">${currentStep.turn}</strong>
-                <small style="opacity:0.9;font-size:10px;">ETA: <strong>${this.dispatchState.etaMinutes}m ${this.dispatchState.etaSeconds}s</strong> · ${this.dispatchState.distanceKm} km</small>
-              </div>
-            </div>
-          ` : ''}
-
-          <!-- GOOGLE MAPS SVG VECTOR LANDSCAPE -->
-          <svg viewBox="0 0 100 100" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%;z-index:2;transform:scale(${this.zoomLevel});transform-origin:50% 50%;transition:transform 0.3s ease;">
-            
-            <!-- Base Land Polygon -->
-            <rect x="0" y="0" width="100" height="100" fill="${landColor}" />
-
-            <!-- Rural Agricultural Grids & Kondapalli Reserve Park -->
-            <rect x="4" y="4" width="40" height="42" rx="3" fill="${parkColor}" stroke="#b2dfdb" stroke-width="0.3" />
-            <text x="6" y="9" fill="${isSat ? '#86efac' : '#2e7d32'}" font-size="2.4" font-weight="700">🌲 Kondapalli Reserve Forest</text>
-
-            <rect x="54" y="52" width="42" height="44" rx="3" fill="${parkColor}" stroke="#b2dfdb" stroke-width="0.3" />
-            <text x="56" y="57" fill="${isSat ? '#86efac' : '#2e7d32'}" font-size="2.4" font-weight="700">🌾 Krishna Valley Farmlands</text>
-
-            <!-- Krishna River & Waterway -->
-            <path d="M 0,86 Q 30,76 60,84 T 100,72" fill="none" stroke="${waterColor}" stroke-width="7" stroke-linecap="round" />
-            <path d="M 0,86 Q 30,76 60,84 T 100,72" fill="none" stroke="#64b5f6" stroke-width="1.5" stroke-dasharray="4,4" />
-            <text x="28" y="84" fill="#1565c0" font-size="2.2" font-weight="700" font-style="italic">≋ Krishna River (Water Basin)</text>
-
-            <!-- Residential Sectors / Urban Blocks -->
-            <rect x="48" y="14" width="22" height="14" rx="1.5" fill="#fdfbf7" stroke="#e0e0e0" stroke-width="0.3" />
-            <text x="50" y="22" fill="#757575" font-size="1.8" font-weight="600">Sector 1 (East)</text>
-
-            <rect x="18" y="48" width="24" height="16" rx="1.5" fill="#fdfbf7" stroke="#e0e0e0" stroke-width="0.3" />
-            <text x="20" y="56" fill="#757575" font-size="1.8" font-weight="600">Sector 4 (Central)</text>
-
-            <!-- LOCAL SECONDARY ROADS -->
-            <line x1="10" y1="20" x2="90" y2="20" stroke="${roadStroke}" stroke-width="2" />
-            <line x1="10" y1="20" x2="90" y2="20" stroke="${roadFill}" stroke-width="1.4" />
-
-            <line x1="30" y1="10" x2="30" y2="80" stroke="${roadStroke}" stroke-width="2" />
-            <line x1="30" y1="10" x2="30" y2="80" stroke="${roadFill}" stroke-width="1.4" />
-
-            <line x1="74" y1="26" x2="48" y2="46" stroke="${roadStroke}" stroke-width="2.6" stroke-linecap="round" />
-            <line x1="74" y1="26" x2="48" y2="46" stroke="${roadFill}" stroke-width="2" stroke-linecap="round" />
-
-            <line x1="20" y1="72" x2="48" y2="46" stroke="${roadStroke}" stroke-width="2.6" stroke-linecap="round" />
-            <line x1="20" y1="72" x2="48" y2="46" stroke="${roadFill}" stroke-width="2" stroke-linecap="round" />
-
-            <!-- NATIONAL HIGHWAY NH-65 (GOOGLE MAPS AUTHENTIC YELLOW HIGHWAY) -->
-            <line x1="0" y1="36" x2="100" y2="64" stroke="${highwayStroke}" stroke-width="4.5" stroke-linecap="round" />
-            <line x1="0" y1="36" x2="100" y2="64" stroke="${highwayFill}" stroke-width="3.2" stroke-linecap="round" />
-            <text x="4" y="34" fill="#9a3412" font-size="2" font-weight="800">🛣️ NH-65 (Vijayawada - Hyderabad Express Highway)</text>
-
-            <!-- LIVE TRAFFIC LAYER OVERLAY (GREEN / ORANGE) -->
-            ${this.trafficEnabled ? `
-              <line x1="0" y1="36" x2="45" y2="48" stroke="#22c55e" stroke-width="1.2" stroke-linecap="round" opacity="0.85" />
-              <line x1="45" y1="48" x2="70" y2="55" stroke="#f97316" stroke-width="1.2" stroke-linecap="round" opacity="0.85" />
-              <line x1="70" y1="55" x2="100" y2="64" stroke="#22c55e" stroke-width="1.2" stroke-linecap="round" opacity="0.85" />
-            ` : ''}
-
-            <!-- GOOGLE MAPS NAVIGATION BLUE ROUTE (WHEN 108 DISPATCH IS ACTIVE) -->
-            ${isDispatched ? `
-              <path d="M 74,26 Q 60,34 48,46" fill="none" stroke="#1a73e8" stroke-width="3.2" stroke-linecap="round" opacity="0.95" />
-              <path d="M 74,26 Q 60,34 48,46" fill="none" stroke="#8ab4f8" stroke-width="1.4" stroke-dasharray="2,2" stroke-linecap="round" style="animation:dashMove 0.8s linear infinite;" />
-            ` : ''}
-          </svg>
-
-          <!-- INTERACTIVE GOOGLE MAPS HTML MARKERS -->
-
-          <!-- 1. PATIENT / DESTINATION RED PIN (GOOGLE MAPS STYLE) -->
-          <div style="position:absolute;top:${pPos.y}%;left:${pPos.x}%;transform:translate(-50%, -100%);z-index:25;cursor:pointer;text-align:center;" onclick="global.toast('📍 You (Patient Destination) · Kondapalli Sector 4')">
-            <div style="position:relative;display:inline-block;">
-              <!-- Google Maps Teardrop Marker -->
-              <svg width="34" height="44" viewBox="0 0 24 32" fill="none" style="filter:drop-shadow(0 3px 6px rgba(0,0,0,0.35));">
-                <path d="M12 0C5.37 0 0 5.37 0 12c0 9 12 20 12 20s12-11 12-20c0-6.63-5.37-12-12-12z" fill="#ea4335"/>
-                <circle cx="12" cy="11" r="5" fill="#ffffff"/>
-                <circle cx="12" cy="11" r="3" fill="#1a73e8"/>
-              </svg>
-            </div>
-            <div style="background:#ffffff;color:#202124;font-size:10px;font-weight:800;padding:2px 8px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.25);border:1px solid #dadce0;white-space:nowrap;margin-top:-6px;">
-              📍 You (Patient)
-            </div>
-          </div>
-
-          <!-- 2. GOOGLE MAPS RED CROSS HOSPITAL MARKERS -->
-          ${HOSPITALS_GEO.map(h => `
-            <div style="position:absolute;top:${h.y}%;left:${h.x}%;transform:translate(-50%, -100%);z-index:20;cursor:pointer;text-align:center;" onclick="gpsTrackingController.selectHospital('${h.id}', '${containerId}')">
-              <div style="width:36px;height:36px;background:#ffffff;border-radius:50%;box-shadow:0 3px 10px rgba(0,0,0,0.25);border:2px solid #ea4335;display:flex;align-items:center;justify-content:center;margin:0 auto;transition:transform 0.2s ease;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'">
-                <span style="font-size:18px;">🏥</span>
-              </div>
-              <div style="background:#ffffff;color:#202124;font-size:10px;font-weight:800;padding:2px 8px;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,0.2);border:1px solid #dadce0;white-space:nowrap;margin-top:2px;">
-                ${h.name.split(' ')[0]} <span style="color:#137333;">(${h.beds.oxygen} O2)</span>
-              </div>
-            </div>
-          `).join('')}
-
-          <!-- 3. LIVE 108 AMBULANCE NAVIGATION ICON (GOOGLE MAPS NAVIGATION ARROW) -->
-          ${isDispatched ? `
-            <div style="position:absolute;top:${ambPos.y}%;left:${ambPos.x}%;transform:translate(-50%, -50%);z-index:28;cursor:pointer;text-align:center;transition:all 1.2s cubic-bezier(0.4, 0, 0.2, 1);" onclick="global.toast('🚨 108 Emergency Ambulance En Route')">
-              <div style="position:relative;width:52px;height:52px;display:flex;align-items:center;justify-content:center;margin:0 auto;">
-                <div style="position:absolute;width:100%;height:100%;border-radius:50%;background:rgba(26,115,232,0.3);animation:ambFlash 0.8s infinite;"></div>
-                <div style="background:#ffffff;border:2.5px solid #1a73e8;width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 4px 16px rgba(26,115,232,0.6);z-index:2;">
-                  🚑
-                </div>
-              </div>
-              <div style="background:#1a73e8;color:#ffffff;font-size:10px;font-weight:900;padding:2px 8px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.3);white-space:nowrap;margin-top:2px;">
-                ${stage === 'arrived' ? '🎉 ARRIVED' : '108 AMBULANCE (AP-16-TX)'}
-              </div>
-            </div>
-          ` : ''}
-
-          <!-- 4. GOOGLE MAPS POPUP CARD (WHEN HOSPITAL IS CLICKED) -->
-          ${this.selectedHospital ? `
-            <div style="position:absolute;bottom:20px;left:20px;right:20px;max-width:380px;background:#ffffff;border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,0.3);padding:14px 16px;z-index:40;border:1px solid #dadce0;animation:slideUp 0.3s ease;">
-              <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
-                <div>
-                  <h4 style="margin:0;font-size:14px;font-weight:800;color:#202124;">${this.selectedHospital.name}</h4>
-                  <div style="color:#e37400;font-size:11px;font-weight:700;margin-top:2px;">${this.selectedHospital.rating} · ${this.selectedHospital.type}</div>
-                </div>
-                <button onclick="gpsTrackingController.closeHospitalPopup('${containerId}')" style="background:none;border:none;font-size:18px;color:#5f6368;cursor:pointer;padding:2px 6px;">✕</button>
-              </div>
-              
-              <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:6px;background:#f8f9fa;padding:8px;border-radius:8px;margin-bottom:10px;text-align:center;">
-                <div><small style="color:#5f6368;font-size:10px;display:block;">Gen Beds</small><strong style="color:#137333;font-size:13px;">${this.selectedHospital.beds.gen} Avail</strong></div>
-                <div><small style="color:#5f6368;font-size:10px;display:block;">ICU Beds</small><strong style="color:#d93025;font-size:13px;">${this.selectedHospital.beds.icu} Avail</strong></div>
-                <div><small style="color:#5f6368;font-size:10px;display:block;">Oxygen</small><strong style="color:#1a73e8;font-size:13px;">${this.selectedHospital.beds.oxygen} Units</strong></div>
-              </div>
-
-              <div style="display:flex;justify-content:space-between;align-items:center;">
-                <span style="font-size:11px;color:#5f6368;">🩺 On Duty: ${this.selectedHospital.doctor.split(',')[0]}</span>
-                <a href="tel:${this.selectedHospital.phone}" style="background:#1a73e8;color:#ffffff;text-decoration:none;padding:6px 14px;border-radius:20px;font-size:11.5px;font-weight:700;display:inline-flex;align-items:center;gap:4px;box-shadow:0 2px 6px rgba(26,115,232,0.4);">
-                  📞 Call
-                </a>
-              </div>
-            </div>
-          ` : ''}
-
-          <!-- GOOGLE MAPS FLOATING BOTTOM-RIGHT ZOOM & COMPASS CONTROLS -->
-          <div style="position:absolute;bottom:20px;right:14px;z-index:30;display:flex;flex-direction:column;gap:6px;">
-            <div style="background:#ffffff;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,0.22);overflow:hidden;border:1px solid #dadce0;display:flex;flex-direction:column;">
-              <button onclick="gpsTrackingController.zoomIn('${containerId}')" title="Zoom in" style="background:#ffffff;border:none;width:34px;height:34px;font-size:18px;font-weight:700;color:#5f6368;cursor:pointer;border-bottom:1px solid #dadce0;">+</button>
-              <button onclick="gpsTrackingController.zoomOut('${containerId}')" title="Zoom out" style="background:#ffffff;border:none;width:34px;height:34px;font-size:18px;font-weight:700;color:#5f6368;cursor:pointer;">−</button>
-            </div>
-            <button onclick="gpsTrackingController.recenterMap('${containerId}')" title="My Location" style="background:#ffffff;border:none;border-radius:50%;width:36px;height:36px;box-shadow:0 2px 6px rgba(0,0,0,0.22);font-size:16px;color:#1a73e8;cursor:pointer;display:flex;align-items:center;justify-content:center;border:1px solid #dadce0;">
-              🎯
-            </button>
-          </div>
-
-          <!-- GOOGLE MAPS BOTTOM ATTRIBUTION PILL -->
-          <div style="position:absolute;bottom:4px;left:14px;z-index:20;background:rgba(255,255,255,0.7);padding:2px 8px;border-radius:4px;font-size:9.5px;color:#5f6368;">
-            Map data ©2026 Swasthya Setu · Ayushman Bharat Digital Gateway
-          </div>
-
-        </div>
-      `;
-    }
-
-    selectHospital(hospId, containerId) {
-      this.selectedHospital = HOSPITALS_GEO.find(h => h.id === hospId) || null;
-      this.renderGoogleMap(containerId);
-    }
-
-    closeHospitalPopup(containerId) {
-      this.selectedHospital = null;
-      this.renderGoogleMap(containerId);
+    updateAllMapLocations() {
+      Object.keys(this.maps).forEach(id => {
+        const inst = this.maps[id];
+        if (inst && inst.map) {
+          if (inst.patientMarker) inst.patientMarker.setLatLng([this.patientCoords.lat, this.patientCoords.lng]);
+          if (inst.patientPulseCircle) inst.patientPulseCircle.setLatLng([this.patientCoords.lat, this.patientCoords.lng]);
+          inst.map.setView([this.patientCoords.lat, this.patientCoords.lng]);
+          inst.map.invalidateSize();
+        }
+      });
     }
 
     // -------------------------------------------------------------
-    // 3. 108 AMBULANCE DISPATCH & ANIMATED LIVE MOVEMENT
+    // 4. 108 AMBULANCE DISPATCH & LIVE ANIMATED ROUTING
     // -------------------------------------------------------------
     startAmbulanceDispatch() {
       if (this.dispatchState.isActive) return;
 
+      const pLat = this.patientCoords.lat;
+      const pLng = this.patientCoords.lng;
+      const baseHosp = HOSPITALS_GEO[0]; // Kondapalli PHC
+
+      // Generate 20 Interpolated Road Waypoints
+      const steps = 20;
+      const route = [];
+      for (let i = 0; i <= steps; i++) {
+        const ratio = i / steps;
+        const curve = Math.sin(ratio * Math.PI) * 0.002;
+        const lat = baseHosp.lat + (pLat - baseHosp.lat) * ratio + curve;
+        const lng = baseHosp.lng + (pLng - baseHosp.lng) * ratio - curve;
+        route.push([lat, lng]);
+      }
+
       this.dispatchState.isActive = true;
       this.dispatchState.stage = 'enroute';
       this.dispatchState.stepIndex = 0;
-      this.dispatchState.ambulancePos = this.dispatchState.routePoints[0];
+      this.dispatchState.routePath = route;
+      this.dispatchState.ambulanceCoords = route[0];
       this.dispatchState.distanceKm = 3.4;
       this.dispatchState.etaMinutes = 4;
       this.dispatchState.etaSeconds = 30;
 
       console.log('[GPS Dispatch] 108 Emergency Ambulance Dispatched!');
 
-      this.renderAllContainers();
+      Object.values(this.maps).forEach(inst => this.renderDispatchOnMap(inst));
       this.updateUiCards();
 
       if (global.toast) {
@@ -482,10 +602,10 @@
 
       this.dispatchState.stepIndex++;
       const currentIdx = this.dispatchState.stepIndex;
-      const totalSteps = this.dispatchState.routePoints.length;
+      const totalSteps = this.dispatchState.routePath.length;
 
       if (currentIdx < totalSteps) {
-        this.dispatchState.ambulancePos = this.dispatchState.routePoints[currentIdx];
+        this.dispatchState.ambulanceCoords = this.dispatchState.routePath[currentIdx];
         
         const progress = currentIdx / totalSteps;
         this.dispatchState.distanceKm = Math.max(0.1, Number((3.4 * (1 - progress)).toFixed(2)));
@@ -497,11 +617,14 @@
           this.dispatchState.etaSeconds = 45;
         }
 
-        this.renderAllContainers();
+        Object.values(this.maps).forEach(inst => {
+          if (inst.ambulanceMarker) {
+            inst.ambulanceMarker.setLatLng(this.dispatchState.ambulanceCoords);
+          }
+        });
         this.updateUiCards();
       } else {
         this.dispatchState.stage = 'arrived';
-        this.dispatchState.ambulancePos = this.dispatchState.patientPos;
         this.dispatchState.distanceKm = 0;
         this.dispatchState.etaMinutes = 0;
         this.dispatchState.etaSeconds = 0;
@@ -510,7 +633,6 @@
         this.dispatchState.timerId = null;
 
         console.log('[GPS Dispatch] 108 Ambulance arrived at patient doorstep!');
-        this.renderAllContainers();
         this.updateUiCards();
 
         if (global.toast) {
@@ -526,9 +648,18 @@
 
       this.dispatchState.isActive = false;
       this.dispatchState.stage = 'idle';
-      this.dispatchState.ambulancePos = { x: 74, y: 26 };
 
-      this.renderAllContainers();
+      Object.values(this.maps).forEach(inst => {
+        if (inst.ambulanceMarker) {
+          inst.ambulanceMarker.remove();
+          inst.ambulanceMarker = null;
+        }
+        if (inst.routeLine) {
+          inst.routeLine.remove();
+          inst.routeLine = null;
+        }
+      });
+
       this.updateUiCards();
       
       if (global.toast) {
@@ -592,7 +723,7 @@
     document.addEventListener('DOMContentLoaded', () => {
       setTimeout(() => {
         global.gpsTrackingController.initMap('patientLiveGpsMap');
-      }, 200);
+      }, 300);
     });
   }
 

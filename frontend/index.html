@@ -1033,19 +1033,34 @@ body[data-theme="doom"] {
   }
 
 
-  /* GOOGLE MAPS FULLSCREEN OVERLAY */
+  
+  /* GOOGLE MAPS AUTHENTIC FULLSCREEN OVERLAY */
   .map-fullscreen-active {
     position: fixed !important;
     top: 0 !important;
     left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
     width: 100vw !important;
     height: 100vh !important;
-    z-index: 99999 !important;
+    z-index: 999999 !important;
     border-radius: 0 !important;
     margin: 0 !important;
     padding: 0 !important;
     box-shadow: none !important;
+    background: #ffffff !important;
   }
+  .map-fullscreen-active .gmaps-leaflet-canvas {
+    height: 100vh !important;
+    min-height: 100vh !important;
+  }
+  .map-fullscreen-active .gmaps-fs-btn {
+    background: #ea4335 !important;
+    color: #ffffff !important;
+    font-weight: 800 !important;
+    box-shadow: 0 4px 16px rgba(234,67,53,0.5) !important;
+  }
+
   @keyframes slideDown {
     from { transform: translateY(-15px); opacity: 0; }
     to { transform: translateY(0); opacity: 1; }
