@@ -7806,8 +7806,8 @@ table td strong {
 /* ==================== video-call.js ==================== */
 /**
  * =========================================================
- * SWASTHYA SETU - HIGH-DEFINITION 2-WAY WEBRTC & AUDIO ENGINE (video-call.js)
- * 720p HD Video, Dedicated Unmuted Audio Pipeline & Live Synced Chat
+ * SWASTHYA SETU - BULLETPROOF WEBRTC AUDIO & HD VIDEO ENGINE (video-call.js)
+ * Web Audio Hardware Routing, Explicit Transceivers, Live Mic Meter & 720p HD
  * =========================================================
  */
 
@@ -7840,6 +7840,8 @@ table td strong {
       this.localStream = null;
       this.remoteStream = null;
       this.audioContext = null;
+      this.audioAnalyser = null;
+      this.micMeterInterval = null;
       this.isAudioMuted = false;
       this.isVideoMuted = false;
       this.currentFacingMode = 'user'; // 'user' or 'environment'
@@ -7919,7 +7921,7 @@ table td strong {
         }
       }
 
-      // 4. Live Dual-Mode Video Frame Streaming (High-Res Real-Time Backup)
+      // 4. Live Dual-Mode Video Frame Streaming (Real-Time Fallback)
       else if (signal.type === 'VIDEO_FRAME') {
         if (this.currentCallData && this.currentCallData.id === signal.callId && signal.frameData) {
           this.renderRemoteVideoFrame(signal.frameData);
@@ -7981,13 +7983,13 @@ table td strong {
         statusEl.innerHTML = '📞 Calling ' + recipientName + '... Ringing on Doctor Desk...';
       }
 
-      // Initialize Local Camera & Microphone with 720p HD constraints
+      // 1. Initialize Local Camera & Microphone FIRST
       await this.initLocalMediaStream();
 
-      // Setup WebRTC PeerConnection & Add Local Tracks
+      // 2. Setup WebRTC PeerConnection & Bind Local Audio/Video Tracks
       this.setupPeerConnection();
 
-      // Create WebRTC Offer & Wait for Complete ICE Candidates
+      // 3. Create WebRTC Offer & Gather All ICE Candidates into SDP
       let offerSdp = null;
       try {
         if (this.peerConnection) {
@@ -8023,6 +8025,7 @@ table td strong {
 
       this.startCallTimer();
       this.startFrameSyncStream();
+      this.startMicLevelMeter();
 
       if (global.toast) {
         global.toast('📞 Calling ' + recipientName + '... Ringing on Doctor Desk.');
@@ -8136,13 +8139,13 @@ table td strong {
       const callModal = document.getElementById('videoCallModal');
       if (callModal) callModal.style.display = 'flex';
 
-      // Start Doctor Local Camera with 720p HD
+      // 1. Start Doctor Local Camera with 720p HD FIRST
       await this.initLocalMediaStream();
 
-      // Setup WebRTC Peer Connection & Add Doctor Tracks
+      // 2. Setup WebRTC Peer Connection & Bind Doctor Tracks
       this.setupPeerConnection();
 
-      // Set Remote Description (Patient's Offer) -> Generate Answer with Complete ICE
+      // 3. Set Remote Description (Patient's Offer) -> Generate Answer with Complete ICE
       let answerSdp = null;
       try {
         if (this.peerConnection && signal.offer) {
@@ -8176,6 +8179,7 @@ table td strong {
 
       this.startCallTimer();
       this.startFrameSyncStream();
+      this.startMicLevelMeter();
     }
 
     async handleCallAcceptedByDoctor(signal) {
@@ -8229,21 +8233,27 @@ table td strong {
     }
 
     // -------------------------------------------------------------
-    // 4. WEBRTC PEER CONNECTION & TRACK STREAMING
+    // 4. WEBRTC PEER CONNECTION & WEB AUDIO HARDWARE ROUTING
     // -------------------------------------------------------------
     setupPeerConnection() {
       try {
         if (typeof RTCPeerConnection === 'undefined') return;
         this.peerConnection = new RTCPeerConnection(RTC_CONFIG);
 
-        // Add Local Audio and Video Tracks
+        // Add explicit transceivers for bidirectional audio & video
+        if (typeof this.peerConnection.addTransceiver === 'function') {
+          this.peerConnection.addTransceiver('audio', { direction: 'sendrecv' });
+          this.peerConnection.addTransceiver('video', { direction: 'sendrecv' });
+        }
+
+        // Add Local Audio and Video Tracks directly to Peer
         if (this.localStream) {
           this.localStream.getTracks().forEach(track => {
             this.peerConnection.addTrack(track, this.localStream);
           });
         }
 
-        // On Remote Track Received -> Stream Video & Audio Immediately to Speakers
+        // On Remote Track Received -> Stream Video & Route Audio Directly to Speakers
         this.peerConnection.ontrack = (event) => {
           console.log('[WebRTC] Remote media track received:', event.track.kind);
           let stream = event.streams && event.streams[0];
@@ -8255,6 +8265,7 @@ table td strong {
             this.remoteStream = stream;
           }
 
+          // 1. Video Element Viewport
           const remoteVideo = document.getElementById('remoteVideoElement');
           if (remoteVideo) {
             remoteVideo.srcObject = stream;
@@ -8263,12 +8274,29 @@ table td strong {
             remoteVideo.play().catch(e => console.warn('Remote video playback:', e));
           }
 
+          // 2. HTML5 Audio Element Output
           const remoteAudio = document.getElementById('remoteAudioElement');
           if (remoteAudio) {
             remoteAudio.srcObject = stream;
             remoteAudio.muted = false;
             remoteAudio.volume = 1.0;
             remoteAudio.play().catch(e => console.warn('Remote audio playback:', e));
+          }
+
+          // 3. Direct Web Audio Context Hardware Routing (Bypasses Autoplay Restrictions)
+          if (event.track.kind === 'audio') {
+            try {
+              const AudioCtx = window.AudioContext || window.webkitAudioContext;
+              if (AudioCtx) {
+                if (!this.audioContext) this.audioContext = new AudioCtx();
+                if (this.audioContext.state === 'suspended') this.audioContext.resume();
+                const audioSource = this.audioContext.createMediaStreamSource(new MediaStream([event.track]));
+                audioSource.connect(this.audioContext.destination);
+                console.log('[WebRTC Audio] Remote voice stream connected directly to device speakers via AudioContext!');
+              }
+            } catch (err) {
+              console.warn('[WebRTC Audio] AudioContext bridge notice:', err);
+            }
           }
 
           const remoteAvatar = document.getElementById('remoteAvatarPlaceholder');
@@ -8327,7 +8355,53 @@ table td strong {
     }
 
     // -------------------------------------------------------------
-    // 5. HIGH-DEFINITION DUAL-MODE REAL-TIME FRAME STREAMING
+    // 5. LIVE MICROPHONE AUDIO VISUALIZER METER
+    // -------------------------------------------------------------
+    startMicLevelMeter() {
+      try {
+        if (!this.localStream) return;
+        const audioTrack = this.localStream.getAudioTracks()[0];
+        if (!audioTrack) return;
+
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        if (!this.audioContext) this.audioContext = new AudioCtx();
+        if (this.audioContext.state === 'suspended') this.audioContext.resume();
+
+        const source = this.audioContext.createMediaStreamSource(new MediaStream([audioTrack]));
+        this.audioAnalyser = this.audioContext.createAnalyser();
+        this.audioAnalyser.fftSize = 64;
+        source.connect(this.audioAnalyser);
+
+        const meterBar = document.getElementById('micAudioLevelBar');
+        const dataArray = new Uint8Array(this.audioAnalyser.frequencyBinCount);
+
+        if (this.micMeterInterval) clearInterval(this.micMeterInterval);
+        this.micMeterInterval = setInterval(() => {
+          if (this.audioAnalyser && meterBar) {
+            this.audioAnalyser.getByteFrequencyData(dataArray);
+            let sum = 0;
+            for (let i = 0; i < dataArray.length; i++) sum += dataArray[i];
+            const avg = sum / dataArray.length;
+            const percentage = Math.min(100, Math.max(10, Math.round((avg / 128) * 100)));
+            meterBar.style.width = percentage + '%';
+            meterBar.style.background = this.isAudioMuted ? '#dc2626' : '#22c55e';
+          }
+        }, 150);
+      } catch (e) {
+        console.warn('[Audio Meter] Visualizer fallback:', e);
+      }
+    }
+
+    stopMicLevelMeter() {
+      if (this.micMeterInterval) {
+        clearInterval(this.micMeterInterval);
+        this.micMeterInterval = null;
+      }
+    }
+
+    // -------------------------------------------------------------
+    // 6. HIGH-DEFINITION DUAL-MODE REAL-TIME FRAME STREAMING
     // -------------------------------------------------------------
     startFrameSyncStream() {
       if (this.frameSyncInterval) clearInterval(this.frameSyncInterval);
@@ -8383,7 +8457,7 @@ table td strong {
     }
 
     // -------------------------------------------------------------
-    // 6. IN-CALL HARDWARE CONTROLS
+    // 7. IN-CALL HARDWARE CONTROLS
     // -------------------------------------------------------------
     toggleAudio() {
       this.isAudioMuted = !this.isAudioMuted;
@@ -8460,7 +8534,7 @@ table td strong {
     }
 
     // -------------------------------------------------------------
-    // 7. IN-CALL E-PRESCRIPTION DRAWER & CHAT
+    // 8. IN-CALL E-PRESCRIPTION DRAWER & CHAT
     // -------------------------------------------------------------
     toggleInCallRxDrawer() {
       const drawer = document.getElementById('inCallRxDrawer');
@@ -8597,7 +8671,7 @@ table td strong {
     }
 
     // -------------------------------------------------------------
-    // 8. END CALL
+    // 9. END CALL
     // -------------------------------------------------------------
     endCall(broadcastSignal = true) {
       if (!this.currentCallData) {
@@ -8606,6 +8680,7 @@ table td strong {
       }
 
       this.stopFrameSyncStream();
+      this.stopMicLevelMeter();
 
       if (broadcastSignal && global.supabaseService) {
         global.supabaseService.sendTeleconsultSignal({
@@ -8654,6 +8729,7 @@ table td strong {
       this.currentCallData = null;
       this.stopCallTimer();
       this.stopFrameSyncStream();
+      this.stopMicLevelMeter();
       if (this.peerConnection) {
         try { this.peerConnection.close(); } catch (e) {}
         this.peerConnection = null;
@@ -8677,7 +8753,7 @@ table td strong {
     }
 
     // -------------------------------------------------------------
-    // 9. RENDER VIDEO MODAL VIEWPORT
+    // 10. RENDER VIDEO MODAL VIEWPORT
     // -------------------------------------------------------------
     renderVideoCallModal() {
       let modal = document.getElementById('videoCallModal');
@@ -8713,6 +8789,12 @@ table td strong {
             </div>
 
             <div style="display:flex;align-items:center;gap:10px;">
+              <div style="display:flex;align-items:center;gap:6px;background:rgba(0,0,0,0.4);padding:4px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);">
+                <span style="font-size:11px;color:#cbd5e1;">🎙️ Mic:</span>
+                <div style="width:40px;height:6px;background:#334155;border-radius:3px;overflow:hidden;">
+                  <div id="micAudioLevelBar" style="width:20%;height:100%;background:#22c55e;transition:width 0.1s;"></div>
+                </div>
+              </div>
               <span id="videoCameraFacingBadge" style="background:rgba(255,255,255,0.1);color:#cbd5e1;font-size:11px;font-weight:700;padding:4px 8px;border-radius:8px;">📷 Front Camera</span>
               <span id="videoCallTimerDisplay" style="background:rgba(22,163,74,0.2);color:#22c55e;border:1px solid rgba(34,197,94,0.4);font-size:12px;font-weight:800;padding:4px 10px;border-radius:12px;font-family:'IBM Plex Mono',monospace;">⏱️ 00:00</span>
               <span style="background:rgba(2,132,199,0.2);color:#38bdf8;font-size:11px;font-weight:700;padding:4px 8px;border-radius:8px;">🔒 256-bit Encrypted</span>
