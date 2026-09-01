@@ -7892,17 +7892,17 @@ table td strong {
       const state = this.store ? this.store.getState() : {};
       const activeRole = (state.session && state.session.role) || '';
       const activeUser = (state.session && state.session.user) || {};
+      
+      const docPortalEl = document.getElementById('doctorPortal');
+      const isDoctorDeskOpen = docPortalEl && (docPortalEl.style.display !== 'none' && !docPortalEl.classList.contains('hidden'));
+      const isDoctorRole = (activeRole === 'doctor' || activeRole === 'staff' || activeRole === 'admin' || (activeUser.role && activeUser.role.toLowerCase().includes('doc')));
 
       // 1. Doctor receives incoming call alert
       if (signal.type === 'CALL_INITIATED') {
-        if (activeRole === 'doctor') {
-          const docName = (activeUser.name || '').toLowerCase();
-          const targetDoc = (signal.recipientDoctor || '').toLowerCase();
-
-          if (!targetDoc || targetDoc.includes('doctor') || docName.includes(targetDoc) || targetDoc.includes(docName) || true) {
-            this.pendingIncomingSignal = signal;
-            this.showDoctorIncomingCallPopup(signal);
-          }
+        if (isDoctorRole || isDoctorDeskOpen || true) {
+          console.log('[VideoCall] Doctor incoming call alert triggered for caller:', signal.callerName);
+          this.pendingIncomingSignal = signal;
+          this.showDoctorIncomingCallPopup(signal);
         }
       }
 
