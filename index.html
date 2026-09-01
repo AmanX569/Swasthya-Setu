@@ -3408,7 +3408,7 @@ table td strong {
         </div>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <button class="auth-btn-primary" style="background:linear-gradient(135deg, #16a34a, #15803d);border:none;padding:10px 18px;font-size:13px;font-weight:800;border-radius:10px;box-shadow:0 4px 14px rgba(22,163,74,0.4);cursor:pointer;" onclick="patientController.startVideoCallWithDoctor()">
+        <button class="auth-btn-primary" style="background:linear-gradient(135deg, #16a34a, #15803d);border:none;padding:10px 18px;font-size:13px;font-weight:800;border-radius:10px;box-shadow:0 4px 14px rgba(22,163,74,0.4);cursor:pointer;" onclick="patientController.openPatientVideoCallModal()">
           📹 Live Video Call Doctor
         </button>
         <button class="auth-btn-primary" style="background:linear-gradient(135deg, #0284c7, #0369a1);border:none;padding:10px 18px;font-size:13px;font-weight:800;border-radius:10px;box-shadow:0 4px 14px rgba(2,132,199,0.4);cursor:pointer;" onclick="patientController.openRequestConsultModal()">
@@ -4573,6 +4573,47 @@ table td strong {
 </div>
 
 
+
+<!-- PATIENT SELECT DOCTOR VIDEO CALL MODAL -->
+<div id="patientVideoCallModal" class="modal-overlay">
+  <div class="modal-card" style="max-width:540px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:26px;">📹</span>
+        <div>
+          <h3 style="color:var(--ink);font-size:17px;font-weight:800;">Start Doctor Video Teleconsultation</h3>
+          <small style="color:var(--muted);">Select Your Medical Officer & Consulting Patient</small>
+        </div>
+      </div>
+      <button onclick="patientController.closePatientVideoCallModal()" style="background:none;border:none;font-size:20px;color:var(--muted);cursor:pointer;">✕</button>
+    </div>
+    <form onsubmit="patientController.submitPatientVideoCall(event)">
+      
+      <div style="margin-bottom:12px;">
+        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Select Available Medical Officer / Specialist *</label>
+        <select id="patientVideoDoctorSelect" class="input-field" style="height:44px;" required></select>
+      </div>
+
+      <div style="margin-bottom:12px;">
+        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Consulting For (Family Member or Self) *</label>
+        <select id="patientVideoMemberSelect" class="input-field" style="height:44px;" required></select>
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Chief Symptoms / Complaint *</label>
+        <input type="text" id="patientVideoComplaint" class="input-field" placeholder="e.g. High fever for 2 days, chest congestion, weakness" required value="Fever, headache and mild throat irritation">
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;gap:8px;">
+        <button type="button" class="btn-glass" onclick="patientController.closePatientVideoCallModal()">Cancel</button>
+        <button type="submit" class="auth-btn-primary" style="background:linear-gradient(135deg, #16a34a, #15803d);border:none;">
+          📹 Connect Live Video Call
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <!-- ASHA FACILITATE VIDEO CALL MODAL -->
 <div id="ashaVideoCallModal" class="modal-overlay">
   <div class="modal-card" style="max-width:520px;">
@@ -5583,7 +5624,9 @@ table td strong {
 
     staff: [
       { id: 'ADM-7856', staff_code: 'ADM-7856', name: 'Aman Yadav', role: 'admin', phone: '7906684557', location: 'District HQ', status: 'Active Online', regNo: 'ADM-AP-001', password: 'Aman@123', pin: 'Aman@123' },
-      { id: 'DOC-101', staff_code: 'DOC-101', name: 'Dr. Priya Sharma, MBBS, MD', role: 'doctor', phone: '9811122233', location: 'Kondapalli PHC', status: 'Active Online', regNo: 'MCI-AP-48912', password: 'doc@123', pin: '1234' },
+      { id: 'DOC-101', staff_code: 'DOC-101', name: 'Dr. Priya Sharma, MBBS, MD', role: 'doctor', phone: '9811122233', location: 'Kondapalli PHC (General Medicine)', status: 'Active Online', regNo: 'MCI-AP-48912', password: 'doc@123', pin: '1234' },
+      { id: 'DOC-102', staff_code: 'DOC-102', name: 'Dr. Rajesh Verma, MBBS, MS', role: 'doctor', phone: '9822233344', location: 'Ibrahimpatnam CHC (Physician & Critical Care)', status: 'Active Online', regNo: 'MCI-AP-51023', password: 'doc@123', pin: '1234' },
+      { id: 'DOC-103', staff_code: 'DOC-103', name: 'Dr. Ananya Reddy, MBBS, DGO', role: 'doctor', phone: '9833311122', location: 'District Hospital (Gynecology & Maternal Care)', status: 'Active Online', regNo: 'MCI-AP-62491', password: 'doc@123', pin: '1234' },
       { id: 'ASH-201', staff_code: 'ASH-201', name: 'Lakshmi Didi (ASHA Lead)', role: 'worker', phone: '9833344455', location: 'Sector 4, Kondapalli', status: 'On Home Visits', regNo: 'ASHA-AP-094', password: 'asha@123', pin: '1234' }
     ],
 
@@ -8288,18 +8331,66 @@ table td strong {
     // -------------------------------------------------------------
     // VIDEO TELECONSULTATION & CALL HISTORY
     // -------------------------------------------------------------
-    startVideoCallWithDoctor() {
+    openPatientVideoCallModal() {
+      const modal = document.getElementById('patientVideoCallModal');
+      const docSelect = document.getElementById('patientVideoDoctorSelect');
+      const memberSelect = document.getElementById('patientVideoMemberSelect');
+
+      if (this.store) {
+        const doctors = (this.store.getState().staff || []).filter(s => s.role === 'doctor');
+        const family = this.store.getState().familyMembers || [];
+        const user = this.store.getState().currentUser || (this.store.getState().session && this.store.getState().session.user) || { name: 'Self' };
+
+        if (docSelect) {
+          docSelect.innerHTML = doctors.map(d => `
+            <option value="${d.name}">
+              👨‍⚕️ ${d.name} · ${d.location || 'PHC/CHC'} (🟢 Online)
+            </option>
+          `).join('') || '<option value="Dr. Priya Sharma, MBBS, MD">👨‍⚕️ Dr. Priya Sharma, MBBS, MD (On Duty)</option>';
+        }
+
+        if (memberSelect) {
+          const membersList = [{ name: (user.name || 'Self (Account Holder)') + ' (Self)' }].concat(family.map(f => ({ name: f.name + ' (' + f.relation + ')' })));
+          memberSelect.innerHTML = membersList.map(m => `<option value="${m.name}">👤 ${m.name}</option>`).join('');
+        }
+      }
+
+      if (modal) modal.style.display = 'flex';
+    }
+
+    closePatientVideoCallModal() {
+      const modal = document.getElementById('patientVideoCallModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    submitPatientVideoCall(e) {
+      if (e) e.preventDefault();
+      const docSelect = document.getElementById('patientVideoDoctorSelect');
+      const memberSelect = document.getElementById('patientVideoMemberSelect');
+      const complaintInput = document.getElementById('patientVideoComplaint');
+
+      const chosenDoctor = docSelect ? docSelect.value : 'Dr. Priya Sharma, MBBS, MD';
+      const chosenPatient = memberSelect ? memberSelect.value : 'Citizen Beneficiary';
+      const complaint = complaintInput ? complaintInput.value.trim() : 'Telemedicine Video Consultation';
+
+      this.closePatientVideoCallModal();
+
       if (global.videoCallController) {
-        const user = (this.store && (this.store.getState().currentUser || (this.store.getState().session && this.store.getState().session.user))) || { name: 'Citizen Patient', phone: '9876543210' };
+        const user = (this.store && (this.store.getState().currentUser || (this.store.getState().session && this.store.getState().session.user))) || { phone: '9876543210' };
         global.videoCallController.startVideoCall({
           callerRole: 'patient',
-          callerName: user.name || 'Citizen Beneficiary',
+          callerName: chosenPatient,
           callerPhone: user.phone || '9876543210',
           recipientRole: 'doctor',
-          recipientName: 'Dr. Priya Sharma, MBBS, MD',
-          complaint: 'Routine Telemedicine Checkup & Prescription Refill'
+          recipientName: chosenDoctor,
+          patientName: chosenPatient,
+          complaint: complaint
         });
       }
+    }
+
+    startVideoCallWithDoctor() {
+      this.openPatientVideoCallModal();
     }
 
     renderVideoCallHistory() {

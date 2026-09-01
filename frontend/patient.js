@@ -38,18 +38,66 @@
     // -------------------------------------------------------------
     // VIDEO TELECONSULTATION & CALL HISTORY
     // -------------------------------------------------------------
-    startVideoCallWithDoctor() {
+    openPatientVideoCallModal() {
+      const modal = document.getElementById('patientVideoCallModal');
+      const docSelect = document.getElementById('patientVideoDoctorSelect');
+      const memberSelect = document.getElementById('patientVideoMemberSelect');
+
+      if (this.store) {
+        const doctors = (this.store.getState().staff || []).filter(s => s.role === 'doctor');
+        const family = this.store.getState().familyMembers || [];
+        const user = this.store.getState().currentUser || (this.store.getState().session && this.store.getState().session.user) || { name: 'Self' };
+
+        if (docSelect) {
+          docSelect.innerHTML = doctors.map(d => `
+            <option value="${d.name}">
+              👨‍⚕️ ${d.name} · ${d.location || 'PHC/CHC'} (🟢 Online)
+            </option>
+          `).join('') || '<option value="Dr. Priya Sharma, MBBS, MD">👨‍⚕️ Dr. Priya Sharma, MBBS, MD (On Duty)</option>';
+        }
+
+        if (memberSelect) {
+          const membersList = [{ name: (user.name || 'Self (Account Holder)') + ' (Self)' }].concat(family.map(f => ({ name: f.name + ' (' + f.relation + ')' })));
+          memberSelect.innerHTML = membersList.map(m => `<option value="${m.name}">👤 ${m.name}</option>`).join('');
+        }
+      }
+
+      if (modal) modal.style.display = 'flex';
+    }
+
+    closePatientVideoCallModal() {
+      const modal = document.getElementById('patientVideoCallModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    submitPatientVideoCall(e) {
+      if (e) e.preventDefault();
+      const docSelect = document.getElementById('patientVideoDoctorSelect');
+      const memberSelect = document.getElementById('patientVideoMemberSelect');
+      const complaintInput = document.getElementById('patientVideoComplaint');
+
+      const chosenDoctor = docSelect ? docSelect.value : 'Dr. Priya Sharma, MBBS, MD';
+      const chosenPatient = memberSelect ? memberSelect.value : 'Citizen Beneficiary';
+      const complaint = complaintInput ? complaintInput.value.trim() : 'Telemedicine Video Consultation';
+
+      this.closePatientVideoCallModal();
+
       if (global.videoCallController) {
-        const user = (this.store && (this.store.getState().currentUser || (this.store.getState().session && this.store.getState().session.user))) || { name: 'Citizen Patient', phone: '9876543210' };
+        const user = (this.store && (this.store.getState().currentUser || (this.store.getState().session && this.store.getState().session.user))) || { phone: '9876543210' };
         global.videoCallController.startVideoCall({
           callerRole: 'patient',
-          callerName: user.name || 'Citizen Beneficiary',
+          callerName: chosenPatient,
           callerPhone: user.phone || '9876543210',
           recipientRole: 'doctor',
-          recipientName: 'Dr. Priya Sharma, MBBS, MD',
-          complaint: 'Routine Telemedicine Checkup & Prescription Refill'
+          recipientName: chosenDoctor,
+          patientName: chosenPatient,
+          complaint: complaint
         });
       }
+    }
+
+    startVideoCallWithDoctor() {
+      this.openPatientVideoCallModal();
     }
 
     renderVideoCallHistory() {

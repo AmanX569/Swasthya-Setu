@@ -1247,7 +1247,7 @@ table td strong {
         </div>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <button class="auth-btn-primary" style="background:linear-gradient(135deg, #16a34a, #15803d);border:none;padding:10px 18px;font-size:13px;font-weight:800;border-radius:10px;box-shadow:0 4px 14px rgba(22,163,74,0.4);cursor:pointer;" onclick="patientController.startVideoCallWithDoctor()">
+        <button class="auth-btn-primary" style="background:linear-gradient(135deg, #16a34a, #15803d);border:none;padding:10px 18px;font-size:13px;font-weight:800;border-radius:10px;box-shadow:0 4px 14px rgba(22,163,74,0.4);cursor:pointer;" onclick="patientController.openPatientVideoCallModal()">
           📹 Live Video Call Doctor
         </button>
         <button class="auth-btn-primary" style="background:linear-gradient(135deg, #0284c7, #0369a1);border:none;padding:10px 18px;font-size:13px;font-weight:800;border-radius:10px;box-shadow:0 4px 14px rgba(2,132,199,0.4);cursor:pointer;" onclick="patientController.openRequestConsultModal()">
@@ -2411,6 +2411,47 @@ table td strong {
   </div>
 </div>
 
+
+
+<!-- PATIENT SELECT DOCTOR VIDEO CALL MODAL -->
+<div id="patientVideoCallModal" class="modal-overlay">
+  <div class="modal-card" style="max-width:540px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:26px;">📹</span>
+        <div>
+          <h3 style="color:var(--ink);font-size:17px;font-weight:800;">Start Doctor Video Teleconsultation</h3>
+          <small style="color:var(--muted);">Select Your Medical Officer & Consulting Patient</small>
+        </div>
+      </div>
+      <button onclick="patientController.closePatientVideoCallModal()" style="background:none;border:none;font-size:20px;color:var(--muted);cursor:pointer;">✕</button>
+    </div>
+    <form onsubmit="patientController.submitPatientVideoCall(event)">
+      
+      <div style="margin-bottom:12px;">
+        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Select Available Medical Officer / Specialist *</label>
+        <select id="patientVideoDoctorSelect" class="input-field" style="height:44px;" required></select>
+      </div>
+
+      <div style="margin-bottom:12px;">
+        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Consulting For (Family Member or Self) *</label>
+        <select id="patientVideoMemberSelect" class="input-field" style="height:44px;" required></select>
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Chief Symptoms / Complaint *</label>
+        <input type="text" id="patientVideoComplaint" class="input-field" placeholder="e.g. High fever for 2 days, chest congestion, weakness" required value="Fever, headache and mild throat irritation">
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;gap:8px;">
+        <button type="button" class="btn-glass" onclick="patientController.closePatientVideoCallModal()">Cancel</button>
+        <button type="submit" class="auth-btn-primary" style="background:linear-gradient(135deg, #16a34a, #15803d);border:none;">
+          📹 Connect Live Video Call
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
 
 <!-- ASHA FACILITATE VIDEO CALL MODAL -->
 <div id="ashaVideoCallModal" class="modal-overlay">
