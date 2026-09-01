@@ -163,14 +163,18 @@
     }
 
     
-            openGpsMapModal() {
+                openGpsMapModal() {
       const modal = document.getElementById('liveGpsTrackingModal');
       if (modal) {
         modal.style.display = 'flex';
+        modal.style.visibility = 'visible';
+        modal.style.opacity = '1';
         if (typeof document !== 'undefined' && document.body) {
           document.body.style.overflow = 'hidden';
         }
       }
+
+      this.ensureLeafletLoaded();
 
       const tryInit = (retries = 0) => {
         if (typeof global.L !== 'undefined') {
@@ -180,7 +184,7 @@
             inst.map.invalidateSize();
             inst.map.setView([this.patientCoords.lat, this.patientCoords.lng], DEFAULT_REGION.zoom);
           }
-        } else if (retries < 20) {
+        } else if (retries < 25) {
           setTimeout(() => tryInit(retries + 1), 100);
         }
       };
@@ -600,7 +604,11 @@
     // 4. 108 AMBULANCE DISPATCH & LIVE ANIMATED ROUTING
     // -------------------------------------------------------------
     async startAmbulanceDispatch() {
-      if (this.dispatchState.isActive) return;
+      if (this.dispatchState.isActive) {
+        this.openGpsMapModal();
+        if (global.toast) global.toast('📍 Showing ongoing 108 ambulance tracking...');
+        return;
+      }
 
       const pLat = this.patientCoords.lat;
       const pLng = this.patientCoords.lng;
@@ -825,3 +833,14 @@
   }
 
 })(typeof window !== 'undefined' ? window : global);
+
+  // Global Window Helpers for Direct Onclick Access
+  global.openGpsMapModal = function() {
+    if (global.gpsTrackingController) global.gpsTrackingController.openGpsMapModal();
+  };
+  global.closeGpsMapModal = function() {
+    if (global.gpsTrackingController) global.gpsTrackingController.closeGpsMapModal();
+  };
+  global.startAmbulanceDispatch = function() {
+    if (global.gpsTrackingController) global.gpsTrackingController.startAmbulanceDispatch();
+  };
