@@ -1344,9 +1344,12 @@ table td strong {
           <small style="color:var(--muted);" data-i18n="doc_subline">National Rural Telemedicine Network · e-Sanjeevani Clinical HUD</small>
         </div>
         <div style="display:flex;gap:8px;">
-          <button class="auth-btn-primary" style="background:#0284c7;border-color:#0369a1;" onclick="doctorController.openAddQueueModal()" data-i18n="btn_admit_patient">
-            + Admit Walk-in Patient
-          </button>
+          <button class="auth-btn-primary" style="background:linear-gradient(135deg, #16a34a, #15803d);border:none;" onclick="doctorController.openDoctorDirectCallModal()">
+          📹 Direct Video Call Patient
+        </button>
+        <button class="auth-btn-primary" style="background:#0284c7;border-color:#0369a1;" onclick="doctorController.openAddQueueModal()" data-i18n="btn_admit_patient">
+          + Admit Walk-in Patient
+        </button>
         </div>
       </div>
     </div>
@@ -1373,6 +1376,22 @@ table td strong {
           <tbody id="doctorQueueTableBody"></tbody>
         </table>
       </div>
+    </div>
+
+    
+    <!-- AI CLINICAL DIAGNOSTIC GUIDELINES & PROTOCOLS ASSISTANT -->
+    <div class="glass-panel" style="border:1.5px solid rgba(2,132,199,0.3);background:linear-gradient(145deg, rgba(2,132,199,0.06), rgba(15,23,42,0.3));">
+      <div class="panel-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:24px;">🩺</span>
+          <div>
+            <h3 class="panel-title" style="color:var(--ink);font-size:16px;font-weight:800;">Clinical Protocols & Standard Treatment Guidelines (NHM)</h3>
+            <small style="color:var(--muted);">Instant differential diagnosis, recommended lab investigations & PMBJP generic formulations</small>
+          </div>
+        </div>
+        <span class="badge" style="background:#0284c7;color:#fff;font-size:11px;font-weight:700;">AI Clinical HUD Active</span>
+      </div>
+      <div id="doctorClinicalAssistantContainer"></div>
     </div>
 
     <div class="glass-panel">

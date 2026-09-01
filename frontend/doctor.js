@@ -18,6 +18,7 @@
       this.renderConsultQueue();
       this.renderPrescriptionHistory();
       this.renderDoctorCallHistory();
+      this.renderClinicalAssistant();
       if (this.store) {
         this.store.subscribe(() => {
           this.renderConsultQueue();
@@ -99,6 +100,7 @@
       if (confirm('Delete this consultation record?')) {
         if (this.store) this.store.deleteVideoCall(id);
         this.renderDoctorCallHistory();
+      this.renderClinicalAssistant();
         if (global.toast) global.toast('🗑️ Consultation record deleted.');
       }
     }
@@ -107,9 +109,200 @@
       if (confirm('Are you sure you want to clear all consultation history?')) {
         if (this.store) this.store.clearVideoCallHistory('doctor');
         this.renderDoctorCallHistory();
+      this.renderClinicalAssistant();
         if (global.toast) global.toast('🗑️ All consultation history cleared.');
       }
     }
+
+    // -------------------------------------------------------------
+    // CLINICAL AI DIAGNOSTIC PROTOCOLS & GUIDELINES ASSISTANT
+    // -------------------------------------------------------------
+    getClinicalProtocols() {
+      return [
+        {
+          disease: 'Acute Viral Bronchitis / URTI',
+          icd: 'J20.9',
+          symptoms: ['Fever', 'Cough', 'Throat Irritation', 'Myalgia'],
+          investigations: ['CBC (if >3 days)', 'SpO2 Monitoring', 'Throat Swab (if exudate)'],
+          protocols: ['Hydration (2-3L/day)', 'Steam Inhalation', 'Warm Saline Gargles'],
+          genericRx: [
+            { name: 'Paracetamol 650mg (Jan Aushadhi)', dosage: '1 Tab TDS', price: '₹8' },
+            { name: 'Cetirizine 10mg (Jan Aushadhi)', dosage: '1 Tab Night', price: '₹5' },
+            { name: 'Amoxicillin 500mg (Jan Aushadhi)', dosage: '1 Cap TDS (if secondary bacterial)', price: '₹22' }
+          ]
+        },
+        {
+          disease: 'Hypertension (Stage 1 / 2)',
+          icd: 'I10',
+          symptoms: ['Headache', 'Dizziness', 'BP > 140/90 mmHg', 'Tinnitus'],
+          investigations: ['Lipid Profile', 'Serum Creatinine', 'ECG 12-Lead', 'Urine Routine'],
+          protocols: ['Low Sodium Diet (<2g/day)', '30 mins Daily Brisk Walk', 'Stress Management'],
+          genericRx: [
+            { name: 'Telmisartan 40mg (Jan Aushadhi)', dosage: '1 Tab Morning (OD)', price: '₹14' },
+            { name: 'Amlodipine 5mg (Jan Aushadhi)', dosage: '1 Tab Morning (OD)', price: '₹6' }
+          ]
+        },
+        {
+          disease: 'Type 2 Diabetes Mellitus',
+          icd: 'E11.9',
+          symptoms: ['Polyuria', 'Polydipsia', 'Fatigue', 'Fasting Blood Sugar > 126 mg/dL'],
+          investigations: ['HbA1c', 'Fasting & Post-Prandial Blood Sugar', 'Kidney Function Test'],
+          protocols: ['Diabetic Meal Plan', 'Foot Care & Inspection', 'Annual Retinal Screening'],
+          genericRx: [
+            { name: 'Metformin 500mg (Jan Aushadhi)', dosage: '1 Tab BD with food', price: '₹9' },
+            { name: 'Glimepiride 1mg (Jan Aushadhi)', dosage: '1 Tab Morning before food', price: '₹7' }
+          ]
+        },
+        {
+          disease: 'Acute Gastroenteritis / Diarrhea',
+          icd: 'A09',
+          symptoms: ['Watery Stools', 'Vomiting', 'Abdominal Cramps', 'Mild Dehydration'],
+          investigations: ['Stool Routine', 'Serum Electrolytes (if severe)', 'Blood Pressure Check'],
+          protocols: ['WHO ORS Solution (1 Liter per 3 loose stools)', 'Zinc Supplements', 'Light Diet'],
+          genericRx: [
+            { name: 'Oral Rehydration Salts (WHO ORS)', dosage: 'Sip continuously after each stool', price: '₹4' },
+            { name: 'Zinc Sulfate 20mg (Jan Aushadhi)', dosage: '1 Tab OD for 14 days', price: '₹6' },
+            { name: 'Ofloxacin + Ornidazole (Jan Aushadhi)', dosage: '1 Tab BD x 3 days', price: '₹18' }
+          ]
+        }
+      ];
+    }
+
+    renderClinicalAssistant() {
+      const container = document.getElementById('doctorClinicalAssistantContainer');
+      if (!container) return;
+      const protocols = this.getClinicalProtocols();
+
+      container.innerHTML = `
+        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:14px;">
+          ${protocols.map((p, idx) => `
+            <div style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:14px;padding:16px;box-shadow:var(--shadow-panel);display:flex;flex-direction:column;justify-content:space-between;">
+              <div>
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+                  <strong style="color:var(--ink);font-size:15px;">${p.disease}</strong>
+                  <span class="badge" style="background:rgba(2,132,199,0.15);color:#0284c7;font-weight:700;font-size:10px;">ICD: ${p.icd}</span>
+                </div>
+                <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">
+                  <strong>Symptoms:</strong> ${p.symptoms.join(', ')}
+                </div>
+                <div style="background:rgba(0,0,0,0.15);padding:8px 10px;border-radius:8px;font-size:11px;color:var(--ink-dim);margin-bottom:10px;">
+                  <strong style="color:var(--ink);display:block;margin-bottom:2px;">🔬 Recommended Labs:</strong>
+                  ${p.investigations.join(' · ')}
+                </div>
+                <div style="font-size:11px;color:var(--ink-dim);margin-bottom:10px;">
+                  <strong style="color:var(--ink);display:block;margin-bottom:2px;">💊 Standard Jan Aushadhi Rx:</strong>
+                  ${p.genericRx.map(g => `<div style="display:flex;justify-content:space-between;"><span>• ${g.name} (${g.dosage})</span><strong style="color:#16a34a;">${g.price}</strong></div>`).join('')}
+                </div>
+              </div>
+              <button class="auth-btn-primary" style="width:100%;padding:8px;font-size:12px;background:linear-gradient(135deg, #0284c7, #0369a1);border:none;margin-top:6px;" onclick="doctorController.applyProtocolToPrescription(${idx})">
+                + Auto-Fill in e-Prescription
+              </button>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    applyProtocolToPrescription(idx) {
+      const p = this.getClinicalProtocols()[idx];
+      if (!p) return;
+      
+      const diagInput = document.getElementById('inCallRxDiagnosis') || document.getElementById('consultDiagnosis');
+      const adviceInput = document.getElementById('inCallRxAdvice') || document.getElementById('consultAdvice');
+      
+      if (diagInput) diagInput.value = p.disease;
+      if (adviceInput) adviceInput.value = p.protocols.join('. ') + '.';
+      
+      if (global.toast) global.toast('✓ Applied ' + p.disease + ' protocol to e-Prescription.');
+    }
+
+    // -------------------------------------------------------------
+    // DIRECT PATIENT CALL DIALER FOR DOCTOR
+    // -------------------------------------------------------------
+    openDoctorDirectCallModal() {
+      let modal = document.getElementById('doctorDirectCallModal');
+      if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'doctorDirectCallModal';
+        modal.className = 'modal-overlay';
+        modal.style.position = 'fixed';
+        modal.style.inset = '0';
+        modal.style.background = 'rgba(15, 23, 42, 0.85)';
+        modal.style.zIndex = '100000';
+        modal.style.display = 'none';
+        modal.style.alignItems = 'center';
+        modal.style.justifyContent = 'center';
+        modal.style.padding = '16px';
+        document.body.appendChild(modal);
+      }
+
+      const patients = (this.store ? this.store.getState().patients : []) || [];
+      const optionsHtml = patients.length 
+        ? patients.map(p => `<option value="${p.name}" data-phone="${p.phone}">👤 ${p.name} (Phone: ${p.phone} · ${p.village || 'Village'})</option>`).join('')
+        : '<option value="Citizen Patient">Citizen Patient (9876543210)</option>';
+
+      modal.innerHTML = `
+        <div class="modal-card" style="max-width:500px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="font-size:26px;">📞</span>
+              <div>
+                <h3 style="color:var(--ink);font-size:17px;font-weight:800;">Direct Patient Video Call</h3>
+                <small style="color:var(--muted);">Initiate On-Demand Video Teleconsultation</small>
+              </div>
+            </div>
+            <button onclick="document.getElementById('doctorDirectCallModal').style.display='none'" style="background:none;border:none;font-size:20px;color:var(--muted);cursor:pointer;">✕</button>
+          </div>
+          <form onsubmit="doctorController.submitDirectPatientCall(event)">
+            <div style="margin-bottom:12px;">
+              <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Select Registered Beneficiary *</label>
+              <select id="docDirectCallPatientSelect" class="input-field" style="height:44px;" required>
+                ${optionsHtml}
+              </select>
+            </div>
+            <div style="margin-bottom:16px;">
+              <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Consultation Reason / Clinical Notes *</label>
+              <input type="text" id="docDirectCallReason" class="input-field" placeholder="e.g. Follow-up review of blood sugar / blood pressure" required value="Routine Teleconsultation & Health Checkup">
+            </div>
+            <div style="display:flex;justify-content:flex-end;gap:8px;">
+              <button type="button" class="btn-glass" onclick="document.getElementById('doctorDirectCallModal').style.display='none'">Cancel</button>
+              <button type="submit" class="auth-btn-primary" style="background:linear-gradient(135deg, #16a34a, #15803d);border:none;">
+                📹 Start Video Call Now
+              </button>
+            </div>
+          </form>
+        </div>
+      `;
+      modal.style.display = 'flex';
+    }
+
+    submitDirectPatientCall(e) {
+      if (e) e.preventDefault();
+      const patSelect = document.getElementById('docDirectCallPatientSelect');
+      const reasonInput = document.getElementById('docDirectCallReason');
+      
+      const patName = patSelect ? patSelect.value : 'Citizen Patient';
+      const patPhone = patSelect && patSelect.options[patSelect.selectedIndex] ? patSelect.options[patSelect.selectedIndex].getAttribute('data-phone') : '9876543210';
+      const reason = reasonInput ? reasonInput.value.trim() : 'Teleconsultation Follow-up';
+
+      const modal = document.getElementById('doctorDirectCallModal');
+      if (modal) modal.style.display = 'none';
+
+      const doctorUser = (this.store && this.store.getState().session && this.store.getState().session.user) || { name: 'Dr. Priya Sharma, MBBS, MD' };
+
+      if (global.videoCallController) {
+        global.videoCallController.startVideoCall({
+          callerRole: 'doctor',
+          callerName: doctorUser.name || 'Medical Officer',
+          recipientRole: 'patient',
+          recipientName: patName,
+          patientName: patName,
+          callerPhone: patPhone || '9876543210',
+          complaint: reason
+        });
+      }
+    }
+
 
     renderConsultQueue() {
       const el = document.getElementById('doctorQueueTableBody');

@@ -68,6 +68,7 @@
       this.callTimerInterval = null;
       this.frameSyncInterval = null;
       this.currentCallData = null;
+      this.isWebRtcAudioActive = false;
       this.inCallMessages = [];
       this.pendingIncomingSignal = null;
       this.unreadChatCount = 0;
@@ -614,8 +615,7 @@
           const remoteVideo = document.getElementById('remoteVideoElement');
           if (remoteVideo) {
             remoteVideo.srcObject = stream;
-            remoteVideo.muted = false;
-            remoteVideo.volume = 1.0;
+            remoteVideo.muted = true; // Prevents duplicate audio playback loop that causes echo
             remoteVideo.play().catch(e => console.warn('Remote video playback:', e));
           }
 
@@ -632,25 +632,10 @@
             remoteAudio.play().catch(e => console.warn('Remote audio element playback:', e));
           }
 
-          // 3. Direct Web Audio Context Hardware Routing (Direct to Physical Device Speakers)
+          // 3. Single Dedicated Hardware Audio Output
           if (event.track.kind === 'audio') {
-            try {
-              const AudioCtx = window.AudioContext || window.webkitAudioContext;
-              if (AudioCtx) {
-                if (!this.audioContext) this.audioContext = new AudioCtx({ latencyHint: 'interactive' });
-                if (this.audioContext.state === 'suspended') this.audioContext.resume();
-                const audioSource = this.audioContext.createMediaStreamSource(new MediaStream([event.track]));
-                if (!this.audioGainNode) {
-                  this.audioGainNode = this.audioContext.createGain();
-                  this.audioGainNode.gain.value = 2.5; // 2.5x Voice Gain Amplification
-                  this.audioGainNode.connect(this.audioContext.destination);
-                }
-                audioSource.connect(this.audioGainNode);
-                console.log('[WebRTC Audio] Remote voice stream connected directly to device speakers with 2.5x boost!');
-              }
-            } catch (err) {
-              console.warn('[WebRTC Audio] AudioContext bridge notice:', err);
-            }
+            this.isWebRtcAudioActive = true;
+            console.log('[WebRTC Audio] Dedicated clean hardware audio stream connected (Echo Cancellation Active)');
           }
 
           const remoteAvatar = document.getElementById('remoteAvatarPlaceholder');
@@ -835,7 +820,7 @@
     }
 
     playRemoteAudioChunk(base64Chunk) {
-      if (!this.isSpeakerBoosted || !base64Chunk) return;
+      if (!this.isSpeakerBoosted || !base64Chunk || this.isWebRtcAudioActive) return; // Ignore chunks when WebRTC is active to prevent echo
       try {
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
         if (!AudioCtx) return;
@@ -1248,6 +1233,7 @@
         modal.innerHTML = '';
       }
       this.currentCallData = null;
+      this.isWebRtcAudioActive = false;
       this.stopCallTimer();
       this.stopFrameSyncStream();
       this.stopRealtimeVoiceStreaming();
