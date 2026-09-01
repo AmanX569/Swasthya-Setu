@@ -32,9 +32,9 @@
     ],
 
     familyMembers: [
-      { id: 'FAM-001', name: 'Ramesh Kumar', relation: 'Self', age: 38, gender: 'Male', abhaId: '14-8921-4402-9912', status: 'Healthy' },
-      { id: 'FAM-002', name: 'Sunita Devi', relation: 'Spouse', age: 34, gender: 'Female', abhaId: '14-3819-5510-7734', status: 'ANC Due' },
-      { id: 'FAM-003', name: 'Aarav Kumar', relation: 'Son', age: 6, gender: 'Male', abhaId: '14-9912-1102-3345', status: 'UIP Immunized' }
+      { id: 'FAM-001', ownerPhone: '9876543210', name: 'Ramesh Kumar', relation: 'Self', age: 38, gender: 'Male', abhaId: '14-8921-4402-9912', status: 'Healthy' },
+      { id: 'FAM-002', ownerPhone: '9876543210', name: 'Sunita Devi', relation: 'Spouse', age: 34, gender: 'Female', abhaId: '14-3819-5510-7734', status: 'ANC Due' },
+      { id: 'FAM-003', ownerPhone: '9876543210', name: 'Aarav Kumar', relation: 'Son', age: 6, gender: 'Male', abhaId: '14-9912-1102-3345', status: 'UIP Immunized' }
     ],
 
     consultQueue: [
@@ -488,10 +488,22 @@
       return queueItem;
     }
 
+    getFamilyMembers(patientPhoneOrId) {
+      const user = this.state.currentUser || (this.state.session && this.state.session.user);
+      const targetPhone = patientPhoneOrId || (user ? (user.phone || '').replace(/\D/g, '') : null);
+      if (!targetPhone) return [];
+      return (this.state.familyMembers || []).filter(f => {
+        const fOwner = (f.ownerPhone || '').replace(/\D/g, '');
+        return fOwner && fOwner === targetPhone;
+      });
+    }
+
     addFamilyMember(member) {
+      const user = this.state.currentUser || (this.state.session && this.state.session.user);
+      const ownerPhone = member.ownerPhone || (user && user.phone ? user.phone : '9876543210');
       const id = 'FAM-' + String(Date.now()).slice(-4);
       const abha = member.abhaId || `14-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}`;
-      const newFam = { id, abhaId: abha, status: 'Healthy', ...member };
+      const newFam = { id, abhaId: abha, status: 'Healthy', ownerPhone, ...member };
       if (!this.state.familyMembers) this.state.familyMembers = [];
       this.state.familyMembers.push(newFam);
       this.saveState();
@@ -536,6 +548,7 @@
 
       return callRecord;
     }
+
     deleteVideoCall(callId) {
       if (!this.state.videoCallHistory) return;
       this.state.videoCallHistory = this.state.videoCallHistory.filter(c => c.id !== callId && c.token !== callId);
@@ -567,12 +580,13 @@
       if (!role) return all;
       if (role === 'patient') {
         const user = this.state.currentUser || (this.state.session && this.state.session.user);
-        const uPhone = user ? (user.phone || '').replace(/\D/g, '') : '';
-        const uName = user ? (user.name || '').toLowerCase() : '';
+        if (!user) return all;
+        const uPhone = (user.phone || '').replace(/\D/g, '');
+        const uName = (user.name || '').trim().toLowerCase();
         return all.filter(c => {
           const cPhone = (c.callerPhone || '').replace(/\D/g, '');
-          const cName = (c.callerName || '').toLowerCase();
-          return (uPhone && cPhone && uPhone === cPhone) || (uName && cName && cName.includes(uName)) || (c.callerRole === 'patient');
+          const cName = (c.callerName || '').trim().toLowerCase();
+          return (uPhone && cPhone && uPhone === cPhone) || (uName && cName && (cName === uName || cName.startsWith(uName)));
         });
       }
       if (role === 'doctor') {
@@ -584,7 +598,12 @@
         });
       }
       if (role === 'worker') {
-        return all.filter(c => Boolean(c.facilitatorName) || c.callerRole === 'worker');
+        const user = this.state.session && this.state.session.user;
+        const wName = user ? (user.name || '').toLowerCase() : '';
+        return all.filter(c => {
+          const fName = (c.facilitatorName || '').toLowerCase();
+          return !wName || fName.includes(wName) || c.callerRole === 'worker';
+        });
       }
       return all;
     }

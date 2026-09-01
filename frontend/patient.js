@@ -45,7 +45,7 @@
 
       if (this.store) {
         const doctors = (this.store.getState().staff || []).filter(s => s.role === 'doctor');
-        const family = this.store.getState().familyMembers || [];
+        const family = typeof this.store.getFamilyMembers === 'function' ? this.store.getFamilyMembers(user ? user.phone : null) : [];
         const user = this.store.getState().currentUser || (this.store.getState().session && this.store.getState().session.user) || { name: 'Self' };
 
         if (docSelect) {
@@ -263,11 +263,15 @@
       const allRx = this.store.getState().prescriptions || [];
 
       // Filter prescriptions for this patient (or show all if demo/all)
+      const uPhone = (user.phone || '').replace(/\D/g, '');
+      const uName = (user.name || '').trim().toLowerCase();
+
       const myRx = allRx.filter(r => {
-        if (!r.patientName) return true;
-        if (!user.name) return true;
-        return r.patientName.toLowerCase().includes(user.name.toLowerCase()) || 
-               user.name.toLowerCase().includes(r.patientName.toLowerCase());
+        const rPhone = (r.patientPhone || '').replace(/\D/g, '');
+        const rName = (r.patientName || '').trim().toLowerCase();
+        if (uPhone && rPhone) return uPhone === rPhone;
+        if (uName && rName) return rName === uName || rName.includes(uName) || uName.includes(rName);
+        return false;
       });
 
       if (!myRx.length) {
@@ -775,7 +779,10 @@
     renderFamilyCircle() {
       const el = document.getElementById('familyMembersGrid') || document.getElementById('familyMembersList');
       if (!el || !this.store) return;
-      const fams = this.store.getState().familyMembers || [];
+      const user = this.store.getState().currentUser || (this.store.getState().session && this.store.getState().session.user);
+      const fams = typeof this.store.getFamilyMembers === 'function' ? 
+                   this.store.getFamilyMembers(user ? user.phone : null) : 
+                   (this.store.getState().familyMembers || []);
 
       if (!fams.length) {
         el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);grid-column:1/-1;">No family members added yet. Tap "+ Add Member" above.</div>';
