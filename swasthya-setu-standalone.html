@@ -965,7 +965,7 @@ body[data-theme="doom"] {
 [data-theme="doom"] #appLeftSidebar {
   background: #041e14 !important;
   border-right: 1.5px solid rgba(16, 185, 129, 0.3) !important;
-  box-shadow: 15px 0 50px rgba(0, 0, 0, 0.8) !important;
+  box-shadow: none !important;
   color: #ffffff !important;
 }
 
@@ -3234,7 +3234,7 @@ body[data-theme="doom"] {
      ========================================================= -->
 <div id="sidebarBackdrop" onclick="toggleLeftSidebar(false)" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,0.65);backdrop-filter:blur(4px);z-index:9998;transition:opacity 0.3s ease;"></div>
 
-<aside id="appLeftSidebar" style="position:fixed;top:0;left:0;bottom:0;width:300px;max-width:85vw;background:#0f172a;border-right:1.5px solid rgba(56,189,248,0.3);box-shadow:15px 0 50px rgba(0,0,0,0.8);z-index:9999;display:flex;flex-direction:column;transform:translateX(-100%);transition:transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);overflow-y:auto;color:#ffffff;">
+<aside id="appLeftSidebar" style="position:fixed;top:0;left:0;bottom:0;width:300px;max-width:85vw;background:#0f172a;border-right:1.5px solid rgba(56,189,248,0.3);box-shadow:none;z-index:9999;display:flex;flex-direction:column;transform:translateX(-100%);transition:transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);overflow-y:auto;color:#ffffff;">
   
   <!-- SIDEBAR HEADER (HIGH VISIBILITY) -->
   <div style="padding:16px 18px;border-bottom:1.5px solid rgba(255,255,255,0.12);display:flex;justify-content:space-between;align-items:center;background:rgba(2,132,199,0.15);">
@@ -12593,12 +12593,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (nextState) {
         sidebar.style.transform = 'translateX(0px)';
+        sidebar.style.boxShadow = '15px 0 50px rgba(0,0,0,0.6)';
         if (backdrop) backdrop.style.display = 'block';
       } else {
         sidebar.style.transform = 'translateX(-100%)';
+        sidebar.style.boxShadow = 'none';
         if (backdrop) backdrop.style.display = 'none';
       }
     }
+  }
   </script>
 
 
