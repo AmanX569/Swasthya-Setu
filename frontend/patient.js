@@ -99,7 +99,7 @@
       this.openPatientVideoCallModal();
     }
 
-    renderVideoCallHistory() {
+        renderVideoCallHistory() {
       const el = document.getElementById('patientVideoCallHistoryContainer');
       if (!el || !this.store) return;
       const history = this.store.getVideoCallHistory('patient') || [];
@@ -109,7 +109,14 @@
         return;
       }
 
-      el.innerHTML = history.map(c => `
+      el.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;width:100%;">
+          <span style="font-size:12px;color:var(--muted);font-weight:700;">Total Recorded Consultations: ${history.length}</span>
+          <button onclick="patientController.clearAllCallHistory()" style="background:rgba(220,38,38,0.12);color:#dc2626;border:1px solid rgba(220,38,38,0.3);padding:4px 10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;">
+            🗑️ Clear History
+          </button>
+        </div>
+      ` + history.map(c => `
         <div style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:14px;padding:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;box-shadow:var(--shadow-panel);margin-bottom:10px;">
           <div style="display:flex;align-items:center;gap:12px;">
             <div style="width:42px;height:42px;background:rgba(2,132,199,0.12);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;">
@@ -128,9 +135,28 @@
                 📥 View Rx PDF
               </button>
             ` : ''}
+            <button onclick="patientController.deleteCallRecord('${c.id}')" title="Delete record" style="background:none;border:none;color:#dc2626;cursor:pointer;font-size:16px;padding:4px 8px;border-radius:6px;">
+              🗑️
+            </button>
           </div>
         </div>
       `).join('');
+    }
+
+    deleteCallRecord(id) {
+      if (confirm('Delete this consultation record?')) {
+        if (this.store) this.store.deleteVideoCall(id);
+        this.renderVideoCallHistory();
+        if (global.toast) global.toast('🗑️ Consultation record deleted.');
+      }
+    }
+
+    clearAllCallHistory() {
+      if (confirm('Are you sure you want to clear all consultation history?')) {
+        if (this.store) this.store.clearVideoCallHistory('patient');
+        this.renderVideoCallHistory();
+        if (global.toast) global.toast('🗑️ All consultation history cleared.');
+      }
     }
 
     // -------------------------------------------------------------

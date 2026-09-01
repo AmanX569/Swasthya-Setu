@@ -1,10 +1,11 @@
 /**
  * =========================================================
  * SWASTHYA SETU - BULLETPROOF WEBRTC & REAL-TIME AUDIO ENGINE (video-call.js)
- * Dual-Layer Voice Streaming:
+ * Triple-Layer Voice Streaming:
  * Layer 1: WebRTC Opus P2P Audio with Full Trickle ICE & TURN Relays
  * Layer 2: Web Audio Realtime Voice Packet Streaming over Cloud Channel
  * Layer 3: Web Audio GainNode 2.5x Hardware Loudspeaker Amplification
+ * Feature: Live Chat In-Call Notification Banners & Audio Chimes
  * =========================================================
  */
 
@@ -40,6 +41,7 @@
       this.audioAnalyser = null;
       this.audioGainNode = null;
       this.audioScriptProcessor = null;
+      this.silentGainNode = null;
       this.micMeterInterval = null;
       this.isAudioMuted = false;
       this.isVideoMuted = false;
@@ -51,6 +53,7 @@
       this.currentCallData = null;
       this.inCallMessages = [];
       this.pendingIncomingSignal = null;
+      this.unreadChatCount = 0;
       this.audioPlaybackTime = 0;
       this.init();
     }
@@ -72,6 +75,69 @@
           }
         }
       } catch (e) {}
+    }
+
+    playChatNotificationChime() {
+      try {
+        this.unlockAudioContext();
+        if (!this.audioContext) return;
+        const now = this.audioContext.currentTime;
+        const osc = this.audioContext.createOscillator();
+        const gain = this.audioContext.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(750, now);
+        osc.frequency.exponentialRampToValueAtTime(1100, now + 0.12);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+        osc.connect(gain);
+        gain.connect(this.audioContext.destination);
+        osc.start(now);
+        osc.stop(now + 0.36);
+      } catch (e) {}
+    }
+
+    showInCallChatNotificationBanner(msg) {
+      let banner = document.getElementById('inCallChatBannerNotification');
+      if (!banner) {
+        banner = document.createElement('div');
+        banner.id = 'inCallChatBannerNotification';
+        banner.style.position = 'absolute';
+        banner.style.top = '60px';
+        banner.style.left = '50%';
+        banner.style.transform = 'translateX(-50%)';
+        banner.style.background = 'linear-gradient(135deg, rgba(2,132,199,0.95), rgba(15,23,42,0.95))';
+        banner.style.border = '1.5px solid #38bdf8';
+        banner.style.boxShadow = '0 10px 30px rgba(0,0,0,0.8), 0 0 20px rgba(56,189,248,0.4)';
+        banner.style.borderRadius = '30px';
+        banner.style.padding = '8px 20px';
+        banner.style.color = '#ffffff';
+        banner.style.zIndex = '100';
+        banner.style.display = 'flex';
+        banner.style.alignItems = 'center';
+        banner.style.gap = '10px';
+        banner.style.cursor = 'pointer';
+        banner.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+        banner.onclick = () => this.toggleInCallChat();
+        const stage = document.getElementById('videoCallModal');
+        if (stage) stage.appendChild(banner);
+      }
+
+      banner.innerHTML = `
+        <span style="font-size:18px;">💬</span>
+        <div style="font-size:12px;max-width:280px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+          <strong style="color:#38bdf8;">${msg.sender}:</strong> <span>${msg.text}</span>
+        </div>
+      `;
+      banner.style.display = 'flex';
+      banner.style.opacity = '1';
+
+      if (this.chatBannerTimeout) clearTimeout(this.chatBannerTimeout);
+      this.chatBannerTimeout = setTimeout(() => {
+        if (banner) {
+          banner.style.opacity = '0';
+          setTimeout(() => { banner.style.display = 'none'; }, 300);
+        }
+      }, 4000);
     }
 
     // -------------------------------------------------------------
@@ -120,11 +186,25 @@
         }
       }
 
-      // 4. Live Synced In-Call Chat
+      // 4. Live Synced In-Call Chat with Notification Banner & Chime
       else if (signal.type === 'IN_CALL_CHAT') {
         if (this.currentCallData && this.currentCallData.id === signal.callId && signal.message) {
           this.inCallMessages.push(signal.message);
           this.renderChatMessages();
+
+          const drawer = document.getElementById('inCallChatDrawer');
+          const isDrawerOpen = drawer && drawer.style.display === 'flex';
+          if (!isDrawerOpen) {
+            this.unreadChatCount++;
+            const badge = document.getElementById('chatUnreadBadge');
+            if (badge) {
+              badge.textContent = this.unreadChatCount;
+              badge.style.display = 'inline-block';
+            }
+            this.showInCallChatNotificationBanner(signal.message);
+            this.playChatNotificationChime();
+          }
+
           if (global.toast) global.toast('💬 ' + signal.message.sender + ': ' + signal.message.text);
         }
       }
@@ -167,6 +247,7 @@
       const recipientName = callDetails.recipientName || 'Dr. Priya Sharma, MBBS, MD';
       const facilitatorName = callDetails.facilitatorName || (callerRole === 'worker' ? activeUser.name : null);
 
+      this.unreadChatCount = 0;
       this.currentCallData = {
         id: 'CALL-' + String(Date.now()).slice(-4),
         token: 'VID-' + Math.floor(1000 + Math.random() * 9000),
@@ -334,6 +415,7 @@
       const state = this.store ? this.store.getState() : {};
       const activeDoctor = (state.session && state.session.user) || { name: 'Dr. Priya Sharma, MBBS, MD' };
 
+      this.unreadChatCount = 0;
       this.currentCallData = {
         id: signal.callId || ('CALL-' + Date.now()),
         token: signal.token || 'VID-101',
@@ -357,6 +439,14 @@
       this.renderVideoCallModal();
       const callModal = document.getElementById('videoCallModal');
       if (callModal) callModal.style.display = 'flex';
+
+      // Ensure remote audio playback is activated on doctor device
+      const remoteAudio = document.getElementById('remoteAudioElement');
+      if (remoteAudio) {
+        remoteAudio.muted = false;
+        remoteAudio.volume = 1.0;
+        remoteAudio.play().catch(() => {});
+      }
 
       // 1. Start Doctor Local Camera with 720p HD FIRST
       await this.initLocalMediaStream();
@@ -414,6 +504,13 @@
         }
       } catch (err) {
         console.warn('[WebRTC] Set remote answer warning:', err.message);
+      }
+
+      const remoteAudio = document.getElementById('remoteAudioElement');
+      if (remoteAudio) {
+        remoteAudio.muted = false;
+        remoteAudio.volume = 1.0;
+        remoteAudio.play().catch(() => {});
       }
 
       this.inCallMessages.push({
@@ -572,62 +669,27 @@
       try {
         if (navigator.mediaDevices && typeof navigator.mediaDevices.getUserMedia === 'function') {
           
-          // 1. Dedicated Microphone Capture with Universal Fallback
+          // 1. Unified Microphone & Camera Acquisition
           try {
-            audioStream = await navigator.mediaDevices.getUserMedia({
+            this.localStream = await navigator.mediaDevices.getUserMedia({
               audio: {
                 echoCancellation: true,
                 noiseSuppression: true,
                 autoGainControl: true
-              }
-            });
-            console.log('[Audio Capture] Acquired echo-cancelled audio stream');
-          } catch (audioErr) {
-            console.warn('[Audio Capture] Strict mic constraints failed, using audio: true', audioErr.message);
-            try {
-              audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            } catch (permErr) {
-              console.warn('[Audio Capture] Microphone permission notice:', permErr.message);
-            }
-          }
-
-          // 2. Dedicated Camera Capture with Universal Fallback
-          try {
-            videoStream = await navigator.mediaDevices.getUserMedia({
+              },
               video: {
                 facingMode: this.currentFacingMode,
                 width: { ideal: 1280, min: 480 },
                 height: { ideal: 720, min: 360 }
               }
             });
-          } catch (vidErr) {
-            console.warn('[Video Capture] HD Video failed, using video: true', vidErr.message);
-            try {
-              videoStream = await navigator.mediaDevices.getUserMedia({ video: true });
-            } catch (vErr) {
-              console.warn('[Video Capture] Video fallback:', vErr.message);
-            }
+          } catch (e) {
+            console.warn('[Media] Strict constraints failed, falling back to simple audio/video', e.message);
+            this.localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
           }
 
-          // 3. Combine Tracks into Unified Stream
-          const combinedTracks = [];
-          if (audioStream) {
-            audioStream.getAudioTracks().forEach(t => {
-              t.enabled = true;
-              combinedTracks.push(t);
-            });
-          }
-          if (videoStream) {
-            videoStream.getVideoTracks().forEach(t => {
-              t.enabled = true;
-              combinedTracks.push(t);
-            });
-          }
-
-          if (combinedTracks.length > 0) {
-            this.localStream = new MediaStream(combinedTracks);
-          } else {
-            throw new Error('No audio or video hardware tracks available');
+          if (this.localStream) {
+            this.localStream.getTracks().forEach(t => t.enabled = true);
           }
 
           if (localVideo && this.localStream) {
@@ -679,9 +741,9 @@
             const avg = sum / dataArray.length;
             const percentage = Math.min(100, Math.max(10, Math.round((avg / 128) * 100)));
             meterBar.style.width = percentage + '%';
-            meterBar.style.background = this.isAudioMuted ? '#dc2626' : (percentage > 20 ? '#22c55e' : '#38bdf8');
+            meterBar.style.background = this.isAudioMuted ? '#dc2626' : (percentage > 18 ? '#22c55e' : '#38bdf8');
             if (micStatusText) {
-              micStatusText.textContent = this.isAudioMuted ? 'Muted' : (percentage > 20 ? 'Speaking...' : 'Live');
+              micStatusText.textContent = this.isAudioMuted ? 'Muted' : (percentage > 18 ? 'Speaking...' : 'Live');
             }
           }
         }, 150);
@@ -712,22 +774,22 @@
         if (this.audioContext.state === 'suspended') this.audioContext.resume();
 
         const source = this.audioContext.createMediaStreamSource(new MediaStream([audioTrack]));
-        // Process audio in 2048 buffer chunks (~120ms)
+        // Buffer chunks of 2048 (~46ms in 44.1kHz)
         this.audioScriptProcessor = this.audioContext.createScriptProcessor(2048, 1, 1);
+        this.silentGainNode = this.audioContext.createGain();
+        this.silentGainNode.gain.value = 0.0; // Prevents local echo loopback while ensuring onaudioprocess fires continuously
         
         this.audioScriptProcessor.onaudioprocess = (e) => {
           if (this.isAudioMuted || !this.currentCallData) return;
           const inputData = e.inputBuffer.getChannelData(0);
           
-          // Check if speech/energy is present
-          let maxVal = 0;
-          for (let i = 0; i < inputData.length; i++) {
-            const abs = Math.abs(inputData[i]);
-            if (abs > maxVal) maxVal = abs;
-          }
+          // Detect voice energy
+          let sum = 0;
+          for (let i = 0; i < inputData.length; i++) sum += inputData[i] * inputData[i];
+          const rms = Math.sqrt(sum / inputData.length);
 
-          if (maxVal > 0.02) {
-            // Compress to 8-bit PCM samples to minimize network bandwidth
+          if (rms > 0.005) {
+            // Encode to Int8 PCM
             const compressed = new Int8Array(inputData.length);
             for (let i = 0; i < inputData.length; i++) {
               compressed[i] = Math.max(-128, Math.min(127, Math.round(inputData[i] * 127)));
@@ -745,8 +807,9 @@
         };
 
         source.connect(this.audioScriptProcessor);
-        this.audioScriptProcessor.connect(this.audioContext.destination);
-        console.log('[Voice Engine] Real-time audio backup streamer active');
+        this.audioScriptProcessor.connect(this.silentGainNode);
+        this.silentGainNode.connect(this.audioContext.destination);
+        console.log('[Voice Engine] Real-time audio backup streamer active with silent gain loop');
       } catch (e) {
         console.warn('[Voice Engine] Real-time streamer notice:', e);
       }
@@ -756,6 +819,10 @@
       if (this.audioScriptProcessor) {
         try { this.audioScriptProcessor.disconnect(); } catch (e) {}
         this.audioScriptProcessor = null;
+      }
+      if (this.silentGainNode) {
+        try { this.silentGainNode.disconnect(); } catch (e) {}
+        this.silentGainNode = null;
       }
     }
 
@@ -778,7 +845,7 @@
         const channelData = audioBuffer.getChannelData(0);
 
         for (let i = 0; i < int8Array.length; i++) {
-          channelData[i] = (int8Array[i] / 127.0) * 1.8; // 1.8x Gain
+          channelData[i] = (int8Array[i] / 127.0) * 2.2; // 2.2x Gain
         }
 
         const source = this.audioContext.createBufferSource();
@@ -1058,7 +1125,13 @@
       drawer.style.display = isOpen ? 'none' : 'flex';
       const rxDrawer = document.getElementById('inCallRxDrawer');
       if (rxDrawer && !isOpen) rxDrawer.style.display = 'none';
-      if (!isOpen) this.renderChatMessages();
+
+      if (!isOpen) {
+        this.unreadChatCount = 0;
+        const badge = document.getElementById('chatUnreadBadge');
+        if (badge) badge.style.display = 'none';
+        this.renderChatMessages();
+      }
     }
 
     sendChatMessage(e) {
@@ -1355,8 +1428,9 @@
               </button>
             ` : ''}
 
-            <button onclick="videoCallController.toggleInCallChat()" style="background:rgba(255,255,255,0.15);color:#ffffff;border:none;padding:10px 18px;border-radius:30px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;">
-              💬 <span>Chat & Notes</span>
+            <button onclick="videoCallController.toggleInCallChat()" style="background:rgba(255,255,255,0.15);color:#ffffff;border:none;padding:10px 18px;border-radius:30px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;position:relative;">
+              💬 <span>Chat</span>
+              <span id="chatUnreadBadge" style="display:none;background:#ef4444;color:#ffffff;font-size:10px;font-weight:900;padding:1px 6px;border-radius:10px;margin-left:4px;box-shadow:0 0 8px rgba(239,68,68,0.8);">0</span>
             </button>
 
             <button onclick="videoCallController.endCall()" style="background:#dc2626;color:#ffffff;border:none;padding:10px 24px;border-radius:30px;font-size:13px;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:8px;box-shadow:0 4px 16px rgba(220,38,38,0.5);">

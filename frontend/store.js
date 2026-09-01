@@ -536,6 +536,31 @@
 
       return callRecord;
     }
+    deleteVideoCall(callId) {
+      if (!this.state.videoCallHistory) return;
+      this.state.videoCallHistory = this.state.videoCallHistory.filter(c => c.id !== callId && c.token !== callId);
+      this.saveState();
+      if (global.supabaseService && typeof global.supabaseService.deleteVideoCallLog === 'function') {
+        global.supabaseService.deleteVideoCallLog(callId);
+      }
+    }
+
+    clearVideoCallHistory(role) {
+      if (!this.state.videoCallHistory) return;
+      if (!role) {
+        this.state.videoCallHistory = [];
+      } else {
+        const toKeep = this.state.videoCallHistory.filter(c => {
+          if (role === 'patient' && c.callerRole === 'patient') return false;
+          if (role === 'doctor' && c.recipientRole === 'doctor') return false;
+          if (role === 'worker' && (c.facilitatorName || c.callerRole === 'worker')) return false;
+          return true;
+        });
+        this.state.videoCallHistory = toKeep;
+      }
+      this.saveState();
+    }
+
 
     getVideoCallHistory(role, identifier) {
       const all = this.state.videoCallHistory || [];

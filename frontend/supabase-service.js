@@ -315,6 +315,9 @@
             case 'delete_staff':
               res = await this.client.from('staff').delete().or(`id.eq.${p.id},staff_code.eq.${p.id}`);
               break;
+            case 'delete_video_call':
+              res = await this.client.from('video_call_history').delete().or('id.eq.' + p.id + ',token.eq.' + p.id);
+              break;
           }
 
           if (res && res.error) {
@@ -723,6 +726,17 @@
         return this.enqueueOfflineAction('insert_video_call', 'video_call_history', call);
       }
     }
+    async deleteVideoCallLog(callId) {
+      if (!this.client || !this.isOnline) {
+        return this.enqueueOfflineAction('delete_video_call', 'video_call_history', { id: callId });
+      }
+      try {
+        return await this.client.from('video_call_history').delete().or('id.eq.' + callId + ',token.eq.' + callId);
+      } catch (e) {
+        return this.enqueueOfflineAction('delete_video_call', 'video_call_history', { id: callId });
+      }
+    }
+
 
     async insertPrescription(rx) {
       if (!this.client || !this.isOnline) {

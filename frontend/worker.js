@@ -418,7 +418,7 @@
       }
     }
 
-    renderAshaCallHistory() {
+        renderAshaCallHistory() {
       const el = document.getElementById('ashaVideoCallHistoryContainer');
       if (!el || !this.store) return;
       const history = this.store.getVideoCallHistory('worker') || [];
@@ -428,7 +428,14 @@
         return;
       }
 
-      el.innerHTML = history.map(c => `
+      el.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;width:100%;">
+          <span style="font-size:12px;color:var(--muted);font-weight:700;">Total Facilitated Calls: ${history.length}</span>
+          <button onclick="workerController.clearAllCallHistory()" style="background:rgba(220,38,38,0.12);color:#dc2626;border:1px solid rgba(220,38,38,0.3);padding:4px 10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;">
+            🗑️ Clear History
+          </button>
+        </div>
+      ` + history.map(c => `
         <div style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:14px;padding:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px;box-shadow:var(--shadow-panel);">
           <div>
             <strong style="color:var(--ink);font-size:14px;display:block;">${c.callerName} ↔ ${c.recipientName}</strong>
@@ -437,9 +444,28 @@
           <div style="display:flex;align-items:center;gap:8px;">
             <span class="badge" style="background:rgba(34,197,94,0.15);color:#16a34a;font-weight:700;font-size:11px;">⏱️ ${c.duration}</span>
             <span class="badge" style="background:rgba(2,132,199,0.15);color:#0284c7;font-weight:700;font-size:11px;">✓ ${c.status}</span>
+            <button onclick="workerController.deleteCallRecord('${c.id}')" title="Delete record" style="background:none;border:none;color:#dc2626;cursor:pointer;font-size:16px;padding:4px 8px;border-radius:6px;">
+              🗑️
+            </button>
           </div>
         </div>
       `).join('');
+    }
+
+    deleteCallRecord(id) {
+      if (confirm('Delete this facilitated consultation record?')) {
+        if (this.store) this.store.deleteVideoCall(id);
+        this.renderAshaCallHistory();
+        if (global.toast) global.toast('🗑️ Facilitated call record deleted.');
+      }
+    }
+
+    clearAllCallHistory() {
+      if (confirm('Are you sure you want to clear all facilitated call history?')) {
+        if (this.store) this.store.clearVideoCallHistory('worker');
+        this.renderAshaCallHistory();
+        if (global.toast) global.toast('🗑️ All facilitated call history cleared.');
+      }
     }
 
     renderMasterRegistry() {
