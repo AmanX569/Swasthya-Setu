@@ -36,7 +36,7 @@ for (const f of cssFiles) {
 html = html.replace('</head>', '<style>\n' + inlinedCss + '\n</style>\n</head>');
 
 // Inline JS files
-const jsFiles = ['supabase-config.js', 'supabase-service.js', 'store.js', 'i18n.js', 'patient.js', 'doctor.js', 'worker.js', 'admin.js'];
+const jsFiles = ['supabase-config.js', 'supabase-service.js', 'store.js', 'i18n.js', 'video-call.js', 'patient.js', 'doctor.js', 'worker.js', 'admin.js'];
 let inlinedJs = '';
 for (const f of jsFiles) {
   const jsPath = path.join(baseDir, f);

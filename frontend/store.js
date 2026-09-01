@@ -43,6 +43,27 @@
 
     prescriptions: [],
 
+    videoCallHistory: [
+      {
+        id: 'CALL-101',
+        token: 'VID-7821',
+        callerRole: 'patient',
+        callerName: 'Ramesh Kumar',
+        callerPhone: '9876543210',
+        recipientRole: 'doctor',
+        recipientName: 'Dr. Priya Sharma, MBBS, MD',
+        facilitatorName: null,
+        status: 'Completed',
+        duration: '06:45',
+        durationSeconds: 405,
+        date: '2026-08-30',
+        time: '11:20 AM',
+        notes: 'Follow-up consultation for viral fever and weakness.',
+        rxId: 'RX-901',
+        diagnosis: 'Acute Viral Fever (Post-Viral Recovery)'
+      }
+    ],
+
     dailyMedications: [
       { id: 'MED-01', name: 'Paracetamol 650mg (Jan Aushadhi)', dose: '1 Tab', saving: '₹26 saved', morning: true, noon: true, night: true, taken: { morning: true, noon: false, night: false } },
       { id: 'MED-02', name: 'Calcium + Vit D3 (Jan Aushadhi)', dose: '1 Tab', saving: '₹45 saved', morning: true, noon: false, night: false, taken: { morning: true, noon: false, night: false } }
@@ -478,6 +499,67 @@
     deleteFamilyMember(id) {
       this.state.familyMembers = (this.state.familyMembers || []).filter(f => f.id !== id);
       this.saveState();
+    }
+
+    // =========================================================
+    // VIDEO TELECONSULTATION MANAGEMENT
+    // =========================================================
+    recordVideoCall(callData) {
+      const callRecord = {
+        id: callData.id || ('CALL-' + String(Date.now()).slice(-4)),
+        token: callData.token || ('VID-' + Math.floor(1000 + Math.random() * 9000)),
+        callerRole: callData.callerRole || 'patient',
+        callerName: callData.callerName || 'Citizen Patient',
+        callerPhone: callData.callerPhone || '9876543210',
+        recipientRole: callData.recipientRole || 'doctor',
+        recipientName: callData.recipientName || 'Dr. Medical Officer',
+        facilitatorName: callData.facilitatorName || null,
+        status: callData.status || 'Completed',
+        duration: callData.duration || '05:00',
+        durationSeconds: callData.durationSeconds || 300,
+        date: callData.date || new Date().toISOString().split('T')[0],
+        time: callData.time || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        notes: callData.notes || 'Telemedicine Video Consultation',
+        rxId: callData.rxId || null,
+        diagnosis: callData.diagnosis || 'Clinical Teleconsultation'
+      };
+
+      if (!this.state.videoCallHistory) this.state.videoCallHistory = [];
+      this.state.videoCallHistory.unshift(callRecord);
+      this.saveState();
+
+      if (global.supabaseService) {
+        global.supabaseService.insertVideoCallLog(callRecord);
+      }
+
+      return callRecord;
+    }
+
+    getVideoCallHistory(role, identifier) {
+      const all = this.state.videoCallHistory || [];
+      if (!role) return all;
+      if (role === 'patient') {
+        const user = this.state.currentUser || (this.state.session && this.state.session.user);
+        const uPhone = user ? (user.phone || '').replace(/\D/g, '') : '';
+        const uName = user ? (user.name || '').toLowerCase() : '';
+        return all.filter(c => {
+          const cPhone = (c.callerPhone || '').replace(/\D/g, '');
+          const cName = (c.callerName || '').toLowerCase();
+          return (uPhone && cPhone && uPhone === cPhone) || (uName && cName && cName.includes(uName)) || (c.callerRole === 'patient');
+        });
+      }
+      if (role === 'doctor') {
+        const user = this.state.session && this.state.session.user;
+        const dName = user ? (user.name || '').toLowerCase() : '';
+        return all.filter(c => {
+          const rName = (c.recipientName || '').toLowerCase();
+          return !dName || rName.includes(dName) || c.recipientRole === 'doctor';
+        });
+      }
+      if (role === 'worker') {
+        return all.filter(c => Boolean(c.facilitatorName) || c.callerRole === 'worker');
+      }
+      return all;
     }
 
     // Queue & Prescriptions

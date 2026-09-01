@@ -1246,9 +1246,29 @@ table td strong {
           <small style="color:var(--muted);">Directly select a registered doctor, describe your illness, and join the digital OPD queue instantly.</small>
         </div>
       </div>
-      <button class="auth-btn-primary" style="background:linear-gradient(135deg, #0284c7, #0369a1);border:none;padding:10px 18px;font-size:13px;font-weight:800;border-radius:10px;box-shadow:0 4px 14px rgba(2,132,199,0.4);cursor:pointer;" onclick="patientController.openRequestConsultModal()">
-        + Request Doctor Consultation
-      </button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="auth-btn-primary" style="background:linear-gradient(135deg, #16a34a, #15803d);border:none;padding:10px 18px;font-size:13px;font-weight:800;border-radius:10px;box-shadow:0 4px 14px rgba(22,163,74,0.4);cursor:pointer;" onclick="patientController.startVideoCallWithDoctor()">
+          📹 Live Video Call Doctor
+        </button>
+        <button class="auth-btn-primary" style="background:linear-gradient(135deg, #0284c7, #0369a1);border:none;padding:10px 18px;font-size:13px;font-weight:800;border-radius:10px;box-shadow:0 4px 14px rgba(2,132,199,0.4);cursor:pointer;" onclick="patientController.openRequestConsultModal()">
+          + Request OPD Queue
+        </button>
+      </div>
+    </div>
+
+    
+    <!-- TELECONSULTATION VIDEO CALL HISTORY -->
+    <div class="glass-panel">
+      <div class="panel-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:22px;">📹</span>
+          <div>
+            <h3 class="panel-title" style="color:var(--ink);font-size:16px;font-weight:800;">Teleconsultation Video Call History</h3>
+            <small style="color:var(--muted);">Past doctor video consultations, call durations & linked e-prescriptions</small>
+          </div>
+        </div>
+      </div>
+      <div id="patientVideoCallHistoryContainer"></div>
     </div>
 
     <!-- DIGITAL ABHA HEALTH CARD -->
@@ -1363,6 +1383,17 @@ table td strong {
     </div>
   </section>
 
+  
+    <div class="glass-panel">
+      <div class="panel-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <div>
+          <h3 class="panel-title" style="color:var(--ink);font-size:16px;font-weight:800;">📹 Telemedicine Video Consultation Logs</h3>
+          <small style="color:var(--muted);">Completed live video sessions with rural patients & ASHA workers</small>
+        </div>
+      </div>
+      <div id="doctorCallHistoryContainer"></div>
+    </div>
+
   <!-- =========================================================
        3. ASHA & FRONTLINE FIELD WORKER HUB
        ========================================================= -->
@@ -1461,6 +1492,21 @@ table td strong {
           <tbody id="ashaMasterRegistryBody"></tbody>
         </table>
       </div>
+    </div>
+
+    
+    <!-- ASHA FACILITATED DOCTOR VIDEO CONSULTATIONS -->
+    <div class="glass-panel">
+      <div class="panel-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+        <div>
+          <h3 class="panel-title" style="color:var(--ink);font-size:16px;font-weight:800;">📹 ASHA Facilitated Doctor Video Consultations</h3>
+          <small style="color:var(--muted);">Connect village beneficiaries and high-risk mothers directly to on-duty doctors</small>
+        </div>
+        <button class="auth-btn-primary" style="padding:8px 14px;font-size:12px;background:#0284c7;border:none;border-radius:8px;" onclick="workerController.openAshaVideoCallModal()">
+          + Facilitate Doctor Video Call
+        </button>
+      </div>
+      <div id="ashaVideoCallHistoryContainer"></div>
     </div>
 
     <!-- Daily Home Visits -->
@@ -2365,6 +2411,41 @@ table td strong {
   </div>
 </div>
 
+
+<!-- ASHA FACILITATE VIDEO CALL MODAL -->
+<div id="ashaVideoCallModal" class="modal-overlay">
+  <div class="modal-card" style="max-width:520px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:26px;">📹</span>
+        <div>
+          <h3 style="color:var(--ink);font-size:17px;font-weight:800;">Facilitate Doctor Video Call</h3>
+          <small style="color:var(--muted);">Connect Village Beneficiary to Medical Officer</small>
+        </div>
+      </div>
+      <button onclick="workerController.closeAshaVideoCallModal()" style="background:none;border:none;font-size:20px;color:var(--muted);cursor:pointer;">✕</button>
+    </div>
+    <form onsubmit="workerController.submitAshaVideoCall(event)">
+      <div style="margin-bottom:12px;">
+        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Select Village Beneficiary / Patient *</label>
+        <select id="ashaVideoPatientSelect" class="input-field" style="height:44px;" required></select>
+      </div>
+      <div style="margin-bottom:12px;">
+        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Select Available Medical Officer *</label>
+        <select id="ashaVideoDoctorSelect" class="input-field" style="height:44px;" required></select>
+      </div>
+      <div style="margin-bottom:16px;">
+        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Chief Reason / Symptoms *</label>
+        <input type="text" id="ashaVideoComplaint" class="input-field" placeholder="e.g. 3rd Trimester high blood pressure or severe cough" required value="High-Risk Follow-up Telemedicine Consultation">
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:8px;">
+        <button type="button" class="btn-glass" onclick="workerController.closeAshaVideoCallModal()">Cancel</button>
+        <button type="submit" class="auth-btn-primary" style="background:#0284c7;border:none;">✓ Connect Live Video Call</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <!-- TOAST -->
 <div id="toast"></div>
 
@@ -2373,6 +2454,7 @@ table td strong {
 <script src="supabase-service.js"></script>
 <script src="store.js"></script>
 <script src="i18n.js"></script>
+<script src="video-call.js"></script>
 <script src="patient.js"></script>
 <script src="doctor.js"></script>
 <script src="worker.js"></script>

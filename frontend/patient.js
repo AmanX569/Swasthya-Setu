@@ -28,10 +28,62 @@
       this.renderAbhaCard();
       this.renderFamilyCircle();
       this.renderDailyMedications();
+      this.renderVideoCallHistory();
       this.renderTriageButtons();
       this.renderLiveHospitals();
       this.renderLiveBloodBank();
       this.renderPrescriptions();
+    }
+
+    // -------------------------------------------------------------
+    // VIDEO TELECONSULTATION & CALL HISTORY
+    // -------------------------------------------------------------
+    startVideoCallWithDoctor() {
+      if (global.videoCallController) {
+        const user = (this.store && (this.store.getState().currentUser || (this.store.getState().session && this.store.getState().session.user))) || { name: 'Citizen Patient', phone: '9876543210' };
+        global.videoCallController.startVideoCall({
+          callerRole: 'patient',
+          callerName: user.name || 'Citizen Beneficiary',
+          callerPhone: user.phone || '9876543210',
+          recipientRole: 'doctor',
+          recipientName: 'Dr. Priya Sharma, MBBS, MD',
+          complaint: 'Routine Telemedicine Checkup & Prescription Refill'
+        });
+      }
+    }
+
+    renderVideoCallHistory() {
+      const el = document.getElementById('patientVideoCallHistoryContainer');
+      if (!el || !this.store) return;
+      const history = this.store.getVideoCallHistory('patient') || [];
+
+      if (!history.length) {
+        el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);background:var(--glass-2);border-radius:12px;border:1px dashed var(--glass-border);grid-column:1/-1;">No video teleconsultations yet. Tap "📹 Start Video Teleconsultation" to connect with an on-duty doctor.</div>';
+        return;
+      }
+
+      el.innerHTML = history.map(c => `
+        <div style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:14px;padding:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;box-shadow:var(--shadow-panel);margin-bottom:10px;">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div style="width:42px;height:42px;background:rgba(2,132,199,0.12);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;">
+              📹
+            </div>
+            <div>
+              <strong style="color:var(--ink);font-size:14px;display:block;">${c.recipientName}</strong>
+              <small style="color:var(--muted);font-family:'IBM Plex Mono',monospace;">Token: ${c.token} · 📅 ${c.date} (${c.time})</small>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="badge" style="background:rgba(34,197,94,0.15);color:#16a34a;font-weight:700;font-size:11px;">⏱️ ${c.duration}</span>
+            <span class="badge" style="background:rgba(2,132,199,0.15);color:#0284c7;font-weight:700;font-size:11px;">✓ ${c.status}</span>
+            ${c.rxId ? `
+              <button class="auth-btn-primary" style="background:#0284c7;padding:6px 12px;font-size:11px;font-weight:700;" onclick="patientController.downloadPrescriptionPdf('${c.rxId}')">
+                📥 View Rx PDF
+              </button>
+            ` : ''}
+          </div>
+        </div>
+      `).join('');
     }
 
     // -------------------------------------------------------------

@@ -17,6 +17,7 @@
     init() {
       this.renderConsultQueue();
       this.renderPrescriptionHistory();
+      this.renderDoctorCallHistory();
       if (this.store) {
         this.store.subscribe(() => {
           this.renderConsultQueue();
@@ -37,6 +38,51 @@
     renderAll() {
       this.renderConsultQueue();
       this.renderPrescriptionHistory();
+    }
+
+    startVideoConsult(queueId) {
+      if (!this.store) return;
+      const q = (this.store.getState().consultQueue || []).find(item => item.id === queueId || item.token === queueId);
+      const doctorUser = (this.store.getState().session && this.store.getState().session.user) || { name: 'Dr. Priya Sharma, MBBS, MD' };
+
+      if (global.videoCallController) {
+        global.videoCallController.startVideoCall({
+          callerRole: 'doctor',
+          callerName: doctorUser.name || 'Medical Officer',
+          recipientRole: 'patient',
+          recipientName: q ? q.patientName : 'Citizen Patient',
+          patientName: q ? q.patientName : 'Citizen Patient',
+          patientAge: q ? q.age : 35,
+          patientGender: q ? q.gender : 'M',
+          complaint: q ? q.complaint : 'Telemedicine OPD Consultation',
+          vitals: q ? q.vitals : { bp: '120/80', spo2: '98%', temp: '98.6°F', pulse: '76 bpm' },
+          queueId: q ? q.id : queueId
+        });
+      }
+    }
+
+    renderDoctorCallHistory() {
+      const el = document.getElementById('doctorCallHistoryContainer');
+      if (!el || !this.store) return;
+      const history = this.store.getVideoCallHistory('doctor') || [];
+
+      if (!history.length) {
+        el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);background:var(--glass-2);border-radius:12px;border:1px dashed var(--glass-border);grid-column:1/-1;">No video teleconsultation logs recorded yet.</div>';
+        return;
+      }
+
+      el.innerHTML = history.map(c => `
+        <div style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:14px;padding:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px;box-shadow:var(--shadow-panel);">
+          <div>
+            <strong style="color:var(--ink);font-size:14px;display:block;">${c.callerName || c.patientName}</strong>
+            <small style="color:var(--muted);font-family:'IBM Plex Mono',monospace;">Token: ${c.token} · 📅 ${c.date} (${c.time}) · Diagnosis: ${c.diagnosis || 'General Checkup'}</small>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="badge" style="background:rgba(34,197,94,0.15);color:#16a34a;font-weight:700;font-size:11px;">⏱️ ${c.duration}</span>
+            <span class="badge" style="background:rgba(2,132,199,0.15);color:#0284c7;font-weight:700;font-size:11px;">✓ ${c.status}</span>
+          </div>
+        </div>
+      `).join('');
     }
 
     renderConsultQueue() {

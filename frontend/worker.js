@@ -29,6 +29,7 @@
       this.renderImmunizations();
       this.renderHomeVisits();
       this.renderMasterRegistry();
+      this.renderAshaCallHistory();
     }
 
     renderAncTable() { this.renderAncRecords(); }
@@ -363,6 +364,82 @@
       if (typeof this.renderStats === 'function') this.renderStats();
       this.renderMasterRegistry();
       if (typeof window.toast === 'function') window.toast('✓ Scheduled home visit for ' + household);
+    }
+
+    openAshaVideoCallModal() {
+      const modal = document.getElementById('ashaVideoCallModal');
+      const patSelect = document.getElementById('ashaVideoPatientSelect');
+      const docSelect = document.getElementById('ashaVideoDoctorSelect');
+
+      if (this.store) {
+        const patients = this.store.getState().patients || [];
+        const doctors = (this.store.getState().staff || []).filter(s => s.role === 'doctor');
+
+        if (patSelect) {
+          patSelect.innerHTML = patients.map(p => `<option value="${p.name}" data-phone="${p.phone}" data-age="${p.age}" data-gender="${p.gender}">🌾 ${p.name} (${p.village || 'Ward'}) - ABHA: ${p.abhaId || '14-XXXX'}</option>`).join('') || '<option value="Beneficiary Resident">🌾 Village Beneficiary Resident</option>';
+        }
+
+        if (docSelect) {
+          docSelect.innerHTML = doctors.map(d => `<option value="${d.name}">🩺 ${d.name} (${d.location || 'PHC/CHC'})</option>`).join('') || '<option value="Dr. Priya Sharma, MBBS, MD">🩺 Dr. Priya Sharma, MBBS, MD (On Duty)</option>';
+        }
+      }
+
+      if (modal) modal.style.display = 'flex';
+    }
+
+    closeAshaVideoCallModal() {
+      const modal = document.getElementById('ashaVideoCallModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    submitAshaVideoCall(e) {
+      if (e) e.preventDefault();
+      const patSelect = document.getElementById('ashaVideoPatientSelect');
+      const docSelect = document.getElementById('ashaVideoDoctorSelect');
+      const complaintInput = document.getElementById('ashaVideoComplaint');
+
+      const patName = patSelect ? patSelect.value : 'Citizen Beneficiary';
+      const docName = docSelect ? docSelect.value : 'Dr. Priya Sharma, MBBS, MD';
+      const complaint = complaintInput ? complaintInput.value.trim() : 'Frontline ASHA Home Visit Teleconsultation';
+
+      const ashaUser = (this.store && this.store.getState().session && this.store.getState().session.user) || { name: 'Lakshmi Didi (ASHA Lead)' };
+
+      this.closeAshaVideoCallModal();
+
+      if (global.videoCallController) {
+        global.videoCallController.startVideoCall({
+          callerRole: 'worker',
+          callerName: patName,
+          recipientRole: 'doctor',
+          recipientName: docName,
+          facilitatorName: ashaUser.name || 'ASHA Frontline Field Worker',
+          complaint: 'ASHA Facilitated Call: ' + complaint
+        });
+      }
+    }
+
+    renderAshaCallHistory() {
+      const el = document.getElementById('ashaVideoCallHistoryContainer');
+      if (!el || !this.store) return;
+      const history = this.store.getVideoCallHistory('worker') || [];
+
+      if (!history.length) {
+        el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);background:var(--glass-2);border-radius:12px;border:1px dashed var(--glass-border);grid-column:1/-1;">No frontline telemedicine video calls facilitated yet. Tap "+ Facilitate Doctor Video Call" above.</div>';
+        return;
+      }
+
+      el.innerHTML = history.map(c => `
+        <div style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:14px;padding:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px;box-shadow:var(--shadow-panel);">
+          <div>
+            <strong style="color:var(--ink);font-size:14px;display:block;">${c.callerName} ↔ ${c.recipientName}</strong>
+            <small style="color:var(--muted);font-family:'IBM Plex Mono',monospace;">Token: ${c.token} · 📅 ${c.date} (${c.time}) · Facilitator: ${c.facilitatorName || 'ASHA Lead'}</small>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="badge" style="background:rgba(34,197,94,0.15);color:#16a34a;font-weight:700;font-size:11px;">⏱️ ${c.duration}</span>
+            <span class="badge" style="background:rgba(2,132,199,0.15);color:#0284c7;font-weight:700;font-size:11px;">✓ ${c.status}</span>
+          </div>
+        </div>
+      `).join('');
     }
 
     renderMasterRegistry() {

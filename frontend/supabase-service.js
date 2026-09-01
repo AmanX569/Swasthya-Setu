@@ -170,6 +170,28 @@
               }]);
               break;
 
+            case 'insert_video_call':
+              try {
+                res = await this.client.from('video_call_history').insert([{
+                  token: p.token || 'VID-101',
+                  caller_role: p.callerRole,
+                  caller_name: p.callerName,
+                  caller_phone: p.callerPhone,
+                  recipient_role: p.recipientRole,
+                  recipient_name: p.recipientName,
+                  facilitator_name: p.facilitatorName,
+                  status: p.status,
+                  duration: p.duration,
+                  call_date: p.date,
+                  call_time: p.time,
+                  notes: p.notes,
+                  rx_id: p.rxId
+                }]);
+              } catch (err) {
+                console.warn('[Supabase] Video call history table sync skipped:', err.message);
+              }
+              break;
+
             case 'insert_prescription':
               res = await this.client.from('prescriptions').insert([{
                 token: p.token || 'Rx',
@@ -602,6 +624,32 @@
         return await this.client.from('prescriptions').delete().or(`id.eq.${rxId},token.eq.${rxId}`);
       } catch (e) {
         return this.enqueueOfflineAction('delete_prescription', 'prescriptions', { rxId });
+      }
+    }
+
+    async insertVideoCallLog(call) {
+      if (!this.client || !this.isOnline) {
+        return this.enqueueOfflineAction('insert_video_call', 'video_call_history', call);
+      }
+      try {
+        return await this.client.from('video_call_history').insert([{
+          token: call.token || 'VID-101',
+          caller_role: call.callerRole,
+          caller_name: call.callerName,
+          caller_phone: call.callerPhone,
+          recipient_role: call.recipientRole,
+          recipient_name: call.recipientName,
+          facilitator_name: call.facilitatorName,
+          status: call.status || 'Completed',
+          duration: call.duration,
+          call_date: call.date || new Date().toISOString().split('T')[0],
+          call_time: call.time || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          notes: call.notes,
+          rx_id: call.rxId
+        }]);
+      } catch (e) {
+        console.warn('[Supabase] Cloud video call logging fallback:', e.message);
+        return this.enqueueOfflineAction('insert_video_call', 'video_call_history', call);
       }
     }
 
