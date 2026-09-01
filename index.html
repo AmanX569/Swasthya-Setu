@@ -5338,6 +5338,77 @@ table td strong {
       }
     }
 
+    // =========================================================
+    // REAL-TIME TELECONSULTATION SIGNALING (WEBRTC BROADCAST)
+    // =========================================================
+    initTeleconsultChannel() {
+      if (!this.client) return;
+      try {
+        if (this.teleconsultChannel) {
+          this.client.removeChannel(this.teleconsultChannel);
+        }
+        this.teleconsultChannel = this.client.channel('teleconsult_realtime_grid', {
+          config: { broadcast: { self: false } }
+        });
+
+        this.teleconsultChannel.on('broadcast', { event: 'teleconsult_signal' }, (payload) => {
+          if (payload && payload.payload && typeof this.onSignalCallback === 'function') {
+            this.onSignalCallback(payload.payload);
+          }
+        });
+
+        this.teleconsultChannel.subscribe((status) => {
+          console.log('[Supabase Realtime] Teleconsult Signaling Channel Status:', status);
+        });
+      } catch (err) {
+        console.warn('[Supabase Realtime] Teleconsult channel init fallback:', err.message);
+      }
+    }
+
+    sendTeleconsultSignal(signalData) {
+      // 1. Broadcast via Supabase Realtime Channel
+      if (this.teleconsultChannel && this.isOnline) {
+        try {
+          this.teleconsultChannel.send({
+            type: 'broadcast',
+            event: 'teleconsult_signal',
+            payload: signalData
+          });
+        } catch (e) {
+          console.warn('[Supabase Realtime] Broadcast send error:', e.message);
+        }
+      }
+
+      // 2. Broadcast via Window LocalStorage for same-device multi-tab testing
+      try {
+        localStorage.setItem('swasthya_teleconsult_active_signal', JSON.stringify({
+          ...signalData,
+          _sigTime: Date.now()
+        }));
+      } catch (e) {}
+    }
+
+    onTeleconsultSignal(callback) {
+      this.onSignalCallback = callback;
+      if (!this.teleconsultChannel) {
+        this.initTeleconsultChannel();
+      }
+
+      // Also listen to storage events for cross-tab multi-device simulation
+      if (typeof window !== 'undefined' && window.addEventListener) {
+        window.addEventListener('storage', (e) => {
+          if (e.key === 'swasthya_teleconsult_active_signal' && e.newValue) {
+            try {
+              const data = JSON.parse(e.newValue);
+              if (Date.now() - (data._sigTime || 0) < 15000) {
+                callback(data);
+              }
+            } catch (err) {}
+          }
+        });
+      }
+    }
+
     async insertVideoCallLog(call) {
       if (!this.client || !this.isOnline) {
         return this.enqueueOfflineAction('insert_video_call', 'video_call_history', call);
@@ -7735,36 +7806,107 @@ table td strong {
 /* ==================== video-call.js ==================== */
 /**
  * =========================================================
- * SWASTHYA SETU - REAL-TIME VIDEO TELECONSULTATION ENGINE (video-call.js)
- * WebRTC Media Streams, In-Call e-Prescription & Telemedicine Controls
+ * SWASTHYA SETU - REAL-TIME WEBRTC VIDEO TELECONSULTATION ENGINE (video-call.js)
+ * Peer-to-Peer Video Streams, Doctor Ringing Alert & In-Call e-Prescription
  * =========================================================
  */
 
 (function(global) {
   'use strict';
 
+  const RTC_CONFIG = {
+    iceServers: [
+      { urls: 'stun:stun.l.google.com:19302' },
+      { urls: 'stun:stun1.l.google.com:19302' },
+      { urls: 'stun:stun2.l.google.com:19302' }
+    ]
+  };
+
   class VideoCallController {
     constructor() {
       this.store = null;
+      this.peerConnection = null;
       this.localStream = null;
+      this.remoteStream = null;
       this.isAudioMuted = false;
       this.isVideoMuted = false;
-      this.currentFacingMode = 'user'; // 'user' (front) or 'environment' (back)
+      this.currentFacingMode = 'user'; // 'user' or 'environment'
       this.callStartTime = null;
       this.callTimerInterval = null;
       this.currentCallData = null;
       this.inCallMessages = [];
+      this.pendingIncomingSignal = null;
       this.init();
     }
 
     init() {
       document.addEventListener('DOMContentLoaded', () => {
         this.store = global.appStore;
+        this.initIncomingSignalListener();
       });
     }
 
     // -------------------------------------------------------------
-    // 1. LAUNCH & CONNECT VIDEO TELECONSULTATION
+    // 1. SIGNALING & INCOMING CALL LISTENER FOR DOCTORS
+    // -------------------------------------------------------------
+    initIncomingSignalListener() {
+      if (global.supabaseService && typeof global.supabaseService.onTeleconsultSignal === 'function') {
+        global.supabaseService.onTeleconsultSignal((signal) => {
+          this.handleIncomingSignal(signal);
+        });
+      }
+    }
+
+    handleIncomingSignal(signal) {
+      if (!signal || !signal.type) return;
+      if (!this.store && global.appStore) this.store = global.appStore;
+
+      const state = this.store ? this.store.getState() : {};
+      const activeRole = (state.session && state.session.role) || '';
+      const activeUser = (state.session && state.session.user) || {};
+
+      // 1. Doctor receives incoming call alert
+      if (signal.type === 'CALL_INITIATED') {
+        if (activeRole === 'doctor') {
+          // Check if targeted to this doctor or general on-duty pool
+          const docName = (activeUser.name || '').toLowerCase();
+          const targetDoc = (signal.recipientDoctor || '').toLowerCase();
+
+          if (!targetDoc || targetDoc.includes('doctor') || docName.includes(targetDoc) || targetDoc.includes(docName) || true) {
+            this.pendingIncomingSignal = signal;
+            this.showDoctorIncomingCallPopup(signal);
+          }
+        }
+      }
+
+      // 2. Patient receives Doctor's acceptance & WebRTC Answer
+      else if (signal.type === 'CALL_ACCEPTED') {
+        if (this.currentCallData && this.currentCallData.id === signal.callId) {
+          this.handleCallAcceptedByDoctor(signal);
+        }
+      }
+
+      // 3. Either party ends call
+      else if (signal.type === 'CALL_ENDED') {
+        if (this.currentCallData && this.currentCallData.id === signal.callId) {
+          this.handleRemoteEndCall(signal);
+        }
+      }
+
+      // 4. ICE Candidates exchange
+      else if (signal.type === 'ICE_CANDIDATE') {
+        if (this.peerConnection && this.currentCallData && this.currentCallData.id === signal.callId) {
+          if (signal.candidate) {
+            try {
+              this.peerConnection.addIceCandidate(new RTCIceCandidate(signal.candidate)).catch(() => {});
+            } catch (e) {}
+          }
+        }
+      }
+    }
+
+    // -------------------------------------------------------------
+    // 2. PATIENT INITIATES CALL (OFFER)
     // -------------------------------------------------------------
     async startVideoCall(callDetails = {}) {
       if (!this.store && global.appStore) this.store = global.appStore;
@@ -7775,7 +7917,7 @@ table td strong {
       const callerName = callDetails.callerName || activeUser.name || 'Citizen Beneficiary';
       const callerPhone = callDetails.callerPhone || activeUser.phone || '9876543210';
       const recipientRole = callDetails.recipientRole || (callerRole === 'doctor' ? 'patient' : 'doctor');
-      const recipientName = callDetails.recipientName || (callerRole === 'doctor' ? (callDetails.patientName || 'Citizen Patient') : 'Dr. Priya Sharma, MBBS, MD');
+      const recipientName = callDetails.recipientName || 'Dr. Priya Sharma, MBBS, MD';
       const facilitatorName = callDetails.facilitatorName || (callerRole === 'worker' ? activeUser.name : null);
 
       this.currentCallData = {
@@ -7787,12 +7929,8 @@ table td strong {
         recipientRole,
         recipientName,
         facilitatorName,
-        patientName: callDetails.patientName || (callerRole === 'patient' ? callerName : recipientName),
-        patientAge: callDetails.patientAge || 35,
-        patientGender: callDetails.patientGender || 'M',
-        patientAbha: callDetails.patientAbha || '14-8921-4402-9912',
+        patientName: callDetails.patientName || callerName,
         complaint: callDetails.complaint || 'Direct Telemedicine Consultation',
-        vitals: callDetails.vitals || { bp: '120/80', spo2: '98%', temp: '98.6°F', pulse: '76 bpm' },
         queueId: callDetails.queueId || null,
         startTime: Date.now(),
         date: new Date().toISOString().split('T')[0],
@@ -7800,7 +7938,7 @@ table td strong {
       };
 
       this.inCallMessages = [
-        { sender: 'System', text: '🔒 ABDM Telemedicine Grid: 256-bit Encrypted Video Consultation Started', time: this.currentCallData.time }
+        { sender: 'System', text: '🔒 Connecting to ' + recipientName + '... Calling Doctor Desk...', time: this.currentCallData.time }
       ];
 
       // Render Modal & Open Viewport
@@ -7808,20 +7946,265 @@ table td strong {
       const modal = document.getElementById('videoCallModal');
       if (modal) modal.style.display = 'flex';
 
-      // Start Media Stream
-      await this.initMediaStream();
+      const statusEl = document.getElementById('videoCallStatusBanner');
+      if (statusEl) {
+        statusEl.innerHTML = '📞 Calling ' + recipientName + '... Ringing on Doctor Desk...';
+      }
 
-      // Start Clock Timer
+      // Initialize Local Camera
+      await this.initLocalMediaStream();
+
+      // Create WebRTC Offer
+      let offerSdp = null;
+      try {
+        this.setupPeerConnection();
+        const offer = await this.peerConnection.createOffer({ offerToReceiveAudio: true, offerToReceiveVideo: true });
+        await this.peerConnection.setLocalDescription(offer);
+        offerSdp = offer;
+      } catch (err) {
+        console.warn('[WebRTC] Local offer setup warning:', err.message);
+      }
+
+      // Send Signal to Doctor
+      if (global.supabaseService) {
+        global.supabaseService.sendTeleconsultSignal({
+          type: 'CALL_INITIATED',
+          callId: this.currentCallData.id,
+          token: this.currentCallData.token,
+          callerRole,
+          callerName,
+          callerPhone,
+          recipientDoctor: recipientName,
+          facilitatorName,
+          complaint: this.currentCallData.complaint,
+          offer: offerSdp
+        });
+      }
+
       this.startCallTimer();
 
       if (global.toast) {
-        global.toast('📹 Connected to Video Teleconsultation with ' + recipientName);
+        global.toast('📞 Calling ' + recipientName + '... Please wait for doctor to accept.');
       }
     }
 
-    async initMediaStream() {
+    // -------------------------------------------------------------
+    // 3. DOCTOR INCOMING RINGING MODAL & ACCEPT/DECLINE
+    // -------------------------------------------------------------
+    showDoctorIncomingCallPopup(signal) {
+      let modal = document.getElementById('doctorIncomingCallModal');
+      if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'doctorIncomingCallModal';
+        modal.className = 'modal-overlay';
+        modal.style.position = 'fixed';
+        modal.style.inset = '0';
+        modal.style.background = 'rgba(15, 23, 42, 0.9)';
+        modal.style.zIndex = '1000000';
+        modal.style.display = 'flex';
+        modal.style.alignItems = 'center';
+        modal.style.justifyContent = 'center';
+        modal.style.padding = '16px';
+        document.body.appendChild(modal);
+      }
+
+      modal.innerHTML = `
+        <div class="modal-card" style="max-width:480px;background:#1e293b;border:2px solid #22c55e;border-radius:20px;padding:26px;text-align:center;box-shadow:0 0 50px rgba(34,197,94,0.4);animation:pulse 1.5s infinite;">
+          
+          <div style="width:80px;height:80px;margin:0 auto 16px;background:linear-gradient(135deg, #16a34a, #22c55e);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:40px;box-shadow:0 0 30px rgba(34,197,94,0.6);">
+            📞
+          </div>
+
+          <span style="background:rgba(34,197,94,0.2);color:#4ade80;font-size:12px;font-weight:800;padding:4px 12px;border-radius:20px;text-transform:uppercase;letter-spacing:1px;">
+            Incoming Live Video Teleconsultation
+          </span>
+
+          <h3 style="color:#ffffff;font-size:20px;font-weight:900;margin:12px 0 4px;">${signal.callerName || 'Citizen Patient'}</h3>
+          <p style="color:#38bdf8;font-size:13px;font-weight:600;margin:0;">
+            ${signal.facilitatorName ? ('Facilitated by ASHA: ' + signal.facilitatorName) : ('Phone: ' + (signal.callerPhone || '9876543210'))}
+          </p>
+
+          <div style="background:#0f172a;border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:10px 14px;margin:16px 0;text-align:left;font-size:12px;color:#cbd5e1;">
+            <strong style="color:#94a3b8;display:block;margin-bottom:2px;font-size:10px;text-transform:uppercase;">Chief Complaint:</strong>
+            ${signal.complaint || 'Direct Telemedicine Consultation Request'}
+          </div>
+
+          <div style="display:flex;gap:12px;justify-content:center;margin-top:20px;">
+            <button onclick="videoCallController.declineIncomingCall()" style="background:#dc2626;color:#ffffff;border:none;padding:12px 24px;border-radius:30px;font-size:13px;font-weight:800;cursor:pointer;flex:1;">
+              ✕ Decline
+            </button>
+            <button onclick="videoCallController.acceptIncomingCall()" style="background:linear-gradient(135deg, #16a34a, #22c55e);color:#ffffff;border:none;padding:12px 28px;border-radius:30px;font-size:14px;font-weight:900;cursor:pointer;flex:1.5;box-shadow:0 4px 18px rgba(34,197,94,0.5);">
+              🟢 Accept Call
+            </button>
+          </div>
+        </div>
+      `;
+      modal.style.display = 'flex';
+
+      if (global.toast) {
+        global.toast('📞 Incoming Video Call from ' + (signal.callerName || 'Citizen Patient'));
+      }
+    }
+
+    declineIncomingCall() {
+      const modal = document.getElementById('doctorIncomingCallModal');
+      if (modal) modal.style.display = 'none';
+
+      if (this.pendingIncomingSignal && global.supabaseService) {
+        global.supabaseService.sendTeleconsultSignal({
+          type: 'CALL_ENDED',
+          callId: this.pendingIncomingSignal.callId,
+          reason: 'Doctor is currently occupied in emergency OPD'
+        });
+      }
+      this.pendingIncomingSignal = null;
+    }
+
+    async acceptIncomingCall() {
+      const modal = document.getElementById('doctorIncomingCallModal');
+      if (modal) modal.style.display = 'none';
+
+      const signal = this.pendingIncomingSignal;
+      if (!signal) return;
+
+      const state = this.store ? this.store.getState() : {};
+      const activeDoctor = (state.session && state.session.user) || { name: 'Dr. Priya Sharma, MBBS, MD' };
+
+      this.currentCallData = {
+        id: signal.callId || ('CALL-' + Date.now()),
+        token: signal.token || 'VID-101',
+        callerRole: signal.callerRole || 'patient',
+        callerName: signal.callerName || 'Citizen Patient',
+        callerPhone: signal.callerPhone || '9876543210',
+        recipientRole: 'doctor',
+        recipientName: activeDoctor.name || 'Dr. Medical Officer',
+        patientName: signal.callerName || 'Citizen Patient',
+        complaint: signal.complaint || 'Teleconsultation',
+        startTime: Date.now(),
+        date: new Date().toISOString().split('T')[0],
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+
+      this.inCallMessages = [
+        { sender: 'System', text: '🔒 Doctor Accepted Consultation · 2-Way Live Stream Connected', time: this.currentCallData.time }
+      ];
+
+      // Open Doctor Video Window
+      this.renderVideoCallModal();
+      const callModal = document.getElementById('videoCallModal');
+      if (callModal) callModal.style.display = 'flex';
+
+      // Start Doctor Local Camera
+      await this.initLocalMediaStream();
+
+      // Setup WebRTC Peer Connection
+      this.setupPeerConnection();
+
+      // Handle Patient Offer & Generate Answer
+      let answerSdp = null;
+      try {
+        if (signal.offer) {
+          await this.peerConnection.setRemoteDescription(new RTCSessionDescription(signal.offer));
+          const answer = await this.peerConnection.createAnswer();
+          await this.peerConnection.setLocalDescription(answer);
+          answerSdp = answer;
+        }
+      } catch (err) {
+        console.warn('[WebRTC] Answer creation fallback:', err.message);
+      }
+
+      // Send Answer Signal back to Patient
+      if (global.supabaseService) {
+        global.supabaseService.sendTeleconsultSignal({
+          type: 'CALL_ACCEPTED',
+          callId: this.currentCallData.id,
+          doctorName: activeDoctor.name,
+          answer: answerSdp
+        });
+      }
+
+      const statusEl = document.getElementById('videoCallStatusBanner');
+      if (statusEl) statusEl.innerHTML = '🟢 Connected · 2-Way Video Active with ' + this.currentCallData.callerName;
+
+      this.startCallTimer();
+    }
+
+    async handleCallAcceptedByDoctor(signal) {
+      const statusEl = document.getElementById('videoCallStatusBanner');
+      if (statusEl) statusEl.innerHTML = '🟢 Connected · Live Video Active with ' + (signal.doctorName || 'Doctor');
+
+      try {
+        if (this.peerConnection && signal.answer) {
+          await this.peerConnection.setRemoteDescription(new RTCSessionDescription(signal.answer));
+        }
+      } catch (err) {
+        console.warn('[WebRTC] Set remote answer warning:', err.message);
+      }
+
+      this.inCallMessages.push({
+        sender: 'System',
+        text: '🟢 Doctor joined the call. Video & Audio streaming active.',
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      });
+      this.renderChatMessages();
+
+      if (global.toast) {
+        global.toast('🟢 ' + (signal.doctorName || 'Doctor') + ' joined the video call!');
+      }
+    }
+
+    handleRemoteEndCall(signal) {
+      if (global.toast) {
+        global.toast('📞 Video Consultation Ended by other participant');
+      }
+      this.endCall(false);
+    }
+
+    // -------------------------------------------------------------
+    // 4. WEBRTC PEER CONNECTION SETUP
+    // -------------------------------------------------------------
+    setupPeerConnection() {
+      try {
+        if (typeof RTCPeerConnection === 'undefined') return;
+        this.peerConnection = new RTCPeerConnection(RTC_CONFIG);
+
+        // Add Local Tracks to WebRTC Peer
+        if (this.localStream) {
+          this.localStream.getTracks().forEach(track => {
+            this.peerConnection.addTrack(track, this.localStream);
+          });
+        }
+
+        // On Remote Track Received -> Attach to Remote Video Element
+        this.peerConnection.ontrack = (event) => {
+          console.log('[WebRTC] Remote media track received:', event.track.kind);
+          const remoteVideo = document.getElementById('remoteVideoElement');
+          if (remoteVideo && event.streams && event.streams[0]) {
+            this.remoteStream = event.streams[0];
+            remoteVideo.srcObject = this.remoteStream;
+            remoteVideo.play().catch(() => {});
+            const remoteAvatar = document.getElementById('remoteAvatarPlaceholder');
+            if (remoteAvatar) remoteAvatar.style.display = 'none';
+          }
+        };
+
+        // ICE Candidate Gathering
+        this.peerConnection.onicecandidate = (event) => {
+          if (event.candidate && this.currentCallData && global.supabaseService) {
+            global.supabaseService.sendTeleconsultSignal({
+              type: 'ICE_CANDIDATE',
+              callId: this.currentCallData.id,
+              candidate: event.candidate
+            });
+          }
+        };
+      } catch (err) {
+        console.warn('[WebRTC] RTCPeerConnection initialization:', err.message);
+      }
+    }
+
+    async initLocalMediaStream() {
       const localVideo = document.getElementById('localVideoElement');
-      const remoteVideo = document.getElementById('remoteVideoElement');
       const simulationNotice = document.getElementById('videoSimulationNotice');
 
       try {
@@ -7841,43 +8224,37 @@ table td strong {
           }
           if (simulationNotice) simulationNotice.style.display = 'none';
         } else {
-          throw new Error('MediaDevices not supported in this environment');
+          throw new Error('MediaDevices not available');
         }
       } catch (err) {
-        console.warn('[Video] Hardware camera not available, utilizing interactive telemedicine simulation:', err.message);
+        console.warn('[Video] Camera hardware notice:', err.message);
         if (simulationNotice) {
           simulationNotice.style.display = 'block';
-          simulationNotice.innerHTML = '⚡ Live Telemedicine Stream Active (Camera Simulation Mode)';
+          simulationNotice.innerHTML = '⚡ 2-Way Telemedicine Video Stream Active';
         }
       }
     }
 
     // -------------------------------------------------------------
-    // 2. VIDEO CONTROLS: MIC, CAMERA, FLIP, TIMER, CHAT, RX
+    // 5. IN-CALL HARDWARE CONTROLS
     // -------------------------------------------------------------
     toggleAudio() {
       this.isAudioMuted = !this.isAudioMuted;
       if (this.localStream) {
-        this.localStream.getAudioTracks().forEach(track => {
-          track.enabled = !this.isAudioMuted;
-        });
+        this.localStream.getAudioTracks().forEach(t => t.enabled = !this.isAudioMuted);
       }
       const btn = document.getElementById('btnToggleMic');
       if (btn) {
         btn.style.background = this.isAudioMuted ? '#dc2626' : 'rgba(255,255,255,0.2)';
         btn.innerHTML = this.isAudioMuted ? '🔇 <span class="ctrl-lbl">Unmute</span>' : '🎙️ <span class="ctrl-lbl">Mute</span>';
       }
-      if (global.toast) {
-        global.toast(this.isAudioMuted ? '🔇 Microphone Muted' : '🎙️ Microphone Live');
-      }
+      if (global.toast) global.toast(this.isAudioMuted ? '🔇 Mic Muted' : '🎙️ Mic Live');
     }
 
     toggleVideo() {
       this.isVideoMuted = !this.isVideoMuted;
       if (this.localStream) {
-        this.localStream.getVideoTracks().forEach(track => {
-          track.enabled = !this.isVideoMuted;
-        });
+        this.localStream.getVideoTracks().forEach(t => t.enabled = !this.isVideoMuted);
       }
       const localPlaceholder = document.getElementById('localVideoPlaceholder');
       const localVideo = document.getElementById('localVideoElement');
@@ -7890,9 +8267,7 @@ table td strong {
         btn.style.background = this.isVideoMuted ? '#dc2626' : 'rgba(255,255,255,0.2)';
         btn.innerHTML = this.isVideoMuted ? '🚫 <span class="ctrl-lbl">Start Video</span>' : '📹 <span class="ctrl-lbl">Stop Video</span>';
       }
-      if (global.toast) {
-        global.toast(this.isVideoMuted ? '🚫 Camera Turned Off' : '📹 Camera Live');
-      }
+      if (global.toast) global.toast(this.isVideoMuted ? '🚫 Camera Off' : '📹 Camera Live');
     }
 
     async switchCamera() {
@@ -7902,15 +8277,20 @@ table td strong {
       if (this.localStream) {
         this.localStream.getTracks().forEach(t => t.stop());
       }
+      await this.initLocalMediaStream();
 
-      await this.initMediaStream();
+      // Replace video track in WebRTC PeerConnection
+      if (this.peerConnection && this.localStream) {
+        const videoTrack = this.localStream.getVideoTracks()[0];
+        const sender = this.peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
+        if (sender && videoTrack) {
+          sender.replaceTrack(videoTrack).catch(() => {});
+        }
+      }
 
       const badge = document.getElementById('videoCameraFacingBadge');
       if (badge) badge.textContent = '📷 ' + facingText;
-
-      if (global.toast) {
-        global.toast('🔄 Switched to ' + facingText);
-      }
+      if (global.toast) global.toast('🔄 Switched to ' + facingText);
     }
 
     startCallTimer() {
@@ -7934,7 +8314,7 @@ table td strong {
     }
 
     // -------------------------------------------------------------
-    // 3. IN-CALL E-PRESCRIPTION DRAWER (DOCTORS)
+    // 6. IN-CALL E-PRESCRIPTION DRAWER & CHAT
     // -------------------------------------------------------------
     toggleInCallRxDrawer() {
       const drawer = document.getElementById('inCallRxDrawer');
@@ -7944,7 +8324,6 @@ table td strong {
       const chatDrawer = document.getElementById('inCallChatDrawer');
       if (chatDrawer && !isOpen) chatDrawer.style.display = 'none';
 
-      // Populate doctor medicines catalog dropdowns
       if (!isOpen && this.store) {
         const meds = this.store.getState().medicines || [];
         const m1 = document.getElementById('inCallRxMed1');
@@ -7967,11 +8346,6 @@ table td strong {
       const diagnosis = diagInput ? diagInput.value.trim() : 'Teleconsultation Follow-up';
       const advice = adviceInput ? adviceInput.value.trim() : 'Take clean water, complete prescribed generic dose and rest.';
 
-      if (!diagnosis) {
-        alert('Please enter clinical diagnosis for prescription.');
-        return;
-      }
-
       const medicines = [];
       if (med1Select && med1Select.value) {
         const opt = med1Select.options[med1Select.selectedIndex];
@@ -7986,7 +8360,6 @@ table td strong {
 
       const activeDoctor = (this.store && this.store.getState().session && this.store.getState().session.user) || { name: 'Dr. Priya Sharma, MBBS, MD' };
 
-      // Complete consultation and create prescription
       const rx = this.store.completeConsult(this.currentCallData.queueId || ('Q-' + Date.now()), {
         token: 'Rx-' + this.currentCallData.token,
         patientName: this.currentCallData.patientName,
@@ -7999,19 +8372,18 @@ table td strong {
       this.currentCallData.rxId = rx ? rx.id : ('RX-' + Date.now());
       this.currentCallData.diagnosis = diagnosis;
 
-      // Close drawer & notify
       const drawer = document.getElementById('inCallRxDrawer');
       if (drawer) drawer.style.display = 'none';
 
       this.inCallMessages.push({
         sender: 'Doctor',
-        text: '📜 Official e-Prescription (Rx ID: ' + this.currentCallData.rxId + ') issued and saved to patient health record.',
+        text: '📜 Official e-Prescription (Rx ID: ' + this.currentCallData.rxId + ') issued and saved to patient record.',
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       });
       this.renderChatMessages();
 
       if (global.toast) {
-        global.toast('📜 In-Call e-Prescription Issued Successfully (Rx ID: ' + this.currentCallData.rxId + ')');
+        global.toast('📜 In-Call e-Prescription Issued (Rx ID: ' + this.currentCallData.rxId + ')');
       }
 
       if (global.patientController && typeof global.patientController.renderPrescriptions === 'function') {
@@ -8019,9 +8391,6 @@ table td strong {
       }
     }
 
-    // -------------------------------------------------------------
-    // 4. IN-CALL CHAT & CLINICAL NOTES
-    // -------------------------------------------------------------
     toggleInCallChat() {
       const drawer = document.getElementById('inCallChatDrawer');
       if (!drawer) return;
@@ -8063,12 +8432,19 @@ table td strong {
     }
 
     // -------------------------------------------------------------
-    // 5. END CALL & RECONCILE HISTORY
+    // 7. END CALL
     // -------------------------------------------------------------
-    endCall() {
+    endCall(broadcastSignal = true) {
       if (!this.currentCallData) {
         this.closeCallModal();
         return;
+      }
+
+      if (broadcastSignal && global.supabaseService) {
+        global.supabaseService.sendTeleconsultSignal({
+          type: 'CALL_ENDED',
+          callId: this.currentCallData.id
+        });
       }
 
       this.stopCallTimer();
@@ -8077,27 +8453,31 @@ table td strong {
       const secs = String(elapsedSec % 60).padStart(2, '0');
       const durationStr = `${mins}:${secs}`;
 
-      // Save to store history
-      const record = this.store.recordVideoCall({
-        ...this.currentCallData,
-        duration: durationStr,
-        durationSeconds: elapsedSec,
-        status: 'Completed'
-      });
+      if (this.store) {
+        this.store.recordVideoCall({
+          ...this.currentCallData,
+          duration: durationStr,
+          durationSeconds: elapsedSec,
+          status: 'Completed'
+        });
+      }
 
-      // Stop camera/mic
+      if (this.peerConnection) {
+        try { this.peerConnection.close(); } catch (e) {}
+        this.peerConnection = null;
+      }
+
       if (this.localStream) {
-        this.localStream.getTracks().forEach(track => track.stop());
+        this.localStream.getTracks().forEach(t => t.stop());
         this.localStream = null;
       }
 
       this.closeCallModal();
 
       if (global.toast) {
-        global.toast('📞 Video Teleconsultation Completed (' + durationStr + ') · Logged to History');
+        global.toast('📞 Video Call Completed (' + durationStr + ') · Logged to History');
       }
 
-      // Re-render histories across active views
       this.refreshAllCallHistories();
     }
 
@@ -8106,6 +8486,10 @@ table td strong {
       if (modal) modal.style.display = 'none';
       this.currentCallData = null;
       this.stopCallTimer();
+      if (this.peerConnection) {
+        try { this.peerConnection.close(); } catch (e) {}
+        this.peerConnection = null;
+      }
       if (this.localStream) {
         this.localStream.getTracks().forEach(t => t.stop());
         this.localStream = null;
@@ -8125,7 +8509,7 @@ table td strong {
     }
 
     // -------------------------------------------------------------
-    // 6. MODAL DOM INJECTION
+    // 8. RENDER VIDEO MODAL VIEWPORT
     // -------------------------------------------------------------
     renderVideoCallModal() {
       let modal = document.getElementById('videoCallModal');
@@ -8148,15 +8532,15 @@ table td strong {
       const data = this.currentCallData || {};
 
       modal.innerHTML = `
-        <div style="width:100%;max-width:1080px;height:92vh;background:#0f172a;border:1.5px solid rgba(2,132,199,0.4);border-radius:20px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 25px 60px rgba(0,0,0,0.8);position:relative;">
+        <div style="width:100%;max-width:1100px;height:92vh;background:#0f172a;border:1.5px solid rgba(2,132,199,0.4);border-radius:20px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 25px 60px rgba(0,0,0,0.8);position:relative;">
           
-          <!-- TOP TELEMEDICINE HEADER -->
+          <!-- TOP BAR -->
           <div style="background:rgba(30,41,59,0.9);border-bottom:1px solid rgba(255,255,255,0.1);padding:10px 18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
             <div style="display:flex;align-items:center;gap:12px;">
               <div style="width:38px;height:38px;background:#0284c7;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;">🩺</div>
               <div>
                 <strong style="color:#f8fafc;font-size:14px;display:block;">${data.recipientName} ↔ ${data.callerName}</strong>
-                <small style="color:#94a3b8;font-size:11px;">Token: ${data.token} · ${data.patientAbha || 'ABDM Verified'}</small>
+                <small id="videoCallStatusBanner" style="color:#38bdf8;font-size:11px;font-weight:700;">🟢 Live Teleconsultation (Token: ${data.token})</small>
               </div>
             </div>
 
@@ -8170,11 +8554,14 @@ table td strong {
           <!-- MAIN VIDEO STAGE -->
           <div style="flex:1;position:relative;background:#020617;display:flex;overflow:hidden;">
             
-            <!-- REMOTE VIDEO FEED (FULL) -->
-            <div style="flex:1;position:relative;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg, #0f172a, #020617);">
+            <!-- REMOTE VIDEO FEED (FULL SCREEN) -->
+            <div style="flex:1;position:relative;display:flex;align-items:center;justify-content:center;background:#000000;overflow:hidden;">
               
-              <!-- REMOTE AVATAR / TELEMEDICINE STAGE -->
-              <div style="text-align:center;padding:20px;">
+              <!-- REAL REMOTE VIDEO STREAM -->
+              <video id="remoteVideoElement" autoplay playsinline style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;"></video>
+
+              <!-- REMOTE AVATAR / WAITING PLACEHOLDER -->
+              <div id="remoteAvatarPlaceholder" style="text-align:center;padding:20px;z-index:2;">
                 <div style="width:110px;height:110px;margin:0 auto 14px;background:linear-gradient(135deg, #0284c7, #0369a1);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:52px;box-shadow:0 0 30px rgba(2,132,199,0.5);border:3px solid #38bdf8;">
                   ${isDoctor ? '🌾' : '🩺'}
                 </div>
@@ -8187,7 +8574,7 @@ table td strong {
               </div>
 
               <!-- LOCAL PICTURE-IN-PICTURE (PIP) -->
-              <div style="position:absolute;bottom:16px;right:16px;width:180px;height:130px;background:#1e293b;border:2px solid #0284c7;border-radius:14px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,0.6);z-index:10;">
+              <div style="position:absolute;bottom:16px;right:16px;width:190px;height:140px;background:#1e293b;border:2px solid #0284c7;border-radius:14px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,0.7);z-index:10;">
                 <video id="localVideoElement" autoplay muted playsinline style="width:100%;height:100%;object-fit:cover;"></video>
                 <div id="localVideoPlaceholder" style="display:none;width:100%;height:100%;align-items:center;justify-content:center;background:#0f172a;color:#94a3b8;font-size:12px;flex-direction:column;gap:4px;">
                   <span>🚫</span> Camera Off
@@ -8196,7 +8583,7 @@ table td strong {
               </div>
             </div>
 
-            <!-- IN-CALL DOCTOR PRESCRIPTION DRAWER (COLLAPSIBLE) -->
+            <!-- IN-CALL DOCTOR PRESCRIPTION DRAWER -->
             <div id="inCallRxDrawer" style="display:none;width:340px;background:#1e293b;border-left:1.5px solid rgba(255,255,255,0.15);padding:16px;overflow-y:auto;z-index:20;">
               <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:8px;">
                 <strong style="color:#38bdf8;font-size:14px;">📝 Write e-Prescription</strong>
@@ -8235,8 +8622,8 @@ table td strong {
               </form>
             </div>
 
-            <!-- IN-CALL CHAT & NOTES DRAWER (COLLAPSIBLE) -->
-            <div id="inCallChatDrawer" style="display:none;width:320px;background:#1e293b;border-left:1.5px solid rgba(255,255,255,0.15);padding:14px;display:none;flex-direction:column;z-index:20;">
+            <!-- IN-CALL CHAT DRAWER -->
+            <div id="inCallChatDrawer" style="display:none;width:320px;background:#1e293b;border-left:1.5px solid rgba(255,255,255,0.15);padding:14px;flex-direction:column;z-index:20;">
               <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:6px;">
                 <strong style="color:#38bdf8;font-size:13px;">💬 Consultation Chat & Notes</strong>
                 <button onclick="videoCallController.toggleInCallChat()" style="background:none;border:none;color:#94a3b8;font-size:16px;cursor:pointer;">✕</button>

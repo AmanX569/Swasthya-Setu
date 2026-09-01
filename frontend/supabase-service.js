@@ -627,6 +627,77 @@
       }
     }
 
+    // =========================================================
+    // REAL-TIME TELECONSULTATION SIGNALING (WEBRTC BROADCAST)
+    // =========================================================
+    initTeleconsultChannel() {
+      if (!this.client) return;
+      try {
+        if (this.teleconsultChannel) {
+          this.client.removeChannel(this.teleconsultChannel);
+        }
+        this.teleconsultChannel = this.client.channel('teleconsult_realtime_grid', {
+          config: { broadcast: { self: false } }
+        });
+
+        this.teleconsultChannel.on('broadcast', { event: 'teleconsult_signal' }, (payload) => {
+          if (payload && payload.payload && typeof this.onSignalCallback === 'function') {
+            this.onSignalCallback(payload.payload);
+          }
+        });
+
+        this.teleconsultChannel.subscribe((status) => {
+          console.log('[Supabase Realtime] Teleconsult Signaling Channel Status:', status);
+        });
+      } catch (err) {
+        console.warn('[Supabase Realtime] Teleconsult channel init fallback:', err.message);
+      }
+    }
+
+    sendTeleconsultSignal(signalData) {
+      // 1. Broadcast via Supabase Realtime Channel
+      if (this.teleconsultChannel && this.isOnline) {
+        try {
+          this.teleconsultChannel.send({
+            type: 'broadcast',
+            event: 'teleconsult_signal',
+            payload: signalData
+          });
+        } catch (e) {
+          console.warn('[Supabase Realtime] Broadcast send error:', e.message);
+        }
+      }
+
+      // 2. Broadcast via Window LocalStorage for same-device multi-tab testing
+      try {
+        localStorage.setItem('swasthya_teleconsult_active_signal', JSON.stringify({
+          ...signalData,
+          _sigTime: Date.now()
+        }));
+      } catch (e) {}
+    }
+
+    onTeleconsultSignal(callback) {
+      this.onSignalCallback = callback;
+      if (!this.teleconsultChannel) {
+        this.initTeleconsultChannel();
+      }
+
+      // Also listen to storage events for cross-tab multi-device simulation
+      if (typeof window !== 'undefined' && window.addEventListener) {
+        window.addEventListener('storage', (e) => {
+          if (e.key === 'swasthya_teleconsult_active_signal' && e.newValue) {
+            try {
+              const data = JSON.parse(e.newValue);
+              if (Date.now() - (data._sigTime || 0) < 15000) {
+                callback(data);
+              }
+            } catch (err) {}
+          }
+        });
+      }
+    }
+
     async insertVideoCallLog(call) {
       if (!this.client || !this.isOnline) {
         return this.enqueueOfflineAction('insert_video_call', 'video_call_history', call);
