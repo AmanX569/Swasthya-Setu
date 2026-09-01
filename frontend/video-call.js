@@ -1,48 +1,22 @@
 /**
  * =========================================================
- * SWASTHYA SETU - BULLETPROOF ANDROID & UNIVERSAL WEBRTC ENGINE (video-call.js)
- * Dedicated Android Audio Capture, Interactive Mic Recovery & 720p HD Video
+ * SWASTHYA SETU - DAILY.CO HD VIDEO TELECONSULTATION ENGINE (video-call.js)
+ * High-Definition Prebuilt Video Rooms, In-Call e-Rx Writer, Chat & Doctor Alerts
  * =========================================================
  */
 
 (function(global) {
   'use strict';
 
-  const RTC_CONFIG = {
-    iceServers: [
-      { urls: 'stun:stun.l.google.com:19302' },
-      { urls: 'stun:stun1.l.google.com:19302' },
-      { urls: 'stun:stun2.l.google.com:19302' },
-      { urls: 'stun:stun.services.mozilla.com' },
-      {
-        urls: [
-          'turn:openrelay.metered.ca:80',
-          'turn:openrelay.metered.ca:443',
-          'turn:openrelay.metered.ca:443?transport=tcp'
-        ],
-        username: 'openrelayproject',
-        credential: 'openrelayproject'
-      }
-    ],
-    iceCandidatePoolSize: 10
-  };
+  // Default Daily.co Prebuilt Telemedicine Room
+  const DEFAULT_DAILY_ROOM_URL = 'https://swasthya-setu.daily.co/teleconsult-room';
 
   class VideoCallController {
     constructor() {
       this.store = null;
-      this.peerConnection = null;
-      this.localStream = null;
-      this.remoteStream = null;
-      this.audioContext = null;
-      this.audioAnalyser = null;
-      this.micMeterInterval = null;
-      this.isAudioMuted = false;
-      this.isVideoMuted = false;
-      this.isSpeakerBoosted = true;
-      this.currentFacingMode = 'user'; // 'user' or 'environment'
+      this.currentDailyRoomUrl = DEFAULT_DAILY_ROOM_URL;
       this.callStartTime = null;
       this.callTimerInterval = null;
-      this.frameSyncInterval = null;
       this.currentCallData = null;
       this.inCallMessages = [];
       this.pendingIncomingSignal = null;
@@ -54,18 +28,6 @@
         this.store = global.appStore;
         this.initIncomingSignalListener();
       });
-    }
-
-    unlockAudioContext() {
-      try {
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        if (AudioCtx) {
-          if (!this.audioContext) this.audioContext = new AudioCtx();
-          if (this.audioContext.state === 'suspended') {
-            this.audioContext.resume();
-          }
-        }
-      } catch (e) {}
     }
 
     // -------------------------------------------------------------
@@ -100,7 +62,7 @@
         }
       }
 
-      // 2. Patient receives Doctor's acceptance & WebRTC Answer
+      // 2. Patient receives Doctor's acceptance notification
       else if (signal.type === 'CALL_ACCEPTED') {
         if (this.currentCallData && this.currentCallData.id === signal.callId) {
           this.handleCallAcceptedByDoctor(signal);
@@ -116,14 +78,7 @@
         }
       }
 
-      // 4. Live Dual-Mode Video Frame Streaming (Real-Time Fallback)
-      else if (signal.type === 'VIDEO_FRAME') {
-        if (this.currentCallData && this.currentCallData.id === signal.callId && signal.frameData) {
-          this.renderRemoteVideoFrame(signal.frameData);
-        }
-      }
-
-      // 5. Either party ends call
+      // 4. Either party ends call
       else if (signal.type === 'CALL_ENDED') {
         if (this.currentCallData && this.currentCallData.id === signal.callId) {
           this.handleRemoteEndCall(signal);
@@ -132,10 +87,9 @@
     }
 
     // -------------------------------------------------------------
-    // 2. PATIENT INITIATES CALL
+    // 2. PATIENT INITIATES CALL (OPENS DAILY.CO PREBUILT ROOM)
     // -------------------------------------------------------------
     async startVideoCall(callDetails = {}) {
-      this.unlockAudioContext();
       if (!this.store && global.appStore) this.store = global.appStore;
       const state = this.store ? this.store.getState() : {};
       const activeUser = (state.session && state.session.user) || state.currentUser || { name: 'Citizen Beneficiary', phone: '9876543210', role: 'patient' };
@@ -146,6 +100,8 @@
       const recipientRole = callDetails.recipientRole || (callerRole === 'doctor' ? 'patient' : 'doctor');
       const recipientName = callDetails.recipientName || 'Dr. Priya Sharma, MBBS, MD';
       const facilitatorName = callDetails.facilitatorName || (callerRole === 'worker' ? activeUser.name : null);
+
+      const roomUrl = callDetails.roomUrl || this.currentDailyRoomUrl;
 
       this.currentCallData = {
         id: 'CALL-' + String(Date.now()).slice(-4),
@@ -159,16 +115,17 @@
         patientName: callDetails.patientName || callerName,
         complaint: callDetails.complaint || 'Direct Telemedicine Consultation',
         queueId: callDetails.queueId || null,
+        roomUrl: roomUrl,
         startTime: Date.now(),
         date: new Date().toISOString().split('T')[0],
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
 
       this.inCallMessages = [
-        { sender: 'System', text: '🔒 Connecting to ' + recipientName + '... Calling Doctor Desk...', time: this.currentCallData.time }
+        { sender: 'System', text: '🔒 Daily.co HD Room Active: ' + recipientName + ' ↔ ' + callerName, time: this.currentCallData.time }
       ];
 
-      // Render Modal & Open Viewport
+      // Render Modal & Open Daily.co Viewport
       this.renderVideoCallModal();
       const modal = document.getElementById('videoCallModal');
       if (modal) modal.style.display = 'flex';
@@ -178,34 +135,7 @@
         statusEl.innerHTML = '📞 Calling ' + recipientName + '... Ringing on Doctor Desk...';
       }
 
-      // 1. Initialize Local Camera & Microphone FIRST (Android Dedicated Capture)
-      await this.initLocalMediaStream();
-
-      // 2. Setup WebRTC PeerConnection & Bind Local Audio/Video Tracks
-      this.setupPeerConnection();
-
-      // 3. Create WebRTC Offer & Gather All ICE Candidates into SDP
-      let offerSdp = null;
-      try {
-        if (this.peerConnection) {
-          const offer = await this.peerConnection.createOffer({
-            offerToReceiveAudio: true,
-            offerToReceiveVideo: true
-          });
-          await this.peerConnection.setLocalDescription(offer);
-
-          await this.waitForIceGatheringComplete();
-
-          offerSdp = {
-            type: this.peerConnection.localDescription.type,
-            sdp: this.peerConnection.localDescription.sdp
-          };
-        }
-      } catch (err) {
-        console.warn('[WebRTC] Local offer setup warning:', err.message);
-      }
-
-      // Send Signal to Doctor
+      // Send Ringing Signal to Doctor
       if (global.supabaseService) {
         global.supabaseService.sendTeleconsultSignal({
           type: 'CALL_INITIATED',
@@ -217,16 +147,14 @@
           recipientDoctor: recipientName,
           facilitatorName,
           complaint: this.currentCallData.complaint,
-          offer: offerSdp
+          roomUrl: roomUrl
         });
       }
 
       this.startCallTimer();
-      this.startFrameSyncStream();
-      this.startMicLevelMeter();
 
       if (global.toast) {
-        global.toast('📞 Calling ' + recipientName + '... Ringing on Doctor Desk.');
+        global.toast('📞 Daily.co HD Video Room Loaded. Calling ' + recipientName + '...');
       }
     }
 
@@ -258,7 +186,7 @@
           </div>
 
           <span style="background:rgba(34,197,94,0.2);color:#4ade80;font-size:12px;font-weight:800;padding:4px 12px;border-radius:20px;text-transform:uppercase;letter-spacing:1px;">
-            Incoming Live Video Teleconsultation
+            Daily.co HD Teleconsultation Call
           </span>
 
           <h3 style="color:#ffffff;font-size:20px;font-weight:900;margin:12px 0 4px;">${signal.callerName || 'Citizen Patient'}</h3>
@@ -276,7 +204,7 @@
               ✕ Decline
             </button>
             <button onclick="videoCallController.acceptIncomingCall()" style="background:linear-gradient(135deg, #16a34a, #22c55e);color:#ffffff;border:none;padding:12px 28px;border-radius:30px;font-size:14px;font-weight:900;cursor:pointer;flex:1.5;box-shadow:0 4px 18px rgba(34,197,94,0.5);">
-              🟢 Accept & Start Video
+              🟢 Accept & Join Video Room
             </button>
           </div>
         </div>
@@ -303,7 +231,6 @@
     }
 
     async acceptIncomingCall() {
-      this.unlockAudioContext();
       const modal = document.getElementById('doctorIncomingCallModal');
       if (modal) modal.style.display = 'none';
 
@@ -312,6 +239,8 @@
 
       const state = this.store ? this.store.getState() : {};
       const activeDoctor = (state.session && state.session.user) || { name: 'Dr. Priya Sharma, MBBS, MD' };
+
+      const roomUrl = signal.roomUrl || this.currentDailyRoomUrl;
 
       this.currentCallData = {
         id: signal.callId || ('CALL-' + Date.now()),
@@ -323,86 +252,49 @@
         recipientName: activeDoctor.name || 'Dr. Medical Officer',
         patientName: signal.callerName || 'Citizen Patient',
         complaint: signal.complaint || 'Teleconsultation',
+        roomUrl: roomUrl,
         startTime: Date.now(),
         date: new Date().toISOString().split('T')[0],
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
 
       this.inCallMessages = [
-        { sender: 'System', text: '🔒 Doctor Accepted Consultation · 2-Way High Definition Stream Connected', time: this.currentCallData.time }
+        { sender: 'System', text: '🔒 Doctor Joined Daily.co HD Room · 2-Way High Definition Video & Audio Connected', time: this.currentCallData.time }
       ];
 
-      // Open Doctor Video Window
+      // Open Doctor Video Window with Daily.co Prebuilt Iframe
       this.renderVideoCallModal();
       const callModal = document.getElementById('videoCallModal');
       if (callModal) callModal.style.display = 'flex';
 
-      // 1. Start Doctor Local Camera with Dedicated Audio FIRST
-      await this.initLocalMediaStream();
-
-      // 2. Setup WebRTC Peer Connection & Bind Doctor Tracks
-      this.setupPeerConnection();
-
-      // 3. Set Remote Description (Patient's Offer) -> Generate Answer with Complete ICE
-      let answerSdp = null;
-      try {
-        if (this.peerConnection && signal.offer) {
-          await this.peerConnection.setRemoteDescription(new RTCSessionDescription(signal.offer));
-          const answer = await this.peerConnection.createAnswer();
-          await this.peerConnection.setLocalDescription(answer);
-
-          await this.waitForIceGatheringComplete();
-
-          answerSdp = {
-            type: this.peerConnection.localDescription.type,
-            sdp: this.peerConnection.localDescription.sdp
-          };
-        }
-      } catch (err) {
-        console.warn('[WebRTC] Answer creation fallback:', err.message);
-      }
-
-      // Send Answer Signal back to Patient
+      // Send Acceptance Signal back to Patient
       if (global.supabaseService) {
         global.supabaseService.sendTeleconsultSignal({
           type: 'CALL_ACCEPTED',
           callId: this.currentCallData.id,
-          doctorName: activeDoctor.name,
-          answer: answerSdp
+          doctorName: activeDoctor.name
         });
       }
 
       const statusEl = document.getElementById('videoCallStatusBanner');
-      if (statusEl) statusEl.innerHTML = '🟢 Connected · 2-Way HD Video & Audio Active with ' + this.currentCallData.callerName;
+      if (statusEl) statusEl.innerHTML = '🟢 Connected · Daily.co HD Video & Audio Active with ' + this.currentCallData.callerName;
 
       this.startCallTimer();
-      this.startFrameSyncStream();
-      this.startMicLevelMeter();
     }
 
     async handleCallAcceptedByDoctor(signal) {
-      this.unlockAudioContext();
       const statusEl = document.getElementById('videoCallStatusBanner');
-      if (statusEl) statusEl.innerHTML = '🟢 Connected · Live HD Video & Audio Active with ' + (signal.doctorName || 'Doctor');
-
-      try {
-        if (this.peerConnection && signal.answer) {
-          await this.peerConnection.setRemoteDescription(new RTCSessionDescription(signal.answer));
-          console.log('[WebRTC] Doctor answer accepted. 2-way peer connection established!');
-        }
-      } catch (err) {
-        console.warn('[WebRTC] Set remote answer warning:', err.message);
-      }
+      if (statusEl) statusEl.innerHTML = '🟢 Connected · Daily.co HD Video & Audio Active with ' + (signal.doctorName || 'Doctor');
 
       this.inCallMessages.push({
         sender: 'System',
-        text: '🟢 Doctor joined the call. 2-Way HD Video & Audio Streaming Active.',
+        text: '🟢 Doctor joined the call. Daily.co HD Audio & Video Streaming Active.',
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       });
       this.renderChatMessages();
 
       if (global.toast) {
-        global.toast('🟢 ' + (signal.doctorName || 'Doctor') + ' joined the video call!');
+        global.toast('🟢 ' + (signal.doctorName || 'Doctor') + ' joined the Daily.co video room!');
       }
     }
 
@@ -411,428 +303,6 @@
         global.toast('📞 Video Consultation Ended by other participant');
       }
       this.endCall(false);
-    }
-
-    waitForIceGatheringComplete() {
-      return new Promise((resolve) => {
-        if (!this.peerConnection || this.peerConnection.iceGatheringState === 'complete') {
-          resolve();
-          return;
-        }
-        const checkState = () => {
-          if (this.peerConnection.iceGatheringState === 'complete') {
-            this.peerConnection.removeEventListener('icegatheringstatechange', checkState);
-            resolve();
-          }
-        };
-        this.peerConnection.addEventListener('icegatheringstatechange', checkState);
-        setTimeout(resolve, 800);
-      });
-    }
-
-    // -------------------------------------------------------------
-    // 4. WEBRTC PEER CONNECTION & WEB AUDIO HARDWARE ROUTING
-    // -------------------------------------------------------------
-    setupPeerConnection() {
-      try {
-        if (typeof RTCPeerConnection === 'undefined') return;
-        this.peerConnection = new RTCPeerConnection(RTC_CONFIG);
-
-        // Bind Local Audio and Video Tracks directly to Peer Connection
-        if (this.localStream) {
-          this.localStream.getTracks().forEach(track => {
-            try {
-              track.enabled = true;
-              this.peerConnection.addTrack(track, this.localStream);
-              console.log('[WebRTC] Successfully added local track:', track.kind, track.label);
-            } catch (e) {
-              console.warn('[WebRTC] Track add warning:', e);
-            }
-          });
-        }
-
-        // On Remote Track Received -> Stream Video & Route Audio Directly to Speakers
-        this.peerConnection.ontrack = (event) => {
-          console.log('[WebRTC] Remote media track received on device:', event.track.kind);
-          let stream = event.streams && event.streams[0];
-          if (!stream) {
-            if (!this.remoteStream) this.remoteStream = new MediaStream();
-            this.remoteStream.addTrack(event.track);
-            stream = this.remoteStream;
-          } else {
-            this.remoteStream = stream;
-          }
-
-          // 1. Remote Video Element Viewport
-          const remoteVideo = document.getElementById('remoteVideoElement');
-          if (remoteVideo) {
-            remoteVideo.srcObject = stream;
-            remoteVideo.muted = false;
-            remoteVideo.volume = 1.0;
-            remoteVideo.play().catch(e => console.warn('Remote video playback:', e));
-          }
-
-          // 2. Visible Unmuted Audio Element Output
-          const remoteAudio = document.getElementById('remoteAudioElement');
-          if (remoteAudio) {
-            if (event.track.kind === 'audio') {
-              remoteAudio.srcObject = new MediaStream([event.track]);
-            } else {
-              remoteAudio.srcObject = stream;
-            }
-            remoteAudio.muted = false;
-            remoteAudio.volume = 1.0;
-            remoteAudio.play().catch(e => console.warn('Remote audio element playback:', e));
-          }
-
-          // 3. Direct Web Audio Context Hardware Routing (Direct to Physical Device Speakers)
-          if (event.track.kind === 'audio') {
-            try {
-              const AudioCtx = window.AudioContext || window.webkitAudioContext;
-              if (AudioCtx) {
-                if (!this.audioContext) this.audioContext = new AudioCtx();
-                if (this.audioContext.state === 'suspended') this.audioContext.resume();
-                const audioSource = this.audioContext.createMediaStreamSource(new MediaStream([event.track]));
-                const gainNode = this.audioContext.createGain();
-                gainNode.gain.value = 2.0; // 2x Voice Gain Amplification
-                audioSource.connect(gainNode);
-                gainNode.connect(this.audioContext.destination);
-                console.log('[WebRTC Audio] Remote voice stream connected directly to device speakers!');
-              }
-            } catch (err) {
-              console.warn('[WebRTC Audio] AudioContext bridge notice:', err);
-            }
-          }
-
-          const remoteAvatar = document.getElementById('remoteAvatarPlaceholder');
-          if (remoteAvatar) remoteAvatar.style.display = 'none';
-        };
-
-        this.peerConnection.onconnectionstatechange = () => {
-          console.log('[WebRTC] Connection State:', this.peerConnection.connectionState);
-          if (this.peerConnection.connectionState === 'connected') {
-            const statusEl = document.getElementById('videoCallStatusBanner');
-            if (statusEl) statusEl.innerHTML = '🟢 2-Way High Definition Video & Audio Connected';
-          }
-        };
-      } catch (err) {
-        console.warn('[WebRTC] RTCPeerConnection setup warning:', err.message);
-      }
-    }
-
-    async initLocalMediaStream() {
-      const localVideo = document.getElementById('localVideoElement');
-      const simulationNotice = document.getElementById('videoSimulationNotice');
-      let audioStream = null;
-      let videoStream = null;
-
-      try {
-        if (navigator.mediaDevices && typeof navigator.mediaDevices.getUserMedia === 'function') {
-          
-          // 1. Android & Mobile Dedicated Microphone Capture
-          try {
-            audioStream = await navigator.mediaDevices.getUserMedia({
-              audio: {
-                echoCancellation: true,
-                noiseSuppression: true,
-                autoGainControl: true
-              }
-            });
-            console.log('[Audio Capture] Acquired dedicated audio stream:', audioStream.getAudioTracks().length);
-          } catch (audioErr) {
-            console.warn('[Audio Capture] Echo-cancelled mic failed, trying fallback audio: true', audioErr.message);
-            try {
-              audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            } catch (permErr) {
-              console.error('[Audio Capture] Microphone permission blocked:', permErr);
-              if (global.toast) global.toast('⚠️ Microphone access blocked. Please tap lock icon and allow mic.');
-            }
-          }
-
-          // 2. Dedicated Camera Capture
-          try {
-            videoStream = await navigator.mediaDevices.getUserMedia({
-              video: {
-                facingMode: this.currentFacingMode,
-                width: { ideal: 1280, min: 480 },
-                height: { ideal: 720, min: 360 }
-              }
-            });
-          } catch (vidErr) {
-            console.warn('[Video Capture] HD Video failed, trying basic video: true', vidErr.message);
-            try {
-              videoStream = await navigator.mediaDevices.getUserMedia({ video: true });
-            } catch (vErr) {
-              console.warn('[Video Capture] Video fallback:', vErr.message);
-            }
-          }
-
-          // 3. Combine Tracks into Unified Stream
-          const combinedTracks = [];
-          if (audioStream) {
-            audioStream.getAudioTracks().forEach(t => {
-              t.enabled = true;
-              combinedTracks.push(t);
-            });
-          }
-          if (videoStream) {
-            videoStream.getVideoTracks().forEach(t => {
-              t.enabled = true;
-              combinedTracks.push(t);
-            });
-          }
-
-          if (combinedTracks.length > 0) {
-            this.localStream = new MediaStream(combinedTracks);
-          } else {
-            throw new Error('No audio or video hardware tracks available');
-          }
-
-          if (localVideo && this.localStream) {
-            localVideo.srcObject = this.localStream;
-            localVideo.play().catch(() => {});
-          }
-          if (simulationNotice) simulationNotice.style.display = 'none';
-        } else {
-          throw new Error('MediaDevices not available');
-        }
-      } catch (err) {
-        console.warn('[Media] Hardware notice:', err.message);
-        if (simulationNotice) {
-          simulationNotice.style.display = 'block';
-          simulationNotice.innerHTML = '⚡ 2-Way Telemedicine Video Stream Active';
-        }
-      }
-    }
-
-    // -------------------------------------------------------------
-    // 5. LIVE MICROPHONE AUDIO VISUALIZER METER & ANDROID MIC RECONNECT
-    // -------------------------------------------------------------
-    startMicLevelMeter() {
-      try {
-        if (!this.localStream) return;
-        const audioTrack = this.localStream.getAudioTracks()[0];
-        if (!audioTrack) {
-          const micStatusText = document.getElementById('micAudioStatusText');
-          if (micStatusText) micStatusText.textContent = 'Tap to Enable Mic';
-          return;
-        }
-
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        if (!AudioCtx) return;
-        if (!this.audioContext) this.audioContext = new AudioCtx();
-        if (this.audioContext.state === 'suspended') this.audioContext.resume();
-
-        const source = this.audioContext.createMediaStreamSource(new MediaStream([audioTrack]));
-        this.audioAnalyser = this.audioContext.createAnalyser();
-        this.audioAnalyser.fftSize = 64;
-        source.connect(this.audioAnalyser);
-
-        const meterBar = document.getElementById('micAudioLevelBar');
-        const micStatusText = document.getElementById('micAudioStatusText');
-        const dataArray = new Uint8Array(this.audioAnalyser.frequencyBinCount);
-
-        if (this.micMeterInterval) clearInterval(this.micMeterInterval);
-        this.micMeterInterval = setInterval(() => {
-          if (this.audioAnalyser && meterBar) {
-            this.audioAnalyser.getByteFrequencyData(dataArray);
-            let sum = 0;
-            for (let i = 0; i < dataArray.length; i++) sum += dataArray[i];
-            const avg = sum / dataArray.length;
-            const percentage = Math.min(100, Math.max(10, Math.round((avg / 128) * 100)));
-            meterBar.style.width = percentage + '%';
-            meterBar.style.background = this.isAudioMuted ? '#dc2626' : (percentage > 25 ? '#22c55e' : '#38bdf8');
-            if (micStatusText) {
-              micStatusText.textContent = this.isAudioMuted ? 'Muted' : (percentage > 25 ? 'Speaking...' : 'Live');
-            }
-          }
-        }, 150);
-      } catch (e) {
-        console.warn('[Audio Meter] Visualizer fallback:', e);
-      }
-    }
-
-    async reconnectAndroidMic() {
-      this.unlockAudioContext();
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        const newAudioTrack = stream.getAudioTracks()[0];
-        if (newAudioTrack) {
-          newAudioTrack.enabled = true;
-          if (this.localStream) {
-            const oldTracks = this.localStream.getAudioTracks();
-            oldTracks.forEach(t => { t.stop(); this.localStream.removeTrack(t); });
-            this.localStream.addTrack(newAudioTrack);
-          }
-          if (this.peerConnection) {
-            const senders = this.peerConnection.getSenders();
-            const audioSender = senders.find(s => s.track && s.track.kind === 'audio');
-            if (audioSender) {
-              await audioSender.replaceTrack(newAudioTrack);
-            } else {
-              this.peerConnection.addTrack(newAudioTrack, stream);
-            }
-          }
-          this.startMicLevelMeter();
-          if (global.toast) global.toast('🎙️ Android Microphone Connected & Active!');
-        }
-      } catch (err) {
-        if (global.toast) global.toast('⚠️ Please allow microphone permissions in Android browser settings.');
-      }
-    }
-
-    stopMicLevelMeter() {
-      if (this.micMeterInterval) {
-        clearInterval(this.micMeterInterval);
-        this.micMeterInterval = null;
-      }
-    }
-
-    // -------------------------------------------------------------
-    // 6. HIGH-DEFINITION DUAL-MODE REAL-TIME FRAME STREAMING
-    // -------------------------------------------------------------
-    startFrameSyncStream() {
-      if (this.frameSyncInterval) clearInterval(this.frameSyncInterval);
-      if (typeof document === 'undefined' || !document.createElement) return;
-      const canvas = document.createElement('canvas');
-      if (!canvas || typeof canvas.getContext !== 'function') return;
-      canvas.width = 640;
-      canvas.height = 480;
-      const ctx = canvas.getContext('2d', { alpha: false });
-      if (ctx) ctx.imageSmoothingQuality = 'high';
-
-      this.frameSyncInterval = setInterval(() => {
-        const localVideo = document.getElementById('localVideoElement');
-        if (localVideo && localVideo.videoWidth > 0 && !this.isVideoMuted && this.currentCallData && ctx) {
-          try {
-            ctx.drawImage(localVideo, 0, 0, canvas.width, canvas.height);
-            const frameData = canvas.toDataURL('image/jpeg', 0.75);
-            if (global.supabaseService) {
-              global.supabaseService.sendTeleconsultSignal({
-                type: 'VIDEO_FRAME',
-                callId: this.currentCallData.id,
-                frameData
-              });
-            }
-          } catch (e) {}
-        }
-      }, 250);
-    }
-
-    stopFrameSyncStream() {
-      if (this.frameSyncInterval) {
-        clearInterval(this.frameSyncInterval);
-        this.frameSyncInterval = null;
-      }
-    }
-
-    renderRemoteVideoFrame(frameData) {
-      const remoteCanvas = document.getElementById('remoteVideoCanvas');
-      const remoteAvatar = document.getElementById('remoteAvatarPlaceholder');
-      if (remoteCanvas && frameData) {
-        const img = new Image();
-        img.onload = () => {
-          remoteCanvas.style.display = 'block';
-          const ctx = remoteCanvas.getContext('2d');
-          if (ctx) {
-            ctx.imageSmoothingQuality = 'high';
-            ctx.drawImage(img, 0, 0, remoteCanvas.width, remoteCanvas.height);
-          }
-          if (remoteAvatar) remoteAvatar.style.display = 'none';
-        };
-        img.src = frameData;
-      }
-    }
-
-    // -------------------------------------------------------------
-    // 7. IN-CALL HARDWARE CONTROLS
-    // -------------------------------------------------------------
-    toggleAudio() {
-      this.isAudioMuted = !this.isAudioMuted;
-      if (this.localStream) {
-        this.localStream.getAudioTracks().forEach(t => t.enabled = !this.isAudioMuted);
-      }
-      const btn = document.getElementById('btnToggleMic');
-      if (btn) {
-        btn.style.background = this.isAudioMuted ? '#dc2626' : 'rgba(255,255,255,0.2)';
-        btn.innerHTML = this.isAudioMuted ? '🔇 <span class="ctrl-lbl">Unmute</span>' : '🎙️ <span class="ctrl-lbl">Mute</span>';
-      }
-      if (global.toast) global.toast(this.isAudioMuted ? '🔇 Mic Muted' : '🎙️ Mic Live');
-    }
-
-    toggleSpeaker() {
-      this.unlockAudioContext();
-      this.isSpeakerBoosted = !this.isSpeakerBoosted;
-      const remoteAudio = document.getElementById('remoteAudioElement');
-      const remoteVideo = document.getElementById('remoteVideoElement');
-      if (remoteAudio) {
-        remoteAudio.muted = false;
-        remoteAudio.volume = this.isSpeakerBoosted ? 1.0 : 0.0;
-        remoteAudio.play().catch(() => {});
-      }
-      if (remoteVideo) {
-        remoteVideo.muted = false;
-        remoteVideo.volume = this.isSpeakerBoosted ? 1.0 : 0.0;
-        remoteVideo.play().catch(() => {});
-      }
-      const btn = document.getElementById('btnToggleSpeaker');
-      if (btn) {
-        btn.style.background = this.isSpeakerBoosted ? 'rgba(34,197,94,0.3)' : 'rgba(220,38,38,0.3)';
-        btn.innerHTML = this.isSpeakerBoosted ? '🔊 <span class="ctrl-lbl">Speaker 100%</span>' : '🔈 <span class="ctrl-lbl">Speaker Off</span>';
-      }
-      if (global.toast) global.toast(this.isSpeakerBoosted ? '🔊 Speaker Active (100%)' : '🔈 Speaker Muted');
-    }
-
-    toggleVideo() {
-      this.isVideoMuted = !this.isVideoMuted;
-      if (this.localStream) {
-        this.localStream.getVideoTracks().forEach(t => t.enabled = !this.isVideoMuted);
-      }
-      const localPlaceholder = document.getElementById('localVideoPlaceholder');
-      const localVideo = document.getElementById('localVideoElement');
-      if (localPlaceholder && localVideo) {
-        localPlaceholder.style.display = this.isVideoMuted ? 'flex' : 'none';
-        localVideo.style.display = this.isVideoMuted ? 'none' : 'block';
-      }
-      const btn = document.getElementById('btnToggleCam');
-      if (btn) {
-        btn.style.background = this.isVideoMuted ? '#dc2626' : 'rgba(255,255,255,0.2)';
-        btn.innerHTML = this.isVideoMuted ? '🚫 <span class="ctrl-lbl">Start Video</span>' : '📹 <span class="ctrl-lbl">Stop Video</span>';
-      }
-      if (global.toast) global.toast(this.isVideoMuted ? '🚫 Camera Off' : '📹 Camera Live');
-    }
-
-    async switchCamera() {
-      this.currentFacingMode = (this.currentFacingMode === 'user') ? 'environment' : 'user';
-      const facingText = this.currentFacingMode === 'user' ? 'Front Camera' : 'Back Camera';
-
-      if (this.localStream) {
-        this.localStream.getVideoTracks().forEach(t => t.stop());
-      }
-      
-      try {
-        const newVidStream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: this.currentFacingMode, width: { ideal: 1280 }, height: { ideal: 720 } }
-        });
-        const newTrack = newVidStream.getVideoTracks()[0];
-        if (newTrack && this.localStream) {
-          const oldTrack = this.localStream.getVideoTracks()[0];
-          if (oldTrack) { oldTrack.stop(); this.localStream.removeTrack(oldTrack); }
-          this.localStream.addTrack(newTrack);
-        }
-        if (this.peerConnection && newTrack) {
-          const sender = this.peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
-          if (sender) sender.replaceTrack(newTrack).catch(() => {});
-        }
-        const localVideo = document.getElementById('localVideoElement');
-        if (localVideo && this.localStream) localVideo.srcObject = this.localStream;
-      } catch (e) {
-        console.warn('Switch camera error:', e);
-      }
-
-      const badge = document.getElementById('videoCameraFacingBadge');
-      if (badge) badge.textContent = '📷 ' + facingText;
-      if (global.toast) global.toast('🔄 Switched to ' + facingText);
     }
 
     startCallTimer() {
@@ -856,7 +326,7 @@
     }
 
     // -------------------------------------------------------------
-    // 8. IN-CALL E-PRESCRIPTION DRAWER & CHAT
+    // 4. IN-CALL E-PRESCRIPTION DRAWER & CHAT
     // -------------------------------------------------------------
     toggleInCallRxDrawer() {
       const drawer = document.getElementById('inCallRxDrawer');
@@ -993,16 +463,13 @@
     }
 
     // -------------------------------------------------------------
-    // 9. END CALL
+    // 5. END CALL & LOG TO DATABASE
     // -------------------------------------------------------------
     endCall(broadcastSignal = true) {
       if (!this.currentCallData) {
         this.closeCallModal();
         return;
       }
-
-      this.stopFrameSyncStream();
-      this.stopMicLevelMeter();
 
       if (broadcastSignal && global.supabaseService) {
         global.supabaseService.sendTeleconsultSignal({
@@ -1012,7 +479,7 @@
       }
 
       this.stopCallTimer();
-      const elapsedSec = Math.max(12, Math.floor((Date.now() - this.currentCallData.startTime) / 1000));
+      const elapsedSec = Math.max(15, Math.floor((Date.now() - this.currentCallData.startTime) / 1000));
       const mins = String(Math.floor(elapsedSec / 60)).padStart(2, '0');
       const secs = String(elapsedSec % 60).padStart(2, '0');
       const durationStr = `${mins}:${secs}`;
@@ -1026,20 +493,10 @@
         });
       }
 
-      if (this.peerConnection) {
-        try { this.peerConnection.close(); } catch (e) {}
-        this.peerConnection = null;
-      }
-
-      if (this.localStream) {
-        this.localStream.getTracks().forEach(t => t.stop());
-        this.localStream = null;
-      }
-
       this.closeCallModal();
 
       if (global.toast) {
-        global.toast('📞 Video Call Completed (' + durationStr + ') · Logged to History');
+        global.toast('📞 Daily.co Video Call Completed (' + durationStr + ') · Logged to History');
       }
 
       this.refreshAllCallHistories();
@@ -1047,19 +504,12 @@
 
     closeCallModal() {
       const modal = document.getElementById('videoCallModal');
-      if (modal) modal.style.display = 'none';
+      if (modal) {
+        modal.style.display = 'none';
+        modal.innerHTML = '';
+      }
       this.currentCallData = null;
       this.stopCallTimer();
-      this.stopFrameSyncStream();
-      this.stopMicLevelMeter();
-      if (this.peerConnection) {
-        try { this.peerConnection.close(); } catch (e) {}
-        this.peerConnection = null;
-      }
-      if (this.localStream) {
-        this.localStream.getTracks().forEach(t => t.stop());
-        this.localStream = null;
-      }
     }
 
     refreshAllCallHistories() {
@@ -1074,8 +524,14 @@
       }
     }
 
+    openRoomInNewTab() {
+      const url = (this.currentCallData && this.currentCallData.roomUrl) || this.currentDailyRoomUrl;
+      window.open(url, '_blank');
+      if (global.toast) global.toast('🌐 Daily.co HD Room opened in new tab.');
+    }
+
     // -------------------------------------------------------------
-    // 10. RENDER VIDEO MODAL VIEWPORT
+    // 6. RENDER DAILY.CO VIDEO MODAL VIEWPORT
     // -------------------------------------------------------------
     renderVideoCallModal() {
       let modal = document.getElementById('videoCallModal');
@@ -1090,81 +546,54 @@
         modal.style.display = 'none';
         modal.style.alignItems = 'center';
         modal.style.justifyContent = 'center';
-        modal.style.padding = '12px';
+        modal.style.padding = '10px';
         document.body.appendChild(modal);
       }
 
       const isDoctor = (this.store && this.store.getState().session && this.store.getState().session.role === 'doctor');
       const data = this.currentCallData || {};
+      const roomUrl = data.roomUrl || this.currentDailyRoomUrl;
 
       modal.innerHTML = `
-        <div style="width:100%;max-width:1100px;height:92vh;background:#0f172a;border:1.5px solid rgba(2,132,199,0.4);border-radius:20px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 25px 60px rgba(0,0,0,0.8);position:relative;">
+        <div style="width:100%;max-width:1180px;height:94vh;background:#0f172a;border:1.5px solid rgba(2,132,199,0.4);border-radius:20px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 25px 60px rgba(0,0,0,0.8);position:relative;">
           
-          <!-- TOP BAR -->
-          <div style="background:rgba(30,41,59,0.9);border-bottom:1px solid rgba(255,255,255,0.1);padding:10px 18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+          <!-- TOP HEADER BAR -->
+          <div style="background:rgba(30,41,59,0.95);border-bottom:1px solid rgba(255,255,255,0.1);padding:10px 18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;z-index:30;">
             <div style="display:flex;align-items:center;gap:12px;">
-              <div style="width:38px;height:38px;background:#0284c7;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;">🩺</div>
+              <div style="width:38px;height:38px;background:linear-gradient(135deg, #0284c7, #0369a1);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 0 15px rgba(2,132,199,0.4);">
+                🩺
+              </div>
               <div>
                 <strong style="color:#f8fafc;font-size:14px;display:block;">${data.recipientName} ↔ ${data.callerName}</strong>
-                <small id="videoCallStatusBanner" style="color:#38bdf8;font-size:11px;font-weight:700;">🟢 Live Teleconsultation (Token: ${data.token})</small>
+                <small id="videoCallStatusBanner" style="color:#38bdf8;font-size:11px;font-weight:700;">🟢 Daily.co Ultra-HD Teleconsultation (Token: ${data.token})</small>
               </div>
             </div>
 
             <div style="display:flex;align-items:center;gap:10px;">
-              <!-- ANDROID MIC STATUS / RECONNECT TRIGGER -->
-              <div onclick="videoCallController.reconnectAndroidMic()" title="Click to test/grant Android mic permissions" style="display:flex;align-items:center;gap:6px;background:rgba(0,0,0,0.4);padding:4px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);cursor:pointer;">
-                <span style="font-size:11px;color:#cbd5e1;">🎙️ Mic:</span>
-                <div style="width:40px;height:6px;background:#334155;border-radius:3px;overflow:hidden;">
-                  <div id="micAudioLevelBar" style="width:20%;height:100%;background:#22c55e;transition:width 0.1s;"></div>
-                </div>
-                <span id="micAudioStatusText" style="font-size:10px;color:#38bdf8;font-weight:700;">Live</span>
-              </div>
-              <span id="videoCameraFacingBadge" style="background:rgba(255,255,255,0.1);color:#cbd5e1;font-size:11px;font-weight:700;padding:4px 8px;border-radius:8px;">📷 Front Camera</span>
               <span id="videoCallTimerDisplay" style="background:rgba(22,163,74,0.2);color:#22c55e;border:1px solid rgba(34,197,94,0.4);font-size:12px;font-weight:800;padding:4px 10px;border-radius:12px;font-family:'IBM Plex Mono',monospace;">⏱️ 00:00</span>
-              <span style="background:rgba(2,132,199,0.2);color:#38bdf8;font-size:11px;font-weight:700;padding:4px 8px;border-radius:8px;">🔒 256-bit Encrypted</span>
+              <button onclick="videoCallController.openRoomInNewTab()" style="background:rgba(255,255,255,0.1);color:#38bdf8;border:1px solid rgba(56,189,248,0.3);font-size:11px;font-weight:700;padding:5px 10px;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:4px;">
+                ↗ Open Full Window
+              </button>
+              <span style="background:rgba(2,132,199,0.2);color:#38bdf8;font-size:11px;font-weight:700;padding:4px 8px;border-radius:8px;">🔒 256-bit ABDM Encrypted</span>
             </div>
           </div>
 
-          <!-- MAIN VIDEO STAGE -->
+          <!-- MAIN VIDEO STAGE (DAILY.CO EMBEDDED PREBUILT ROOM) -->
           <div style="flex:1;position:relative;background:#020617;display:flex;overflow:hidden;">
             
-            <!-- REMOTE VIDEO FEED (FULL SCREEN) -->
-            <div style="flex:1;position:relative;display:flex;align-items:center;justify-content:center;background:#000000;overflow:hidden;">
-              
-              <!-- REAL REMOTE VIDEO STREAM (WEBRTC) -->
-              <video id="remoteVideoElement" autoplay playsinline style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;"></video>
-
-              <!-- DEDICATED UNMUTED REMOTE AUDIO STREAM (IN DOM TO PREVENT MOBILE SLEEP) -->
-              <audio id="remoteAudioElement" autoplay playsinline style="position:absolute;top:6px;left:6px;width:120px;height:24px;opacity:0.01;z-index:1;"></audio>
-
-              <!-- DUAL-MODE BACKUP CANVAS STREAM (HIGH RES 640x480) -->
-              <canvas id="remoteVideoCanvas" width="640" height="480" style="display:none;width:100%;height:100%;object-fit:cover;position:absolute;inset:0;"></canvas>
-
-              <!-- REMOTE AVATAR / WAITING PLACEHOLDER -->
-              <div id="remoteAvatarPlaceholder" style="text-align:center;padding:20px;z-index:2;">
-                <div style="width:110px;height:110px;margin:0 auto 14px;background:linear-gradient(135deg, #0284c7, #0369a1);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:52px;box-shadow:0 0 30px rgba(2,132,199,0.5);border:3px solid #38bdf8;">
-                  ${isDoctor ? '🌾' : '🩺'}
-                </div>
-                <h3 style="color:#ffffff;font-size:18px;font-weight:800;">${isDoctor ? (data.callerName || 'Citizen Patient') : (data.recipientName || 'Dr. Medical Officer')}</h3>
-                <p style="color:#38bdf8;font-size:13px;font-weight:600;margin-top:2px;">${isDoctor ? ('Chief Complaint: ' + (data.complaint || 'OPD Teleconsultation')) : 'National Rural Telemedicine Grid · Kondapalli'}</p>
-                <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(34,197,94,0.15);color:#22c55e;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;margin-top:10px;">
-                  <span style="display:inline-block;width:8px;height:8px;background:#22c55e;border-radius:50%;"></span> Audio & Video Connected
-                </div>
-                <div id="videoSimulationNotice" style="margin-top:12px;font-size:11px;color:#94a3b8;"></div>
-              </div>
-
-              <!-- LOCAL PICTURE-IN-PICTURE (PIP) -->
-              <div style="position:absolute;bottom:16px;right:16px;width:190px;height:140px;background:#1e293b;border:2px solid #0284c7;border-radius:14px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,0.7);z-index:10;">
-                <video id="localVideoElement" autoplay muted playsinline style="width:100%;height:100%;object-fit:cover;transform:scaleX(-1);"></video>
-                <div id="localVideoPlaceholder" style="display:none;width:100%;height:100%;align-items:center;justify-content:center;background:#0f172a;color:#94a3b8;font-size:12px;flex-direction:column;gap:4px;">
-                  <span>🚫</span> Camera Off
-                </div>
-                <span style="position:absolute;bottom:4px;left:6px;background:rgba(0,0,0,0.6);color:#fff;font-size:10px;padding:2px 6px;border-radius:4px;">You (Local)</span>
-              </div>
+            <!-- DAILY.CO EMBEDDED IFRAME -->
+            <div style="flex:1;position:relative;background:#000000;display:flex;align-items:center;justify-content:center;">
+              <iframe
+                id="dailyVideoIframe"
+                src="${roomUrl}"
+                allow="camera; microphone; fullscreen; display-capture; autoplay"
+                style="width:100%;height:100%;border:0;position:absolute;inset:0;"
+                title="Daily.co Video Room"
+              ></iframe>
             </div>
 
             <!-- IN-CALL DOCTOR PRESCRIPTION DRAWER -->
-            <div id="inCallRxDrawer" style="display:none;width:340px;background:#1e293b;border-left:1.5px solid rgba(255,255,255,0.15);padding:16px;overflow-y:auto;z-index:20;">
+            <div id="inCallRxDrawer" style="display:none;width:340px;background:#1e293b;border-left:1.5px solid rgba(255,255,255,0.15);padding:16px;overflow-y:auto;z-index:40;">
               <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:8px;">
                 <strong style="color:#38bdf8;font-size:14px;">📝 Write e-Prescription</strong>
                 <button onclick="videoCallController.toggleInCallRxDrawer()" style="background:none;border:none;color:#94a3b8;font-size:16px;cursor:pointer;">✕</button>
@@ -1203,7 +632,7 @@
             </div>
 
             <!-- IN-CALL CHAT DRAWER -->
-            <div id="inCallChatDrawer" style="display:none;width:320px;background:#1e293b;border-left:1.5px solid rgba(255,255,255,0.15);padding:14px;flex-direction:column;z-index:20;">
+            <div id="inCallChatDrawer" style="display:none;width:320px;background:#1e293b;border-left:1.5px solid rgba(255,255,255,0.15);padding:14px;flex-direction:column;z-index:40;">
               <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:6px;">
                 <strong style="color:#38bdf8;font-size:13px;">💬 Consultation Chat & Notes</strong>
                 <button onclick="videoCallController.toggleInCallChat()" style="background:none;border:none;color:#94a3b8;font-size:16px;cursor:pointer;">✕</button>
@@ -1217,37 +646,21 @@
 
           </div>
 
-          <!-- BOTTOM TELEMEDICINE CONTROL TASKBAR -->
-          <div style="background:#0f172a;border-top:1px solid rgba(255,255,255,0.1);padding:14px 20px;display:flex;justify-content:center;align-items:center;gap:14px;flex-wrap:wrap;">
+          <!-- BOTTOM CLINICAL TELEMEDICINE ACTION BAR -->
+          <div style="background:#0f172a;border-top:1px solid rgba(255,255,255,0.1);padding:12px 20px;display:flex;justify-content:center;align-items:center;gap:14px;flex-wrap:wrap;z-index:30;">
             
-            <button id="btnToggleMic" onclick="videoCallController.toggleAudio()" style="background:rgba(255,255,255,0.15);color:#ffffff;border:none;padding:10px 18px;border-radius:30px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;transition:0.2s;">
-              🎙️ <span>Mute</span>
-            </button>
-
-            <button id="btnToggleSpeaker" onclick="videoCallController.toggleSpeaker()" style="background:rgba(34,197,94,0.3);color:#ffffff;border:none;padding:10px 18px;border-radius:30px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;transition:0.2s;">
-              🔊 <span>Speaker 100%</span>
-            </button>
-
-            <button id="btnToggleCam" onclick="videoCallController.toggleVideo()" style="background:rgba(255,255,255,0.15);color:#ffffff;border:none;padding:10px 18px;border-radius:30px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;transition:0.2s;">
-              📹 <span>Stop Video</span>
-            </button>
-
-            <button id="btnSwitchCam" onclick="videoCallController.switchCamera()" style="background:rgba(255,255,255,0.15);color:#ffffff;border:none;padding:10px 18px;border-radius:30px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;transition:0.2s;">
-              🔄 <span>Flip Camera</span>
-            </button>
-
             ${isDoctor ? `
-              <button onclick="videoCallController.toggleInCallRxDrawer()" style="background:linear-gradient(135deg, #16a34a, #15803d);color:#ffffff;border:none;padding:10px 18px;border-radius:30px;font-size:13px;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:8px;box-shadow:0 4px 14px rgba(22,163,74,0.4);">
+              <button onclick="videoCallController.toggleInCallRxDrawer()" style="background:linear-gradient(135deg, #16a34a, #15803d);color:#ffffff;border:none;padding:10px 20px;border-radius:30px;font-size:13px;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:8px;box-shadow:0 4px 14px rgba(22,163,74,0.4);">
                 📝 <span>e-Prescription</span>
               </button>
             ` : ''}
 
             <button onclick="videoCallController.toggleInCallChat()" style="background:rgba(255,255,255,0.15);color:#ffffff;border:none;padding:10px 18px;border-radius:30px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;">
-              💬 <span>Chat & Notes</span>
+              💬 <span>Chat & Clinical Notes</span>
             </button>
 
             <button onclick="videoCallController.endCall()" style="background:#dc2626;color:#ffffff;border:none;padding:10px 24px;border-radius:30px;font-size:13px;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:8px;box-shadow:0 4px 16px rgba(220,38,38,0.5);">
-              📞 <span>End Call</span>
+              📞 <span>End Consultation</span>
             </button>
           </div>
 
