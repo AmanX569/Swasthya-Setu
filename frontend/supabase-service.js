@@ -415,30 +415,31 @@
           }
         }
 
-        if (staffRes.data && staffRes.data.length) {
-          const cloudStaff = staffRes.data.map(s => ({
-            id: s.staff_code || s.id,
-            staff_code: s.staff_code || s.id,
-            name: s.name,
-            role: s.role,
-            phone: s.phone,
-            location: s.location || 'District Health Centre',
-            status: s.status || 'Active Online',
-            regNo: s.reg_no || s.regNo || '—',
-            password: s.password_hash || s.password || s.pin || (s.role + '@123'),
-            pin: s.pin || s.password_hash || s.password || '1234'
-          }));
+        if (staffRes && Array.isArray(staffRes.data)) {
+          const defaultStaff = [
+            { id: 'ADM-7856', staff_code: 'ADM-7856', name: 'Aman Yadav', role: 'admin', phone: '7906684557', location: 'District HQ', status: 'Active Online', regNo: 'ADM-AP-001', password: 'Aman@123', pin: 'Aman@123' },
+            { id: 'DOC-101', staff_code: 'DOC-101', name: 'Dr. Priya Sharma, MBBS, MD', role: 'doctor', phone: '9811122233', location: 'Kondapalli PHC (General Medicine)', status: 'Active Online', regNo: 'MCI-AP-48912', password: 'doc@123', pin: '1234' },
+            { id: 'DOC-102', staff_code: 'DOC-102', name: 'Dr. Rajesh Verma, MBBS, MS', role: 'doctor', phone: '9822233344', location: 'Ibrahimpatnam CHC (Physician & Critical Care)', status: 'Active Online', regNo: 'MCI-AP-51023', password: 'doc@123', pin: '1234' },
+            { id: 'DOC-103', staff_code: 'DOC-103', name: 'Dr. Ananya Reddy, MBBS, DGO', role: 'doctor', phone: '9833311122', location: 'District Hospital (Gynecology & Maternal Care)', status: 'Active Online', regNo: 'MCI-AP-62491', password: 'doc@123', pin: '1234' },
+            { id: 'ASH-201', staff_code: 'ASH-201', name: 'Lakshmi Didi (ASHA Lead)', role: 'worker', phone: '9833344455', location: 'Sector 4, Kondapalli', status: 'On Home Visits', regNo: 'ASHA-AP-094', password: 'asha@123', pin: '1234' }
+          ];
 
-          const existingStaff = global.appStore.state.staff || [];
-          cloudStaff.forEach(cs => {
-            const idx = existingStaff.findIndex(es => es.id === cs.id || es.staff_code === cs.id || es.phone === cs.phone);
-            if (idx >= 0) {
-              existingStaff[idx] = Object.assign({}, existingStaff[idx], cs);
-            } else {
-              existingStaff.push(cs);
-            }
-          });
-          patch.staff = existingStaff;
+          if (staffRes.data.length > 0) {
+            patch.staff = staffRes.data.map(s => ({
+              id: s.staff_code || s.id,
+              staff_code: s.staff_code || s.id,
+              name: s.name,
+              role: s.role,
+              phone: s.phone,
+              location: s.location || 'District Health Centre',
+              status: s.status || 'Active Online',
+              regNo: s.reg_no || s.regNo || '—',
+              password: s.password_hash || s.password || s.pin || (s.role + '@123'),
+              pin: s.pin || s.password_hash || s.password || '1234'
+            }));
+          } else {
+            patch.staff = defaultStaff;
+          }
         }
 
         if (qRes && Array.isArray(qRes.data)) {
@@ -477,7 +478,7 @@
           patch.bloodBank = bank;
         }
 
-        if (ancRes.data && ancRes.data.length) {
+        if (ancRes && Array.isArray(ancRes.data)) {
           patch.ancRecords = ancRes.data.map(a => ({
             id: a.id,
             motherName: a.mother_name,
@@ -494,7 +495,7 @@
           }));
         }
 
-        if (immRes.data && immRes.data.length) {
+        if (immRes && Array.isArray(immRes.data)) {
           patch.immunizations = immRes.data.map(i => ({
             id: i.id,
             childName: i.child_name,
@@ -508,7 +509,7 @@
           }));
         }
 
-        if (visRes.data && visRes.data.length) {
+        if (visRes && Array.isArray(visRes.data)) {
           patch.homeVisits = visRes.data.map(v => ({
             id: v.id,
             household: v.household,
@@ -532,7 +533,7 @@
           }));
         }
 
-        if (medRes.data && medRes.data.length) {
+        if (medRes && Array.isArray(medRes.data)) {
           patch.medicines = medRes.data.map(m => ({
             id: m.id || ('DRUG-' + String(Date.now()).slice(-4)),
             name: m.name,
