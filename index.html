@@ -3007,18 +3007,25 @@ table td strong {
     </div>
   </div>
 
-  <!-- RIGHT: ACTIVE SESSION USER CONTROLS -->
+  <!-- RIGHT: LANGUAGE SELECTOR & ACTIVE USER CONTROLS -->
   <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
     
+    <!-- 🌐 LANGUAGE SELECTOR (IN PLACE OF CHANGE PASSWORD) -->
+    <select id="langSelect" class="select-control" onchange="onLanguageChange(this.value)" style="padding:7px 12px;border-radius:10px;font-weight:800;font-size:12.5px;background:rgba(2,132,199,0.12);border:1.5px solid var(--primary-bright);color:var(--ink);cursor:pointer;box-shadow:0 2px 10px rgba(2,132,199,0.15);">
+      <option value="en">🌐 English</option>
+      <option value="hi">हिंदी (Hindi)</option>
+      <option value="te">తెలుగు (Telugu)</option>
+      <option value="ta">தமிழ் (Tamil)</option>
+      <option value="mr">मराठी (Marathi)</option>
+      <option value="bn">বাংলা (Bengali)</option>
+      <option value="kn">ಕನ್ನಡ (Kannada)</option>
+    </select>
+
     <!-- ACTIVE SESSION BADGE & ACTION BUTTONS -->
     <div id="sessionHeaderControls" style="display:none;align-items:center;gap:8px;flex-wrap:wrap;">
       <span id="activeUserBadge" style="background:linear-gradient(135deg, rgba(2,132,199,0.2), rgba(15,23,42,0.6));color:var(--ink);padding:7px 14px;border-radius:12px;font-size:13px;font-weight:800;border:1.5px solid var(--primary-bright);display:inline-flex;align-items:center;gap:6px;box-shadow:0 2px 10px rgba(2,132,199,0.2);">
         🌾 Citizen User
       </span>
-
-      <button type="button" class="btn-taskbar-action" style="background:linear-gradient(135deg, #0284c7, #0369a1);color:#ffffff;padding:8px 14px;font-size:12px;font-weight:800;border:none;border-radius:10px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;box-shadow:0 2px 10px rgba(2,132,199,0.35);transition:all 0.2s ease;" onclick="openChangePasswordModal()">
-        <span>🔑</span> <span>Change Password</span>
-      </button>
 
       <button type="button" class="btn-taskbar-logout" style="background:linear-gradient(135deg, #ef4444, #dc2626);color:#ffffff;padding:8px 16px;font-size:12px;font-weight:900;border:1px solid #b91c1c;border-radius:10px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;box-shadow:0 2px 12px rgba(239,68,68,0.4);transition:all 0.2s ease;" onclick="doLogout()" data-i18n="btn_logout">
         <span>🚪</span> <span>Log Out / Change Portal</span>
@@ -3060,13 +3067,19 @@ table td strong {
       <span class="badge" style="background:#0284c7;color:#fff;font-size:10px;font-weight:700;">Cloud Synced</span>
     </div>
 
-    <!-- PRIMARY TOOLS & ACTIONS -->
+    <!-- PRIMARY TOOLS & ACTIONS (INCLUDING CHANGE PASSWORD IN SIDEBAR) -->
     <div style="display:flex;flex-direction:column;gap:8px;">
-      <div style="font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px;">Quick Features</div>
+      <div style="font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px;">Navigation & Settings</div>
 
       <button class="btn-glass" onclick="goToHome(); toggleLeftSidebar(false);" style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;font-size:13px;font-weight:700;text-align:left;width:100%;">
         <span style="font-size:16px;">🏠</span>
         <span>Home Dashboard</span>
+      </button>
+
+      <!-- 🔑 CHANGE PASSWORD (IN PLACE OF LANGUAGE IN SIDEBAR) -->
+      <button class="btn-glass" onclick="openChangePasswordModal(); toggleLeftSidebar(false);" style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;font-size:13px;font-weight:700;text-align:left;width:100%;color:var(--ink);">
+        <span style="font-size:16px;">🔑</span>
+        <span>Change Password</span>
       </button>
 
       <button class="btn-glass" onclick="openHelpGuideModal(); toggleLeftSidebar(false);" style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;font-size:13px;font-weight:700;text-align:left;width:100%;color:var(--primary-bright);">
@@ -3085,22 +3098,8 @@ table td strong {
       </button>
     </div>
 
-    <!-- LANGUAGE SELECTOR -->
-    <div style="background:var(--glass-2);border:1px solid var(--glass-border);border-radius:12px;padding:12px;">
-      <label style="font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:6px;">🌐 Choose Language</label>
-      <select id="langSelect" class="select-control" onchange="onLanguageChange(this.value)" style="width:100%;padding:8px 10px;border-radius:8px;font-weight:700;font-size:13px;">
-        <option value="en">🌐 English</option>
-        <option value="hi">हिंदी (Hindi)</option>
-        <option value="te">తెలుగు (Telugu)</option>
-        <option value="ta">தமிழ் (Tamil)</option>
-        <option value="mr">मराठी (Marathi)</option>
-        <option value="bn">বাংলা (Bengali)</option>
-        <option value="kn">ಕನ್ನಡ (Kannada)</option>
-      </select>
-    </div>
-
     <!-- EMERGENCY 108 SOS -->
-    <button class="auth-btn-primary" style="background:linear-gradient(135deg, #dc2626, #991b1b);border:none;padding:12px 16px;font-size:14px;font-weight:900;border-radius:12px;box-shadow:0 4px 16px rgba(220,38,38,0.4);display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:4px;" onclick="patientController.triggerSos(); toggleLeftSidebar(false);" data-i18n="btn_sos">
+    <button class="auth-btn-primary" style="background:linear-gradient(135deg, #dc2626, #991b1b);border:none;padding:12px 16px;font-size:14px;font-weight:900;border-radius:12px;box-shadow:0 4px 16px rgba(220,38,38,0.4);display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:auto;" onclick="patientController.triggerSos(); toggleLeftSidebar(false);" data-i18n="btn_sos">
       <span>🚨</span> <span>108 Emergency SOS</span>
     </button>
 
