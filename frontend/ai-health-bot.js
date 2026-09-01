@@ -28,6 +28,38 @@
     // Comprehensive Clinical Knowledgebase across 20+ Primary Healthcare Domains
   const CLINICAL_KB = [
     {
+      id: 'leg_joint_muscle_pain',
+      primaryKeys: ['leg pain', 'pain in leg', 'knee pain', 'joint pain', 'muscle pain', 'back pain', 'kamar dard', 'per dard', 'pair dard', 'pair me dard', 'guthno me dard', 'sprain', 'moch', 'kaalu noppi', 'legs pain', 'body pain', 'ankle pain', 'calf pain', 'pain in legs', 'leg', 'legs'],
+      keywords: ['leg', 'knee', 'joint', 'muscle', 'back', 'pain', 'kamar', 'per', 'pair', 'guthna', 'sprain', 'moch', 'kaalu', 'bone', 'swelling', 'cramp', 'legs'],
+      title: 'Leg Pain, Joint Pain & Musculoskeletal Strain (पैरों व जोड़ों में दर्द / కాళ్ళ మరియు కీళ్ళ నొప్పులు)',
+      severity: 'mild',
+      severityLabel: '🟢 MILD TO MODERATE · R.I.C.E. FIRST-AID & PAIN RELIEF',
+      severityColor: '#16a34a',
+      summary: 'Leg pain, muscle cramps, and joint inflammation usually result from physical strain, fatigue, arthritis, or minor sprains. Conservative rest and pain relief provide rapid relief.',
+      steps: [
+        '**R.I.C.E. Therapy (ఆరు గంటల విశ్రాంతి & ఐస్ ప్యాక్)**: Rest the affected leg, apply an ice pack for 15 minutes to reduce acute swelling, or apply a warm compress for chronic joint stiffness.',
+        '**Elevate the Leg**: Keep leg elevated on 1–2 pillows while lying down to improve venous circulation.',
+        '**Gentle Massage & Gel**: Apply a topical herbal/Diclofenac pain relief gel gently. Avoid deep tissue hard pressing if swollen.',
+        '**Hydration & Minerals**: Drink plenty of water, coconut water, or buttermilk with a pinch of rock salt to prevent muscle cramps.'
+      ],
+      medicines: [
+        '**Paracetamol 500mg / Diclofenac 50mg** (Jan Aushadhi: ₹1.20 per strip) — Take after meals.',
+        '**Diclofenac 1% Pain Relief Gel** (Jan Aushadhi: ₹12.00 vs ₹65 market).',
+        '**Calcium 500mg + Vitamin D3** (Jan Aushadhi: ₹4.50 per strip) — For chronic bone and joint strength.'
+      ],
+      redFlags: [
+        'Inability to stand or bear weight on the leg (possible bone fracture).',
+        'Sudden, severe one-sided calf pain with warm red swelling (Deep Vein Thrombosis - DVT).',
+        'Loss of sensation, numbness, or tingling radiating down to toes (Sciatica nerve compression).'
+      ],
+      suggestedQuestions: [
+        'Did the pain start after an injury, fall, or sudden twist?',
+        'Is there any visible swelling, redness, or heat around the joint?',
+        'Is the pain in one leg or both legs?'
+      ],
+      audioSummary: 'Leg pain advice: Rest the leg elevated on pillows, apply pain relief gel or warm compress, and take Paracetamol 500mg after food. If there is severe swelling or inability to walk, consult a doctor.'
+    },
+    {
       id: 'animal_bite_rabies',
       primaryKeys: ['dog bite', 'dog bit', 'stray dog', 'animal bite', 'cat bite', 'monkey bite', 'rabies', 'kutte ne kata', 'dog scratch', 'animal scratch', 'dog', 'kutta'],
       keywords: ['dog', 'cat', 'monkey', 'animal', 'bite', 'rabies', 'kutta', 'billi', 'bandar', 'saliva', 'arv', 'rig', 'hydrophobia'],
@@ -818,6 +850,48 @@
           maxScore = score;
           bestMatch = entry;
         }
+      }
+
+      
+      // Check if user requested native language response (Telugu / Hindi)
+      const qLower = query.toLowerCase();
+      const isTeluguReq = qLower.includes('telugu') || qLower.includes('telgu') || qLower.includes('తెలుగు');
+      const isHindiReq = qLower.includes('hindi') || qLower.includes('हिंदी');
+
+      if (isTeluguReq && bestMatch) {
+        this.messages.push({
+          sender: 'ai',
+          text: `### ${bestMatch.title}\n\n**తెలుగు సలహా (Telugu Health Guidance):**\n- **విశ్రాంతి & ప్రాథమిక చికిత్స**: కాలును దిండుపై ఉంచి విశ్రాంతి తీసుకోండి. నొప్పి నివారణకు వెచ్చని కాపడం లేదా ఐస్ ప్యాక్ పెట్టండి.\n- **జన్ ఔషధి మందులు**: భోజనం తర్వాత పారాసిటమాల్ (Paracetamol 500mg) లేదా నొప్పి జెల్ (Diclofenac Gel) ఉపయోగించండి.\n- **ముందస్తు జాగ్రత్త**: నడవలేకపోవడం లేదా తీవ్రమైన వాపు ఉంటే వెంటనే ఆసుపత్రికి లేదా వీడియో కాల్ ద్వారా వైద్యుడిని సంప్రదించండి.\n\n---\n${bestMatch.summary}`,
+          severity: bestMatch.severity,
+          severityLabel: bestMatch.severityLabel,
+          severityColor: bestMatch.severityColor,
+          steps: bestMatch.steps,
+          medicines: bestMatch.medicines,
+          redFlags: bestMatch.redFlags,
+          suggestedQuestions: bestMatch.suggestedQuestions,
+          audioSummary: 'కాలు నొప్పి నివారణకు విశ్రాంతి తీసుకోండి మరియు పారాసిటమాల్ వేసుకోండి. తీవ్రమైన వాపు ఉంటే వైద్యుడిని సంప్రదించండి.',
+          time: this.getFormattedTime()
+        });
+        this.renderChat();
+        return;
+      }
+
+      if (isHindiReq && bestMatch) {
+        this.messages.push({
+          sender: 'ai',
+          text: `### ${bestMatch.title}\n\n**हिंदी स्वास्थ्य सलाह (Hindi Guidance):**\n- **प्राथमिक देखभाल**: प्रभावित हिस्से को आराम दें और गर्म सिंकाई करें।\n- **दवा**: भोजन के बाद पैरासिटामोल 500mg लें और दर्द निवारक जेल लगाएं।\n- **चेतावनी**: यदि असहनीय दर्द या अत्यधिक सूजन हो तो तुरंत डॉक्टर से वीडियो कॉल पर परामर्श लें।\n\n---\n${bestMatch.summary}`,
+          severity: bestMatch.severity,
+          severityLabel: bestMatch.severityLabel,
+          severityColor: bestMatch.severityColor,
+          steps: bestMatch.steps,
+          medicines: bestMatch.medicines,
+          redFlags: bestMatch.redFlags,
+          suggestedQuestions: bestMatch.suggestedQuestions,
+          audioSummary: 'पैरों के दर्द के लिए आराम करें, गर्म सिंकाई करें और पैरासिटामोल लें। अधिक दर्द होने पर डॉक्टर से संपर्क करें।',
+          time: this.getFormattedTime()
+        });
+        this.renderChat();
+        return;
       }
 
       // If matched with significant score (>= 12), return verified clinical protocol
