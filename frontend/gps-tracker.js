@@ -586,46 +586,99 @@
     // -------------------------------------------------------------
     // 4. 108 AMBULANCE DISPATCH & LIVE ANIMATED ROUTING
     // -------------------------------------------------------------
-    startAmbulanceDispatch() {
+    async startAmbulanceDispatch() {
       if (this.dispatchState.isActive) return;
 
       const pLat = this.patientCoords.lat;
       const pLng = this.patientCoords.lng;
-      const baseHosp = HOSPITALS_GEO[0]; // Kondapalli PHC
-
-      // Generate 20 Interpolated Road Waypoints
-      const steps = 20;
-      const route = [];
-      for (let i = 0; i <= steps; i++) {
-        const ratio = i / steps;
-        const curve = Math.sin(ratio * Math.PI) * 0.002;
-        const lat = baseHosp.lat + (pLat - baseHosp.lat) * ratio + curve;
-        const lng = baseHosp.lng + (pLng - baseHosp.lng) * ratio - curve;
-        route.push([lat, lng]);
-      }
+      
+      // Select closest healthcare base
+      let nearestHosp = HOSPITALS_GEO[0];
+      let minHospDist = Infinity;
+      HOSPITALS_GEO.forEach(h => {
+        const d = this.calculateDistance(h.lat, h.lng, pLat, pLng);
+        if (d < minHospDist) {
+          minHospDist = d;
+          nearestHosp = h;
+        }
+      });
 
       this.dispatchState.isActive = true;
       this.dispatchState.stage = 'enroute';
       this.dispatchState.stepIndex = 0;
-      this.dispatchState.routePath = route;
-      this.dispatchState.ambulanceCoords = route[0];
-      this.dispatchState.distanceKm = 3.4;
-      this.dispatchState.etaMinutes = 4;
+      this.dispatchState.distanceKm = minHospDist || 3.4;
+      this.dispatchState.etaMinutes = Math.max(2, Math.round((minHospDist || 3.4) * 1.5));
       this.dispatchState.etaSeconds = 30;
 
-      console.log('[GPS Dispatch] 108 Emergency Ambulance Dispatched!');
       this.openGpsMapModal();
+      this.updateUiCards();
+
+      if (global.toast) {
+        global.toast('🚨 108 Ambulance Dispatched! Calculating Real Road Driving Route...');
+      }
+
+      // 1. Fetch Real Driving Road Route from OSRM (Real Highway & Streets)
+      let roadCoords = [];
+      try {
+        const osrmUrl = 'https://router.project-osrm.org/route/v1/driving/' + nearestHosp.lng + ',' + nearestHosp.lat + ';' + pLng + ',' + pLat + '?overview=full&geometries=geojson';
+        const res = await fetch(osrmUrl);
+        const data = await res.json();
+        if (data.routes && data.routes.length > 0) {
+          const route = data.routes[0];
+          this.dispatchState.distanceKm = Number((route.distance / 1000).toFixed(2));
+          this.dispatchState.etaMinutes = Math.max(1, Math.round(route.duration / 60));
+          this.dispatchState.etaSeconds = 0;
+
+          // Convert GeoJSON [lng, lat] to Leaflet [lat, lng]
+          const rawPoints = route.geometry.coordinates.map(c => [c[1], c[0]]);
+
+          // Sample road points smoothly into ~30-40 animation steps
+          const totalPoints = rawPoints.length;
+          const targetSteps = Math.min(45, Math.max(20, Math.floor(totalPoints / 10)));
+          const sampled = [];
+          for (let i = 0; i < targetSteps; i++) {
+            const idx = Math.floor((i / (targetSteps - 1)) * (totalPoints - 1));
+            sampled.push(rawPoints[idx]);
+          }
+          roadCoords = sampled;
+          console.log('[GPS Real Road Route] Successfully loaded ' + rawPoints.length + ' real paved road waypoints');
+        }
+      } catch (err) {
+        console.warn('[GPS Real Road Fallback] Offline or network delay, generating curved road path:', err);
+      }
+
+      // Fallback if offline
+      if (!roadCoords.length) {
+        const steps = 25;
+        for (let i = 0; i <= steps; i++) {
+          const ratio = i / steps;
+          const curve = Math.sin(ratio * Math.PI) * 0.003;
+          const lat = nearestHosp.lat + (pLat - nearestHosp.lat) * ratio + curve;
+          const lng = nearestHosp.lng + (pLng - nearestHosp.lng) * ratio - curve;
+          roadCoords.push([lat, lng]);
+        }
+      }
+
+      this.dispatchState.routePath = roadCoords;
+      this.dispatchState.ambulanceCoords = roadCoords[0];
 
       Object.values(this.maps).forEach(inst => this.renderDispatchOnMap(inst));
       this.updateUiCards();
 
-      if (global.toast) {
-        global.toast('🚨 108 Ambulance AP-16-TX-1081 Dispatched! Live Navigation Active.');
-      }
+      // Fit map bounds to show route
+      Object.values(this.maps).forEach(inst => {
+        if (inst && inst.map && global.L) {
+          try {
+            const bounds = global.L.latLngBounds(roadCoords);
+            inst.map.fitBounds(bounds, { padding: [50, 50] });
+          } catch (e) {}
+        }
+      });
 
+      if (this.dispatchState.timerId) clearInterval(this.dispatchState.timerId);
       this.dispatchState.timerId = setInterval(() => {
         this.stepAmbulanceMovement();
-      }, 1400);
+      }, 1200);
     }
 
     stepAmbulanceMovement() {
