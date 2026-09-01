@@ -7806,8 +7806,8 @@ table td strong {
 /* ==================== video-call.js ==================== */
 /**
  * =========================================================
- * SWASTHYA SETU - UNIVERSAL 2-WAY WEBRTC AUDIO & HD VIDEO ENGINE (video-call.js)
- * Resilient Mic Capture, Chromium Audio Routing, Speaker Boost & 720p HD Video
+ * SWASTHYA SETU - BULLETPROOF ANDROID & UNIVERSAL WEBRTC ENGINE (video-call.js)
+ * Dedicated Android Audio Capture, Interactive Mic Recovery & 720p HD Video
  * =========================================================
  */
 
@@ -7984,7 +7984,7 @@ table td strong {
         statusEl.innerHTML = '📞 Calling ' + recipientName + '... Ringing on Doctor Desk...';
       }
 
-      // 1. Initialize Local Camera & Microphone FIRST
+      // 1. Initialize Local Camera & Microphone FIRST (Android Dedicated Capture)
       await this.initLocalMediaStream();
 
       // 2. Setup WebRTC PeerConnection & Bind Local Audio/Video Tracks
@@ -8143,7 +8143,7 @@ table td strong {
       const callModal = document.getElementById('videoCallModal');
       if (callModal) callModal.style.display = 'flex';
 
-      // 1. Start Doctor Local Camera with 720p HD FIRST
+      // 1. Start Doctor Local Camera with Dedicated Audio FIRST
       await this.initLocalMediaStream();
 
       // 2. Setup WebRTC Peer Connection & Bind Doctor Tracks
@@ -8329,39 +8329,72 @@ table td strong {
     async initLocalMediaStream() {
       const localVideo = document.getElementById('localVideoElement');
       const simulationNotice = document.getElementById('videoSimulationNotice');
+      let audioStream = null;
+      let videoStream = null;
 
       try {
         if (navigator.mediaDevices && typeof navigator.mediaDevices.getUserMedia === 'function') {
+          
+          // 1. Android & Mobile Dedicated Microphone Capture
           try {
-            // First attempt: High quality echo-cancelled microphone + 720p HD video
-            this.localStream = await navigator.mediaDevices.getUserMedia({
+            audioStream = await navigator.mediaDevices.getUserMedia({
               audio: {
                 echoCancellation: true,
                 noiseSuppression: true,
                 autoGainControl: true
-              },
-              video: {
-                facingMode: this.currentFacingMode,
-                width: { ideal: 1280, min: 640 },
-                height: { ideal: 720, min: 480 },
-                frameRate: { ideal: 30, min: 20 }
               }
             });
-          } catch (strictErr) {
-            console.warn('[Media] Strict constraints rejected, falling back to universal audio/video:', strictErr.message);
-            // Resilient universal fallback for all mobile/desktop devices
-            this.localStream = await navigator.mediaDevices.getUserMedia({
-              audio: true,
-              video: true
+            console.log('[Audio Capture] Acquired dedicated audio stream:', audioStream.getAudioTracks().length);
+          } catch (audioErr) {
+            console.warn('[Audio Capture] Echo-cancelled mic failed, trying fallback audio: true', audioErr.message);
+            try {
+              audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            } catch (permErr) {
+              console.error('[Audio Capture] Microphone permission blocked:', permErr);
+              if (global.toast) global.toast('⚠️ Microphone access blocked. Please tap lock icon and allow mic.');
+            }
+          }
+
+          // 2. Dedicated Camera Capture
+          try {
+            videoStream = await navigator.mediaDevices.getUserMedia({
+              video: {
+                facingMode: this.currentFacingMode,
+                width: { ideal: 1280, min: 480 },
+                height: { ideal: 720, min: 360 }
+              }
+            });
+          } catch (vidErr) {
+            console.warn('[Video Capture] HD Video failed, trying basic video: true', vidErr.message);
+            try {
+              videoStream = await navigator.mediaDevices.getUserMedia({ video: true });
+            } catch (vErr) {
+              console.warn('[Video Capture] Video fallback:', vErr.message);
+            }
+          }
+
+          // 3. Combine Tracks into Unified Stream
+          const combinedTracks = [];
+          if (audioStream) {
+            audioStream.getAudioTracks().forEach(t => {
+              t.enabled = true;
+              combinedTracks.push(t);
+            });
+          }
+          if (videoStream) {
+            videoStream.getVideoTracks().forEach(t => {
+              t.enabled = true;
+              combinedTracks.push(t);
             });
           }
 
-          if (this.localStream) {
-            this.localStream.getAudioTracks().forEach(t => t.enabled = true);
-            this.localStream.getVideoTracks().forEach(t => t.enabled = true);
+          if (combinedTracks.length > 0) {
+            this.localStream = new MediaStream(combinedTracks);
+          } else {
+            throw new Error('No audio or video hardware tracks available');
           }
 
-          if (localVideo) {
+          if (localVideo && this.localStream) {
             localVideo.srcObject = this.localStream;
             localVideo.play().catch(() => {});
           }
@@ -8370,7 +8403,7 @@ table td strong {
           throw new Error('MediaDevices not available');
         }
       } catch (err) {
-        console.warn('[Video] Camera/Mic hardware notice:', err.message);
+        console.warn('[Media] Hardware notice:', err.message);
         if (simulationNotice) {
           simulationNotice.style.display = 'block';
           simulationNotice.innerHTML = '⚡ 2-Way Telemedicine Video Stream Active';
@@ -8379,13 +8412,17 @@ table td strong {
     }
 
     // -------------------------------------------------------------
-    // 5. LIVE MICROPHONE AUDIO VISUALIZER METER
+    // 5. LIVE MICROPHONE AUDIO VISUALIZER METER & ANDROID MIC RECONNECT
     // -------------------------------------------------------------
     startMicLevelMeter() {
       try {
         if (!this.localStream) return;
         const audioTrack = this.localStream.getAudioTracks()[0];
-        if (!audioTrack) return;
+        if (!audioTrack) {
+          const micStatusText = document.getElementById('micAudioStatusText');
+          if (micStatusText) micStatusText.textContent = 'Tap to Enable Mic';
+          return;
+        }
 
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
         if (!AudioCtx) return;
@@ -8398,6 +8435,7 @@ table td strong {
         source.connect(this.audioAnalyser);
 
         const meterBar = document.getElementById('micAudioLevelBar');
+        const micStatusText = document.getElementById('micAudioStatusText');
         const dataArray = new Uint8Array(this.audioAnalyser.frequencyBinCount);
 
         if (this.micMeterInterval) clearInterval(this.micMeterInterval);
@@ -8409,11 +8447,43 @@ table td strong {
             const avg = sum / dataArray.length;
             const percentage = Math.min(100, Math.max(10, Math.round((avg / 128) * 100)));
             meterBar.style.width = percentage + '%';
-            meterBar.style.background = this.isAudioMuted ? '#dc2626' : '#22c55e';
+            meterBar.style.background = this.isAudioMuted ? '#dc2626' : (percentage > 25 ? '#22c55e' : '#38bdf8');
+            if (micStatusText) {
+              micStatusText.textContent = this.isAudioMuted ? 'Muted' : (percentage > 25 ? 'Speaking...' : 'Live');
+            }
           }
         }, 150);
       } catch (e) {
         console.warn('[Audio Meter] Visualizer fallback:', e);
+      }
+    }
+
+    async reconnectAndroidMic() {
+      this.unlockAudioContext();
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const newAudioTrack = stream.getAudioTracks()[0];
+        if (newAudioTrack) {
+          newAudioTrack.enabled = true;
+          if (this.localStream) {
+            const oldTracks = this.localStream.getAudioTracks();
+            oldTracks.forEach(t => { t.stop(); this.localStream.removeTrack(t); });
+            this.localStream.addTrack(newAudioTrack);
+          }
+          if (this.peerConnection) {
+            const senders = this.peerConnection.getSenders();
+            const audioSender = senders.find(s => s.track && s.track.kind === 'audio');
+            if (audioSender) {
+              await audioSender.replaceTrack(newAudioTrack);
+            } else {
+              this.peerConnection.addTrack(newAudioTrack, stream);
+            }
+          }
+          this.startMicLevelMeter();
+          if (global.toast) global.toast('🎙️ Android Microphone Connected & Active!');
+        }
+      } catch (err) {
+        if (global.toast) global.toast('⚠️ Please allow microphone permissions in Android browser settings.');
       }
     }
 
@@ -8543,16 +8613,27 @@ table td strong {
       const facingText = this.currentFacingMode === 'user' ? 'Front Camera' : 'Back Camera';
 
       if (this.localStream) {
-        this.localStream.getTracks().forEach(t => t.stop());
+        this.localStream.getVideoTracks().forEach(t => t.stop());
       }
-      await this.initLocalMediaStream();
-
-      if (this.peerConnection && this.localStream) {
-        const videoTrack = this.localStream.getVideoTracks()[0];
-        const sender = this.peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
-        if (sender && videoTrack) {
-          sender.replaceTrack(videoTrack).catch(() => {});
+      
+      try {
+        const newVidStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: this.currentFacingMode, width: { ideal: 1280 }, height: { ideal: 720 } }
+        });
+        const newTrack = newVidStream.getVideoTracks()[0];
+        if (newTrack && this.localStream) {
+          const oldTrack = this.localStream.getVideoTracks()[0];
+          if (oldTrack) { oldTrack.stop(); this.localStream.removeTrack(oldTrack); }
+          this.localStream.addTrack(newTrack);
         }
+        if (this.peerConnection && newTrack) {
+          const sender = this.peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
+          if (sender) sender.replaceTrack(newTrack).catch(() => {});
+        }
+        const localVideo = document.getElementById('localVideoElement');
+        if (localVideo && this.localStream) localVideo.srcObject = this.localStream;
+      } catch (e) {
+        console.warn('Switch camera error:', e);
       }
 
       const badge = document.getElementById('videoCameraFacingBadge');
@@ -8836,11 +8917,13 @@ table td strong {
             </div>
 
             <div style="display:flex;align-items:center;gap:10px;">
-              <div style="display:flex;align-items:center;gap:6px;background:rgba(0,0,0,0.4);padding:4px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);">
+              <!-- ANDROID MIC STATUS / RECONNECT TRIGGER -->
+              <div onclick="videoCallController.reconnectAndroidMic()" title="Click to test/grant Android mic permissions" style="display:flex;align-items:center;gap:6px;background:rgba(0,0,0,0.4);padding:4px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);cursor:pointer;">
                 <span style="font-size:11px;color:#cbd5e1;">🎙️ Mic:</span>
                 <div style="width:40px;height:6px;background:#334155;border-radius:3px;overflow:hidden;">
                   <div id="micAudioLevelBar" style="width:20%;height:100%;background:#22c55e;transition:width 0.1s;"></div>
                 </div>
+                <span id="micAudioStatusText" style="font-size:10px;color:#38bdf8;font-weight:700;">Live</span>
               </div>
               <span id="videoCameraFacingBadge" style="background:rgba(255,255,255,0.1);color:#cbd5e1;font-size:11px;font-weight:700;padding:4px 8px;border-radius:8px;">📷 Front Camera</span>
               <span id="videoCallTimerDisplay" style="background:rgba(22,163,74,0.2);color:#22c55e;border:1px solid rgba(34,197,94,0.4);font-size:12px;font-weight:800;padding:4px 10px;border-radius:12px;font-family:'IBM Plex Mono',monospace;">⏱️ 00:00</span>
