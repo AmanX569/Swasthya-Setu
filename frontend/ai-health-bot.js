@@ -29,7 +29,7 @@
   const CLINICAL_KB = [
     {
       id: 'animal_bite_rabies',
-      primaryKeys: ['animal bite', 'dog bite', 'cat bite', 'monkey bite', 'rabies', 'kutte ne kata', 'dog scratch', 'animal scratch', 'dog bit'],
+      primaryKeys: ['dog bite', 'dog bit', 'stray dog', 'animal bite', 'cat bite', 'monkey bite', 'rabies', 'kutte ne kata', 'dog scratch', 'animal scratch', 'dog', 'kutta'],
       keywords: ['dog', 'cat', 'monkey', 'animal', 'bite', 'rabies', 'kutta', 'billi', 'bandar', 'saliva', 'arv', 'rig', 'hydrophobia'],
       title: 'Animal Bite & Anti-Rabies Emergency Protocol (जानवर / कुत्ते के काटने पर रेबीज प्रोटोकॉल)',
       severity: 'critical',
@@ -282,7 +282,7 @@
     },
     {
       id: 'cough_cold_sorethroat',
-      primaryKeys: ['cough', 'cold', 'sore throat', 'khasi', 'jukam', 'gala dard', 'throat pain', 'throat hurt', 'throat hurting', 'flu', 'tonsil'],
+      primaryKeys: ['cough', 'cough and cold', 'cold cough', 'sore throat', 'khasi', 'jukam', 'gala dard', 'throat pain', 'throat hurt', 'throat hurting', 'tonsil', 'runny nose', 'sneezing', 'phlegm'],
       keywords: ['cough', 'cold', 'sore throat', 'khasi', 'jukam', 'gala dard', 'throat', 'phlegm', 'mucus', 'sneezing', 'runny nose', 'tonsil', 'voice loss'],
       title: 'Cough, Cold & Sore Throat Care (खांसी, जुकाम व गले में खराश)',
       severity: 'mild',
@@ -468,7 +468,7 @@
     },
     {
       id: 'diabetes_hypoglycemia',
-      primaryKeys: ['sugar', 'diabetes', 'hypoglycemia', 'low sugar', 'sugar low', 'sugar high', 'madhumeh'],
+      primaryKeys: ['sugar', 'diabetes', 'hypoglycemia', 'low sugar', 'sugar low', 'sugar high', 'madhumeh', 'sugar level', 'blood sugar', 'shaking sugar', 'cold sweat', 'cold sweating'],
       keywords: ['sugar', 'diabetes', 'hypoglycemia', 'hyperglycemia', 'madhumeh', 'insulin', 'glucometer'],
       title: 'Blood Sugar & Hypoglycemia Management (मधुमेह व शुगर संतुलन)',
       severity: 'moderate',

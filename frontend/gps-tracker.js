@@ -163,7 +163,7 @@
     }
 
     
-                openGpsMapModal() {
+                    openGpsMapModal() {
       const modal = document.getElementById('liveGpsTrackingModal');
       if (modal) {
         modal.style.display = 'flex';
@@ -176,26 +176,21 @@
 
       this.ensureLeafletLoaded();
 
-      const tryInit = (retries = 0) => {
+      const refreshMap = () => {
         if (typeof global.L !== 'undefined') {
           this.initMap('patientLiveGpsMap');
           const inst = this.maps['patientLiveGpsMap'];
           if (inst && inst.map) {
-            inst.map.invalidateSize();
+            inst.map.invalidateSize(true);
             inst.map.setView([this.patientCoords.lat, this.patientCoords.lng], DEFAULT_REGION.zoom);
           }
-        } else if (retries < 25) {
-          setTimeout(() => tryInit(retries + 1), 100);
         }
       };
 
-      tryInit();
-      setTimeout(() => {
-        const inst = this.maps['patientLiveGpsMap'];
-        if (inst && inst.map) {
-          inst.map.invalidateSize();
-        }
-      }, 300);
+      // Multi-phase refresh ensures map renders crisply across all devices
+      setTimeout(refreshMap, 50);
+      setTimeout(refreshMap, 200);
+      setTimeout(refreshMap, 500);
     }
 
     closeGpsMapModal() {
@@ -309,8 +304,11 @@
       }
     }
 
-    buildMapHtmlStructure(container, containerId) {
+        buildMapHtmlStructure(container, containerId) {
       container.style.position = 'relative';
+      container.style.width = '100%';
+      container.style.height = '100%';
+      container.style.minHeight = '480px';
       container.style.overflow = 'hidden';
 
       container.innerHTML = `
@@ -364,8 +362,8 @@
           Google Maps · Swasthya Setu Telemedicine Grid
         </div>
 
-        <!-- LEAFLET CANVAS CONTAINER -->
-        <div class="gmaps-leaflet-canvas" style="width:100%;height:100%;min-height:360px;"></div>
+        <!-- LEAFLET CANVAS CONTAINER (ABSOLUTE INSET 0) -->
+        <div class="gmaps-leaflet-canvas" style="position:absolute;top:0;left:0;right:0;bottom:0;width:100%;height:100%;min-height:100%;z-index:1;background:#f2efe9;"></div>
       `;
     }
 

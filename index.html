@@ -8465,7 +8465,7 @@ body[data-theme="doom"] {
     }
 
     
-                openGpsMapModal() {
+                    openGpsMapModal() {
       const modal = document.getElementById('liveGpsTrackingModal');
       if (modal) {
         modal.style.display = 'flex';
@@ -8478,26 +8478,21 @@ body[data-theme="doom"] {
 
       this.ensureLeafletLoaded();
 
-      const tryInit = (retries = 0) => {
+      const refreshMap = () => {
         if (typeof global.L !== 'undefined') {
           this.initMap('patientLiveGpsMap');
           const inst = this.maps['patientLiveGpsMap'];
           if (inst && inst.map) {
-            inst.map.invalidateSize();
+            inst.map.invalidateSize(true);
             inst.map.setView([this.patientCoords.lat, this.patientCoords.lng], DEFAULT_REGION.zoom);
           }
-        } else if (retries < 25) {
-          setTimeout(() => tryInit(retries + 1), 100);
         }
       };
 
-      tryInit();
-      setTimeout(() => {
-        const inst = this.maps['patientLiveGpsMap'];
-        if (inst && inst.map) {
-          inst.map.invalidateSize();
-        }
-      }, 300);
+      // Multi-phase refresh ensures map renders crisply across all devices
+      setTimeout(refreshMap, 50);
+      setTimeout(refreshMap, 200);
+      setTimeout(refreshMap, 500);
     }
 
     closeGpsMapModal() {
@@ -8611,8 +8606,11 @@ body[data-theme="doom"] {
       }
     }
 
-    buildMapHtmlStructure(container, containerId) {
+        buildMapHtmlStructure(container, containerId) {
       container.style.position = 'relative';
+      container.style.width = '100%';
+      container.style.height = '100%';
+      container.style.minHeight = '480px';
       container.style.overflow = 'hidden';
 
       container.innerHTML = `
@@ -8666,8 +8664,8 @@ body[data-theme="doom"] {
           Google Maps · Swasthya Setu Telemedicine Grid
         </div>
 
-        <!-- LEAFLET CANVAS CONTAINER -->
-        <div class="gmaps-leaflet-canvas" style="width:100%;height:100%;min-height:360px;"></div>
+        <!-- LEAFLET CANVAS CONTAINER (ABSOLUTE INSET 0) -->
+        <div class="gmaps-leaflet-canvas" style="position:absolute;top:0;left:0;right:0;bottom:0;width:100%;height:100%;min-height:100%;z-index:1;background:#f2efe9;"></div>
       `;
     }
 
@@ -10668,7 +10666,7 @@ body[data-theme="doom"] {
   const CLINICAL_KB = [
     {
       id: 'animal_bite_rabies',
-      primaryKeys: ['animal bite', 'dog bite', 'cat bite', 'monkey bite', 'rabies', 'kutte ne kata', 'dog scratch', 'animal scratch', 'dog bit'],
+      primaryKeys: ['dog bite', 'dog bit', 'stray dog', 'animal bite', 'cat bite', 'monkey bite', 'rabies', 'kutte ne kata', 'dog scratch', 'animal scratch', 'dog', 'kutta'],
       keywords: ['dog', 'cat', 'monkey', 'animal', 'bite', 'rabies', 'kutta', 'billi', 'bandar', 'saliva', 'arv', 'rig', 'hydrophobia'],
       title: 'Animal Bite & Anti-Rabies Emergency Protocol (जानवर / कुत्ते के काटने पर रेबीज प्रोटोकॉल)',
       severity: 'critical',
@@ -10921,7 +10919,7 @@ body[data-theme="doom"] {
     },
     {
       id: 'cough_cold_sorethroat',
-      primaryKeys: ['cough', 'cold', 'sore throat', 'khasi', 'jukam', 'gala dard', 'throat pain', 'throat hurt', 'throat hurting', 'flu', 'tonsil'],
+      primaryKeys: ['cough', 'cough and cold', 'cold cough', 'sore throat', 'khasi', 'jukam', 'gala dard', 'throat pain', 'throat hurt', 'throat hurting', 'tonsil', 'runny nose', 'sneezing', 'phlegm'],
       keywords: ['cough', 'cold', 'sore throat', 'khasi', 'jukam', 'gala dard', 'throat', 'phlegm', 'mucus', 'sneezing', 'runny nose', 'tonsil', 'voice loss'],
       title: 'Cough, Cold & Sore Throat Care (खांसी, जुकाम व गले में खराश)',
       severity: 'mild',
@@ -11107,7 +11105,7 @@ body[data-theme="doom"] {
     },
     {
       id: 'diabetes_hypoglycemia',
-      primaryKeys: ['sugar', 'diabetes', 'hypoglycemia', 'low sugar', 'sugar low', 'sugar high', 'madhumeh'],
+      primaryKeys: ['sugar', 'diabetes', 'hypoglycemia', 'low sugar', 'sugar low', 'sugar high', 'madhumeh', 'sugar level', 'blood sugar', 'shaking sugar', 'cold sweat', 'cold sweating'],
       keywords: ['sugar', 'diabetes', 'hypoglycemia', 'hyperglycemia', 'madhumeh', 'insulin', 'glucometer'],
       title: 'Blood Sugar & Hypoglycemia Management (मधुमेह व शुगर संतुलन)',
       severity: 'moderate',
