@@ -1,20 +1,25 @@
 /**
  * =========================================================
- * SWASTHYA SETU - DAILY.CO HD VIDEO TELECONSULTATION ENGINE (video-call.js)
- * High-Definition Prebuilt Video Rooms, In-Call e-Rx Writer, Chat & Doctor Alerts
+ * SWASTHYA SETU - INSTANT HD VIDEO TELECONSULTATION ENGINE (video-call.js)
+ * Instant Zero-Config HD Video Rooms, In-Call e-Rx Writer, Chat & Doctor Alerts
  * =========================================================
  */
 
 (function(global) {
   'use strict';
 
-  // Default Daily.co Prebuilt Telemedicine Room
-  const DEFAULT_DAILY_ROOM_URL = 'https://swasthya-setu.daily.co/teleconsult-room';
+  // Helper to generate guaranteed instant prebuilt room URL
+  function generateInstantRoomUrl(token, customUrl) {
+    if (customUrl && typeof customUrl === 'string' && customUrl.trim().startsWith('http')) {
+      return customUrl.trim();
+    }
+    const cleanId = (token || ('VID-' + Math.floor(1000 + Math.random() * 9000))).replace(/[^a-zA-Z0-9]/g, '');
+    return 'https://meet.jit.si/SwasthyaSetu_OPD_' + cleanId + '#config.prejoinPageEnabled=false&config.startWithAudioMuted=false&config.startWithVideoMuted=false';
+  }
 
   class VideoCallController {
     constructor() {
       this.store = null;
-      this.currentDailyRoomUrl = DEFAULT_DAILY_ROOM_URL;
       this.callStartTime = null;
       this.callTimerInterval = null;
       this.currentCallData = null;
@@ -87,7 +92,7 @@
     }
 
     // -------------------------------------------------------------
-    // 2. PATIENT INITIATES CALL (OPENS DAILY.CO PREBUILT ROOM)
+    // 2. PATIENT INITIATES CALL (OPENS INSTANT PREBUILT ROOM)
     // -------------------------------------------------------------
     async startVideoCall(callDetails = {}) {
       if (!this.store && global.appStore) this.store = global.appStore;
@@ -101,11 +106,12 @@
       const recipientName = callDetails.recipientName || 'Dr. Priya Sharma, MBBS, MD';
       const facilitatorName = callDetails.facilitatorName || (callerRole === 'worker' ? activeUser.name : null);
 
-      const roomUrl = callDetails.roomUrl || this.currentDailyRoomUrl;
+      const token = 'VID-' + Math.floor(1000 + Math.random() * 9000);
+      const roomUrl = generateInstantRoomUrl(token, callDetails.roomUrl);
 
       this.currentCallData = {
         id: 'CALL-' + String(Date.now()).slice(-4),
-        token: 'VID-' + Math.floor(1000 + Math.random() * 9000),
+        token,
         callerRole,
         callerName,
         callerPhone,
@@ -122,10 +128,10 @@
       };
 
       this.inCallMessages = [
-        { sender: 'System', text: '🔒 Daily.co HD Room Active: ' + recipientName + ' ↔ ' + callerName, time: this.currentCallData.time }
+        { sender: 'System', text: '🔒 HD Room Active: ' + recipientName + ' ↔ ' + callerName, time: this.currentCallData.time }
       ];
 
-      // Render Modal & Open Daily.co Viewport
+      // Render Modal & Open Viewport
       this.renderVideoCallModal();
       const modal = document.getElementById('videoCallModal');
       if (modal) modal.style.display = 'flex';
@@ -154,7 +160,7 @@
       this.startCallTimer();
 
       if (global.toast) {
-        global.toast('📞 Daily.co HD Video Room Loaded. Calling ' + recipientName + '...');
+        global.toast('📞 HD Video Room Loaded. Calling ' + recipientName + '...');
       }
     }
 
@@ -186,7 +192,7 @@
           </div>
 
           <span style="background:rgba(34,197,94,0.2);color:#4ade80;font-size:12px;font-weight:800;padding:4px 12px;border-radius:20px;text-transform:uppercase;letter-spacing:1px;">
-            Daily.co HD Teleconsultation Call
+            Incoming Live Video Teleconsultation
           </span>
 
           <h3 style="color:#ffffff;font-size:20px;font-weight:900;margin:12px 0 4px;">${signal.callerName || 'Citizen Patient'}</h3>
@@ -240,7 +246,7 @@
       const state = this.store ? this.store.getState() : {};
       const activeDoctor = (state.session && state.session.user) || { name: 'Dr. Priya Sharma, MBBS, MD' };
 
-      const roomUrl = signal.roomUrl || this.currentDailyRoomUrl;
+      const roomUrl = signal.roomUrl || generateInstantRoomUrl(signal.token || 'VID-101');
 
       this.currentCallData = {
         id: signal.callId || ('CALL-' + Date.now()),
@@ -259,10 +265,10 @@
       };
 
       this.inCallMessages = [
-        { sender: 'System', text: '🔒 Doctor Joined Daily.co HD Room · 2-Way High Definition Video & Audio Connected', time: this.currentCallData.time }
+        { sender: 'System', text: '🔒 Doctor Joined HD Room · 2-Way High Definition Video & Audio Connected', time: this.currentCallData.time }
       ];
 
-      // Open Doctor Video Window with Daily.co Prebuilt Iframe
+      // Open Doctor Video Window
       this.renderVideoCallModal();
       const callModal = document.getElementById('videoCallModal');
       if (callModal) callModal.style.display = 'flex';
@@ -277,24 +283,24 @@
       }
 
       const statusEl = document.getElementById('videoCallStatusBanner');
-      if (statusEl) statusEl.innerHTML = '🟢 Connected · Daily.co HD Video & Audio Active with ' + this.currentCallData.callerName;
+      if (statusEl) statusEl.innerHTML = '🟢 Connected · Live HD Video & Audio Active with ' + this.currentCallData.callerName;
 
       this.startCallTimer();
     }
 
     async handleCallAcceptedByDoctor(signal) {
       const statusEl = document.getElementById('videoCallStatusBanner');
-      if (statusEl) statusEl.innerHTML = '🟢 Connected · Daily.co HD Video & Audio Active with ' + (signal.doctorName || 'Doctor');
+      if (statusEl) statusEl.innerHTML = '🟢 Connected · Live HD Video & Audio Active with ' + (signal.doctorName || 'Doctor');
 
       this.inCallMessages.push({
         sender: 'System',
-        text: '🟢 Doctor joined the call. Daily.co HD Audio & Video Streaming Active.',
+        text: '🟢 Doctor joined the call. Live HD Audio & Video Streaming Active.',
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       });
       this.renderChatMessages();
 
       if (global.toast) {
-        global.toast('🟢 ' + (signal.doctorName || 'Doctor') + ' joined the Daily.co video room!');
+        global.toast('🟢 ' + (signal.doctorName || 'Doctor') + ' joined the video room!');
       }
     }
 
@@ -496,7 +502,7 @@
       this.closeCallModal();
 
       if (global.toast) {
-        global.toast('📞 Daily.co Video Call Completed (' + durationStr + ') · Logged to History');
+        global.toast('📞 Video Call Completed (' + durationStr + ') · Logged to History');
       }
 
       this.refreshAllCallHistories();
@@ -525,13 +531,13 @@
     }
 
     openRoomInNewTab() {
-      const url = (this.currentCallData && this.currentCallData.roomUrl) || this.currentDailyRoomUrl;
+      const url = (this.currentCallData && this.currentCallData.roomUrl) || generateInstantRoomUrl('ROOM-101');
       window.open(url, '_blank');
-      if (global.toast) global.toast('🌐 Daily.co HD Room opened in new tab.');
+      if (global.toast) global.toast('🌐 HD Video Room opened in full browser tab.');
     }
 
     // -------------------------------------------------------------
-    // 6. RENDER DAILY.CO VIDEO MODAL VIEWPORT
+    // 6. RENDER INSTANT VIDEO MODAL VIEWPORT
     // -------------------------------------------------------------
     renderVideoCallModal() {
       let modal = document.getElementById('videoCallModal');
@@ -552,7 +558,7 @@
 
       const isDoctor = (this.store && this.store.getState().session && this.store.getState().session.role === 'doctor');
       const data = this.currentCallData || {};
-      const roomUrl = data.roomUrl || this.currentDailyRoomUrl;
+      const roomUrl = data.roomUrl || generateInstantRoomUrl(data.token || 'VID-101');
 
       modal.innerHTML = `
         <div style="width:100%;max-width:1180px;height:94vh;background:#0f172a;border:1.5px solid rgba(2,132,199,0.4);border-radius:20px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 25px 60px rgba(0,0,0,0.8);position:relative;">
@@ -565,7 +571,7 @@
               </div>
               <div>
                 <strong style="color:#f8fafc;font-size:14px;display:block;">${data.recipientName} ↔ ${data.callerName}</strong>
-                <small id="videoCallStatusBanner" style="color:#38bdf8;font-size:11px;font-weight:700;">🟢 Daily.co Ultra-HD Teleconsultation (Token: ${data.token})</small>
+                <small id="videoCallStatusBanner" style="color:#38bdf8;font-size:11px;font-weight:700;">🟢 Live Ultra-HD Teleconsultation (Token: ${data.token})</small>
               </div>
             </div>
 
@@ -578,17 +584,17 @@
             </div>
           </div>
 
-          <!-- MAIN VIDEO STAGE (DAILY.CO EMBEDDED PREBUILT ROOM) -->
+          <!-- MAIN VIDEO STAGE (INSTANT PREBUILT ROOM) -->
           <div style="flex:1;position:relative;background:#020617;display:flex;overflow:hidden;">
             
-            <!-- DAILY.CO EMBEDDED IFRAME -->
+            <!-- EMBEDDED IFRAME -->
             <div style="flex:1;position:relative;background:#000000;display:flex;align-items:center;justify-content:center;">
               <iframe
                 id="dailyVideoIframe"
                 src="${roomUrl}"
                 allow="camera; microphone; fullscreen; display-capture; autoplay"
                 style="width:100%;height:100%;border:0;position:absolute;inset:0;"
-                title="Daily.co Video Room"
+                title="Swasthya Setu Video Room"
               ></iframe>
             </div>
 
