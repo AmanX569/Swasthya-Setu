@@ -393,8 +393,9 @@
 
         const patch = {};
 
-        if (profRes.data && profRes.data.length) {
-          const cloudPatients = profRes.data.map(p => ({
+        // 1. PATIENTS / CITIZEN PROFILES: Strict Cloud Source of Truth
+        if (profRes && Array.isArray(profRes.data)) {
+          patch.patients = profRes.data.map(p => ({
             id: p.id,
             abhaId: p.abha_id,
             name: p.name,
@@ -407,19 +408,10 @@
             pin: p.pin || p.password_hash || p.password || '123456'
           }));
 
-          const existingPatients = global.appStore.state.patients || [];
-          cloudPatients.forEach(cp => {
-            const idx = existingPatients.findIndex(ep => ep.phone === cp.phone || ep.abhaId === cp.abhaId || ep.id === cp.id);
-            if (idx >= 0) {
-              existingPatients[idx] = Object.assign({}, existingPatients[idx], cp);
-            } else {
-              existingPatients.push(cp);
-            }
-          });
-          patch.patients = existingPatients;
-
-          if (!global.appStore.state.currentUser && patch.patients.length) {
+          if (patch.patients.length) {
             patch.currentUser = patch.patients[0];
+          } else {
+            patch.currentUser = null;
           }
         }
 
@@ -449,7 +441,7 @@
           patch.staff = existingStaff;
         }
 
-        if (qRes.data && qRes.data.length) {
+        if (qRes && Array.isArray(qRes.data)) {
           patch.consultQueue = qRes.data.map(q => ({
             id: q.id,
             token: q.token,
@@ -527,7 +519,7 @@
           }));
         }
 
-        if (rxRes.data && rxRes.data.length) {
+        if (rxRes && Array.isArray(rxRes.data)) {
           patch.prescriptions = rxRes.data.map(r => ({
             id: r.id,
             token: r.token,
