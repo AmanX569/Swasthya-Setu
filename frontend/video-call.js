@@ -1,7 +1,7 @@
 /**
  * =========================================================
- * SWASTHYA SETU - HIGH-FIDELITY 2-WAY WEBRTC AUDIO & HD VIDEO ENGINE (video-call.js)
- * Clean Track Binding, Speaker Boost, Mic Level Meter & 720p HD Video
+ * SWASTHYA SETU - UNIVERSAL 2-WAY WEBRTC AUDIO & HD VIDEO ENGINE (video-call.js)
+ * Resilient Mic Capture, Chromium Audio Routing, Speaker Boost & 720p HD Video
  * =========================================================
  */
 
@@ -442,8 +442,9 @@
         if (this.localStream) {
           this.localStream.getTracks().forEach(track => {
             try {
+              track.enabled = true;
               this.peerConnection.addTrack(track, this.localStream);
-              console.log('[WebRTC] Added local track:', track.kind);
+              console.log('[WebRTC] Successfully added local track:', track.kind, track.label);
             } catch (e) {
               console.warn('[WebRTC] Track add warning:', e);
             }
@@ -452,7 +453,7 @@
 
         // On Remote Track Received -> Stream Video & Route Audio Directly to Speakers
         this.peerConnection.ontrack = (event) => {
-          console.log('[WebRTC] Remote media track received:', event.track.kind);
+          console.log('[WebRTC] Remote media track received on device:', event.track.kind);
           let stream = event.streams && event.streams[0];
           if (!stream) {
             if (!this.remoteStream) this.remoteStream = new MediaStream();
@@ -471,13 +472,17 @@
             remoteVideo.play().catch(e => console.warn('Remote video playback:', e));
           }
 
-          // 2. Offscreen Unmuted Audio Element Output
+          // 2. Visible Unmuted Audio Element Output
           const remoteAudio = document.getElementById('remoteAudioElement');
           if (remoteAudio) {
-            remoteAudio.srcObject = stream;
+            if (event.track.kind === 'audio') {
+              remoteAudio.srcObject = new MediaStream([event.track]);
+            } else {
+              remoteAudio.srcObject = stream;
+            }
             remoteAudio.muted = false;
             remoteAudio.volume = 1.0;
-            remoteAudio.play().catch(e => console.warn('Remote audio playback:', e));
+            remoteAudio.play().catch(e => console.warn('Remote audio element playback:', e));
           }
 
           // 3. Direct Web Audio Context Hardware Routing (Direct to Physical Device Speakers)
@@ -489,10 +494,10 @@
                 if (this.audioContext.state === 'suspended') this.audioContext.resume();
                 const audioSource = this.audioContext.createMediaStreamSource(new MediaStream([event.track]));
                 const gainNode = this.audioContext.createGain();
-                gainNode.gain.value = 1.5; // Audio Boost
+                gainNode.gain.value = 2.0; // 2x Voice Gain Amplification
                 audioSource.connect(gainNode);
                 gainNode.connect(this.audioContext.destination);
-                console.log('[WebRTC Audio] Remote voice stream amplified and routed to physical speakers!');
+                console.log('[WebRTC Audio] Remote voice stream connected directly to device speakers!');
               }
             } catch (err) {
               console.warn('[WebRTC Audio] AudioContext bridge notice:', err);
@@ -521,22 +526,35 @@
 
       try {
         if (navigator.mediaDevices && typeof navigator.mediaDevices.getUserMedia === 'function') {
-          const constraints = {
-            audio: {
-              echoCancellation: true,
-              noiseSuppression: true,
-              autoGainControl: true,
-              channelCount: 1,
-              sampleRate: 48000
-            },
-            video: {
-              facingMode: this.currentFacingMode,
-              width: { ideal: 1280, min: 640 },
-              height: { ideal: 720, min: 480 },
-              frameRate: { ideal: 30, min: 20 }
-            }
-          };
-          this.localStream = await navigator.mediaDevices.getUserMedia(constraints);
+          try {
+            // First attempt: High quality echo-cancelled microphone + 720p HD video
+            this.localStream = await navigator.mediaDevices.getUserMedia({
+              audio: {
+                echoCancellation: true,
+                noiseSuppression: true,
+                autoGainControl: true
+              },
+              video: {
+                facingMode: this.currentFacingMode,
+                width: { ideal: 1280, min: 640 },
+                height: { ideal: 720, min: 480 },
+                frameRate: { ideal: 30, min: 20 }
+              }
+            });
+          } catch (strictErr) {
+            console.warn('[Media] Strict constraints rejected, falling back to universal audio/video:', strictErr.message);
+            // Resilient universal fallback for all mobile/desktop devices
+            this.localStream = await navigator.mediaDevices.getUserMedia({
+              audio: true,
+              video: true
+            });
+          }
+
+          if (this.localStream) {
+            this.localStream.getAudioTracks().forEach(t => t.enabled = true);
+            this.localStream.getVideoTracks().forEach(t => t.enabled = true);
+          }
+
           if (localVideo) {
             localVideo.srcObject = this.localStream;
             localVideo.play().catch(() => {});
@@ -546,7 +564,7 @@
           throw new Error('MediaDevices not available');
         }
       } catch (err) {
-        console.warn('[Video] Camera hardware notice:', err.message);
+        console.warn('[Video] Camera/Mic hardware notice:', err.message);
         if (simulationNotice) {
           simulationNotice.style.display = 'block';
           simulationNotice.innerHTML = '⚡ 2-Way Telemedicine Video Stream Active';
@@ -1033,8 +1051,8 @@
               <!-- REAL REMOTE VIDEO STREAM (WEBRTC) -->
               <video id="remoteVideoElement" autoplay playsinline style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;"></video>
 
-              <!-- DEDICATED UNMUTED REMOTE AUDIO STREAM (POSITIONED OFFSCREEN TO PREVENT SLEEP) -->
-              <audio id="remoteAudioElement" autoplay playsinline style="position:absolute;left:-9999px;opacity:0.01;width:1px;height:1px;"></audio>
+              <!-- DEDICATED UNMUTED REMOTE AUDIO STREAM (IN DOM TO PREVENT MOBILE SLEEP) -->
+              <audio id="remoteAudioElement" autoplay playsinline style="position:absolute;top:6px;left:6px;width:120px;height:24px;opacity:0.01;z-index:1;"></audio>
 
               <!-- DUAL-MODE BACKUP CANVAS STREAM (HIGH RES 640x480) -->
               <canvas id="remoteVideoCanvas" width="640" height="480" style="display:none;width:100%;height:100%;object-fit:cover;position:absolute;inset:0;"></canvas>
