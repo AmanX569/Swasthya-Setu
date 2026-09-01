@@ -8465,7 +8465,7 @@ body[data-theme="doom"] {
     }
 
     
-    openGpsMapModal() {
+        openGpsMapModal() {
       const modal = document.getElementById('liveGpsTrackingModal');
       if (modal) {
         modal.style.display = 'flex';
@@ -8473,6 +8473,8 @@ body[data-theme="doom"] {
           document.body.style.overflow = 'hidden';
         }
       }
+      // Ensure Leaflet is loaded and initialize map
+      this.ensureLeafletLoaded();
       setTimeout(() => {
         this.initMap('patientLiveGpsMap');
         const inst = this.maps['patientLiveGpsMap'];
@@ -8480,7 +8482,13 @@ body[data-theme="doom"] {
           inst.map.invalidateSize();
           inst.map.setView([this.patientCoords.lat, this.patientCoords.lng], DEFAULT_REGION.zoom);
         }
-      }, 150);
+      }, 100);
+      setTimeout(() => {
+        const inst = this.maps['patientLiveGpsMap'];
+        if (inst && inst.map) {
+          inst.map.invalidateSize();
+        }
+      }, 350);
     }
 
     closeGpsMapModal() {
@@ -13709,6 +13717,7 @@ body[data-theme="doom"] {
 
 
   
+  
 
 
 
@@ -14521,7 +14530,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     <!-- MAP BODY -->
     <div style="flex:1;position:relative;width:100%;height:100%;overflow:hidden;background:#f2efe9;">
-      <div id="patientLiveGpsMap" style="width:100%;height:100%;min-height:100%;"></div>
+      <div id="patientLiveGpsMap" style="width:100%;height:100%;min-height:480px;position:relative;"></div>
     </div>
 
     <!-- MODAL FOOTER DRIVER HUD -->
