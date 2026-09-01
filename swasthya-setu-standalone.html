@@ -817,6 +817,110 @@ table td strong {
   display: none;
 }
 
+
+/* 4. DOOM GREEN (CYBER MATRIX / TACTICAL TOXIC EMERALD) */
+[data-theme="doom"], body[data-theme="doom"] {
+  --void-950: #020b06;
+  --void-900: #04180d;
+  --glass-1: rgba(3, 20, 11, 0.88);
+  --glass-2: rgba(5, 30, 17, 0.94);
+  --glass-border: rgba(16, 185, 129, 0.35);
+  --primary: #10b981;
+  --primary-dark: #047857;
+  --primary-bright: #00ff88;
+  --accent: #22c55e;
+  --ink: #f0fdf4;
+  --ink-dim: #bbf7d0;
+  --muted: #6ee7b7;
+  --line: rgba(16, 185, 129, 0.22);
+  --topbar-bg: rgba(2, 11, 6, 0.95);
+  --body-bg: #020b06;
+  --shadow-panel: 0 10px 35px -5px rgba(16, 185, 129, 0.25), 0 4px 12px rgba(0, 0, 0, 0.8);
+  color-scheme: dark;
+}
+
+[data-theme="doom"] body {
+  background-color: #020b06 !important;
+  background-image:
+    radial-gradient(100% 70% at 50% -10%, rgba(16, 185, 129, 0.18) 0%, transparent 70%),
+    radial-gradient(60% 40% at 85% 15%, rgba(0, 255, 136, 0.12) 0%, transparent 60%),
+    linear-gradient(180deg, #020b06 0%, #04180d 100%) !important;
+  background-attachment: fixed !important;
+}
+
+[data-theme="doom"] .top-appbar {
+  background: rgba(2, 11, 6, 0.92) !important;
+  backdrop-filter: blur(20px) !important;
+  border-bottom: 1.5px solid rgba(0, 255, 136, 0.35) !important;
+  box-shadow: 0 4px 25px rgba(0, 255, 136, 0.15) !important;
+}
+
+[data-theme="doom"] .glass-panel,
+[data-theme="doom"] .pillar-card,
+[data-theme="doom"] .auth-form-card,
+[data-theme="doom"] .rx-glass-card {
+  background: rgba(4, 22, 13, 0.85) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1.5px solid rgba(16, 185, 129, 0.35) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 12px 36px -8px rgba(0, 255, 136, 0.16), 0 4px 14px rgba(0, 0, 0, 0.6) !important;
+  color: #f0fdf4 !important;
+}
+
+[data-theme="doom"] .glass-panel:hover,
+[data-theme="doom"] .pillar-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(0, 255, 136, 0.65) !important;
+  box-shadow: 0 16px 40px -6px rgba(0, 255, 136, 0.3), 0 6px 18px rgba(0, 0, 0, 0.7) !important;
+}
+
+[data-theme="doom"] .btn-glass {
+  background: rgba(6, 30, 18, 0.8) !important;
+  border: 1.5px solid rgba(16, 185, 129, 0.4) !important;
+  color: #00ff88 !important;
+  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.15) !important;
+}
+
+[data-theme="doom"] .btn-glass:hover {
+  background: rgba(16, 185, 129, 0.25) !important;
+  border-color: #00ff88 !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 20px rgba(0, 255, 136, 0.4) !important;
+}
+
+[data-theme="doom"] .auth-btn-primary {
+  background: linear-gradient(135deg, #059669, #10b981) !important;
+  border: 1px solid #34d399 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 18px rgba(16, 185, 129, 0.45) !important;
+}
+
+[data-theme="doom"] .input-field {
+  background: rgba(3, 20, 11, 0.9) !important;
+  border: 1.5px solid rgba(16, 185, 129, 0.4) !important;
+  color: #00ff88 !important;
+}
+
+[data-theme="doom"] .input-field:focus {
+  border-color: #00ff88 !important;
+  box-shadow: 0 0 0 3px rgba(0, 255, 136, 0.3) !important;
+}
+
+[data-theme="doom"] #activeUserBadge {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(0, 255, 136, 0.38)) !important;
+  border: 1.5px solid #00ff88 !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 18px rgba(0, 255, 136, 0.35) !important;
+}
+
+[data-theme="doom"] #langSelect {
+  background: rgba(6, 30, 18, 0.85) !important;
+  border: 1.5px solid #10b981 !important;
+  color: #00ff88 !important;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.25) !important;
+}
+
 </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -12494,8 +12598,29 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
       </div>
 
-    </div>
+    
+      <!-- 4. DOOM GREEN (CYBER MATRIX) -->
+      <div onclick="selectTheme('doom')" id="themeCardDoom" class="theme-select-card" style="cursor:pointer;border:2px solid transparent;background:linear-gradient(135deg, #020b06 0%, #04180d 100%);border-radius:14px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 4px 16px rgba(0,255,136,0.15);transition:all 0.2s ease;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="width:42px;height:42px;border-radius:12px;background:rgba(0,255,136,0.18);color:#00ff88;border:1px solid #00ff88;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 0 12px rgba(0,255,136,0.3);">
+            ☣️
+          </div>
+          <div>
+            <div style="font-size:15px;font-weight:800;color:#00ff88;display:flex;align-items:center;gap:8px;">
+              <span>Doom Emerald (Cyber Matrix)</span>
+              <span id="badgeDoomActive" style="display:none;background:#00ff88;color:#020b06;font-size:10px;font-weight:900;padding:2px 8px;border-radius:6px;">Active</span>
+            </div>
+            <small style="color:#6ee7b7;font-size:12px;font-weight:600;">Futuristic cyber matrix with glowing toxic emerald neon & obsidian glass</small>
+          </div>
+        </div>
+        <div style="display:flex;gap:4px;">
+          <span style="width:14px;height:14px;border-radius:50%;background:#020b06;border:1px solid rgba(0,255,136,0.4);"></span>
+          <span style="width:14px;height:14px;border-radius:50%;background:#10b981;"></span>
+          <span style="width:14px;height:14px;border-radius:50%;background:#00ff88;box-shadow:0 0 8px #00ff88;"></span>
+        </div>
+      </div>
 
+    </div>
     <div style="display:flex;justify-content:flex-end;">
       <button type="button" class="auth-btn-primary" style="background:#0284c7;border:none;padding:10px 20px;font-size:13px;font-weight:800;" onclick="closeThemeSelectorModal()">
         ✓ Done
