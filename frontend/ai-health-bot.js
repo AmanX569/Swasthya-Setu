@@ -25,12 +25,12 @@
     'tell', 'give', 'suggest', 'need', 'want', 'please', 'help', 'doctor', 'patient'
   ]);
 
-  // Comprehensive Clinical Knowledgebase across 20+ Primary Healthcare Domains
+    // Comprehensive Clinical Knowledgebase across 20+ Primary Healthcare Domains
   const CLINICAL_KB = [
     {
       id: 'animal_bite_rabies',
-      primaryKeys: ['animal bite', 'dog bite', 'cat bite', 'monkey bite', 'rabies', 'kutte ne kata', 'dog scratch', 'animal scratch'],
-      keywords: ['dog', 'cat', 'monkey', 'animal', 'bite', 'rabies', 'kutta', 'billi', 'bandar', 'kutta kata', 'saliva', 'rabies vaccine', 'arv', 'rig', 'hydrophobia'],
+      primaryKeys: ['animal bite', 'dog bite', 'cat bite', 'monkey bite', 'rabies', 'kutte ne kata', 'dog scratch', 'animal scratch', 'dog bit'],
+      keywords: ['dog', 'cat', 'monkey', 'animal', 'bite', 'rabies', 'kutta', 'billi', 'bandar', 'saliva', 'arv', 'rig', 'hydrophobia'],
       title: 'Animal Bite & Anti-Rabies Emergency Protocol (जानवर / कुत्ते के काटने पर रेबीज प्रोटोकॉल)',
       severity: 'critical',
       severityLabel: '🔴 CRITICAL EMERGENCY · ANTI-RABIES VACCINATION (ARV)',
@@ -61,8 +61,8 @@
     },
     {
       id: 'tetanus_rusty_metal',
-      primaryKeys: ['rusty metal', 'rusty nail', 'rust', 'tetanus', 'metal injury', 'lohe se chot', 'puncture wound', 'rusty wire'],
-      keywords: ['rusty', 'metal', 'rust', 'nail', 'loha', 'tin', 'wire', 'blade', 'tetanus', 'tt', 'tetanus toxoid', 'lockjaw', 'dhanusthankar', 'iron cut'],
+      primaryKeys: ['rusty metal', 'rusty nail', 'rust', 'tetanus', 'metal injury', 'lohe se chot', 'puncture wound', 'rusty wire', 'stepped on rusty', 'iron cut', 'rusty iron'],
+      keywords: ['rusty', 'metal', 'rust', 'nail', 'loha', 'tin', 'wire', 'blade', 'tetanus', 'tt', 'tetanus toxoid', 'lockjaw', 'dhanusthankar'],
       title: 'Rusty Metal Injury & Tetanus Protocol (जंग लगे लोहे से चोट व टिटनेस रोकथाम)',
       severity: 'moderate',
       severityLabel: '🟡 URGENT FIRST AID · TETANUS TT SHOT WITHIN 24 HOURS',
@@ -94,7 +94,7 @@
     },
     {
       id: 'fever_hyperpyrexia',
-      primaryKeys: ['high fever', 'fever', 'fiver', 'fvr', 'temperature', 'bukhar', 'jwaram'],
+      primaryKeys: ['high fever', 'fever', 'fiver', 'fvr', 'temperature', 'bukhar', 'jwaram', 'body hot'],
       keywords: ['fever', 'fiver', 'fvr', 'temperature', 'bukhar', 'jwaram', 'chills', 'hot body', 'shivering', '101', '102', '103', '104', 'pyrexia'],
       title: 'High Fever & Hyperpyrexia (उच्च बुखार व कपकंपी)',
       severity: 'moderate',
@@ -123,6 +123,100 @@
         'Has a rapid malaria card test or CBC blood test been done?'
       ],
       audioSummary: 'High fever care: Do tepid sponging with room temperature water on forehead and armpits. Stay hydrated with ORS and take Paracetamol 500mg after food. If fever exceeds 103 degrees or seizures occur, visit nearest PHC.'
+    },
+    {
+      id: 'chest_pain_cardiac',
+      primaryKeys: ['chest pain', 'chest hurt', 'chest hurting', 'chest hurts', 'heart attack', 'angina', 'cardiac', 'chhati me dard', 'sineme dard', 'heart hurt', 'chest tight', 'chest pressure'],
+      keywords: ['chest', 'heart', 'cardiac', 'angina', 'chhati', 'gunde', 'sineme', 'left arm pain'],
+      title: 'Acute Chest Pain & Cardiac Alert (छाती में दर्द व दिल का दौरा)',
+      severity: 'critical',
+      severityLabel: '🔴 CRITICAL CARDIAC ALERT · CALL 108 IMMEDIATELY',
+      severityColor: '#dc2626',
+      summary: 'Crushing chest tightness radiating to left arm/jaw with cold sweating requires immediate hospital emergency ECG.',
+      steps: [
+        '**Call 108 Emergency**: Request an Advanced Life Support (ALS) Ambulance with defibrillator and ECG.',
+        '**Sit in W-Position**: Help patient sit upright with knees bent and back firmly supported to reduce heart workload.',
+        '**Loosen Tight Clothing**: Unbutton shirt collar, tie, and belt for free breathing.',
+        '**Chew Soluble Aspirin**: If conscious and not allergic, chew 1 Soluble Aspirin (300mg/325mg) immediately.'
+      ],
+      medicines: [
+        '**Aspirin 300mg / 325mg (Soluble)** (Jan Aushadhi: ₹0.80 per strip).',
+        '**Sorbitrate 5mg** — Sublingual under tongue only if previously prescribed.'
+      ],
+      redFlags: [
+        'Pain radiating to left shoulder, arm, neck, jaw, or upper back.',
+        'Cold profuse sweating, dizziness, shortness of breath, or fainting.'
+      ],
+      suggestedQuestions: [
+        'Does the pain spread to your left arm or jaw?',
+        'Is there cold sweating or shortness of breath?',
+        'Does the patient have a history of diabetes or high BP?'
+      ],
+      audioSummary: 'Cardiac emergency: Sit down in a supported upright position. Chew one Aspirin tablet if available. Call 108 ambulance immediately to reach the nearest hospital emergency ICU.'
+    },
+    {
+      id: 'headache_migraine',
+      primaryKeys: ['headache', 'head hurting', 'head hurts', 'head pain', 'migraine', 'sar dard', 'sir dard', 'tala noppi', 'temple pain'],
+      keywords: ['head', 'headache', 'migraine', 'sar dard', 'sir dard', 'tala noppi', 'temple', 'forehead'],
+      title: 'Severe Headache & Migraine Management (सिरदर्द व माइग्रेन)',
+      severity: 'mild',
+      severityLabel: '🟢 MILD TO MODERATE · REST & HYDRATION',
+      severityColor: '#16a34a',
+      summary: 'Tension headaches, dehydration, and migraine respond well to rest in dark quiet rooms, hydration, and mild analgesics.',
+      steps: [
+        '**Dark, Quiet Room**: Rest in a dark, quiet, well-ventilated room to relieve sensory strain.',
+        '**Hydration**: Drink 2 large glasses of cool water immediately.',
+        '**Cold/Warm Compress**: Apply a cool damp cloth or ice pack over forehead and temples.',
+        '**Gentle Temple Massage**: Light circular pressure on temples and neck base relieves muscle tension.'
+      ],
+      medicines: [
+        '**Paracetamol 500mg + Caffeine** (Jan Aushadhi: ₹1.80 per strip).',
+        '**Naproxen 250mg / Ibuprofen 400mg** (Jan Aushadhi: ₹3.00 per strip) — Take after food.'
+      ],
+      redFlags: [
+        'Sudden explosive "thunderclap" headache (worst headache of life).',
+        'Headache with weakness in one arm/leg, facial drooping, or slurred speech (Stroke alert).',
+        'Headache following head injury or trauma.',
+        'Headache with high fever, neck stiffness, and confusion.'
+      ],
+      suggestedQuestions: [
+        'Is the headache on one side or the entire head?',
+        'Are you experiencing sensitivity to light or nausea?',
+        'Did the headache come on gradually or suddenly within seconds?'
+      ],
+      audioSummary: 'Headache care: Rest in a dark, quiet room and drink 2 glasses of water. Apply a cool compress on temples. Take Paracetamol after food. If accompanied by facial drooping or speech difficulty, call 108 immediately.'
+    },
+    {
+      id: 'breathing_respiratory',
+      primaryKeys: ['breathing', 'trouble breathing', 'difficulty breathing', 'breath', 'asthma', 'wheezing', 'saans', 'dam', 'short of breath', 'suffocation', 'gasping'],
+      keywords: ['breath', 'breathing', 'asthma', 'suffocation', 'wheezing', 'saans', 'dam', 'oopiri', 'gasping', 'choking', 'spO2', 'inhaler'],
+      title: 'Breathing Difficulty & Asthma Care (सांस लेने में तकलीफ व दमा)',
+      severity: 'critical',
+      severityLabel: '🔴 HIGH URGENCY · PHC OXYGEN & NEBULIZATION',
+      severityColor: '#dc2626',
+      summary: 'Severe breathlessness requires immediate bronchodilator therapy and oxygen saturation (SpO2) evaluation.',
+      steps: [
+        '**Sit Upright (Tripod Posture)**: Never allow the patient to lie flat. Sit leaning slightly forward with hands on knees.',
+        '**Use Rescue Inhaler**: If the patient has a prescribed inhaler (Salbutamol/Asthalin), administer 2–4 puffs with a spacer immediately.',
+        '**Airflow**: Open all windows and doors for fresh ventilation. Keep crowds away.',
+        '**Head to PHC**: Visit nearest PHC for oxygen concentrator support and nebulization.'
+      ],
+      medicines: [
+        '**Salbutamol 100mcg Inhaler** (Jan Aushadhi: ₹45.00 vs ₹180 market).',
+        '**Budesonide 0.5mg Respules** for nebulizer (Jan Aushadhi: ₹12.00).'
+      ],
+      redFlags: [
+        'Bluish tint on lips, fingernails, or tongue (Cyanosis).',
+        'Inability to speak 2–3 words without gasping.',
+        'Ribs pulling inward while breathing (intercostal retractions).',
+        'Oxygen level (SpO2) falling below 92%.'
+      ],
+      suggestedQuestions: [
+        'Is there whistling or wheezing sound in the chest?',
+        'Is a pulse oximeter available to check oxygen level?',
+        'Is this sudden onset or a known history of asthma?'
+      ],
+      audioSummary: 'Breathing difficulty: Sit upright leaning forward. Take 2 to 4 puffs of your rescue inhaler if prescribed. Visit the nearest PHC for oxygen support and nebulization.'
     },
     {
       id: 'snake_bite',
@@ -187,38 +281,8 @@
       audioSummary: 'Diarrhea care: Drink one glass of ORS solution after every loose motion. Give Zinc tablets for children under 5. If there is blood in stool or extreme weakness, consult a doctor immediately.'
     },
     {
-      id: 'chest_pain_cardiac',
-      primaryKeys: ['chest pain', 'heart attack', 'angina', 'cardiac', 'chhati me dard'],
-      keywords: ['chest', 'heart', 'cardiac', 'chest pain', 'sineme dard', 'chhati', 'gunde noppi', 'heart attack', 'angina', 'left arm pain'],
-      title: 'Acute Chest Pain & Cardiac Alert (छाती में दर्द व दिल का दौरा)',
-      severity: 'critical',
-      severityLabel: '🔴 CRITICAL CARDIAC ALERT · CALL 108 IMMEDIATELY',
-      severityColor: '#dc2626',
-      summary: 'Crushing chest tightness radiating to left arm/jaw with cold sweating requires immediate hospital emergency ECG.',
-      steps: [
-        '**Call 108 Emergency**: Request an Advanced Life Support (ALS) Ambulance with defibrillator and ECG.',
-        '**Sit in W-Position**: Help patient sit upright with knees bent and back firmly supported to reduce heart workload.',
-        '**Loosen Tight Clothing**: Unbutton shirt collar, tie, and belt for free breathing.',
-        '**Chew Soluble Aspirin**: If conscious and not allergic, chew 1 Soluble Aspirin (300mg/325mg) immediately.'
-      ],
-      medicines: [
-        '**Aspirin 300mg / 325mg (Soluble)** (Jan Aushadhi: ₹0.80 per strip).',
-        '**Sorbitrate 5mg** — Sublingual under tongue only if previously prescribed.'
-      ],
-      redFlags: [
-        'Pain radiating to left shoulder, arm, neck, jaw, or upper back.',
-        'Cold profuse sweating, dizziness, shortness of breath, or fainting.'
-      ],
-      suggestedQuestions: [
-        'Does the pain spread to your left arm or jaw?',
-        'Is there cold sweating or shortness of breath?',
-        'Does the patient have a history of diabetes or high BP?'
-      ],
-      audioSummary: 'Cardiac emergency: Sit down in a supported upright position. Chew one Aspirin tablet if available. Call 108 ambulance immediately to reach the nearest hospital emergency ICU.'
-    },
-    {
       id: 'cough_cold_sorethroat',
-      primaryKeys: ['cough', 'cold', 'sore throat', 'khasi', 'jukam', 'gala dard', 'throat pain', 'flu'],
+      primaryKeys: ['cough', 'cold', 'sore throat', 'khasi', 'jukam', 'gala dard', 'throat pain', 'throat hurt', 'throat hurting', 'flu', 'tonsil'],
       keywords: ['cough', 'cold', 'sore throat', 'khasi', 'jukam', 'gala dard', 'throat', 'phlegm', 'mucus', 'sneezing', 'runny nose', 'tonsil', 'voice loss'],
       title: 'Cough, Cold & Sore Throat Care (खांसी, जुकाम व गले में खराश)',
       severity: 'mild',
@@ -249,8 +313,8 @@
     },
     {
       id: 'stomach_pain_cramps',
-      primaryKeys: ['stomach pain', 'stomach ache', 'abdominal pain', 'pet dard', 'pet me dard', 'cramps'],
-      keywords: ['stomach pain', 'stomach ache', 'abdominal pain', 'pet dard', 'pet me dard', 'cramp', 'gas', 'acidity', 'bloating', 'belly pain'],
+      primaryKeys: ['stomach pain', 'stomach ache', 'stomach hurt', 'stomach hurting', 'abdominal pain', 'pet dard', 'pet me dard', 'belly pain', 'cramps'],
+      keywords: ['stomach', 'abdominal', 'pet', 'cramp', 'gas', 'acidity', 'bloating', 'belly', 'abdomen'],
       title: 'Stomach Ache & Abdominal Cramps (पेट दर्द व ऐंठन)',
       severity: 'moderate',
       severityLabel: '🟡 MODERATE · ANTISPASMODIC & GASTRO CARE',
@@ -279,9 +343,133 @@
       audioSummary: 'Stomach pain care: Place a warm compress on the abdomen and drink warm ajwain water. Take Dicyclomine with Paracetamol for cramps. If pain shifts to the right lower abdomen with high fever, visit the hospital emergency.'
     },
     {
+      id: 'pregnancy_maternal',
+      primaryKeys: ['pregnancy', 'labour', 'pregnant', 'garbh', 'prasav', 'contractions', 'water leakage', 'water break', 'delivery pain', 'labor'],
+      keywords: ['pregnancy', 'pregnant', 'labour', 'labor', 'delivery', 'garbh', 'prasav', 'contractions', 'fetus', 'maternal'],
+      title: 'Pregnancy Labour & Maternal Care (प्रसव पीड़ा व मातृत्व देखभाल)',
+      severity: 'critical',
+      severityLabel: '🔴 MATERNAL EMERGENCY · DISPATCH 108 AMBULANCE',
+      severityColor: '#dc2626',
+      summary: 'Active labour pains, leaking amniotic fluid, or vaginal bleeding require immediate institutional delivery at 24x7 FRU/CHC.',
+      steps: [
+        '**Call 108 & ASHA Lead**: Alert your local ASHA worker and request immediate 108 maternal transport.',
+        '**Left Lateral Position**: Have the mother lie on her left side to optimize blood and oxygen flow to the baby.',
+        '**Pack Mother-Child Kit**: Keep MCP Card (Maternal & Child Protection), ABHA card, clean clothes, and baby wraps ready.',
+        '**Slow Deep Breathing**: Guide calm, deep breathing during each contraction.'
+      ],
+      medicines: [
+        '**Iron & Folic Acid (IFA) Tablets** (Provided free at PHC).',
+        '**Calcium 500mg + Vitamin D3** (Jan Aushadhi: ₹4.50 per strip).'
+      ],
+      redFlags: [
+        'Vaginal bleeding or sudden gush of clear/green fluid.',
+        'Severe headache, blurred vision, or high blood pressure (Eclampsia).',
+        'Decreased or absent baby movements in the last 12 hours.'
+      ],
+      suggestedQuestions: [
+        'How many weeks or months pregnant is the mother?',
+        'How frequent are the contractions (minutes apart)?',
+        'Has there been any water breakage or bleeding?'
+      ],
+      audioSummary: 'Maternal labour care: Lie on the left side and guide slow deep breathing. Call 108 ambulance and inform your local ASHA worker for safe hospital delivery.'
+    },
+    {
+      id: 'vomiting_gastric',
+      primaryKeys: ['vomiting', 'vomit', 'nausea', 'ulti', 'vamthulu', 'throwing up', 'puking', 'food poison', 'gastric'],
+      keywords: ['vomit', 'vomiting', 'nausea', 'ulti', 'vamthulu', 'throwing up', 'puking', 'gastric', 'acid', 'stomach upset'],
+      title: 'Nausea, Vomiting & Gastric Relief (उल्टी व मितली)',
+      severity: 'moderate',
+      severityLabel: '🟡 MODERATE · SIP HYDRATION & ANTI-EMETIC',
+      severityColor: '#d97706',
+      summary: 'Frequent vomiting depletes stomach electrolytes. Small sips of fluid prevent further gastric irritation.',
+      steps: [
+        '**Rest Stomach 15 Mins**: Avoid large gulps of water immediately after vomiting. Wait 15 minutes, then take 1 teaspoon of ORS or water every 5 minutes.',
+        '**Ginger / Mint Infusion**: Warm water infused with crushed ginger or mint leaves soothes gastric contractions.',
+        '**Bland Diet**: When vomiting stops for 4 hours, introduce clear soups, toast, or boiled rice with a pinch of salt.',
+        '**Avoid Triggers**: Avoid oily, spicy, dairy, or fried foods.'
+      ],
+      medicines: [
+        '**Ondansetron 4mg (Mouth Dissolving)** (Jan Aushadhi: ₹3.00 per strip) — Take 30 mins before meals.',
+        '**Domperidone 10mg + Pantoprazole 40mg** (Jan Aushadhi: ₹12.00 per strip) — For acidity and nausea.'
+      ],
+      redFlags: [
+        'Vomiting blood (coffee-ground appearance) or green bile.',
+        'Inability to retain liquids for more than 12 hours.',
+        'Severe right lower abdomen pain (possible Appendicitis).'
+      ],
+      suggestedQuestions: [
+        'How many times has vomiting occurred today?',
+        'Is there any abdominal pain or fever?',
+        'Is the vomit containing food, bile, or blood?'
+      ],
+      audioSummary: 'Vomiting care: Rest the stomach for 15 minutes, then take small sips of ORS every 5 minutes. Take Ondansetron mouth-dissolving tablet if prescribed. Avoid spicy and oily foods.'
+    },
+    {
+      id: 'cuts_bleeding_burns',
+      primaryKeys: ['cut', 'wound', 'bleeding', 'injury', 'chot', 'rakta', 'burn', 'burns', 'jalan', 'cut hand', 'cut finger', 'blood'],
+      keywords: ['cut', 'wound', 'bleed', 'injury', 'chot', 'rakta', 'ghav', 'trauma', 'burn', 'jalan', 'blood', 'scraped'],
+      title: 'Wound Bleeding & Burn First-Aid (चोट व रक्तस्राव प्राथमिक चिकित्सा)',
+      severity: 'moderate',
+      severityLabel: '🟡 URGENT FIRST AID · WOUND HYGIENE',
+      severityColor: '#d97706',
+      summary: 'Controlling blood loss and preventing infection through clean water washing are critical first-aid steps.',
+      steps: [
+        '**Direct Pressure**: Apply firm, continuous pressure directly over the wound using a clean cloth or sterile gauze for 10 full minutes.',
+        '**Elevate the Wound**: Keep the injured part raised above heart level to decrease blood flow to the injury.',
+        '**Clean with Running Water**: Gently wash the wound with clean drinking water to remove dirt. Do NOT apply dirt, cow dung, or turmeric.',
+        '**For Burns**: Cool immediately under running tap water for 15 minutes. Do NOT break blisters.'
+      ],
+      medicines: [
+        '**Povidone Iodine 5% Ointment** (Jan Aushadhi: ₹14.00 vs ₹60 market).',
+        '**Tetanus Toxoid (TT) Injection** — Within 24 hours at nearest PHC if not vaccinated in last 5 years.'
+      ],
+      redFlags: [
+        'Pulsating or spurting bright red blood that does not stop after 10 minutes of direct pressure.',
+        'Deep gaping wound requiring surgical stitches.',
+        'Burn covering a large area, face, hands, or groin.'
+      ],
+      suggestedQuestions: [
+        'Is the bleeding stopping with direct pressure?',
+        'When did the person receive their last Tetanus (TT) shot?',
+        'Is the injury caused by a rusty metal or animal bite?'
+      ],
+      audioSummary: 'Wound first aid: Apply direct firm pressure with a clean cloth for 10 minutes. Clean with running water and apply Povidone Iodine ointment. Get a Tetanus TT shot at the nearest PHC within 24 hours.'
+    },
+    {
+      id: 'dengue_malaria',
+      primaryKeys: ['dengue', 'malaria', 'platelet', 'retro-orbital', 'mosquito', 'machhar', 'dengu'],
+      keywords: ['dengue', 'malaria', 'mosquito', 'platelet', 'body ache', 'backache', 'eye pain', 'machhar', 'dengu'],
+      title: 'Dengue & Vector-Borne Disease Signs (डेंगू एवं मलेरिया लक्षण)',
+      severity: 'moderate',
+      severityLabel: '🟡 MODERATE · CBC & PLATELET TEST REQUIRED',
+      severityColor: '#d97706',
+      summary: 'Dengue and Malaria present with sudden high fever, retro-orbital eye pain, and severe bone aches.',
+      steps: [
+        '**Complete Blood Count (CBC) & Platelet Test**: Get a rapid malaria card test and CBC done at your nearest PHC/CHC.',
+        '**Strict Rest & Hydration**: Drink 3–4 liters of fluids daily (tender coconut water, ORS, pomegranate juice, soups).',
+        '**DO NOT TAKE NSAIDs**: Do NOT take Aspirin, Ibuprofen, or Brufen as they increase bleeding risks in dengue. ONLY use Paracetamol for fever.',
+        '**Mosquito Nets**: Sleep under insecticide-treated bed nets to avoid spreading to family members.'
+      ],
+      medicines: [
+        '**Paracetamol 500mg** (Jan Aushadhi: ₹1.50) — Safe for fever in dengue/malaria.',
+        '**Chloroquine / Artemisinin Combo (ACT)** — ONLY after confirmed laboratory malaria test under doctor supervision.'
+      ],
+      redFlags: [
+        'Red pin-prick spots (Petechiae) on skin or spontaneous gum/nose bleeding.',
+        'Severe persistent abdominal pain with continuous vomiting.',
+        'Platelet count dropping below 50,000 / µL.'
+      ],
+      suggestedQuestions: [
+        'Are you having severe pain behind the eyeballs or backache?',
+        'Have you noticed any red spots on the skin or nosebleeds?',
+        'Has a blood test (CBC / Malaria card) been conducted?'
+      ],
+      audioSummary: 'Dengue signs: Stay well hydrated with coconut water and ORS. Take only Paracetamol for fever. Do not take Aspirin or Ibuprofen. Get a CBC platelet test at your nearest PHC.'
+    },
+    {
       id: 'diabetes_hypoglycemia',
       primaryKeys: ['sugar', 'diabetes', 'hypoglycemia', 'low sugar', 'sugar low', 'sugar high', 'madhumeh'],
-      keywords: ['sugar', 'diabetes', 'hypoglycemia', 'hyperglycemia', 'madhumeh', 'insulin', 'sugar level', 'glucometer', 'shaking sugar', 'sweating sugar'],
+      keywords: ['sugar', 'diabetes', 'hypoglycemia', 'hyperglycemia', 'madhumeh', 'insulin', 'glucometer'],
       title: 'Blood Sugar & Hypoglycemia Management (मधुमेह व शुगर संतुलन)',
       severity: 'moderate',
       severityLabel: '🟡 CRITICAL METABOLIC · FAST GLUCOSE PROTOCOL',
@@ -311,8 +499,8 @@
     },
     {
       id: 'hypertension_highbp',
-      primaryKeys: ['high bp', 'blood pressure', 'hypertension', 'bp high', 'uch rakta chap'],
-      keywords: ['bp', 'high bp', 'blood pressure', 'hypertension', 'systolic', 'diastolic', 'bp 160', 'bp 170', 'bp 180', 'sphygmomanometer'],
+      primaryKeys: ['high bp', 'blood pressure', 'hypertension', 'bp high', 'uch rakta chap', 'bp 160', 'bp 170', 'bp 180'],
+      keywords: ['bp', 'high bp', 'blood pressure', 'hypertension', 'systolic', 'diastolic'],
       title: 'High Blood Pressure & Stroke Prevention (उच्च रक्तचाप व स्ट्रोक रोकथाम)',
       severity: 'moderate',
       severityLabel: '🟡 CARDIOVASCULAR · REGULAR MEDICINES & SALT CONTROL',
@@ -342,8 +530,8 @@
     },
     {
       id: 'eye_infection_conjunctivitis',
-      primaryKeys: ['eye infection', 'conjunctivitis', 'red eye', 'eye flu', 'aankh aana', 'sticky eye'],
-      keywords: ['eye', 'eyes', 'conjunctivitis', 'red eye', 'eye flu', 'aankh', 'itchy eye', 'eye discharge', 'sticky eye', 'watery eye', 'cornea'],
+      primaryKeys: ['eye infection', 'conjunctivitis', 'red eye', 'eye flu', 'aankh aana', 'sticky eye', 'eye hurt', 'eye hurting'],
+      keywords: ['eye', 'eyes', 'conjunctivitis', 'red eye', 'eye flu', 'aankh', 'itchy eye', 'eye discharge'],
       title: 'Eye Infection & Conjunctivitis / Eye Flu (आंखों का संक्रमण / आई फ्लू)',
       severity: 'mild',
       severityLabel: '🟢 MILD · HYGIENE & ANTIMICROBIAL DROPS',
@@ -373,8 +561,8 @@
     },
     {
       id: 'uti_burning_urine',
-      primaryKeys: ['uti', 'burning urine', 'urine infection', 'peshab me jalan', 'urinary infection'],
-      keywords: ['uti', 'urine', 'urination', 'peshab', 'burning urine', 'jalan', 'bladder', 'kidney', 'frequent urine', 'urine pain', 'dark urine'],
+      primaryKeys: ['uti', 'burning urine', 'urine infection', 'peshab me jalan', 'urinary infection', 'burning when peeing', 'burning while passing urine'],
+      keywords: ['uti', 'urine', 'urination', 'peshab', 'burning urine', 'jalan', 'bladder', 'peeing'],
       title: 'Urinary Tract Infection & Burning (पेशाब में जलन व यूटीआई)',
       severity: 'moderate',
       severityLabel: '🟡 MODERATE · HYDRATION & URINARY ALKALIZER',
@@ -582,6 +770,19 @@
       // Tokenize and remove stop words
       const rawTokens = qRaw.replace(/[^a-z0-9 ]/g, ' ').split(/\s+/);
       const filteredTokens = rawTokens.filter(w => w.length > 1 && !STOP_WORDS.has(w));
+      const normalizedTokens = filteredTokens.map(w => {
+        if (w === 'hurting' || w === 'hurts' || w === 'hurt') return 'pain';
+        if (w === 'aching' || w === 'aches' || w === 'ache') return 'pain';
+        if (w === 'bleeding' || w === 'bled') return 'bleed';
+        if (w === 'vomiting' || w === 'vomited') return 'vomit';
+        if (w === 'coughing' || w === 'coughed') return 'cough';
+        if (w.endsWith('ing') && w.length > 4) return w.slice(0, -3);
+        if (w.endsWith('ed') && w.length > 4) return w.slice(0, -2);
+        if (w.endsWith('s') && w.length > 4) return w.slice(0, -1);
+        return w;
+      });
+      // Combine both raw and normalized tokens for maximal coverage
+      const allTokens = Array.from(new Set([...filteredTokens, ...normalizedTokens]));
 
       let bestMatch = null;
       let maxScore = 0;
@@ -599,7 +800,7 @@
         }
 
         // 2. Check Filtered Tokens against Keywords
-        for (const token of filteredTokens) {
+        for (const token of allTokens) {
           for (const kw of entry.keywords) {
             if (token === kw) {
               score += 15;
