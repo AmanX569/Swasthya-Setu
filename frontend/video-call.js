@@ -1,7 +1,7 @@
 /**
  * =========================================================
- * SWASTHYA SETU - BULLETPROOF 2-WAY WEBRTC & REALTIME TELECONSULTATION (video-call.js)
- * Dual-Mode Streaming (WebRTC + Realtime Video), Live Synced Chat & In-Call Rx
+ * SWASTHYA SETU - HIGH-DEFINITION 2-WAY WEBRTC & AUDIO ENGINE (video-call.js)
+ * 720p HD Video, Dedicated Unmuted Audio Pipeline & Live Synced Chat
  * =========================================================
  */
 
@@ -33,9 +33,10 @@
       this.peerConnection = null;
       this.localStream = null;
       this.remoteStream = null;
+      this.audioContext = null;
       this.isAudioMuted = false;
       this.isVideoMuted = false;
-      this.currentFacingMode = 'user'; // 'user' (front) or 'environment' (back)
+      this.currentFacingMode = 'user'; // 'user' or 'environment'
       this.callStartTime = null;
       this.callTimerInterval = null;
       this.frameSyncInterval = null;
@@ -50,6 +51,18 @@
         this.store = global.appStore;
         this.initIncomingSignalListener();
       });
+    }
+
+    unlockAudioContext() {
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (AudioCtx) {
+          if (!this.audioContext) this.audioContext = new AudioCtx();
+          if (this.audioContext.state === 'suspended') {
+            this.audioContext.resume();
+          }
+        }
+      } catch (e) {}
     }
 
     // -------------------------------------------------------------
@@ -100,7 +113,7 @@
         }
       }
 
-      // 4. Live Dual-Mode Video Frame Streaming (Real-Time Backup)
+      // 4. Live Dual-Mode Video Frame Streaming (High-Res Real-Time Backup)
       else if (signal.type === 'VIDEO_FRAME') {
         if (this.currentCallData && this.currentCallData.id === signal.callId && signal.frameData) {
           this.renderRemoteVideoFrame(signal.frameData);
@@ -116,9 +129,10 @@
     }
 
     // -------------------------------------------------------------
-    // 2. PATIENT INITIATES CALL (OFFER WITH COMPLETE ICE GATHERING)
+    // 2. PATIENT INITIATES CALL
     // -------------------------------------------------------------
     async startVideoCall(callDetails = {}) {
+      this.unlockAudioContext();
       if (!this.store && global.appStore) this.store = global.appStore;
       const state = this.store ? this.store.getState() : {};
       const activeUser = (state.session && state.session.user) || state.currentUser || { name: 'Citizen Beneficiary', phone: '9876543210', role: 'patient' };
@@ -161,7 +175,7 @@
         statusEl.innerHTML = '📞 Calling ' + recipientName + '... Ringing on Doctor Desk...';
       }
 
-      // Initialize Local Camera & Microphone
+      // Initialize Local Camera & Microphone with 720p HD constraints
       await this.initLocalMediaStream();
 
       // Setup WebRTC PeerConnection & Add Local Tracks
@@ -282,6 +296,7 @@
     }
 
     async acceptIncomingCall() {
+      this.unlockAudioContext();
       const modal = document.getElementById('doctorIncomingCallModal');
       if (modal) modal.style.display = 'none';
 
@@ -307,7 +322,7 @@
       };
 
       this.inCallMessages = [
-        { sender: 'System', text: '🔒 Doctor Accepted Consultation · 2-Way Live Stream Connected', time: this.currentCallData.time }
+        { sender: 'System', text: '🔒 Doctor Accepted Consultation · 2-Way High Definition Stream Connected', time: this.currentCallData.time }
       ];
 
       // Open Doctor Video Window
@@ -315,7 +330,7 @@
       const callModal = document.getElementById('videoCallModal');
       if (callModal) callModal.style.display = 'flex';
 
-      // Start Doctor Local Camera
+      // Start Doctor Local Camera with 720p HD
       await this.initLocalMediaStream();
 
       // Setup WebRTC Peer Connection & Add Doctor Tracks
@@ -351,15 +366,16 @@
       }
 
       const statusEl = document.getElementById('videoCallStatusBanner');
-      if (statusEl) statusEl.innerHTML = '🟢 Connected · 2-Way Video Active with ' + this.currentCallData.callerName;
+      if (statusEl) statusEl.innerHTML = '🟢 Connected · 2-Way HD Video & Audio Active with ' + this.currentCallData.callerName;
 
       this.startCallTimer();
       this.startFrameSyncStream();
     }
 
     async handleCallAcceptedByDoctor(signal) {
+      this.unlockAudioContext();
       const statusEl = document.getElementById('videoCallStatusBanner');
-      if (statusEl) statusEl.innerHTML = '🟢 Connected · Live Video Active with ' + (signal.doctorName || 'Doctor');
+      if (statusEl) statusEl.innerHTML = '🟢 Connected · Live HD Video & Audio Active with ' + (signal.doctorName || 'Doctor');
 
       try {
         if (this.peerConnection && signal.answer) {
@@ -372,7 +388,7 @@
 
       this.inCallMessages.push({
         sender: 'System',
-        text: '🟢 Doctor joined the call. 2-Way Video & Audio Streaming Active.',
+        text: '🟢 Doctor joined the call. 2-Way HD Video & Audio Streaming Active.',
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       });
       this.renderChatMessages();
@@ -414,14 +430,14 @@
         if (typeof RTCPeerConnection === 'undefined') return;
         this.peerConnection = new RTCPeerConnection(RTC_CONFIG);
 
-        // Add Local Tracks to PeerConnection
+        // Add Local Audio and Video Tracks
         if (this.localStream) {
           this.localStream.getTracks().forEach(track => {
             this.peerConnection.addTrack(track, this.localStream);
           });
         }
 
-        // On Remote Track Received -> Stream Video & Audio Immediately
+        // On Remote Track Received -> Stream Video & Audio Immediately to Speakers
         this.peerConnection.ontrack = (event) => {
           console.log('[WebRTC] Remote media track received:', event.track.kind);
           let stream = event.streams && event.streams[0];
@@ -436,7 +452,17 @@
           const remoteVideo = document.getElementById('remoteVideoElement');
           if (remoteVideo) {
             remoteVideo.srcObject = stream;
+            remoteVideo.muted = false;
+            remoteVideo.volume = 1.0;
             remoteVideo.play().catch(e => console.warn('Remote video playback:', e));
+          }
+
+          const remoteAudio = document.getElementById('remoteAudioElement');
+          if (remoteAudio) {
+            remoteAudio.srcObject = stream;
+            remoteAudio.muted = false;
+            remoteAudio.volume = 1.0;
+            remoteAudio.play().catch(e => console.warn('Remote audio playback:', e));
           }
 
           const remoteAvatar = document.getElementById('remoteAvatarPlaceholder');
@@ -462,11 +488,18 @@
       try {
         if (navigator.mediaDevices && typeof navigator.mediaDevices.getUserMedia === 'function') {
           const constraints = {
-            audio: true,
+            audio: {
+              echoCancellation: true,
+              noiseSuppression: true,
+              autoGainControl: true,
+              channelCount: 1,
+              sampleRate: 48000
+            },
             video: {
               facingMode: this.currentFacingMode,
-              width: { ideal: 640 },
-              height: { ideal: 480 }
+              width: { ideal: 1280, min: 640 },
+              height: { ideal: 720, min: 480 },
+              frameRate: { ideal: 30, min: 20 }
             }
           };
           this.localStream = await navigator.mediaDevices.getUserMedia(constraints);
@@ -488,21 +521,24 @@
     }
 
     // -------------------------------------------------------------
-    // 5. DUAL-MODE REAL-TIME VIDEO FRAME SYNC (BACKUP STREAM)
+    // 5. HIGH-DEFINITION DUAL-MODE REAL-TIME FRAME STREAMING
     // -------------------------------------------------------------
     startFrameSyncStream() {
       if (this.frameSyncInterval) clearInterval(this.frameSyncInterval);
+      if (typeof document === 'undefined' || !document.createElement) return;
       const canvas = document.createElement('canvas');
-      canvas.width = 320;
-      canvas.height = 240;
-      const ctx = canvas.getContext('2d');
+      if (!canvas || typeof canvas.getContext !== 'function') return;
+      canvas.width = 640;
+      canvas.height = 480;
+      const ctx = canvas.getContext('2d', { alpha: false });
+      if (ctx) ctx.imageSmoothingQuality = 'high';
 
       this.frameSyncInterval = setInterval(() => {
         const localVideo = document.getElementById('localVideoElement');
-        if (localVideo && localVideo.videoWidth > 0 && !this.isVideoMuted && this.currentCallData) {
+        if (localVideo && localVideo.videoWidth > 0 && !this.isVideoMuted && this.currentCallData && ctx) {
           try {
             ctx.drawImage(localVideo, 0, 0, canvas.width, canvas.height);
-            const frameData = canvas.toDataURL('image/jpeg', 0.4);
+            const frameData = canvas.toDataURL('image/jpeg', 0.75);
             if (global.supabaseService) {
               global.supabaseService.sendTeleconsultSignal({
                 type: 'VIDEO_FRAME',
@@ -512,7 +548,7 @@
             }
           } catch (e) {}
         }
-      }, 300); // 3-4 FPS live broadcast backup ensuring 100% video delivery across NATs
+      }, 250);
     }
 
     stopFrameSyncStream() {
@@ -530,7 +566,10 @@
         img.onload = () => {
           remoteCanvas.style.display = 'block';
           const ctx = remoteCanvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, remoteCanvas.width, remoteCanvas.height);
+          if (ctx) {
+            ctx.imageSmoothingQuality = 'high';
+            ctx.drawImage(img, 0, 0, remoteCanvas.width, remoteCanvas.height);
+          }
           if (remoteAvatar) remoteAvatar.style.display = 'none';
         };
         img.src = frameData;
@@ -727,7 +766,6 @@
       input.value = '';
       this.renderChatMessages();
 
-      // Broadcast chat message to remote device
       if (global.supabaseService) {
         global.supabaseService.sendTeleconsultSignal({
           type: 'IN_CALL_CHAT',
@@ -884,7 +922,10 @@
               <!-- REAL REMOTE VIDEO STREAM (WEBRTC) -->
               <video id="remoteVideoElement" autoplay playsinline style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;"></video>
 
-              <!-- DUAL-MODE BACKUP CANVAS STREAM -->
+              <!-- DEDICATED UNMUTED REMOTE AUDIO STREAM -->
+              <audio id="remoteAudioElement" autoplay playsinline style="display:none;"></audio>
+
+              <!-- DUAL-MODE BACKUP CANVAS STREAM (HIGH RES 640x480) -->
               <canvas id="remoteVideoCanvas" width="640" height="480" style="display:none;width:100%;height:100%;object-fit:cover;position:absolute;inset:0;"></canvas>
 
               <!-- REMOTE AVATAR / WAITING PLACEHOLDER -->
