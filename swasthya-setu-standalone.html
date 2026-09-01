@@ -3788,16 +3788,82 @@ body[data-theme="doom"] {
       <div id="abhaCardContainer"></div>
     </div>
 
-    <!-- VISUAL AI SYMPTOM TRIAGE -->
-    <div class="glass-panel">
-      <div class="panel-header">
-        <h2 class="panel-title" data-i18n="triage_title">🩺 Visual AI Symptom Triage</h2>
+    <!-- 🤖 SWASTHYA 24x7 AI HEALTH BOT & CLINICAL SYMPTOM GUIDE -->
+    <div class="glass-panel" id="aiHealthBotPanel" style="border:1.5px solid rgba(16,185,129,0.35);background:linear-gradient(145deg, rgba(16,185,129,0.06), rgba(15,23,42,0.35));">
+      <div class="panel-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg, #10b981, #059669);color:#ffffff;display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:0 4px 14px rgba(16,185,129,0.4);">
+            🤖
+          </div>
+          <div>
+            <h2 class="panel-title" style="color:var(--ink);font-size:17px;font-weight:800;display:flex;align-items:center;gap:8px;">
+              <span>Swasthya AI Health Guide & Symptom Assistant</span>
+              <span class="badge" style="background:rgba(16,185,129,0.15);color:#10b981;font-size:10px;padding:3px 8px;border-radius:10px;">24x7 Live</span>
+            </h2>
+            <small style="color:var(--muted);">Instant clinical triage, emergency first-aid, home care remedies & medicine guide when doctor is offline</small>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button type="button" class="btn-glass" style="padding:6px 12px;font-size:12px;border-radius:8px;" onclick="aiHealthBot.clearChat()">
+            🧹 Clear Chat
+          </button>
+        </div>
       </div>
-      <p style="color:var(--muted);font-size:13px;margin-bottom:14px;" data-i18n="triage_subtitle">
-        Tap your symptom for instant first-aid guidance & emergency advice:
-      </p>
-      <div id="symptomButtonsGrid" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(130px, 1fr));gap:10px;"></div>
-      <div id="triageResultContainer"></div>
+
+      <!-- QUICK SYMPTOM PROMPTS PILLS CAROUSEL -->
+      <div style="margin-bottom:14px;">
+        <small style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:8px;">
+          ⚡ Quick Clinical Symptom Triage (Tap Any):
+        </small>
+        <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;scrollbar-width:thin;">
+          <button type="button" onclick="aiHealthBot.triggerSymptomPill('fever')" class="btn-glass" style="padding:7px 14px;font-size:12.5px;font-weight:700;white-space:nowrap;display:flex;align-items:center;gap:6px;border-radius:20px;flex-shrink:0;">
+            <span>🌡️</span> <span>High Fever</span>
+          </button>
+          <button type="button" onclick="aiHealthBot.triggerSymptomPill('snakebite')" class="btn-glass" style="padding:7px 14px;font-size:12.5px;font-weight:700;white-space:nowrap;display:flex;align-items:center;gap:6px;border-radius:20px;flex-shrink:0;border-color:rgba(220,38,38,0.4);color:#dc2626;">
+            <span>🐍</span> <span>Snake Bite</span>
+          </button>
+          <button type="button" onclick="aiHealthBot.triggerSymptomPill('diarrhea')" class="btn-glass" style="padding:7px 14px;font-size:12.5px;font-weight:700;white-space:nowrap;display:flex;align-items:center;gap:6px;border-radius:20px;flex-shrink:0;">
+            <span>💧</span> <span>Diarrhea & ORS</span>
+          </button>
+          <button type="button" onclick="aiHealthBot.triggerSymptomPill('chestpain')" class="btn-glass" style="padding:7px 14px;font-size:12.5px;font-weight:700;white-space:nowrap;display:flex;align-items:center;gap:6px;border-radius:20px;flex-shrink:0;border-color:rgba(220,38,38,0.4);color:#dc2626;">
+            <span>🫀</span> <span>Chest Pain</span>
+          </button>
+          <button type="button" onclick="aiHealthBot.triggerSymptomPill('breathing')" class="btn-glass" style="padding:7px 14px;font-size:12.5px;font-weight:700;white-space:nowrap;display:flex;align-items:center;gap:6px;border-radius:20px;flex-shrink:0;">
+            <span>😮‍💨</span> <span>Breathing Issue</span>
+          </button>
+          <button type="button" onclick="aiHealthBot.triggerSymptomPill('pregnancy')" class="btn-glass" style="padding:7px 14px;font-size:12.5px;font-weight:700;white-space:nowrap;display:flex;align-items:center;gap:6px;border-radius:20px;flex-shrink:0;">
+            <span>🤰</span> <span>Pregnancy Labour</span>
+          </button>
+          <button type="button" onclick="aiHealthBot.triggerSymptomPill('vomiting')" class="btn-glass" style="padding:7px 14px;font-size:12.5px;font-weight:700;white-space:nowrap;display:flex;align-items:center;gap:6px;border-radius:20px;flex-shrink:0;">
+            <span>🤢</span> <span>Vomiting</span>
+          </button>
+          <button type="button" onclick="aiHealthBot.triggerSymptomPill('headache')" class="btn-glass" style="padding:7px 14px;font-size:12.5px;font-weight:700;white-space:nowrap;display:flex;align-items:center;gap:6px;border-radius:20px;flex-shrink:0;">
+            <span>🤕</span> <span>Migraine / Headache</span>
+          </button>
+          <button type="button" onclick="aiHealthBot.triggerSymptomPill('bleeding')" class="btn-glass" style="padding:7px 14px;font-size:12.5px;font-weight:700;white-space:nowrap;display:flex;align-items:center;gap:6px;border-radius:20px;flex-shrink:0;">
+            <span>🩹</span> <span>Cuts & Bleeding</span>
+          </button>
+          <button type="button" onclick="aiHealthBot.triggerSymptomPill('dengue')" class="btn-glass" style="padding:7px 14px;font-size:12.5px;font-weight:700;white-space:nowrap;display:flex;align-items:center;gap:6px;border-radius:20px;flex-shrink:0;">
+            <span>🦟</span> <span>Dengue Signs</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- INTERACTIVE CHAT MESSAGES SCROLL AREA -->
+      <div id="aiChatMessagesContainer" style="height:340px;max-height:380px;overflow-y:auto;background:var(--glass-1);border:1px solid var(--glass-border);border-radius:14px;padding:16px;margin-bottom:14px;scroll-behavior:smooth;"></div>
+
+      <!-- CHAT INPUT & VOICE SEARCH BAR -->
+      <form onsubmit="event.preventDefault(); aiHealthBot.sendUserQuery();" style="display:flex;gap:10px;align-items:center;">
+        <div style="flex:1;position:relative;">
+          <input type="text" id="aiChatInput" class="input-field" placeholder="Describe symptoms (e.g. child has 102°F fever with vomiting, chest tightness, throat pain...)" style="width:100%;padding:12px 42px 12px 16px;font-size:13.5px;border-radius:12px;box-shadow:none;">
+          <button type="button" onclick="aiHealthBot.startVoiceInput()" title="Speak in Hindi/English/Telugu" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:18px;cursor:pointer;color:var(--primary-bright);padding:4px;">
+            🎙️
+          </button>
+        </div>
+        <button type="submit" class="auth-btn-primary" style="padding:12px 22px;background:linear-gradient(135deg, #10b981, #059669);border:none;font-size:13.5px;font-weight:800;border-radius:12px;box-shadow:0 4px 14px rgba(16,185,129,0.4);cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;">
+          <span>💬</span> <span>Ask AI Guide</span>
+        </button>
+      </form>
     </div>
 
     <!-- JAN AUSHADHI MEDICINE TRACKER -->
@@ -10565,6 +10631,9 @@ body[data-theme="doom"] {
       this.renderDailyMedications();
       this.renderVideoCallHistory();
       this.renderTriageButtons();
+      if (global.aiHealthBot) {
+        global.aiHealthBot.renderChat();
+      }
       this.renderLiveHospitals();
       this.renderLiveBloodBank();
       this.renderPrescriptions();
@@ -11240,6 +11309,10 @@ body[data-theme="doom"] {
     // 4. AUDIO-VISUAL SYMPTOM TRIAGE
     // -------------------------------------------------------------
     triageSymptom(type) {
+      if (global.aiHealthBot) {
+        global.aiHealthBot.triggerSymptomPill(type);
+        return;
+      }
       const triageData = {
         fever: {
           title: this.t('sym_fever', 'High Fever'),

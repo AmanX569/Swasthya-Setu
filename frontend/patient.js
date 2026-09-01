@@ -30,6 +30,9 @@
       this.renderDailyMedications();
       this.renderVideoCallHistory();
       this.renderTriageButtons();
+      if (global.aiHealthBot) {
+        global.aiHealthBot.renderChat();
+      }
       this.renderLiveHospitals();
       this.renderLiveBloodBank();
       this.renderPrescriptions();
@@ -705,6 +708,10 @@
     // 4. AUDIO-VISUAL SYMPTOM TRIAGE
     // -------------------------------------------------------------
     triageSymptom(type) {
+      if (global.aiHealthBot) {
+        global.aiHealthBot.triggerSymptomPill(type);
+        return;
+      }
       const triageData = {
         fever: {
           title: this.t('sym_fever', 'High Fever'),
