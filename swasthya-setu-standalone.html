@@ -3007,16 +3007,16 @@ table td strong {
     </div>
   </div>
 
-  <!-- RIGHT: ACTIVE USER NAME FIRST, THEN LANGUAGE SELECTOR, THEN LOGOUT -->
+  <!-- RIGHT: ENLARGED USER NAME BOX FIRST, THEN LANGUAGE SELECTOR -->
   <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
     
-    <!-- 1. ACTIVE USER NAME / BADGE (PLACED BEFORE LANGUAGE) -->
-    <span id="activeUserBadge" style="display:none;background:linear-gradient(135deg, rgba(2,132,199,0.2), rgba(15,23,42,0.6));color:var(--ink);padding:7px 14px;border-radius:12px;font-size:13px;font-weight:800;border:1.5px solid var(--primary-bright);align-items:center;gap:6px;box-shadow:0 2px 10px rgba(2,132,199,0.2);">
+    <!-- 1. ENLARGED HIGH-CONTRAST USER NAME BADGE -->
+    <span id="activeUserBadge" style="display:none;background:linear-gradient(135deg, rgba(2,132,199,0.14) 0%, rgba(56,189,248,0.28) 100%);color:var(--ink);padding:8px 18px;border-radius:14px;font-size:13.5px;font-weight:800;border:1.5px solid var(--primary-bright);align-items:center;gap:8px;box-shadow:0 4px 14px rgba(2,132,199,0.22), inset 0 1px 0 rgba(255,255,255,0.5);letter-spacing:0.3px;backdrop-filter:blur(10px);">
       🌾 Citizen User
     </span>
 
-    <!-- 2. 🌐 LANGUAGE SELECTOR (AFTER USER NAME) -->
-    <select id="langSelect" class="select-control" onchange="onLanguageChange(this.value)" style="padding:7px 12px;border-radius:10px;font-weight:800;font-size:12.5px;background:rgba(2,132,199,0.12);border:1.5px solid var(--primary-bright);color:var(--ink);cursor:pointer;box-shadow:0 2px 10px rgba(2,132,199,0.15);">
+    <!-- 2. 🌐 LANGUAGE SELECTOR -->
+    <select id="langSelect" class="select-control" onchange="onLanguageChange(this.value)" style="padding:8px 14px;border-radius:12px;font-weight:800;font-size:13px;background:rgba(2,132,199,0.12);border:1.5px solid var(--primary-bright);color:var(--ink);cursor:pointer;box-shadow:0 2px 10px rgba(2,132,199,0.15);">
       <option value="en">🌐 English</option>
       <option value="hi">हिंदी (Hindi)</option>
       <option value="te">తెలుగు (Telugu)</option>
@@ -3026,12 +3026,8 @@ table td strong {
       <option value="kn">ಕನ್ನಡ (Kannada)</option>
     </select>
 
-    <!-- 3. LOG OUT BUTTON -->
-    <div id="sessionHeaderControls" style="display:none;align-items:center;">
-      <button type="button" class="btn-taskbar-logout" style="background:linear-gradient(135deg, #ef4444, #dc2626);color:#ffffff;padding:8px 16px;font-size:12px;font-weight:900;border:1px solid #b91c1c;border-radius:10px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;box-shadow:0 2px 12px rgba(239,68,68,0.4);transition:all 0.2s ease;" onclick="doLogout()" data-i18n="btn_logout">
-        <span>🚪</span> <span>Log Out / Change Portal</span>
-      </button>
-    </div>
+    <!-- Hidden dummy container to prevent errors if referenced in scripts -->
+    <div id="sessionHeaderControls" style="display:none;"></div>
 
   </div>
 
@@ -3095,6 +3091,12 @@ table td strong {
       <button onclick="cycleTheme()" id="themeToggleBtn" style="background:#1e293b;border:1px solid rgba(255,255,255,0.12);color:#ffffff;display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:10px;font-size:13px;font-weight:700;text-align:left;width:100%;cursor:pointer;transition:all 0.2s ease;">
         <span style="font-size:16px;">🏛️</span>
         <span data-i18n="theme_classic">Switch Color Theme</span>
+      </button>
+
+      <!-- 🚪 LOG OUT / CHANGE PORTAL (INSIDE SIDEBAR) -->
+      <button onclick="doLogout(); toggleLeftSidebar(false);" style="background:linear-gradient(135deg, rgba(239,68,68,0.2), rgba(220,38,38,0.35));border:1.5px solid #ef4444;color:#fca5a5;display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:10px;font-size:13px;font-weight:800;text-align:left;width:100%;cursor:pointer;margin-top:6px;transition:all 0.2s ease;">
+        <span style="font-size:16px;">🚪</span>
+        <span>Log Out / Change Portal</span>
       </button>
     </div>
 
@@ -3437,6 +3439,7 @@ table td strong {
       <div style="display:flex;gap:8px;">
         <a href="tel:108" class="btn-glass" style="background:#ffffff;color:#dc2626;font-weight:700;padding:6px 14px;" data-i18n="btn_call_108">📞 Call 108</a>
         <button class="btn-glass" style="background:rgba(255,255,255,0.2);color:#ffffff;border-color:rgba(255,255,255,0.4);" onclick="patientController.triggerSos()" data-i18n="btn_gps_sos">📍 GPS SOS</button>
+        <button id="patientLogOutBtn" class="btn-glass" style="background:rgba(0,0,0,0.3);color:#ffffff;border-color:rgba(255,255,255,0.4);" onclick="doLogout()">🚪 Log Out</button>
       </div>
     </div>
 
@@ -3568,8 +3571,11 @@ table td strong {
           📹 Direct Video Call Patient
         </button>
         <button class="auth-btn-primary" style="background:#0284c7;border-color:#0369a1;" onclick="doctorController.openAddQueueModal()" data-i18n="btn_admit_patient">
-          + Admit Walk-in Patient
-        </button>
+            + Admit Walk-in Patient
+          </button>
+          <button class="auth-btn-primary" style="background:#dc2626;border-color:#b91c1c;padding:8px 14px;" onclick="doLogout()" title="Log out to switch portal">
+            🚪 Log Out
+          </button>
         </div>
       </div>
     </div>
@@ -3639,8 +3645,9 @@ table td strong {
   <section id="viewWorker" style="display:none;">
     <div class="glass-panel" style="background:linear-gradient(135deg, rgba(217,119,6,0.15), rgba(15,23,42,0.4));border-color:rgba(217,119,6,0.3);">
       <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
-        <div>
-          <h2 style="font-size:20px;color:var(--ink);font-weight:800;margin-bottom:4px;" data-i18n="worker_title">🤝 ASHA & ANM Frontline Field Hub</h2>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div>
+            <h2 style="font-size:20px;color:var(--ink);font-weight:800;margin-bottom:4px;" data-i18n="worker_title">🤝 ASHA & ANM Frontline Field Hub</h2>
           <small style="color:var(--muted);" data-i18n="worker_subline">Maternal ANC Register, UIP Child Immunization & Village Home Visits</small>
         </div>
         <div>
@@ -3770,6 +3777,9 @@ table td strong {
           <h2 style="font-size:20px;color:var(--ink);font-weight:800;margin-bottom:4px;" data-i18n="admin_title">👑 District Health Officer Command Center</h2>
           <small style="color:var(--muted);" data-i18n="admin_subline">Executive KPIs, Staff Roster, Hospital Grid & Drug Supply Oversight</small>
         </div>
+        <button id="adminLogOutBtn" class="auth-btn-primary" style="background:#dc2626;border-color:#b91c1c;padding:8px 14px;" onclick="doLogout()">
+          🚪 Log Out
+        </button>
       </div>
     </div>
 
