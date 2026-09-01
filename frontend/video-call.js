@@ -1,8 +1,10 @@
 /**
  * =========================================================
- * SWASTHYA SETU - 100% IN-BUILT NATIVE VIDEO CALLING ENGINE (video-call.js)
- * Zero External Iframes · WebRTC P2P + Realtime Dual-Mode Canvas Sync
- * In-Call e-Prescriptions · 2-Way Chat · Camera Flipping · Audio Gain Boost
+ * SWASTHYA SETU - BULLETPROOF WEBRTC & REAL-TIME AUDIO ENGINE (video-call.js)
+ * Dual-Layer Voice Streaming:
+ * Layer 1: WebRTC Opus P2P Audio with Full Trickle ICE & TURN Relays
+ * Layer 2: Web Audio Realtime Voice Packet Streaming over Cloud Channel
+ * Layer 3: Web Audio GainNode 2.5x Hardware Loudspeaker Amplification
  * =========================================================
  */
 
@@ -36,6 +38,8 @@
       this.remoteStream = null;
       this.audioContext = null;
       this.audioAnalyser = null;
+      this.audioGainNode = null;
+      this.audioScriptProcessor = null;
       this.micMeterInterval = null;
       this.isAudioMuted = false;
       this.isVideoMuted = false;
@@ -47,6 +51,7 @@
       this.currentCallData = null;
       this.inCallMessages = [];
       this.pendingIncomingSignal = null;
+      this.audioPlaybackTime = 0;
       this.init();
     }
 
@@ -108,7 +113,14 @@
         }
       }
 
-      // 3. Live Synced In-Call Chat
+      // 3. Dynamic Trickle ICE Candidates for Guaranteed Cross-Network Connectivity
+      else if (signal.type === 'ICE_CANDIDATE') {
+        if (this.currentCallData && this.currentCallData.id === signal.callId && signal.candidate) {
+          this.handleRemoteIceCandidate(signal.candidate);
+        }
+      }
+
+      // 4. Live Synced In-Call Chat
       else if (signal.type === 'IN_CALL_CHAT') {
         if (this.currentCallData && this.currentCallData.id === signal.callId && signal.message) {
           this.inCallMessages.push(signal.message);
@@ -117,14 +129,21 @@
         }
       }
 
-      // 4. Live Dual-Mode Video Frame Streaming (Real-Time Fallback)
+      // 5. Dual-Mode Video Frame Streaming (Real-Time Fallback)
       else if (signal.type === 'VIDEO_FRAME') {
         if (this.currentCallData && this.currentCallData.id === signal.callId && signal.frameData) {
           this.renderRemoteVideoFrame(signal.frameData);
         }
       }
 
-      // 5. Either party ends call
+      // 6. Dual-Mode Real-Time Voice Audio Chunk Streaming (Real-Time Audio Fallback)
+      else if (signal.type === 'AUDIO_VOICE_STREAM') {
+        if (this.currentCallData && this.currentCallData.id === signal.callId && signal.audioChunk) {
+          this.playRemoteAudioChunk(signal.audioChunk);
+        }
+      }
+
+      // 7. Either party ends call
       else if (signal.type === 'CALL_ENDED') {
         if (this.currentCallData && this.currentCallData.id === signal.callId) {
           this.handleRemoteEndCall(signal);
@@ -166,7 +185,7 @@
       };
 
       this.inCallMessages = [
-        { sender: 'System', text: '🔒 Connecting to ' + recipientName + '... Ringing on Doctor Desk...', time: this.currentCallData.time }
+        { sender: 'System', text: '🔒 Connecting to ' + recipientName + '... Calling Doctor Desk...', time: this.currentCallData.time }
       ];
 
       // Render Modal & Open Viewport
@@ -185,7 +204,7 @@
       // 2. Setup WebRTC PeerConnection & Bind Local Audio/Video Tracks
       this.setupPeerConnection();
 
-      // 3. Create WebRTC Offer & Gather All ICE Candidates into SDP
+      // 3. Create WebRTC Offer
       let offerSdp = null;
       try {
         if (this.peerConnection) {
@@ -225,6 +244,7 @@
       this.startCallTimer();
       this.startFrameSyncStream();
       this.startMicLevelMeter();
+      this.startRealtimeVoiceStreaming();
 
       if (global.toast) {
         global.toast('📞 Calling ' + recipientName + '... Ringing on Doctor Desk.');
@@ -379,6 +399,7 @@
       this.startCallTimer();
       this.startFrameSyncStream();
       this.startMicLevelMeter();
+      this.startRealtimeVoiceStreaming();
     }
 
     async handleCallAcceptedByDoctor(signal) {
@@ -407,6 +428,14 @@
       }
     }
 
+    handleRemoteIceCandidate(candidate) {
+      try {
+        if (this.peerConnection && this.peerConnection.remoteDescription) {
+          this.peerConnection.addIceCandidate(new RTCIceCandidate(candidate)).catch(() => {});
+        }
+      } catch (e) {}
+    }
+
     handleRemoteEndCall(signal) {
       if (global.toast) {
         global.toast('📞 Video Consultation Ended by other participant');
@@ -427,7 +456,7 @@
           }
         };
         this.peerConnection.addEventListener('icegatheringstatechange', checkState);
-        setTimeout(resolve, 800);
+        setTimeout(resolve, 1200);
       });
     }
 
@@ -451,6 +480,17 @@
             }
           });
         }
+
+        // Send Trickle ICE Candidate Signals
+        this.peerConnection.onicecandidate = (event) => {
+          if (event.candidate && global.supabaseService && this.currentCallData) {
+            global.supabaseService.sendTeleconsultSignal({
+              type: 'ICE_CANDIDATE',
+              callId: this.currentCallData.id,
+              candidate: event.candidate
+            });
+          }
+        };
 
         // On Remote Track Received -> Stream Video & Route Audio Directly to Speakers
         this.peerConnection.ontrack = (event) => {
@@ -494,11 +534,13 @@
                 if (!this.audioContext) this.audioContext = new AudioCtx();
                 if (this.audioContext.state === 'suspended') this.audioContext.resume();
                 const audioSource = this.audioContext.createMediaStreamSource(new MediaStream([event.track]));
-                const gainNode = this.audioContext.createGain();
-                gainNode.gain.value = 2.0; // 2x Voice Gain Amplification
-                audioSource.connect(gainNode);
-                gainNode.connect(this.audioContext.destination);
-                console.log('[WebRTC Audio] Remote voice stream connected directly to device speakers!');
+                if (!this.audioGainNode) {
+                  this.audioGainNode = this.audioContext.createGain();
+                  this.audioGainNode.gain.value = 2.5; // 2.5x Voice Gain Amplification
+                  this.audioGainNode.connect(this.audioContext.destination);
+                }
+                audioSource.connect(this.audioGainNode);
+                console.log('[WebRTC Audio] Remote voice stream connected directly to device speakers with 2.5x boost!');
               }
             } catch (err) {
               console.warn('[WebRTC Audio] AudioContext bridge notice:', err);
@@ -530,7 +572,7 @@
       try {
         if (navigator.mediaDevices && typeof navigator.mediaDevices.getUserMedia === 'function') {
           
-          // 1. Dedicated Microphone Capture
+          // 1. Dedicated Microphone Capture with Universal Fallback
           try {
             audioStream = await navigator.mediaDevices.getUserMedia({
               audio: {
@@ -539,7 +581,9 @@
                 autoGainControl: true
               }
             });
+            console.log('[Audio Capture] Acquired echo-cancelled audio stream');
           } catch (audioErr) {
+            console.warn('[Audio Capture] Strict mic constraints failed, using audio: true', audioErr.message);
             try {
               audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
             } catch (permErr) {
@@ -547,7 +591,7 @@
             }
           }
 
-          // 2. Dedicated Camera Capture
+          // 2. Dedicated Camera Capture with Universal Fallback
           try {
             videoStream = await navigator.mediaDevices.getUserMedia({
               video: {
@@ -557,6 +601,7 @@
               }
             });
           } catch (vidErr) {
+            console.warn('[Video Capture] HD Video failed, using video: true', vidErr.message);
             try {
               videoStream = await navigator.mediaDevices.getUserMedia({ video: true });
             } catch (vErr) {
@@ -634,9 +679,9 @@
             const avg = sum / dataArray.length;
             const percentage = Math.min(100, Math.max(10, Math.round((avg / 128) * 100)));
             meterBar.style.width = percentage + '%';
-            meterBar.style.background = this.isAudioMuted ? '#dc2626' : (percentage > 25 ? '#22c55e' : '#38bdf8');
+            meterBar.style.background = this.isAudioMuted ? '#dc2626' : (percentage > 20 ? '#22c55e' : '#38bdf8');
             if (micStatusText) {
-              micStatusText.textContent = this.isAudioMuted ? 'Muted' : (percentage > 25 ? 'Speaking...' : 'Live');
+              micStatusText.textContent = this.isAudioMuted ? 'Muted' : (percentage > 20 ? 'Speaking...' : 'Live');
             }
           }
         }, 150);
@@ -653,7 +698,104 @@
     }
 
     // -------------------------------------------------------------
-    // 6. HIGH-DEFINITION DUAL-MODE REAL-TIME FRAME STREAMING
+    // 6. REAL-TIME VOICE STREAMING FALLBACK (LAYER 2 VOICE PIPELINE)
+    // -------------------------------------------------------------
+    startRealtimeVoiceStreaming() {
+      try {
+        if (!this.localStream) return;
+        const audioTrack = this.localStream.getAudioTracks()[0];
+        if (!audioTrack) return;
+
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        if (!this.audioContext) this.audioContext = new AudioCtx();
+        if (this.audioContext.state === 'suspended') this.audioContext.resume();
+
+        const source = this.audioContext.createMediaStreamSource(new MediaStream([audioTrack]));
+        // Process audio in 2048 buffer chunks (~120ms)
+        this.audioScriptProcessor = this.audioContext.createScriptProcessor(2048, 1, 1);
+        
+        this.audioScriptProcessor.onaudioprocess = (e) => {
+          if (this.isAudioMuted || !this.currentCallData) return;
+          const inputData = e.inputBuffer.getChannelData(0);
+          
+          // Check if speech/energy is present
+          let maxVal = 0;
+          for (let i = 0; i < inputData.length; i++) {
+            const abs = Math.abs(inputData[i]);
+            if (abs > maxVal) maxVal = abs;
+          }
+
+          if (maxVal > 0.02) {
+            // Compress to 8-bit PCM samples to minimize network bandwidth
+            const compressed = new Int8Array(inputData.length);
+            for (let i = 0; i < inputData.length; i++) {
+              compressed[i] = Math.max(-128, Math.min(127, Math.round(inputData[i] * 127)));
+            }
+            const base64Audio = btoa(String.fromCharCode.apply(null, new Uint8Array(compressed.buffer)));
+
+            if (global.supabaseService) {
+              global.supabaseService.sendTeleconsultSignal({
+                type: 'AUDIO_VOICE_STREAM',
+                callId: this.currentCallData.id,
+                audioChunk: base64Audio
+              });
+            }
+          }
+        };
+
+        source.connect(this.audioScriptProcessor);
+        this.audioScriptProcessor.connect(this.audioContext.destination);
+        console.log('[Voice Engine] Real-time audio backup streamer active');
+      } catch (e) {
+        console.warn('[Voice Engine] Real-time streamer notice:', e);
+      }
+    }
+
+    stopRealtimeVoiceStreaming() {
+      if (this.audioScriptProcessor) {
+        try { this.audioScriptProcessor.disconnect(); } catch (e) {}
+        this.audioScriptProcessor = null;
+      }
+    }
+
+    playRemoteAudioChunk(base64Chunk) {
+      if (!this.isSpeakerBoosted || !base64Chunk) return;
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        if (!this.audioContext) this.audioContext = new AudioCtx();
+        if (this.audioContext.state === 'suspended') this.audioContext.resume();
+
+        const binaryStr = atob(base64Chunk);
+        const len = binaryStr.length;
+        const bytes = new Uint8Array(len);
+        for (let i = 0; i < len; i++) bytes[i] = binaryStr.charCodeAt(i);
+        const int8Array = new Int8Array(bytes.buffer);
+
+        const sampleRate = this.audioContext.sampleRate || 44100;
+        const audioBuffer = this.audioContext.createBuffer(1, int8Array.length, sampleRate);
+        const channelData = audioBuffer.getChannelData(0);
+
+        for (let i = 0; i < int8Array.length; i++) {
+          channelData[i] = (int8Array[i] / 127.0) * 1.8; // 1.8x Gain
+        }
+
+        const source = this.audioContext.createBufferSource();
+        source.buffer = audioBuffer;
+        
+        const now = this.audioContext.currentTime;
+        const playTime = Math.max(now, this.audioPlaybackTime);
+        source.connect(this.audioContext.destination);
+        source.start(playTime);
+        this.audioPlaybackTime = playTime + audioBuffer.duration;
+      } catch (e) {
+        console.warn('[Voice Playback] Buffer play notice:', e);
+      }
+    }
+
+    // -------------------------------------------------------------
+    // 7. HIGH-DEFINITION DUAL-MODE REAL-TIME FRAME STREAMING
     // -------------------------------------------------------------
     startFrameSyncStream() {
       if (this.frameSyncInterval) clearInterval(this.frameSyncInterval);
@@ -709,7 +851,7 @@
     }
 
     // -------------------------------------------------------------
-    // 7. IN-CALL HARDWARE CONTROLS
+    // 8. IN-CALL HARDWARE CONTROLS
     // -------------------------------------------------------------
     toggleAudio() {
       this.isAudioMuted = !this.isAudioMuted;
@@ -739,12 +881,15 @@
         remoteVideo.volume = this.isSpeakerBoosted ? 1.0 : 0.0;
         remoteVideo.play().catch(() => {});
       }
+      if (this.audioGainNode) {
+        this.audioGainNode.gain.value = this.isSpeakerBoosted ? 2.5 : 0.0;
+      }
       const btn = document.getElementById('btnToggleSpeaker');
       if (btn) {
         btn.style.background = this.isSpeakerBoosted ? 'rgba(34,197,94,0.3)' : 'rgba(220,38,38,0.3)';
         btn.innerHTML = this.isSpeakerBoosted ? '🔊 <span class="ctrl-lbl">Speaker 100%</span>' : '🔈 <span class="ctrl-lbl">Speaker Off</span>';
       }
-      if (global.toast) global.toast(this.isSpeakerBoosted ? '🔊 Speaker Active (100%)' : '🔈 Speaker Muted');
+      if (global.toast) global.toast(this.isSpeakerBoosted ? '🔊 Speaker Active (2.5x Boost)' : '🔈 Speaker Muted');
     }
 
     toggleVideo() {
@@ -820,7 +965,7 @@
     }
 
     // -------------------------------------------------------------
-    // 8. IN-CALL E-PRESCRIPTION DRAWER & CHAT
+    // 9. IN-CALL E-PRESCRIPTION DRAWER & CHAT
     // -------------------------------------------------------------
     toggleInCallRxDrawer() {
       const drawer = document.getElementById('inCallRxDrawer');
@@ -957,7 +1102,7 @@
     }
 
     // -------------------------------------------------------------
-    // 9. END CALL & LOG TO DATABASE
+    // 10. END CALL & LOG TO DATABASE
     // -------------------------------------------------------------
     endCall(broadcastSignal = true) {
       if (!this.currentCallData) {
@@ -966,6 +1111,7 @@
       }
 
       this.stopFrameSyncStream();
+      this.stopRealtimeVoiceStreaming();
       this.stopMicLevelMeter();
 
       if (broadcastSignal && global.supabaseService) {
@@ -1018,6 +1164,7 @@
       this.currentCallData = null;
       this.stopCallTimer();
       this.stopFrameSyncStream();
+      this.stopRealtimeVoiceStreaming();
       this.stopMicLevelMeter();
       if (this.peerConnection) {
         try { this.peerConnection.close(); } catch (e) {}
@@ -1042,7 +1189,7 @@
     }
 
     // -------------------------------------------------------------
-    // 10. RENDER IN-BUILT NATIVE VIDEO MODAL VIEWPORT
+    // 11. RENDER IN-BUILT NATIVE VIDEO MODAL VIEWPORT
     // -------------------------------------------------------------
     renderVideoCallModal() {
       let modal = document.getElementById('videoCallModal');
