@@ -72,6 +72,8 @@
       this.inCallMessages = [];
       this.pendingIncomingSignal = null;
       this.unreadChatCount = 0;
+      this.hasDirectWebRtcAudio = false;
+      this.remoteAudioSource = null;
       this.audioPlaybackTime = 0;
       this.init();
     }
@@ -268,6 +270,8 @@
       const facilitatorName = callDetails.facilitatorName || (callerRole === 'worker' ? activeUser.name : null);
 
       this.unreadChatCount = 0;
+      this.hasDirectWebRtcAudio = false;
+      this.remoteAudioSource = null;
       this.currentCallData = {
         id: 'CALL-' + String(Date.now()).slice(-4),
         token: 'VID-' + Math.floor(1000 + Math.random() * 9000),
@@ -436,6 +440,8 @@
       const activeDoctor = (state.session && state.session.user) || { name: 'Dr. Priya Sharma, MBBS, MD' };
 
       this.unreadChatCount = 0;
+      this.hasDirectWebRtcAudio = false;
+      this.remoteAudioSource = null;
       this.currentCallData = {
         id: signal.callId || ('CALL-' + Date.now()),
         token: signal.token || 'VID-101',
@@ -599,7 +605,7 @@
           }
         };
 
-        // On Remote Track Received -> Stream Video & Route Audio Directly to Speakers
+                // On Remote Track Received -> Direct Single Clean Route to Device Speakers
         this.peerConnection.ontrack = (event) => {
           console.log('[WebRTC] Remote media track received on device:', event.track.kind);
           let stream = event.streams && event.streams[0];
@@ -611,31 +617,46 @@
             this.remoteStream = stream;
           }
 
-          // 1. Remote Video Element Viewport
+          // 1. Remote Video Element Viewport (Video Only, Muted to Prevent Echo)
           const remoteVideo = document.getElementById('remoteVideoElement');
           if (remoteVideo) {
             remoteVideo.srcObject = stream;
-            remoteVideo.muted = true; // Prevents duplicate audio playback loop that causes echo
+            remoteVideo.muted = true; // Essential: Muted to avoid echo loop
             remoteVideo.play().catch(e => console.warn('Remote video playback:', e));
           }
 
-          // 2. Visible Unmuted Audio Element Output
-          const remoteAudio = document.getElementById('remoteAudioElement');
-          if (remoteAudio) {
-            if (event.track.kind === 'audio') {
-              remoteAudio.srcObject = new MediaStream([event.track]);
-            } else {
-              remoteAudio.srcObject = stream;
-            }
-            remoteAudio.muted = false;
-            remoteAudio.volume = 1.0;
-            remoteAudio.play().catch(e => console.warn('Remote audio element playback:', e));
-          }
-
-          // 3. Single Dedicated Hardware Audio Output
+          // 2. Single Authoritative Audio Output (Web Audio API Destination)
           if (event.track.kind === 'audio') {
-            this.isWebRtcAudioActive = true;
-            console.log('[WebRTC Audio] Dedicated clean hardware audio stream connected (Echo Cancellation Active)');
+            try {
+              this.unlockAudioContext();
+              if (this.audioContext) {
+                if (this.audioContext.state === 'suspended') this.audioContext.resume();
+                
+                // Disconnect previous if any
+                if (this.remoteAudioSource) {
+                  try { this.remoteAudioSource.disconnect(); } catch (e) {}
+                }
+
+                this.remoteAudioSource = this.audioContext.createMediaStreamSource(new MediaStream([event.track]));
+                if (!this.audioGainNode) {
+                  this.audioGainNode = this.audioContext.createGain();
+                  this.audioGainNode.gain.value = 2.0; // 2.0x Clear Voice Amplification
+                  this.audioGainNode.connect(this.audioContext.destination);
+                }
+                this.remoteAudioSource.connect(this.audioGainNode);
+                this.hasDirectWebRtcAudio = true;
+                console.log('[WebRTC Audio] Remote voice stream connected directly to speakers with 2.0x gain (Zero Echo)');
+              }
+            } catch (err) {
+              console.warn('[WebRTC Audio] AudioContext routing fallback to audio tag:', err);
+              const remoteAudio = document.getElementById('remoteAudioElement');
+              if (remoteAudio) {
+                remoteAudio.srcObject = new MediaStream([event.track]);
+                remoteAudio.muted = false;
+                remoteAudio.volume = 1.0;
+                remoteAudio.play().catch(() => {});
+              }
+            }
           }
 
           const remoteAvatar = document.getElementById('remoteAvatarPlaceholder');
@@ -819,8 +840,8 @@
       }
     }
 
-    playRemoteAudioChunk(base64Chunk) {
-      if (!this.isSpeakerBoosted || !base64Chunk || this.isWebRtcAudioActive) return; // Ignore chunks when WebRTC is active to prevent echo
+        playRemoteAudioChunk(base64Chunk) {
+      if (!this.isSpeakerBoosted || !base64Chunk || this.hasDirectWebRtcAudio) return; // Prevent double-playback when WebRTC is active
       try {
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
         if (!AudioCtx) return;
@@ -838,14 +859,13 @@
         const channelData = audioBuffer.getChannelData(0);
 
         for (let i = 0; i < int8Array.length; i++) {
-          channelData[i] = (int8Array[i] / 127.0) * 2.2;
+          channelData[i] = (int8Array[i] / 127.0) * 2.0;
         }
 
         const source = this.audioContext.createBufferSource();
         source.buffer = audioBuffer;
         
         const now = this.audioContext.currentTime;
-        // Zero-drift scheduling: If buffer queue exceeds 60ms, immediately snap back to 'now'
         if ((this.audioPlaybackTime - now) > 0.06 || this.audioPlaybackTime < now) {
           this.audioPlaybackTime = now;
         }
@@ -947,7 +967,7 @@
         remoteVideo.play().catch(() => {});
       }
       if (this.audioGainNode) {
-        this.audioGainNode.gain.value = this.isSpeakerBoosted ? 2.5 : 0.0;
+        this.audioGainNode.gain.value = this.isSpeakerBoosted ? 2.0 : 0.0;
       }
       const btn = document.getElementById('btnToggleSpeaker');
       if (btn) {
@@ -1126,6 +1146,8 @@
 
       if (!isOpen) {
         this.unreadChatCount = 0;
+      this.hasDirectWebRtcAudio = false;
+      this.remoteAudioSource = null;
         const badge = document.getElementById('chatUnreadBadge');
         if (badge) badge.style.display = 'none';
         this.renderChatMessages();
