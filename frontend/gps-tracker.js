@@ -163,7 +163,7 @@
     }
 
     
-        openGpsMapModal() {
+            openGpsMapModal() {
       const modal = document.getElementById('liveGpsTrackingModal');
       if (modal) {
         modal.style.display = 'flex';
@@ -171,22 +171,27 @@
           document.body.style.overflow = 'hidden';
         }
       }
-      // Ensure Leaflet is loaded and initialize map
-      this.ensureLeafletLoaded();
+
+      const tryInit = (retries = 0) => {
+        if (typeof global.L !== 'undefined') {
+          this.initMap('patientLiveGpsMap');
+          const inst = this.maps['patientLiveGpsMap'];
+          if (inst && inst.map) {
+            inst.map.invalidateSize();
+            inst.map.setView([this.patientCoords.lat, this.patientCoords.lng], DEFAULT_REGION.zoom);
+          }
+        } else if (retries < 20) {
+          setTimeout(() => tryInit(retries + 1), 100);
+        }
+      };
+
+      tryInit();
       setTimeout(() => {
-        this.initMap('patientLiveGpsMap');
         const inst = this.maps['patientLiveGpsMap'];
         if (inst && inst.map) {
           inst.map.invalidateSize();
-          inst.map.setView([this.patientCoords.lat, this.patientCoords.lng], DEFAULT_REGION.zoom);
         }
-      }, 100);
-      setTimeout(() => {
-        const inst = this.maps['patientLiveGpsMap'];
-        if (inst && inst.map) {
-          inst.map.invalidateSize();
-        }
-      }, 350);
+      }, 300);
     }
 
     closeGpsMapModal() {
