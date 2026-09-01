@@ -7806,8 +7806,8 @@ table td strong {
 /* ==================== video-call.js ==================== */
 /**
  * =========================================================
- * SWASTHYA SETU - BULLETPROOF WEBRTC AUDIO & HD VIDEO ENGINE (video-call.js)
- * Web Audio Hardware Routing, Explicit Transceivers, Live Mic Meter & 720p HD
+ * SWASTHYA SETU - HIGH-FIDELITY 2-WAY WEBRTC AUDIO & HD VIDEO ENGINE (video-call.js)
+ * Clean Track Binding, Speaker Boost, Mic Level Meter & 720p HD Video
  * =========================================================
  */
 
@@ -7844,6 +7844,7 @@ table td strong {
       this.micMeterInterval = null;
       this.isAudioMuted = false;
       this.isVideoMuted = false;
+      this.isSpeakerBoosted = true;
       this.currentFacingMode = 'user'; // 'user' or 'environment'
       this.callStartTime = null;
       this.callTimerInterval = null;
@@ -7993,7 +7994,10 @@ table td strong {
       let offerSdp = null;
       try {
         if (this.peerConnection) {
-          const offer = await this.peerConnection.createOffer({ offerToReceiveAudio: true, offerToReceiveVideo: true });
+          const offer = await this.peerConnection.createOffer({
+            offerToReceiveAudio: true,
+            offerToReceiveVideo: true
+          });
           await this.peerConnection.setLocalDescription(offer);
 
           await this.waitForIceGatheringComplete();
@@ -8240,16 +8244,15 @@ table td strong {
         if (typeof RTCPeerConnection === 'undefined') return;
         this.peerConnection = new RTCPeerConnection(RTC_CONFIG);
 
-        // Add explicit transceivers for bidirectional audio & video
-        if (typeof this.peerConnection.addTransceiver === 'function') {
-          this.peerConnection.addTransceiver('audio', { direction: 'sendrecv' });
-          this.peerConnection.addTransceiver('video', { direction: 'sendrecv' });
-        }
-
-        // Add Local Audio and Video Tracks directly to Peer
+        // Bind Local Audio and Video Tracks directly to Peer Connection
         if (this.localStream) {
           this.localStream.getTracks().forEach(track => {
-            this.peerConnection.addTrack(track, this.localStream);
+            try {
+              this.peerConnection.addTrack(track, this.localStream);
+              console.log('[WebRTC] Added local track:', track.kind);
+            } catch (e) {
+              console.warn('[WebRTC] Track add warning:', e);
+            }
           });
         }
 
@@ -8265,7 +8268,7 @@ table td strong {
             this.remoteStream = stream;
           }
 
-          // 1. Video Element Viewport
+          // 1. Remote Video Element Viewport
           const remoteVideo = document.getElementById('remoteVideoElement');
           if (remoteVideo) {
             remoteVideo.srcObject = stream;
@@ -8274,7 +8277,7 @@ table td strong {
             remoteVideo.play().catch(e => console.warn('Remote video playback:', e));
           }
 
-          // 2. HTML5 Audio Element Output
+          // 2. Offscreen Unmuted Audio Element Output
           const remoteAudio = document.getElementById('remoteAudioElement');
           if (remoteAudio) {
             remoteAudio.srcObject = stream;
@@ -8283,7 +8286,7 @@ table td strong {
             remoteAudio.play().catch(e => console.warn('Remote audio playback:', e));
           }
 
-          // 3. Direct Web Audio Context Hardware Routing (Bypasses Autoplay Restrictions)
+          // 3. Direct Web Audio Context Hardware Routing (Direct to Physical Device Speakers)
           if (event.track.kind === 'audio') {
             try {
               const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -8291,8 +8294,11 @@ table td strong {
                 if (!this.audioContext) this.audioContext = new AudioCtx();
                 if (this.audioContext.state === 'suspended') this.audioContext.resume();
                 const audioSource = this.audioContext.createMediaStreamSource(new MediaStream([event.track]));
-                audioSource.connect(this.audioContext.destination);
-                console.log('[WebRTC Audio] Remote voice stream connected directly to device speakers via AudioContext!');
+                const gainNode = this.audioContext.createGain();
+                gainNode.gain.value = 1.5; // Audio Boost
+                audioSource.connect(gainNode);
+                gainNode.connect(this.audioContext.destination);
+                console.log('[WebRTC Audio] Remote voice stream amplified and routed to physical speakers!');
               }
             } catch (err) {
               console.warn('[WebRTC Audio] AudioContext bridge notice:', err);
@@ -8470,6 +8476,29 @@ table td strong {
         btn.innerHTML = this.isAudioMuted ? '🔇 <span class="ctrl-lbl">Unmute</span>' : '🎙️ <span class="ctrl-lbl">Mute</span>';
       }
       if (global.toast) global.toast(this.isAudioMuted ? '🔇 Mic Muted' : '🎙️ Mic Live');
+    }
+
+    toggleSpeaker() {
+      this.unlockAudioContext();
+      this.isSpeakerBoosted = !this.isSpeakerBoosted;
+      const remoteAudio = document.getElementById('remoteAudioElement');
+      const remoteVideo = document.getElementById('remoteVideoElement');
+      if (remoteAudio) {
+        remoteAudio.muted = false;
+        remoteAudio.volume = this.isSpeakerBoosted ? 1.0 : 0.0;
+        remoteAudio.play().catch(() => {});
+      }
+      if (remoteVideo) {
+        remoteVideo.muted = false;
+        remoteVideo.volume = this.isSpeakerBoosted ? 1.0 : 0.0;
+        remoteVideo.play().catch(() => {});
+      }
+      const btn = document.getElementById('btnToggleSpeaker');
+      if (btn) {
+        btn.style.background = this.isSpeakerBoosted ? 'rgba(34,197,94,0.3)' : 'rgba(220,38,38,0.3)';
+        btn.innerHTML = this.isSpeakerBoosted ? '🔊 <span class="ctrl-lbl">Speaker 100%</span>' : '🔈 <span class="ctrl-lbl">Speaker Off</span>';
+      }
+      if (global.toast) global.toast(this.isSpeakerBoosted ? '🔊 Speaker Active (100%)' : '🔈 Speaker Muted');
     }
 
     toggleVideo() {
@@ -8810,8 +8839,8 @@ table td strong {
               <!-- REAL REMOTE VIDEO STREAM (WEBRTC) -->
               <video id="remoteVideoElement" autoplay playsinline style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;"></video>
 
-              <!-- DEDICATED UNMUTED REMOTE AUDIO STREAM -->
-              <audio id="remoteAudioElement" autoplay playsinline style="display:none;"></audio>
+              <!-- DEDICATED UNMUTED REMOTE AUDIO STREAM (POSITIONED OFFSCREEN TO PREVENT SLEEP) -->
+              <audio id="remoteAudioElement" autoplay playsinline style="position:absolute;left:-9999px;opacity:0.01;width:1px;height:1px;"></audio>
 
               <!-- DUAL-MODE BACKUP CANVAS STREAM (HIGH RES 640x480) -->
               <canvas id="remoteVideoCanvas" width="640" height="480" style="display:none;width:100%;height:100%;object-fit:cover;position:absolute;inset:0;"></canvas>
@@ -8898,6 +8927,10 @@ table td strong {
             
             <button id="btnToggleMic" onclick="videoCallController.toggleAudio()" style="background:rgba(255,255,255,0.15);color:#ffffff;border:none;padding:10px 18px;border-radius:30px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;transition:0.2s;">
               🎙️ <span>Mute</span>
+            </button>
+
+            <button id="btnToggleSpeaker" onclick="videoCallController.toggleSpeaker()" style="background:rgba(34,197,94,0.3);color:#ffffff;border:none;padding:10px 18px;border-radius:30px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;transition:0.2s;">
+              🔊 <span>Speaker 100%</span>
             </button>
 
             <button id="btnToggleCam" onclick="videoCallController.toggleVideo()" style="background:rgba(255,255,255,0.15);color:#ffffff;border:none;padding:10px 18px;border-radius:30px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;transition:0.2s;">
