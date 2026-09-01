@@ -3693,17 +3693,7 @@ body[data-theme="doom"] {
        1. CITIZEN / PATIENT HUB
        ========================================================= -->
   <section id="viewPatient" style="display:none;">
-    <div style="background:linear-gradient(135deg, #dc2626, #b91c1c);color:#ffffff;border-radius:16px;padding:14px 18px;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;box-shadow:0 8px 24px rgba(220,38,38,0.25);">
-      <div>
-        <strong style="font-size:15px;display:block;" data-i18n="emergency_banner">🚑 Immediate 108 Ambulance SOS — Tap to Call or Send GPS</strong>
-        <small style="opacity:0.9;font-size:12px;" data-i18n="emergency_subline">Direct connection to nearest Rural Emergency Dispatch Hub</small>
-      </div>
-      <div style="display:flex;gap:8px;">
-        <a href="tel:108" class="btn-glass" style="background:#ffffff;color:#dc2626;font-weight:700;padding:6px 14px;" data-i18n="btn_call_108">📞 Call 108</a>
-        <button class="btn-glass" style="background:rgba(255,255,255,0.2);color:#ffffff;border-color:rgba(255,255,255,0.4);" onclick="patientController.triggerSos()" data-i18n="btn_gps_sos">📍 GPS SOS</button>
-        
-      </div>
-    </div>
+    
 
     
     
@@ -3726,6 +3716,9 @@ body[data-theme="doom"] {
         </div>
       </div>
       <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <a href="tel:108" class="btn-glass" style="background:#ffffff;color:#dc2626;font-weight:800;padding:10px 16px;font-size:13px;border-radius:10px;display:inline-flex;align-items:center;gap:6px;text-decoration:none;border:1px solid rgba(220,38,38,0.3);box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+          <span>📞</span> <span>Call 108</span>
+        </a>
         <button type="button" onclick="gpsTrackingController.startAmbulanceDispatch()" class="auth-btn-primary" style="background:linear-gradient(135deg, #dc2626, #b91c1c);border:none;padding:10px 18px;font-size:13px;font-weight:800;border-radius:10px;box-shadow:0 4px 14px rgba(220,38,38,0.4);cursor:pointer;display:inline-flex;align-items:center;gap:6px;">
           <span>🚨</span> <span>Dispatch 108 & Track</span>
         </button>
