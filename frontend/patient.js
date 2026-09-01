@@ -42,6 +42,7 @@
     }
 
     // -------------------------------------------------------------
+        // -------------------------------------------------------------
     // VIDEO TELECONSULTATION & CALL HISTORY
     // -------------------------------------------------------------
     openPatientVideoCallModal() {
@@ -50,9 +51,9 @@
       const memberSelect = document.getElementById('patientVideoMemberSelect');
 
       if (this.store) {
+        const user = this.store.getState().currentUser || (this.store.getState().session && this.store.getState().session.user) || { name: 'Citizen Beneficiary', phone: '9876543210' };
         const doctors = (this.store.getState().staff || []).filter(s => s.role === 'doctor');
         const family = typeof this.store.getFamilyMembers === 'function' ? this.store.getFamilyMembers(user ? user.phone : null) : [];
-        const user = this.store.getState().currentUser || (this.store.getState().session && this.store.getState().session.user) || { name: 'Self' };
 
         if (docSelect) {
           docSelect.innerHTML = doctors.map(d => `
