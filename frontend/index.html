@@ -1109,8 +1109,14 @@ body[data-theme="doom"] {
   </div>
 
   <!-- RIGHT: 🔵 BLUE (LANGUAGE SELECTOR) & 🟢 GREEN (108 SOS) -->
-  <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
     
+    <!-- 🎨 TOP NAVBAR COMPACT THEME SWITCHER BUTTON -->
+    <button type="button" onclick="openThemeSelectorModal()" class="btn-glass" title="Change Workspace Theme" style="padding:8px 14px;border-radius:12px;font-weight:800;font-size:13px;background:rgba(2,132,199,0.12);border:1.5px solid var(--primary-bright);color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;gap:6px;box-shadow:0 2px 10px rgba(2,132,199,0.15);transition:all 0.2s ease;">
+      <span style="font-size:15px;">🎨</span>
+      <span id="navThemeText">Theme</span>
+    </button>
+
     <!-- 🔵 BLUE POSITION: 🌐 LANGUAGE SELECTOR -->
     <select id="langSelect" class="select-control" onchange="onLanguageChange(this.value)" style="padding:8px 14px;border-radius:12px;font-weight:800;font-size:13px;background:rgba(2,132,199,0.12);border:1.5px solid var(--primary-bright);color:var(--ink);cursor:pointer;box-shadow:0 2px 10px rgba(2,132,199,0.15);">
       <option value="en">🌐 English</option>
@@ -3635,28 +3641,7 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
 
     
-      <!-- 4. DOOM GREEN (CYBER MATRIX) -->
-      <div onclick="selectTheme('doom')" id="themeCardDoom" class="theme-select-card" style="cursor:pointer;border:2px solid transparent;background:linear-gradient(135deg, #020b06 0%, #04180d 100%);border-radius:14px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 4px 16px rgba(0,255,136,0.15);transition:all 0.2s ease;">
-        <div style="display:flex;align-items:center;gap:12px;">
-          <div style="width:42px;height:42px;border-radius:12px;background:rgba(0,255,136,0.18);color:#00ff88;border:1px solid #00ff88;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 0 12px rgba(0,255,136,0.3);">
-            ☣️
-          </div>
-          <div>
-            <div style="font-size:15px;font-weight:800;color:#00ff88;display:flex;align-items:center;gap:8px;">
-              <span>Emerald Green (Forest Clinical HUD)</span>
-              <span id="badgeDoomActive" style="display:none;background:#00ff88;color:#020b06;font-size:10px;font-weight:900;padding:2px 8px;border-radius:6px;">Active</span>
-            </div>
-            <small style="color:#6ee7b7;font-size:12px;font-weight:600;">Deep forest emerald glass, glowing jade auras & high-contrast clinical metrics</small>
-          </div>
-        </div>
-        <div style="display:flex;gap:4px;">
-          <span style="width:14px;height:14px;border-radius:50%;background:#020b06;border:1px solid rgba(0,255,136,0.4);"></span>
-          <span style="width:14px;height:14px;border-radius:50%;background:#10b981;"></span>
-          <span style="width:14px;height:14px;border-radius:50%;background:#00ff88;box-shadow:0 0 8px #00ff88;"></span>
-        </div>
-      </div>
-
-    </div>
+      
     <div style="display:flex;justify-content:flex-end;">
       <button type="button" class="auth-btn-primary" style="background:#0284c7;border:none;padding:10px 20px;font-size:13px;font-weight:800;" onclick="closeThemeSelectorModal()">
         ✓ Done
@@ -3702,6 +3687,12 @@ document.addEventListener('DOMContentLoaded', () => {
       if (btnText) {
         const names = { classic: '🏛️ Classic (White & Blue)', navy: '🌌 Midnight (Deep Navy)', black: '🖤 Pure AMOLED (Black)' };
         btnText.textContent = names[current] || 'Switch Theme';
+      }
+
+      const navThemeText = document.getElementById('navThemeText');
+      if (navThemeText) {
+        const navNames = { classic: 'Classic', navy: 'Midnight', black: 'Dark' };
+        navThemeText.textContent = navNames[current] || 'Theme';
       }
     }
 
