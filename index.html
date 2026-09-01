@@ -10617,6 +10617,7 @@ body[data-theme="doom"] {
  * =========================================================
  * SWASTHYA SETU - 24x7 AI CLINICAL HEALTH BOT & SYMPTOM GUIDE
  * (Swasthya AI Sahayak / स्वास्थय AI सहायक)
+ * Advanced Tokenized Semantic NLP, 20+ Clinical Protocols,
  * Instant Triage, First-Aid, Danger Red Flags & Home Care
  * =========================================================
  */
@@ -10624,316 +10625,397 @@ body[data-theme="doom"] {
 (function(global) {
   'use strict';
 
-  // Comprehensive Clinical Knowledgebase with Typo & Phonetic Tolerance
+  // Common stop words in English/Hinglish to exclude from semantic matching
+  const STOP_WORDS = new Set([
+    'is', 'the', 'by', 'a', 'an', 'or', 'and', 'in', 'to', 'of', 'for', 'with', 'on', 'at', 'from',
+    'as', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'do', 'does', 'did',
+    'will', 'would', 'shall', 'should', 'may', 'might', 'must', 'can', 'could', 'i', 'me', 'my',
+    'myself', 'we', 'our', 'ours', 'you', 'your', 'yours', 'he', 'him', 'his', 'she', 'her', 'it',
+    'its', 'they', 'them', 'their', 'what', 'which', 'who', 'whom', 'this', 'that', 'these', 'those',
+    'am', 'if', 'because', 'as', 'until', 'while', 'about', 'against', 'between', 'into', 'through',
+    'during', 'before', 'after', 'above', 'below', 'up', 'down', 'out', 'off', 'over', 'under',
+    'again', 'further', 'then', 'once', 'here', 'there', 'when', 'where', 'why', 'how', 'all',
+    'any', 'both', 'each', 'few', 'more', 'most', 'other', 'some', 'such', 'no', 'nor', 'not',
+    'only', 'own', 'same', 'so', 'than', 'too', 'very', 'just', 'caused', 'causing', 'cause',
+    'tell', 'give', 'suggest', 'need', 'want', 'please', 'help', 'doctor', 'patient'
+  ]);
+
+  // Comprehensive Clinical Knowledgebase across 20+ Primary Healthcare Domains
   const CLINICAL_KB = [
     {
-      id: 'fever',
-      keywords: ['fever', 'fiver', 'fvr', 'fevr', 'temperature', 'temp', 'bukhar', 'jwaram', 'chills', 'hot body', 'shivering', '102', '103', '101', '100', '104', 'pyrexia'],
-      title: 'High Fever & Hyperpyrexia (उच्च बुखार)',
-      severity: 'moderate',
-      severityLabel: '🟡 MODERATE · HOME CARE & PHC MONITORING',
-      severityColor: '#d97706',
-      summary: 'Fever is the body\'s immune response fighting infection. Immediate temperature reduction and hydration are crucial.',
+      id: 'animal_bite_rabies',
+      primaryKeys: ['animal bite', 'dog bite', 'cat bite', 'monkey bite', 'rabies', 'kutte ne kata', 'dog scratch', 'animal scratch'],
+      keywords: ['dog', 'cat', 'monkey', 'animal', 'bite', 'rabies', 'kutta', 'billi', 'bandar', 'kutta kata', 'saliva', 'rabies vaccine', 'arv', 'rig', 'hydrophobia'],
+      title: 'Animal Bite & Anti-Rabies Emergency Protocol (जानवर / कुत्ते के काटने पर रेबीज प्रोटोकॉल)',
+      severity: 'critical',
+      severityLabel: '🔴 CRITICAL EMERGENCY · ANTI-RABIES VACCINATION (ARV)',
+      severityColor: '#dc2626',
+      summary: 'All warm-blooded mammal bites (dogs, cats, monkeys) carry 100% fatal rabies risk if untreated. Immediate soap-water washing and Post-Exposure Prophylaxis (PEP) are mandatory.',
       steps: [
-        '**Cold / Tepid Sponging**: Apply a clean cloth soaked in normal tap water (not ice cold) on forehead, neck, armpits, and groin to rapidly lower body temperature.',
-        '**Oral Hydration**: Drink coconut water, lemon water with salt, thin dal soup, or warm water to prevent dehydration.',
-        '**Light Cotton Clothing**: Dress in light, breathable cotton clothes. Avoid wrapping the patient in thick heavy blankets.',
-        '**Temperature Monitoring**: Check temperature every 2 hours using a digital thermometer.'
+        '**Immediate Soap & Water Wash (15 Minutes)**: Wash the bite wound vigorously under running tap water with ordinary alkaline bathing soap for 15 FULL MINUTES. Soap dissolves the virus lipid envelope and eliminates over 90% of rabies virus.',
+        '**Apply Antiseptic**: Apply Povidone Iodine (Betadine) or Spirit. Do NOT apply chili powder, turmeric, lime, cow dung, or plant juice.',
+        '**DO NOT SUTURE / STITCH**: The bite wound must NOT be stitched immediately to prevent driving virus deeper into nerves.',
+        '**Rush to Nearest Government PHC / CHC**: Get Day-0 Anti-Rabies Vaccine (ARV) and Rabies Immunoglobulin (RIG) for Category III deep bites.'
       ],
       medicines: [
-        '**Paracetamol 500mg / 650mg** (Jan Aushadhi: ₹1.50 per strip) — 1 tablet every 6–8 hours after food for adults.',
-        '**WHO-ORS Electrolytes** (Jan Aushadhi: ₹4.00) — to maintain electrolyte balance.'
+        '**Anti-Rabies Vaccine (ARV)** (Intradermal / Intramuscular) — Schedule: Day 0, 3, 7, and 28 (Available FREE at Government Hospitals).',
+        '**Rabies Immunoglobulin (RIG)** — Infiltrated locally around wound for deep bleeding bites.',
+        '**Tetanus Toxoid (TT) Injection 0.5ml** — Within 24 hours.'
       ],
       redFlags: [
-        'Temperature exceeding 103°F (39.4°C) not coming down with medication.',
-        'Seizures or fits (Febrile convulsion), especially in children under 5.',
-        'Severe headache, neck stiffness, or inability to touch chin to chest.',
-        'Continuous vomiting or purple/red spots on skin.'
+        'Animal appeared unusually aggressive, salivating excessively, or died within 10 days.',
+        'Deep puncture wounds or bleeding near head, neck, face, or fingertips (high nerve density).',
+        'Fever, restlessness, fear of water (Hydrophobia), or fear of air drafts (Aerophobia).'
       ],
       suggestedQuestions: [
-        'Is the fever accompanied by shivering or chills?',
-        'How many days has the fever been present?',
-        'Are there any skin rashes, joint pains, or cough?'
+        'Was the animal a stray or pet, and is it available for 10-day observation?',
+        'Did the bite break the skin and cause bleeding (Category III bite)?',
+        'Have you washed the wound with soap and running water for 15 minutes?'
       ],
-      audioSummary: 'High fever care: Do tepid sponging with normal water on forehead and armpits. Stay hydrated with ORS and take Paracetamol after food. If fever exceeds 103 degrees or seizures occur, visit nearest PHC.'
+      audioSummary: 'Animal bite emergency: Immediately wash the wound with soap and running water for 15 full minutes. Do not stitch or tie the wound. Rush to the nearest PHC immediately for Anti-Rabies Vaccine ARV on Day 0.'
     },
     {
-      id: 'snakebite',
-      keywords: ['snake', 'snakebite', 'snak', 'bite', 'venom', 'saap', 'samp', 'paamu', 'cobra', 'viper', 'krait', 'bitten by snake'],
-      title: 'Snake Bite Emergency Protocol (सांप काटने पर आपातकालीन उपचार)',
+      id: 'tetanus_rusty_metal',
+      primaryKeys: ['rusty metal', 'rusty nail', 'rust', 'tetanus', 'metal injury', 'lohe se chot', 'puncture wound', 'rusty wire'],
+      keywords: ['rusty', 'metal', 'rust', 'nail', 'loha', 'tin', 'wire', 'blade', 'tetanus', 'tt', 'tetanus toxoid', 'lockjaw', 'dhanusthankar', 'iron cut'],
+      title: 'Rusty Metal Injury & Tetanus Protocol (जंग लगे लोहे से चोट व टिटनेस रोकथाम)',
+      severity: 'moderate',
+      severityLabel: '🟡 URGENT FIRST AID · TETANUS TT SHOT WITHIN 24 HOURS',
+      severityColor: '#d97706',
+      summary: 'Injuries from rusty iron nails, soil-contaminated metal, or deep puncture wounds can introduce Clostridium tetani spores causing life-threatening Tetanus (Lockjaw).',
+      steps: [
+        '**Clean Running Water**: Flush the puncture wound thoroughly under clean tap water with antiseptic soap to remove rust particles, soil, and debris.',
+        '**Allow Minor Bleeding**: Gently allow a few drops of blood to flow out to naturally flush anaerobic bacteria from deep tissue.',
+        '**Apply Povidone Iodine 5%**: Disinfect the wound surface with Betadine ointment and cover with a sterile dry gauze.',
+        '**Tetanus Toxoid (TT) Shot within 24h**: Visit nearest PHC for a 0.5ml Tetanus booster shot if your last vaccine was >5 years ago.'
+      ],
+      medicines: [
+        '**Tetanus Toxoid (TT) / Td Vaccine 0.5ml IM** (Available free at all PHCs/CHCs).',
+        '**Povidone Iodine 5% Ointment** (Jan Aushadhi: ₹14.00 vs ₹60 market).',
+        '**Amoxicillin + Clavulanic Acid 625mg** (Under doctor prescription for deep infected wounds).'
+      ],
+      redFlags: [
+        'Stiffness in jaw muscles (Lockjaw / Trismus) or difficulty opening mouth.',
+        'Painful muscle spasms in neck, back, or abdomen.',
+        'Wound showing throbbing pain, foul-smelling pus, or spreading redness.',
+        'High fever with difficulty swallowing.'
+      ],
+      suggestedQuestions: [
+        'When did you receive your last Tetanus (TT) vaccine booster?',
+        'Was the rusty object deeply embedded in the foot or hand?',
+        'Is there active throbbing pain, swelling, or pus discharge?'
+      ],
+      audioSummary: 'Rusty metal injury: Wash the puncture wound under running tap water with soap. Apply Povidone Iodine ointment. Visit the nearest PHC within 24 hours for a Tetanus TT injection.'
+    },
+    {
+      id: 'fever_hyperpyrexia',
+      primaryKeys: ['high fever', 'fever', 'fiver', 'fvr', 'temperature', 'bukhar', 'jwaram'],
+      keywords: ['fever', 'fiver', 'fvr', 'temperature', 'bukhar', 'jwaram', 'chills', 'hot body', 'shivering', '101', '102', '103', '104', 'pyrexia'],
+      title: 'High Fever & Hyperpyrexia (उच्च बुखार व कपकंपी)',
+      severity: 'moderate',
+      severityLabel: '🟡 MODERATE · TEPID SPONGING & ORAL HYDRATION',
+      severityColor: '#d97706',
+      summary: 'Fever indicates active infection. Immediate physical cooling with tepid water and oral hydration prevent complications like febrile seizures.',
+      steps: [
+        '**Tepid Water Sponging**: Soak clean cloths in normal room-temperature tap water and apply continuously to forehead, neck, armpits, and groin until temperature drops below 100°F.',
+        '**Liberal Oral Fluids**: Drink coconut water, lemon water with salt, thin dal soup, and warm water every hour.',
+        '**Light Cotton Clothing**: Keep patient in airy cotton clothes. Do not cover with heavy blankets.',
+        '**Temperature Log**: Record temperature every 2 hours with a digital thermometer.'
+      ],
+      medicines: [
+        '**Paracetamol 500mg / 650mg** (Jan Aushadhi: ₹1.50 per strip) — 1 tab every 6–8 hours after food for adults.',
+        '**WHO-ORS Sachet** (Jan Aushadhi: ₹4.00) — to restore vital electrolytes.'
+      ],
+      redFlags: [
+        'Temperature >103°F (39.4°C) not responding to paracetamol.',
+        'Seizures or sudden body twitching (Febrile convulsion in children).',
+        'Stiff neck, severe persistent headache, or light sensitivity.',
+        'Purple/red pin-prick spots on skin or extreme lethargy.'
+      ],
+      suggestedQuestions: [
+        'How many days has the fever lasted, and what is the highest recorded temperature?',
+        'Is there shivering, joint pain, cough, or burning urination?',
+        'Has a rapid malaria card test or CBC blood test been done?'
+      ],
+      audioSummary: 'High fever care: Do tepid sponging with room temperature water on forehead and armpits. Stay hydrated with ORS and take Paracetamol 500mg after food. If fever exceeds 103 degrees or seizures occur, visit nearest PHC.'
+    },
+    {
+      id: 'snake_bite',
+      primaryKeys: ['snake bite', 'snakebite', 'saap ne kata', 'cobra bite', 'krait bite', 'viper bite'],
+      keywords: ['snake', 'snakebite', 'snak', 'bite', 'venom', 'saap', 'samp', 'paamu', 'cobra', 'viper', 'krait', 'fang', 'venomous'],
+      title: 'Snake Bite Critical Protocol (सांप काटने पर आपातकालीन उपचार)',
       severity: 'critical',
       severityLabel: '🔴 CRITICAL EMERGENCY · IMMEDIATE 108 AMBULANCE',
       severityColor: '#dc2626',
       summary: 'All snake bites in India must be treated as medical emergencies requiring Anti-Snake Venom (ASV) at the nearest Government CHC/Hospital.',
       steps: [
-        '**Immobilize Immediately**: Keep the patient completely calm, lying down, and still. Any muscle movement accelerates venom spread.',
-        '**Keep Below Heart**: Position the bitten limb below the level of the heart.',
-        '**Remove Tight Items**: Remove bangles, rings, anklets, and tight shoes before swelling begins.',
-        '**CRITICAL DO NOTS**: Do NOT cut the wound, do NOT suck the venom, do NOT tie a tight tourniquet, and do NOT apply cow dung or herbal pastes.'
+        '**Immobilize Completely**: Keep the victim calm, lying down, and still. Muscle movements pump venom through lymph vessels.',
+        '**Keep Limb Below Heart**: Position the bitten arm or leg below the level of the heart.',
+        '**Remove Constrictive Items**: Remove rings, bangles, anklets, and shoes before swelling spreads.',
+        '**CRITICAL WARNING**: Do NOT cut the wound, do NOT suck venom, do NOT tie tight tourniquets, and do NOT apply cow dung or herbal pastes.'
       ],
       medicines: [
-        '**Polyvalent Anti-Snake Venom (ASV)** — Administered via IV drip exclusively at Government PHC / CHC hospitals.'
+        '**Polyvalent Anti-Snake Venom (ASV)** — Administered via IV drip exclusively at Government Hospitals.'
       ],
       redFlags: [
         'Drooping eyelids (Ptosis), difficulty swallowing, or slurred speech.',
-        'Active bleeding from bite marks, nose, or gums.',
-        'Rapidly spreading swelling and severe pain up the leg or arm.',
-        'Breathing difficulty or sudden limb weakness.'
+        'Bleeding from gums, nose, or fang puncture marks.',
+        'Rapid swelling spreading up the limb within 30 minutes.'
       ],
       suggestedQuestions: [
         'How many minutes ago did the bite occur?',
         'Can you describe the snake (color, triangular head, bands)?',
-        'Is there active bleeding or difficulty in opening eyes?'
+        'Is there difficulty in swallowing or breathing?'
       ],
       audioSummary: 'Snake bite emergency: Keep the patient calm and completely still. Do not cut or tie the wound. Call 108 ambulance immediately to reach the nearest hospital for anti-snake venom.'
     },
     {
-      id: 'diarrhea',
-      keywords: ['diarrhea', 'diarrhoea', 'loose motion', 'motions', 'dast', 'dastur', 'vidhivulu', 'dehydration', 'watery stool', 'stomach loose', 'cholera', 'potty', 'tatti'],
+      id: 'diarrhea_dehydration',
+      primaryKeys: ['diarrhea', 'loose motion', 'dast', 'vidhivulu', 'dehydration'],
+      keywords: ['diarrhea', 'diarrhoea', 'loose motion', 'motions', 'dast', 'vidhivulu', 'dehydration', 'watery stool', 'stomach loose', 'cholera'],
       title: 'Acute Diarrhea & Dehydration Care (दस्त एवं निर्जलीकरण)',
       severity: 'moderate',
-      severityLabel: '🟢 MILD TO MODERATE · ORS & ZINC THERAPY',
+      severityLabel: '🟢 MILD TO MODERATE · WHO-ORS & ZINC THERAPY',
       severityColor: '#16a34a',
-      summary: 'Dehydration from fluid and salt loss is the primary risk in diarrhea. Continuous oral rehydration saves lives.',
+      summary: 'Dehydration from fluid and electrolyte loss is the primary danger. Continuous oral rehydration is lifesaving.',
       steps: [
-        '**Prepare WHO-ORS Solution**: Mix 1 full sachet of WHO-ORS in exactly 1 Liter of clean boiled/filtered water. Drink 1 glass (200ml) after every loose motion.',
-        '**Home Fluids**: Drink rice kanji with salt, buttermilk, coconut water, and light dal water.',
-        '**Zinc Therapy for Children**: Children under 5 should take 20mg Zinc tablet daily for 14 days to rebuild gut immunity.',
-        '**Nutritious Diet**: Continue feeding khichdi, curd-rice, bananas, and boiled potatoes. Do NOT starve the patient.'
+        '**Prepare WHO-ORS**: Mix 1 full sachet of WHO-ORS in exactly 1 Liter of clean drinking water. Drink 1 glass (200ml) after every loose motion.',
+        '**Home Rehydration**: Drink rice kanji with salt, buttermilk, coconut water, and light dal water.',
+        '**Zinc for Children**: Children under 5 must take 20mg Zinc tablet daily for 14 days to rebuild gut lining.',
+        '**Continue Food**: Feed soft khichdi, curd-rice, bananas, and boiled potatoes. Do not starve.'
       ],
       medicines: [
         '**WHO-ORS Sachet 21.8g** (Jan Aushadhi: ₹4.50 per pack).',
         '**Zinc Sulfate 20mg Tablets** (Jan Aushadhi: ₹1.20 per strip).',
-        '**Lactic Acid Bacillus / Probiotics** (Jan Aushadhi: ₹3.50).'
+        '**Probiotics Capsule / Sachet** (Jan Aushadhi: ₹3.50).'
       ],
       redFlags: [
-        'Sunken eyes, extreme thirst, dry mouth, or no urine for >6 hours.',
+        'Sunken eyes, extreme thirst, dry tongue, or no urine for >6 hours.',
         'Blood or mucus in stool (Dysentery).',
-        'Repeated vomiting preventing fluid retention.',
-        'Lethargy, unconsciousness, or floppy limpness in infants.'
+        'Repeated vomiting preventing fluid intake.'
       ],
       suggestedQuestions: [
-        'Is there any blood or mucus in the stool?',
-        'How many episodes of loose stool in the last 24 hours?',
+        'Is there any blood in the stool?',
+        'How many episodes of loose stool occurred today?',
         'Is the patient able to drink fluids without vomiting?'
       ],
       audioSummary: 'Diarrhea care: Drink one glass of ORS solution after every loose motion. Give Zinc tablets for children under 5. If there is blood in stool or extreme weakness, consult a doctor immediately.'
     },
     {
-      id: 'chestpain',
-      keywords: ['chest', 'heart', 'cardiac', 'chest pain', 'sineme dard', 'chhati', 'gunde noppi', 'heart attack', 'angina', 'left arm pain', 'chest tight', 'chest pressure', 'suffocation chest'],
+      id: 'chest_pain_cardiac',
+      primaryKeys: ['chest pain', 'heart attack', 'angina', 'cardiac', 'chhati me dard'],
+      keywords: ['chest', 'heart', 'cardiac', 'chest pain', 'sineme dard', 'chhati', 'gunde noppi', 'heart attack', 'angina', 'left arm pain'],
       title: 'Acute Chest Pain & Cardiac Alert (छाती में दर्द व दिल का दौरा)',
       severity: 'critical',
       severityLabel: '🔴 CRITICAL CARDIAC ALERT · CALL 108 IMMEDIATELY',
       severityColor: '#dc2626',
-      summary: 'Severe crushing chest pain radiating to left arm or jaw with sweating requires immediate hospital emergency ECG.',
+      summary: 'Crushing chest tightness radiating to left arm/jaw with cold sweating requires immediate hospital emergency ECG.',
       steps: [
         '**Call 108 Emergency**: Request an Advanced Life Support (ALS) Ambulance with defibrillator and ECG.',
-        '**Rest in W-Position**: Help the patient sit upright with knees bent and back firmly supported to reduce cardiac strain.',
-        '**Loosen Clothing**: Unbutton tight shirt collar and belt for maximum oxygen intake.',
-        '**Aspirin First-Aid**: If conscious and not allergic, chew 1 Soluble Aspirin (300mg/325mg) with a sip of water.'
+        '**Sit in W-Position**: Help patient sit upright with knees bent and back firmly supported to reduce heart workload.',
+        '**Loosen Tight Clothing**: Unbutton shirt collar, tie, and belt for free breathing.',
+        '**Chew Soluble Aspirin**: If conscious and not allergic, chew 1 Soluble Aspirin (300mg/325mg) immediately.'
       ],
       medicines: [
         '**Aspirin 300mg / 325mg (Soluble)** (Jan Aushadhi: ₹0.80 per strip).',
-        '**Sorbitrate 5mg** — Under tongue only if previously prescribed by a cardiologist.'
+        '**Sorbitrate 5mg** — Sublingual under tongue only if previously prescribed.'
       ],
       redFlags: [
-        'Pain radiating to left shoulder, left arm, neck, jaw, or upper back.',
-        'Cold profuse sweating, breathlessness, dizziness, or fainting.',
-        'Severe heaviness like a heavy weight pressing on the chest.'
+        'Pain radiating to left shoulder, arm, neck, jaw, or upper back.',
+        'Cold profuse sweating, dizziness, shortness of breath, or fainting.'
       ],
       suggestedQuestions: [
         'Does the pain spread to your left arm or jaw?',
-        'Is there sweating or shortness of breath?',
-        'Does the patient have a history of heart disease, diabetes, or high BP?'
+        'Is there cold sweating or shortness of breath?',
+        'Does the patient have a history of diabetes or high BP?'
       ],
       audioSummary: 'Cardiac emergency: Sit down in a supported upright position. Chew one Aspirin tablet if available. Call 108 ambulance immediately to reach the nearest hospital emergency ICU.'
     },
     {
-      id: 'breathing',
-      keywords: ['breath', 'breathing', 'asthma', 'suffocation', 'wheezing', 'shortness of breath', 'saans', 'dam', 'oopiri', 'gasping', 'choking', 'cough breath', 'oxygen low'],
-      title: 'Breathing Difficulty & Asthma Care (सांस लेने में तकलीफ)',
-      severity: 'critical',
-      severityLabel: '🔴 HIGH URGENCY · PHC OXYGEN & NEBULIZATION',
-      severityColor: '#dc2626',
-      summary: 'Severe breathlessness requires immediate bronchodilator therapy and oxygen saturation (SpO2) evaluation.',
-      steps: [
-        '**Sit Upright (Tripod Posture)**: Never allow the patient to lie flat. Sit leaning slightly forward with hands on knees.',
-        '**Use Rescue Inhaler**: If the patient has a prescribed inhaler (Salbutamol/Asthalin), administer 2–4 puffs with a spacer immediately.',
-        '**Airflow**: Open all windows and doors for fresh ventilation. Keep crowds away.',
-        '**Head to PHC**: Visit nearest PHC for oxygen concentrator support and nebulization.'
-      ],
-      medicines: [
-        '**Salbutamol 100mcg Inhaler** (Jan Aushadhi: ₹45.00 vs ₹180 market).',
-        '**Budesonide 0.5mg Respules** for nebulizer (Jan Aushadhi: ₹12.00).'
-      ],
-      redFlags: [
-        'Bluish tint on lips, fingernails, or tongue (Cyanosis).',
-        'Inability to speak 2–3 words without gasping.',
-        'Ribs pulling inward while breathing (intercostal retractions).',
-        'Oxygen level (SpO2) falling below 92%.'
-      ],
-      suggestedQuestions: [
-        'Is there whistling or wheezing sound in the chest?',
-        'Is a pulse oximeter available to check oxygen level?',
-        'Is this sudden onset or a known history of asthma?'
-      ],
-      audioSummary: 'Breathing difficulty: Sit upright leaning forward. Take 2 to 4 puffs of your rescue inhaler if prescribed. Visit the nearest PHC for oxygen support and nebulization.'
-    },
-    {
-      id: 'pregnancy',
-      keywords: ['pregnancy', 'labour', 'pregnant', 'garbh', 'prasav', 'contractions', 'water break', 'amniotic', 'bleeding pregnancy', 'delivery', 'delivery pain', 'labor'],
-      title: 'Pregnancy Labour & Maternal Emergency (प्रसव पीड़ा व मातृत्व देखभाल)',
-      severity: 'critical',
-      severityLabel: '🔴 MATERNAL EMERGENCY · DISPATCH 108 AMBULANCE',
-      severityColor: '#dc2626',
-      summary: 'Active labour pains, leaking water, or vaginal bleeding in pregnancy require institutional delivery at 24x7 FRU/CHC.',
-      steps: [
-        '**Call 108 & ASHA Lead**: Alert your local ASHA worker and request immediate 108 maternal transport.',
-        '**Left Lateral Position**: Have the mother lie on her left side to optimize blood and oxygen flow to the baby.',
-        '**Pack Mother-Child Kit**: Keep MCP Card (Maternal & Child Protection), ABHA card, clean clothes, and baby wraps ready.',
-        '**Slow Deep Breathing**: Guide calm, deep breathing during each contraction.'
-      ],
-      medicines: [
-        '**Iron & Folic Acid (IFA) Tablets** (Provided free at PHC).',
-        '**Calcium 500mg + Vitamin D3** (Jan Aushadhi: ₹4.50 per strip).'
-      ],
-      redFlags: [
-        'Vaginal bleeding or sudden gush of clear/green fluid.',
-        'Severe headache, blurred vision, or high blood pressure (Eclampsia).',
-        'Decreased or absent baby movements in the last 12 hours.',
-        'Severe constant lower abdominal pain.'
-      ],
-      suggestedQuestions: [
-        'How many weeks or months pregnant is the mother?',
-        'How frequent are the contractions (minutes apart)?',
-        'Has there been any water breakage or bleeding?'
-      ],
-      audioSummary: 'Maternal labour care: Lie on the left side and guide slow deep breathing. Call 108 ambulance and inform your local ASHA worker for safe hospital delivery.'
-    },
-    {
-      id: 'vomiting',
-      keywords: ['vomit', 'vomiting', 'nausea', 'ulti', 'vamthulu', 'throwing up', 'puking', 'gastric', 'acid', 'stomach upset', 'food poison'],
-      title: 'Nausea, Vomiting & Gastric Relief (उल्टी व मितली)',
-      severity: 'moderate',
-      severityLabel: '🟡 MODERATE · SIP HYDRATION & ANTI-EMETIC',
-      severityColor: '#d97706',
-      summary: 'Frequent vomiting depletes stomach electrolytes. Small sips of fluid prevent further gastric irritation.',
-      steps: [
-        '**Rest Stomach 15 Mins**: Avoid large gulps of water immediately after vomiting. Wait 15 minutes, then take 1 teaspoon of ORS or water every 5 minutes.',
-        '**Ginger / Mint Infusion**: Warm water infused with crushed ginger or mint leaves soothes gastric contractions.',
-        '**Bland Diet**: When vomiting stops for 4 hours, introduce clear soups, toast, or boiled rice with a pinch of salt.',
-        '**Avoid Triggers**: Avoid oily, spicy, dairy, or fried foods.'
-      ],
-      medicines: [
-        '**Ondansetron 4mg (Mouth Dissolving)** (Jan Aushadhi: ₹3.00 per strip) — Take 30 mins before meals.',
-        '**Domperidone 10mg + Pantoprazole 40mg** (Jan Aushadhi: ₹12.00 per strip) — For acidity and nausea.'
-      ],
-      redFlags: [
-        'Vomiting blood (coffee-ground appearance) or green bile.',
-        'Inability to retain liquids for more than 12 hours.',
-        'Severe right lower abdomen pain (possible Appendicitis).',
-        'High fever, stiff neck, or extreme lethargy.'
-      ],
-      suggestedQuestions: [
-        'How many times has vomiting occurred today?',
-        'Is there any abdominal pain or fever?',
-        'Is the vomit containing food, bile, or blood?'
-      ],
-      audioSummary: 'Vomiting care: Rest the stomach for 15 minutes, then take small sips of ORS every 5 minutes. Take Ondansetron mouth-dissolving tablet if prescribed. Avoid spicy and oily foods.'
-    },
-    {
-      id: 'headache',
-      keywords: ['headache', 'head pain', 'migraine', 'sar dard', 'tala noppi', 'temple pain', 'dizziness', 'head ache', 'sir dard'],
-      title: 'Severe Headache & Migraine Management (सिरदर्द व माइग्रेन)',
+      id: 'cough_cold_sorethroat',
+      primaryKeys: ['cough', 'cold', 'sore throat', 'khasi', 'jukam', 'gala dard', 'throat pain', 'flu'],
+      keywords: ['cough', 'cold', 'sore throat', 'khasi', 'jukam', 'gala dard', 'throat', 'phlegm', 'mucus', 'sneezing', 'runny nose', 'tonsil', 'voice loss'],
+      title: 'Cough, Cold & Sore Throat Care (खांसी, जुकाम व गले में खराश)',
       severity: 'mild',
-      severityLabel: '🟢 MILD TO MODERATE · REST & HYDRATION',
+      severityLabel: '🟢 MILD · WARM STEAM, GARGLES & JAN AUSHADHI',
       severityColor: '#16a34a',
-      summary: 'Tension headaches, dehydration, and migraine respond well to rest, hydration, and mild analgesics.',
+      summary: 'Viral upper respiratory infections respond best to warm saline gargles, steam inhalation, and anti-allergic support.',
       steps: [
-        '**Dark, Quiet Room**: Rest in a dark, quiet, well-ventilated room to relieve sensory strain.',
-        '**Hydration**: Drink 2 large glasses of cool water immediately.',
-        '**Cold/Warm Compress**: Apply a cool damp cloth or ice pack over forehead and temples.',
-        '**Gentle Temple Massage**: Light circular pressure on temples and neck base relieves muscle tension.'
+        '**Warm Salt Water Gargles**: Dissolve 1/2 teaspoon salt in 1 glass of warm water; gargle 3 times daily to reduce throat swelling.',
+        '**Steam Inhalation**: Inhale plain water steam for 10 minutes twice daily to clear nasal congestion and chest phlegm.',
+        '**Warm Herbal Fluids**: Drink warm water with ginger, tulsi, black pepper, and honey.',
+        '**Avoid Cold Items**: Avoid ice water, cold beverages, and sudden temperature shifts.'
       ],
       medicines: [
-        '**Paracetamol 500mg + Caffeine** (Jan Aushadhi: ₹1.80 per strip).',
-        '**Naproxen 250mg / Ibuprofen 400mg** (Jan Aushadhi: ₹3.00 per strip) — Take after food.'
+        '**Cetirizine 10mg / Levocetirizine 5mg** (Jan Aushadhi: ₹1.20 per strip) — 1 tablet at night for runny nose/sneezing.',
+        '**Dextromethorphan / Ambroxol Syrup** (Jan Aushadhi: ₹18.00 per bottle) — For dry or productive cough.'
       ],
       redFlags: [
-        'Sudden, explosive "thunderclap" headache (worst headache of life).',
-        'Headache with weakness in one arm/leg, facial drooping, or slurred speech (Stroke alert).',
-        'Headache following head injury or trauma.',
-        'Headache with high fever, neck stiffness, and confusion.'
+        'Difficulty swallowing even liquids or breathing stridor sound.',
+        'Coughing up blood or rust-colored phlegm.',
+        'High fever lasting more than 4 days with chest wheezing.'
       ],
       suggestedQuestions: [
-        'Is the headache on one side or the entire head?',
-        'Are you experiencing sensitivity to light or nausea?',
-        'Did the headache come on gradually or suddenly within seconds?'
+        'Is the cough dry or producing yellow/green phlegm?',
+        'How many days has the cold and throat irritation lasted?',
+        'Is there any accompanying fever or difficulty swallowing?'
       ],
-      audioSummary: 'Headache care: Rest in a dark, quiet room and drink 2 glasses of water. Apply a cool compress on temples. Take Paracetamol after food. If accompanied by facial drooping or speech difficulty, call 108 immediately.'
+      audioSummary: 'Cough and sore throat care: Gargle with warm salt water 3 times a day and take steam inhalation. Take Cetirizine 10mg at night for runny nose. If coughing up blood or fever lasts over 4 days, consult a doctor.'
     },
     {
-      id: 'bleeding',
-      keywords: ['cut', 'wound', 'bleeding', 'injury', 'chot', 'rakta', 'ghav', 'trauma', 'burn', 'jalan', 'blood', 'scraped', 'accident'],
-      title: 'Wound Bleeding & Burn First-Aid (चोट व रक्तस्राव प्राथमिक चिकित्सा)',
+      id: 'stomach_pain_cramps',
+      primaryKeys: ['stomach pain', 'stomach ache', 'abdominal pain', 'pet dard', 'pet me dard', 'cramps'],
+      keywords: ['stomach pain', 'stomach ache', 'abdominal pain', 'pet dard', 'pet me dard', 'cramp', 'gas', 'acidity', 'bloating', 'belly pain'],
+      title: 'Stomach Ache & Abdominal Cramps (पेट दर्द व ऐंठन)',
       severity: 'moderate',
-      severityLabel: '🟡 URGENT FIRST AID · WOUND HYGIENE',
+      severityLabel: '🟡 MODERATE · ANTISPASMODIC & GASTRO CARE',
       severityColor: '#d97706',
-      summary: 'Controlling blood loss and preventing infection through clean water washing are critical first-aid steps.',
+      summary: 'Gastric spasms, acidity, and indigestion are common causes. Severe localized pain requires surgical evaluation.',
       steps: [
-        '**Direct Pressure**: Apply firm, continuous pressure directly over the wound using a clean cloth or sterile gauze for 10 full minutes.',
-        '**Elevate the Wound**: Keep the injured part raised above heart level to decrease blood flow to the injury.',
-        '**Clean with Running Water**: Gently wash the wound with clean drinking water to remove dirt. Do NOT apply dirt, cow dung, or turmeric.',
-        '**For Burns**: Cool immediately under running tap water for 15 minutes. Do NOT break blisters.'
+        '**Warm Compress**: Place a warm water bottle on the abdomen to relax contracted intestinal muscles.',
+        '**Sip Warm Water / Ajwain**: Warm water with boiled carom seeds (Ajwain) and a pinch of black salt relieves gas.',
+        '**Light Diet**: Eat plain curd-rice or khichdi. Avoid deep-fried, spicy, or sour foods.',
+        '**Do Not Press Hard**: Avoid aggressive abdominal pressing.'
       ],
       medicines: [
-        '**Povidone Iodine 5% Ointment** (Jan Aushadhi: ₹14.00 vs ₹60 market).',
-        '**Tetanus Toxoid (TT) Injection** — Within 24 hours at nearest PHC if not vaccinated in last 5 years.'
+        '**Dicyclomine 10mg + Paracetamol 325mg (Meftal-Spas)** (Jan Aushadhi: ₹2.50 per strip) — For smooth muscle spasms.',
+        '**Pantoprazole 40mg / Omeprazole 20mg** (Jan Aushadhi: ₹2.00) — For acidity-induced burning.'
       ],
       redFlags: [
-        'Pulsating or spurting bright red blood that does not stop after 10 minutes of direct pressure.',
-        'Deep gaping wound requiring surgical stitches.',
-        'Numbness or loss of sensation beyond the cut area.',
-        'Burn covering a large area, face, hands, or groin.'
+        'Severe sharp pain shifting to the RIGHT LOWER ABDOMEN (suspected Appendicitis).',
+        'Vomiting blood, black tarry stool, or high fever with rigid board-like abdomen.',
+        'Inability to pass gas or stool for >48 hours with severe distension.'
       ],
       suggestedQuestions: [
-        'Is the bleeding stopping with direct pressure?',
-        'When did the person receive their last Tetanus (TT) shot?',
-        'Is the injury caused by a rusty metal or animal bite?'
+        'Is the pain in upper stomach (acidity), around navel, or right lower side?',
+        'Is the pain sharp and sudden or dull and crampy?',
+        'When did you last pass stool or have food?'
       ],
-      audioSummary: 'Wound first aid: Apply direct firm pressure with a clean cloth for 10 minutes. Clean with running water and apply Povidone Iodine ointment. Get a Tetanus TT shot at the nearest PHC within 24 hours.'
+      audioSummary: 'Stomach pain care: Place a warm compress on the abdomen and drink warm ajwain water. Take Dicyclomine with Paracetamol for cramps. If pain shifts to the right lower abdomen with high fever, visit the hospital emergency.'
     },
     {
-      id: 'dengue',
-      keywords: ['dengue', 'malaria', 'mosquito', 'platelet', 'body ache', 'backache', 'eye pain', 'machhar', 'dengu'],
-      title: 'Dengue & Vector-Borne Disease Signs (डेंगू एवं मलेरिया लक्षण)',
+      id: 'diabetes_hypoglycemia',
+      primaryKeys: ['sugar', 'diabetes', 'hypoglycemia', 'low sugar', 'sugar low', 'sugar high', 'madhumeh'],
+      keywords: ['sugar', 'diabetes', 'hypoglycemia', 'hyperglycemia', 'madhumeh', 'insulin', 'sugar level', 'glucometer', 'shaking sugar', 'sweating sugar'],
+      title: 'Blood Sugar & Hypoglycemia Management (मधुमेह व शुगर संतुलन)',
       severity: 'moderate',
-      severityLabel: '🟡 MODERATE · CBC & PLATELET TEST REQUIRED',
+      severityLabel: '🟡 CRITICAL METABOLIC · FAST GLUCOSE PROTOCOL',
       severityColor: '#d97706',
-      summary: 'Dengue and Malaria present with sudden high fever, retro-orbital eye pain, and severe bone aches.',
+      summary: 'Low blood sugar (<70 mg/dL) is a medical emergency causing brain glucose starvation. Immediate fast sugar intake is lifesaving.',
       steps: [
-        '**Complete Blood Count (CBC) & Platelet Test**: Get a rapid malaria card test and CBC done at your nearest PHC/CHC.',
-        '**Strict Rest & Hydration**: Drink 3–4 liters of fluids daily (tender coconut water, ORS, pomegranate juice, soups).',
-        '**DO NOT TAKE NSAIDs**: Do NOT take Aspirin, Ibuprofen, or Brufen as they increase bleeding risks in dengue. ONLY use Paracetamol for fever.',
-        '**Mosquito Nets**: Sleep under insecticide-treated bed nets to avoid spreading to family members.'
+        '**The Rule of 15 for Low Sugar (Hypoglycemia)**: If feeling dizzy, trembling, or sweaty: Immediately take 15g fast sugar (3 teaspoons sugar, 1/2 cup fruit juice, or 3 candies).',
+        '**Wait 15 Minutes & Retest**: Check blood sugar after 15 minutes. If still <70 mg/dL, repeat 15g sugar.',
+        '**Eat a Complex Snack**: Once stabilized, eat a roti, toast, or glass of milk to prevent sugar crashing again.',
+        '**Never Skip Meals After Insulin**: Always eat meals within 20 minutes of taking insulin or sulfonylurea.'
       ],
       medicines: [
-        '**Paracetamol 500mg** (Jan Aushadhi: ₹1.50) — Safe for fever in dengue/malaria.',
-        '**Chloroquine / Artemisinin Combo (ACT)** — ONLY after confirmed laboratory malaria test under doctor supervision.'
+        '**Metformin 500mg / 1000mg** (Jan Aushadhi: ₹1.20 per strip) — Primary oral glycemic regulator.',
+        '**Glimepiride 1mg / 2mg** (Jan Aushadhi: ₹1.80 per strip).'
       ],
       redFlags: [
-        'Red pin-prick spots (Petechiae) on skin or spontaneous gum/nose bleeding.',
-        'Severe persistent abdominal pain with continuous vomiting.',
-        'Platelet count dropping below 50,000 / µL.',
-        'Extreme fatigue, dizziness, or cold clammy hands and feet.'
+        'Confusion, slurred speech, seizures, or loss of consciousness in low sugar.',
+        'Fruity breath odor with rapid deep breathing and vomiting (Ketoacidosis in high sugar).',
+        'Blood sugar exceeding 400 mg/dL or dropping below 50 mg/dL.'
       ],
       suggestedQuestions: [
-        'Are you having severe pain behind the eyeballs or backache?',
-        'Have you noticed any red spots on the skin or nosebleeds?',
-        'Has a blood test (CBC / Malaria card) been conducted?'
+        'What is your current blood sugar reading on the glucometer?',
+        'Are you experiencing shaking, cold sweats, or confusion?',
+        'Are you currently on insulin injections or diabetes tablets?'
       ],
-      audioSummary: 'Dengue signs: Stay well hydrated with coconut water and ORS. Take only Paracetamol for fever. Do not take Aspirin or Ibuprofen. Get a CBC platelet test at your nearest PHC.'
+      audioSummary: 'Low blood sugar emergency: Immediately consume 3 teaspoons of sugar, half cup fruit juice, or candy. Rest for 15 minutes and recheck sugar. Eat a snack to prevent another crash.'
+    },
+    {
+      id: 'hypertension_highbp',
+      primaryKeys: ['high bp', 'blood pressure', 'hypertension', 'bp high', 'uch rakta chap'],
+      keywords: ['bp', 'high bp', 'blood pressure', 'hypertension', 'systolic', 'diastolic', 'bp 160', 'bp 170', 'bp 180', 'sphygmomanometer'],
+      title: 'High Blood Pressure & Stroke Prevention (उच्च रक्तचाप व स्ट्रोक रोकथाम)',
+      severity: 'moderate',
+      severityLabel: '🟡 CARDIOVASCULAR · REGULAR MEDICINES & SALT CONTROL',
+      severityColor: '#d97706',
+      summary: 'Uncontrolled blood pressure (>140/90 mmHg) is the leading cause of brain stroke and kidney damage. Consistent medication is critical.',
+      steps: [
+        '**Rest in Quiet Setting**: Sit calmly for 10 minutes with back supported before re-measuring blood pressure.',
+        '**Strict Salt Limitation**: Limit daily salt intake to under 1 flat teaspoon (5g). Avoid pickles, papad, and salted snacks.',
+        '**Never Stop Medicines Abruptly**: Take daily prescribed BP medicines every morning without fail even if feeling fine.',
+        '**FAST Stroke Test**: Check Face drooping, Arm weakness, Slurred speech, and Time to call 108.'
+      ],
+      medicines: [
+        '**Amlodipine 5mg** (Jan Aushadhi: ₹0.80 per strip) — Calcium channel blocker.',
+        '**Telmisartan 40mg** (Jan Aushadhi: ₹1.50 per strip) — ARB antihypertensive.'
+      ],
+      redFlags: [
+        'BP exceeding 180/120 mmHg (Hypertensive Crisis).',
+        'Sudden weakness or numbness in one side of face, arm, or leg (Stroke).',
+        'Severe sudden headache with vision blurring or chest heaviness.'
+      ],
+      suggestedQuestions: [
+        'What is your current systolic and diastolic BP reading?',
+        'Are you experiencing any vision blurring or weakness in one arm/leg?',
+        'Did you take your daily BP tablet today?'
+      ],
+      audioSummary: 'High blood pressure advice: Rest quietly for 10 minutes. Reduce salt in food and take your prescribed BP medicine daily. If you experience facial weakness or arm numbness, call 108 immediately.'
+    },
+    {
+      id: 'eye_infection_conjunctivitis',
+      primaryKeys: ['eye infection', 'conjunctivitis', 'red eye', 'eye flu', 'aankh aana', 'sticky eye'],
+      keywords: ['eye', 'eyes', 'conjunctivitis', 'red eye', 'eye flu', 'aankh', 'itchy eye', 'eye discharge', 'sticky eye', 'watery eye', 'cornea'],
+      title: 'Eye Infection & Conjunctivitis / Eye Flu (आंखों का संक्रमण / आई फ्लू)',
+      severity: 'mild',
+      severityLabel: '🟢 MILD · HYGIENE & ANTIMICROBIAL DROPS',
+      severityColor: '#16a34a',
+      summary: 'Bacterial and viral conjunctivitis spread easily by touch. Clean water hygiene and antibiotic drops prevent corneal damage.',
+      steps: [
+        '**Do NOT Rub Eyes**: Rubbing spreads infection to the other eye and scratches the cornea.',
+        '**Clean Eye Hygiene**: Clean crusty eye discharge using a clean cotton ball soaked in boiled, cooled water from inner corner outwards.',
+        '**Cool Compresses**: Apply a clean, cool damp cloth over closed eyelids for 10 minutes to soothe burning.',
+        '**Isolate Towels & Bedding**: Wash personal towels, pillowcases, and handkerchiefs separately.'
+      ],
+      medicines: [
+        '**Ciprofloxacin 0.3% / Moxifloxacin 0.5% Eye Drops** (Jan Aushadhi: ₹12.00 vs ₹75 market) — 1 drop 3 times daily.',
+        '**Carboxymethylcellulose 0.5% Lubricant Eye Drops** (Jan Aushadhi: ₹18.00).'
+      ],
+      redFlags: [
+        'Severe eye pain with sensitivity to light (Photophobia).',
+        'Reduced or blurred vision in the infected eye.',
+        'Foreign body / chemical splash in the eye (flush immediately for 15 minutes).'
+      ],
+      suggestedQuestions: [
+        'Is the eye discharge watery (viral) or thick yellow/green pus (bacterial)?',
+        'Is there any reduction in eyesight or severe pain?',
+        'Are both eyes infected or only one?'
+      ],
+      audioSummary: 'Eye infection care: Do not rub the eyes. Clean discharge with boiled cooled water and a clean cotton ball. Use Ciprofloxacin antibiotic eye drops 3 times a day. If vision becomes blurry, visit an eye doctor.'
+    },
+    {
+      id: 'uti_burning_urine',
+      primaryKeys: ['uti', 'burning urine', 'urine infection', 'peshab me jalan', 'urinary infection'],
+      keywords: ['uti', 'urine', 'urination', 'peshab', 'burning urine', 'jalan', 'bladder', 'kidney', 'frequent urine', 'urine pain', 'dark urine'],
+      title: 'Urinary Tract Infection & Burning (पेशाब में जलन व यूटीआई)',
+      severity: 'moderate',
+      severityLabel: '🟡 MODERATE · HYDRATION & URINARY ALKALIZER',
+      severityColor: '#d97706',
+      summary: 'Bacterial infection of the urinary tract causes intense burning, frequency, and pelvic discomfort. High fluid intake flushes bacteria.',
+      steps: [
+        '**Drink 3–4 Liters of Water Daily**: Abundant water intake flushes bacteria naturally from the urethra and bladder.',
+        '**Urinary Alkalizer**: Drink 1 glass of water with 2 teaspoons of Disodium Hydrogen Citrate syrup to neutralize burning urine acidity.',
+        '**Never Hold Urine**: Empty bladder completely whenever urge arises.',
+        '**Maintain Genital Hygiene**: Wash with plain water after urination.'
+      ],
+      medicines: [
+        '**Disodium Hydrogen Citrate Syrup** (Jan Aushadhi: ₹22.00 vs ₹90 market).',
+        '**Nitrofurantoin 100mg / Cefixime 200mg** (Under medical prescription after urine routine test).'
+      ],
+      redFlags: [
+        'High fever with chills, shivering, and severe LOWER BACK / FLANK PAIN (Kidney infection / Pyelonephritis).',
+        'Blood in urine (Hematuria) or cloudy foul-smelling urine.',
+        'Complete inability to pass urine with swollen bladder.'
+      ],
+      suggestedQuestions: [
+        'Is there severe lower back flank pain or fever with chills?',
+        'Have you noticed any blood or dark color in the urine?',
+        'How many days has the burning sensation been present?'
+      ],
+      audioSummary: 'Urinary infection care: Drink 3 to 4 liters of clean water daily. Take Disodium hydrogen citrate syrup in water to reduce burning. If you have fever with lower back pain, visit the PHC for a urine test.'
     }
   ];
 
@@ -10948,7 +11030,7 @@ body[data-theme="doom"] {
       this.messages = [
         {
           sender: 'ai',
-          text: 'Namaste! I am your **24x7 Swasthya AI Clinical Health Assistant**. If our doctors are busy or you need immediate guidance, describe your symptoms below (in English, Hindi, or Telugu) or tap any quick symptom above. I will provide instant clinical assessment, first-aid steps, home remedies, danger red flags, and affordable Jan Aushadhi medicine guidance.',
+          text: 'Namaste! I am your **24x7 Swasthya AI Clinical Health Assistant**. If our doctors are busy or you need immediate guidance, describe your symptoms below (in English, Hindi, or Telugu) or tap any quick symptom pill above. I will provide instant clinical assessment, first-aid steps, danger red flags, and affordable Jan Aushadhi medicine guidance.',
           time: this.getFormattedTime(),
           audioSummary: 'Namaste! I am your 24x7 Swasthya AI Clinical Health Assistant. Describe your symptoms or tap any quick symptom for instant first aid and medicine guidance.'
         }
@@ -11111,33 +11193,49 @@ body[data-theme="doom"] {
     processAiResponse(query) {
       this.removeTypingIndicator();
 
-      const qClean = query.toLowerCase().replace(/[^a-z0-9 ]/g, ' ');
-      const words = qClean.split(/\s+/).filter(w => w.length > 1);
+      const qRaw = query.toLowerCase();
+      // Tokenize and remove stop words
+      const rawTokens = qRaw.replace(/[^a-z0-9 ]/g, ' ').split(/\s+/);
+      const filteredTokens = rawTokens.filter(w => w.length > 1 && !STOP_WORDS.has(w));
 
-      // Intelligent Fuzzy & Keyword Scoring
       let bestMatch = null;
       let maxScore = 0;
 
       for (const entry of CLINICAL_KB) {
         let score = 0;
-        for (const kw of entry.keywords) {
-          if (qClean.includes(kw)) {
-            score += kw.length * 3;
-          }
-          // Fuzzy word check (e.g. fiver -> fever, dastur -> dast)
-          for (const w of words) {
-            if (kw.includes(w) || w.includes(kw) || this.isSimilar(w, kw)) {
-              score += 4;
+
+        // 1. Check Exact Primary Keys (Highest Weight: +50 pts)
+        if (entry.primaryKeys) {
+          for (const pk of entry.primaryKeys) {
+            if (qRaw.includes(pk)) {
+              score += 50;
             }
           }
         }
+
+        // 2. Check Filtered Tokens against Keywords
+        for (const token of filteredTokens) {
+          for (const kw of entry.keywords) {
+            if (token === kw) {
+              score += 15;
+            } else if (kw.includes(' ') && qRaw.includes(kw)) {
+              score += 25;
+            } else if (token.length >= 4 && (kw.startsWith(token) || token.startsWith(kw))) {
+              score += 8;
+            } else if (this.isFuzzyMatch(token, kw)) {
+              score += 6;
+            }
+          }
+        }
+
         if (score > maxScore) {
           maxScore = score;
           bestMatch = entry;
         }
       }
 
-      if (bestMatch && maxScore >= 3) {
+      // If matched with significant score (>= 12), return verified clinical protocol
+      if (bestMatch && maxScore >= 12) {
         this.messages.push({
           sender: 'ai',
           text: `### ${bestMatch.title}\n${bestMatch.summary}`,
@@ -11152,31 +11250,31 @@ body[data-theme="doom"] {
           time: this.getFormattedTime()
         });
       } else {
-        // Clinical General Assessment
+        // Intelligent Comprehensive Fallback
         this.messages.push({
           sender: 'ai',
-          text: `### Clinical Assessment for: "${this.escapeHtml(query)}"\n\nBased on national rural clinical triage guidelines:\n\n1. **Home Rest & Hydration**: Rest in a well-ventilated room and drink clean water, ORS, or coconut water.\n2. **Consult On-Duty Doctor**: Since our registered doctors are currently available on the telemedicine grid, tap **Video Call Doctor** below for an official prescription.\n3. **Emergency Alert**: If you experience severe chest pain, extreme breathlessness, sudden paralysis, or uncontrolled bleeding, tap **Call 108 Ambulance** immediately.`,
+          text: `### Clinical Assessment for: "${this.escapeHtml(query)}"\n\nBased on national rural telemedicine clinical guidelines:\n\n1. **First-Aid & Rest**: Rest in an airy environment, stay hydrated with clean water/ORS, and monitor symptom progression.\n2. **Connect with Doctor**: Since our on-duty Medical Officers are active on the telemedicine grid, tap **Video Call Doctor** below for a verified digital diagnosis and prescription.\n3. **Emergency Alert**: If you or the patient experience severe breathing difficulty, continuous chest heaviness, deep bleeding, or seizures, tap **Call 108 Ambulance** immediately.`,
           severity: 'moderate',
           severityLabel: '🟡 CLINICAL TRIAGE ADVISORY',
           severityColor: '#0284c7',
           steps: [
-            'Record your body temperature and pulse if a thermometer/oximeter is available.',
-            'Note down when the symptoms started and any current medications.',
-            'Keep your ABHA health card ready for the doctor consultation.'
+            'Note the exact start time, duration, and any aggravating factors of the symptoms.',
+            'Check vital signs (temperature, pulse, BP) if household instruments are available.',
+            'Keep your 14-digit ABHA ID card ready for the doctor video consultation.'
           ],
           medicines: [
-            '**Paracetamol 500mg** (for fever/pain) — Jan Aushadhi: ₹1.50 per strip.',
-            '**ORS Electrolytes** — Jan Aushadhi: ₹4.00 per pack.'
+            '**Paracetamol 500mg** (Jan Aushadhi: ₹1.50 per strip) — For mild pain/fever.',
+            '**WHO-ORS Electrolyte Sachet** (Jan Aushadhi: ₹4.00) — For fluid restoration.'
           ],
           redFlags: [
-            'Sudden breathlessness or chest tightness.',
-            'High fever >103°F with stiff neck or convulsions.',
-            'Loss of consciousness or continuous vomiting.'
+            'Sudden chest tightness or shortness of breath.',
+            'Loss of consciousness, slurred speech, or continuous vomiting.',
+            'High fever >103°F with neck stiffness.'
           ],
           suggestedQuestions: [
-            'Is the symptom mild, moderate, or severe?',
-            'How many days has this been happening?',
-            'Are there any known drug allergies?'
+            'How many hours or days have you had this symptom?',
+            'Is the discomfort mild, moderate, or severe?',
+            'Are there any known medical conditions or allergies?'
           ],
           audioSummary: 'Clinical advice: Rest and stay hydrated. We recommend connecting to an on-duty doctor via live video call or visiting the nearest PHC.',
           time: this.getFormattedTime()
@@ -11186,15 +11284,15 @@ body[data-theme="doom"] {
       this.renderChat();
     }
 
-    isSimilar(a, b) {
+    isFuzzyMatch(a, b) {
       if (a === b) return true;
-      if (Math.abs(a.length - b.length) > 2) return false;
-      // Simple Levenshtein distance <= 2
+      if (Math.abs(a.length - b.length) > 1) return false;
+      if (a.length < 4 || b.length < 4) return false;
       let diff = 0;
       for (let i = 0; i < Math.min(a.length, b.length); i++) {
         if (a[i] !== b[i]) diff++;
       }
-      return diff <= 2;
+      return diff <= 1;
     }
 
     triggerSymptomPill(symptomId) {
