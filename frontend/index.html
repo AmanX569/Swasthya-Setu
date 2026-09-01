@@ -3397,6 +3397,7 @@ function renderActivePortalView() {
   if (role === 'patient') {
     setTimeout(() => {
       if (global.gpsTrackingController) global.gpsTrackingController.initMap('patientLiveGpsMap');
+    if (global.aiHealthBot) global.aiHealthBot.renderChat();
     }, 300);
   }
 
