@@ -2438,9 +2438,14 @@ table td strong {
         <select id="patientVideoMemberSelect" class="input-field" style="height:44px;" required></select>
       </div>
 
-      <div style="margin-bottom:16px;">
+            <div style="margin-bottom:14px;">
         <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Chief Symptoms / Complaint *</label>
-        <input type="text" id="patientVideoComplaint" class="input-field" placeholder="e.g. High fever for 2 days, chest congestion, weakness" required value="Fever, headache and mild throat irritation">
+        <input type="text" id="patientVideoComplaint" class="input-field" placeholder="e.g. High fever for 2 days, chest congestion" required value="Fever, headache and mild throat irritation">
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Custom Meeting Link (Optional - e.g. Daily.co / Meet)</label>
+        <input type="url" id="patientVideoCustomRoom" class="input-field" placeholder="Leave empty for instant auto-created 1-click room">
       </div>
 
       <div style="display:flex;justify-content:flex-end;gap:8px;">
@@ -2475,9 +2480,14 @@ table td strong {
         <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Select Available Medical Officer *</label>
         <select id="ashaVideoDoctorSelect" class="input-field" style="height:44px;" required></select>
       </div>
-      <div style="margin-bottom:16px;">
+            <div style="margin-bottom:14px;">
         <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Chief Reason / Symptoms *</label>
-        <input type="text" id="ashaVideoComplaint" class="input-field" placeholder="e.g. 3rd Trimester high blood pressure or severe cough" required value="High-Risk Follow-up Telemedicine Consultation">
+        <input type="text" id="ashaVideoComplaint" class="input-field" placeholder="e.g. 3rd Trimester assessment" required value="High-Risk Follow-up Telemedicine Consultation">
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Custom Meeting Link (Optional - e.g. Daily.co / Meet)</label>
+        <input type="url" id="ashaVideoCustomRoom" class="input-field" placeholder="Leave empty for instant auto-created 1-click room">
       </div>
       <div style="display:flex;justify-content:flex-end;gap:8px;">
         <button type="button" class="btn-glass" onclick="workerController.closeAshaVideoCallModal()">Cancel</button>

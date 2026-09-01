@@ -397,23 +397,26 @@
       const patSelect = document.getElementById('ashaVideoPatientSelect');
       const docSelect = document.getElementById('ashaVideoDoctorSelect');
       const complaintInput = document.getElementById('ashaVideoComplaint');
+      const customRoomInput = document.getElementById('ashaVideoCustomRoom');
 
-      const patName = patSelect ? patSelect.value : 'Citizen Beneficiary';
-      const docName = docSelect ? docSelect.value : 'Dr. Priya Sharma, MBBS, MD';
-      const complaint = complaintInput ? complaintInput.value.trim() : 'Frontline ASHA Home Visit Teleconsultation';
-
-      const ashaUser = (this.store && this.store.getState().session && this.store.getState().session.user) || { name: 'Lakshmi Didi (ASHA Lead)' };
+      const chosenPatient = patSelect ? patSelect.value : 'Village Beneficiary';
+      const chosenDoctor = docSelect ? docSelect.value : 'Dr. Priya Sharma, MBBS, MD';
+      const complaint = complaintInput ? complaintInput.value.trim() : 'Frontline Telemedicine Consultation';
+      const customRoom = customRoomInput ? customRoomInput.value.trim() : '';
 
       this.closeAshaVideoCallModal();
 
       if (global.videoCallController) {
+        const activeAsha = (this.store && this.store.getState().session && this.store.getState().session.user) || { name: 'Lakshmi Didi (ASHA)' };
         global.videoCallController.startVideoCall({
           callerRole: 'worker',
-          callerName: patName,
+          callerName: chosenPatient,
+          callerPhone: '9876543210',
           recipientRole: 'doctor',
-          recipientName: docName,
-          facilitatorName: ashaUser.name || 'ASHA Frontline Field Worker',
-          complaint: 'ASHA Facilitated Call: ' + complaint
+          recipientName: chosenDoctor,
+          facilitatorName: activeAsha.name || 'ASHA Worker',
+          complaint: complaint,
+          roomUrl: customRoom || null
         });
       }
     }
