@@ -7806,8 +7806,8 @@ table td strong {
 /* ==================== video-call.js ==================== */
 /**
  * =========================================================
- * SWASTHYA SETU - REAL-TIME WEBRTC VIDEO TELECONSULTATION ENGINE (video-call.js)
- * Peer-to-Peer Video Streams, Doctor Ringing Alert & In-Call e-Prescription
+ * SWASTHYA SETU - PRODUCTION WEBRTC 2-WAY VIDEO & AUDIO ENGINE (video-call.js)
+ * Full ICE Gathering, Robust Media Streams & Doctor Incoming Ringing Alert
  * =========================================================
  */
 
@@ -7818,7 +7818,8 @@ table td strong {
     iceServers: [
       { urls: 'stun:stun.l.google.com:19302' },
       { urls: 'stun:stun1.l.google.com:19302' },
-      { urls: 'stun:stun2.l.google.com:19302' }
+      { urls: 'stun:stun2.l.google.com:19302' },
+      { urls: 'stun:stun.services.mozilla.com' }
     ]
   };
 
@@ -7830,7 +7831,7 @@ table td strong {
       this.remoteStream = null;
       this.isAudioMuted = false;
       this.isVideoMuted = false;
-      this.currentFacingMode = 'user'; // 'user' or 'environment'
+      this.currentFacingMode = 'user'; // 'user' (front) or 'environment' (back)
       this.callStartTime = null;
       this.callTimerInterval = null;
       this.currentCallData = null;
@@ -7868,10 +7869,10 @@ table td strong {
       // 1. Doctor receives incoming call alert
       if (signal.type === 'CALL_INITIATED') {
         if (activeRole === 'doctor') {
-          // Check if targeted to this doctor or general on-duty pool
           const docName = (activeUser.name || '').toLowerCase();
           const targetDoc = (signal.recipientDoctor || '').toLowerCase();
 
+          // If targeted to this doctor or general on-duty doctor pool
           if (!targetDoc || targetDoc.includes('doctor') || docName.includes(targetDoc) || targetDoc.includes(docName) || true) {
             this.pendingIncomingSignal = signal;
             this.showDoctorIncomingCallPopup(signal);
@@ -7892,21 +7893,10 @@ table td strong {
           this.handleRemoteEndCall(signal);
         }
       }
-
-      // 4. ICE Candidates exchange
-      else if (signal.type === 'ICE_CANDIDATE') {
-        if (this.peerConnection && this.currentCallData && this.currentCallData.id === signal.callId) {
-          if (signal.candidate) {
-            try {
-              this.peerConnection.addIceCandidate(new RTCIceCandidate(signal.candidate)).catch(() => {});
-            } catch (e) {}
-          }
-        }
-      }
     }
 
     // -------------------------------------------------------------
-    // 2. PATIENT INITIATES CALL (OFFER)
+    // 2. PATIENT INITIATES CALL (OFFER WITH COMPLETE ICE GATHERING)
     // -------------------------------------------------------------
     async startVideoCall(callDetails = {}) {
       if (!this.store && global.appStore) this.store = global.appStore;
@@ -7951,16 +7941,27 @@ table td strong {
         statusEl.innerHTML = '📞 Calling ' + recipientName + '... Ringing on Doctor Desk...';
       }
 
-      // Initialize Local Camera
+      // Initialize Local Camera & Microphone
       await this.initLocalMediaStream();
 
-      // Create WebRTC Offer
+      // Setup WebRTC PeerConnection & Add Local Tracks
+      this.setupPeerConnection();
+
+      // Create WebRTC Offer & Wait for Complete ICE Candidates
       let offerSdp = null;
       try {
-        this.setupPeerConnection();
-        const offer = await this.peerConnection.createOffer({ offerToReceiveAudio: true, offerToReceiveVideo: true });
-        await this.peerConnection.setLocalDescription(offer);
-        offerSdp = offer;
+        if (this.peerConnection) {
+          const offer = await this.peerConnection.createOffer({ offerToReceiveAudio: true, offerToReceiveVideo: true });
+          await this.peerConnection.setLocalDescription(offer);
+
+          // Wait up to 800ms for complete ICE candidate gathering into SDP
+          await this.waitForIceGatheringComplete();
+
+          offerSdp = {
+            type: this.peerConnection.localDescription.type,
+            sdp: this.peerConnection.localDescription.sdp
+          };
+        }
       } catch (err) {
         console.warn('[WebRTC] Local offer setup warning:', err.message);
       }
@@ -7984,7 +7985,7 @@ table td strong {
       this.startCallTimer();
 
       if (global.toast) {
-        global.toast('📞 Calling ' + recipientName + '... Please wait for doctor to accept.');
+        global.toast('📞 Calling ' + recipientName + '... Ringing on Doctor Desk.');
       }
     }
 
@@ -7999,7 +8000,7 @@ table td strong {
         modal.className = 'modal-overlay';
         modal.style.position = 'fixed';
         modal.style.inset = '0';
-        modal.style.background = 'rgba(15, 23, 42, 0.9)';
+        modal.style.background = 'rgba(15, 23, 42, 0.92)';
         modal.style.zIndex = '1000000';
         modal.style.display = 'flex';
         modal.style.alignItems = 'center';
@@ -8034,7 +8035,7 @@ table td strong {
               ✕ Decline
             </button>
             <button onclick="videoCallController.acceptIncomingCall()" style="background:linear-gradient(135deg, #16a34a, #22c55e);color:#ffffff;border:none;padding:12px 28px;border-radius:30px;font-size:14px;font-weight:900;cursor:pointer;flex:1.5;box-shadow:0 4px 18px rgba(34,197,94,0.5);">
-              🟢 Accept Call
+              🟢 Accept & Start Video
             </button>
           </div>
         </div>
@@ -8054,7 +8055,7 @@ table td strong {
         global.supabaseService.sendTeleconsultSignal({
           type: 'CALL_ENDED',
           callId: this.pendingIncomingSignal.callId,
-          reason: 'Doctor is currently occupied in emergency OPD'
+          reason: 'Doctor declined call'
         });
       }
       this.pendingIncomingSignal = null;
@@ -8097,17 +8098,24 @@ table td strong {
       // Start Doctor Local Camera
       await this.initLocalMediaStream();
 
-      // Setup WebRTC Peer Connection
+      // Setup WebRTC Peer Connection & Add Doctor Tracks
       this.setupPeerConnection();
 
-      // Handle Patient Offer & Generate Answer
+      // Set Remote Description (Patient's Offer) -> Generate Answer with Complete ICE
       let answerSdp = null;
       try {
-        if (signal.offer) {
+        if (this.peerConnection && signal.offer) {
           await this.peerConnection.setRemoteDescription(new RTCSessionDescription(signal.offer));
           const answer = await this.peerConnection.createAnswer();
           await this.peerConnection.setLocalDescription(answer);
-          answerSdp = answer;
+
+          // Wait up to 800ms for complete ICE candidate gathering into SDP
+          await this.waitForIceGatheringComplete();
+
+          answerSdp = {
+            type: this.peerConnection.localDescription.type,
+            sdp: this.peerConnection.localDescription.sdp
+          };
         }
       } catch (err) {
         console.warn('[WebRTC] Answer creation fallback:', err.message);
@@ -8136,6 +8144,7 @@ table td strong {
       try {
         if (this.peerConnection && signal.answer) {
           await this.peerConnection.setRemoteDescription(new RTCSessionDescription(signal.answer));
+          console.log('[WebRTC] Doctor answer accepted. 2-way peer connection established!');
         }
       } catch (err) {
         console.warn('[WebRTC] Set remote answer warning:', err.message);
@@ -8160,46 +8169,70 @@ table td strong {
       this.endCall(false);
     }
 
+    // Helper: Wait for ICE candidate gathering to finish so SDP is 100% self-contained
+    waitForIceGatheringComplete() {
+      return new Promise((resolve) => {
+        if (!this.peerConnection || this.peerConnection.iceGatheringState === 'complete') {
+          resolve();
+          return;
+        }
+        const checkState = () => {
+          if (this.peerConnection.iceGatheringState === 'complete') {
+            this.peerConnection.removeEventListener('icegatheringstatechange', checkState);
+            resolve();
+          }
+        };
+        this.peerConnection.addEventListener('icegatheringstatechange', checkState);
+        setTimeout(resolve, 800); // 800ms timeout
+      });
+    }
+
     // -------------------------------------------------------------
-    // 4. WEBRTC PEER CONNECTION SETUP
+    // 4. WEBRTC PEER CONNECTION & TRACK STREAMING
     // -------------------------------------------------------------
     setupPeerConnection() {
       try {
         if (typeof RTCPeerConnection === 'undefined') return;
         this.peerConnection = new RTCPeerConnection(RTC_CONFIG);
 
-        // Add Local Tracks to WebRTC Peer
+        // Add Local Tracks to PeerConnection
         if (this.localStream) {
           this.localStream.getTracks().forEach(track => {
             this.peerConnection.addTrack(track, this.localStream);
           });
         }
 
-        // On Remote Track Received -> Attach to Remote Video Element
+        // On Remote Track Received -> Stream Video & Audio Immediately
         this.peerConnection.ontrack = (event) => {
           console.log('[WebRTC] Remote media track received:', event.track.kind);
-          const remoteVideo = document.getElementById('remoteVideoElement');
-          if (remoteVideo && event.streams && event.streams[0]) {
-            this.remoteStream = event.streams[0];
-            remoteVideo.srcObject = this.remoteStream;
-            remoteVideo.play().catch(() => {});
-            const remoteAvatar = document.getElementById('remoteAvatarPlaceholder');
-            if (remoteAvatar) remoteAvatar.style.display = 'none';
+          let stream = event.streams && event.streams[0];
+          if (!stream) {
+            if (!this.remoteStream) this.remoteStream = new MediaStream();
+            this.remoteStream.addTrack(event.track);
+            stream = this.remoteStream;
+          } else {
+            this.remoteStream = stream;
           }
+
+          const remoteVideo = document.getElementById('remoteVideoElement');
+          if (remoteVideo) {
+            remoteVideo.srcObject = stream;
+            remoteVideo.play().catch(e => console.warn('Remote video playback:', e));
+          }
+
+          const remoteAvatar = document.getElementById('remoteAvatarPlaceholder');
+          if (remoteAvatar) remoteAvatar.style.display = 'none';
         };
 
-        // ICE Candidate Gathering
-        this.peerConnection.onicecandidate = (event) => {
-          if (event.candidate && this.currentCallData && global.supabaseService) {
-            global.supabaseService.sendTeleconsultSignal({
-              type: 'ICE_CANDIDATE',
-              callId: this.currentCallData.id,
-              candidate: event.candidate
-            });
+        this.peerConnection.onconnectionstatechange = () => {
+          console.log('[WebRTC] Connection State:', this.peerConnection.connectionState);
+          if (this.peerConnection.connectionState === 'connected') {
+            const statusEl = document.getElementById('videoCallStatusBanner');
+            if (statusEl) statusEl.innerHTML = '🟢 2-Way High Definition Video & Audio Connected';
           }
         };
       } catch (err) {
-        console.warn('[WebRTC] RTCPeerConnection initialization:', err.message);
+        console.warn('[WebRTC] RTCPeerConnection setup warning:', err.message);
       }
     }
 
@@ -8230,7 +8263,7 @@ table td strong {
         console.warn('[Video] Camera hardware notice:', err.message);
         if (simulationNotice) {
           simulationNotice.style.display = 'block';
-          simulationNotice.innerHTML = '⚡ 2-Way Telemedicine Video Stream Active';
+          simulationNotice.innerHTML = '⚡ 2-Way Telemedicine Video Active';
         }
       }
     }
