@@ -162,11 +162,41 @@
       }
     }
 
+    
+    openGpsMapModal() {
+      const modal = document.getElementById('liveGpsTrackingModal');
+      if (modal) {
+        modal.style.display = 'flex';
+        if (typeof document !== 'undefined' && document.body) {
+          document.body.style.overflow = 'hidden';
+        }
+      }
+      setTimeout(() => {
+        this.initMap('patientLiveGpsMap');
+        const inst = this.maps['patientLiveGpsMap'];
+        if (inst && inst.map) {
+          inst.map.invalidateSize();
+          inst.map.setView([this.patientCoords.lat, this.patientCoords.lng], DEFAULT_REGION.zoom);
+        }
+      }, 150);
+    }
+
+    closeGpsMapModal() {
+      const modal = document.getElementById('liveGpsTrackingModal');
+      if (modal) {
+        modal.style.display = 'none';
+        if (typeof document !== 'undefined' && document.body) {
+          document.body.style.overflow = '';
+        }
+      }
+    }
+
     setupEscKey() {
       if (typeof document !== 'undefined') {
         document.addEventListener('keydown', (e) => {
-          if (e.key === 'Escape' && this.isFullscreen) {
-            this.exitFullscreen();
+          if (e.key === 'Escape') {
+            this.closeGpsMapModal();
+            if (this.isFullscreen) this.exitFullscreen();
           }
         });
       }
@@ -584,6 +614,7 @@
       this.dispatchState.etaSeconds = 30;
 
       console.log('[GPS Dispatch] 108 Emergency Ambulance Dispatched!');
+      this.openGpsMapModal();
 
       Object.values(this.maps).forEach(inst => this.renderDispatchOnMap(inst));
       this.updateUiCards();
