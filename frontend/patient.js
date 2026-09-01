@@ -33,6 +33,9 @@
       this.renderLiveHospitals();
       this.renderLiveBloodBank();
       this.renderPrescriptions();
+      if (global.gpsTrackingController) {
+        global.gpsTrackingController.initMap('patientLiveGpsMap');
+      }
     }
 
     // -------------------------------------------------------------
