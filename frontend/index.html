@@ -31,7 +31,7 @@ if ('caches' in window) {
    ========================================================= */
 
 /* 1. CLASSIC ROYAL BLUE & SOLID CRISP WHITE (DEFAULT — NO GLASS BLUR) */
-:root, [data-theme="classic"], body[data-theme="classic"], body:not([data-theme="black"]):not([data-theme="navy"]) {
+:root, [data-theme="classic"], body[data-theme="classic"], body:not([data-theme="black"]):not([data-theme="navy"]):not([data-theme="doom"]) {
   --void-950: #f8fafc;
   --void-900: #f1f5f9;
   --glass-1: #ffffff;
@@ -53,13 +53,13 @@ if ('caches' in window) {
 
 /* Crisp Solid Surfaces for Classic Blue & White Theme (Zero Glass Distortion) */
 [data-theme="classic"] body,
-body:not([data-theme="black"]):not([data-theme="navy"]) {
+body:not([data-theme="black"]):not([data-theme="navy"]):not([data-theme="doom"]) {
   background: #f8fafc !important;
   background-image: none !important;
 }
 
 [data-theme="classic"] .top-appbar,
-body:not([data-theme="black"]):not([data-theme="navy"]) .top-appbar {
+body:not([data-theme="black"]):not([data-theme="navy"]):not([data-theme="doom"]) .top-appbar {
   background: #ffffff !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
@@ -71,10 +71,10 @@ body:not([data-theme="black"]):not([data-theme="navy"]) .top-appbar {
 [data-theme="classic"] .pillar-card,
 [data-theme="classic"] .auth-form-card,
 [data-theme="classic"] .rx-glass-card,
-body:not([data-theme="black"]):not([data-theme="navy"]) .glass-panel,
-body:not([data-theme="black"]):not([data-theme="navy"]) .pillar-card,
-body:not([data-theme="black"]):not([data-theme="navy"]) .auth-form-card,
-body:not([data-theme="black"]):not([data-theme="navy"]) .rx-glass-card {
+body:not([data-theme="black"]):not([data-theme="navy"]):not([data-theme="doom"]) .glass-panel,
+body:not([data-theme="black"]):not([data-theme="navy"]):not([data-theme="doom"]) .pillar-card,
+body:not([data-theme="black"]):not([data-theme="navy"]):not([data-theme="doom"]) .auth-form-card,
+body:not([data-theme="black"]):not([data-theme="navy"]):not([data-theme="doom"]) .rx-glass-card {
   background: #ffffff !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
@@ -84,7 +84,7 @@ body:not([data-theme="black"]):not([data-theme="navy"]) .rx-glass-card {
 }
 
 [data-theme="classic"] .btn-glass,
-body:not([data-theme="black"]):not([data-theme="navy"]) .btn-glass {
+body:not([data-theme="black"]):not([data-theme="navy"]):not([data-theme="doom"]) .btn-glass {
   background: #ffffff !important;
   border: 1px solid #cbd5e1 !important;
   color: #0f172a !important;
@@ -92,40 +92,40 @@ body:not([data-theme="black"]):not([data-theme="navy"]) .btn-glass {
 }
 
 [data-theme="classic"] .btn-glass:hover,
-body:not([data-theme="black"]):not([data-theme="navy"]) .btn-glass:hover {
+body:not([data-theme="black"]):not([data-theme="navy"]):not([data-theme="doom"]) .btn-glass:hover {
   background: #f1f5f9 !important;
   border-color: #94a3b8 !important;
 }
 
 [data-theme="classic"] .input-field,
-body:not([data-theme="black"]):not([data-theme="navy"]) .input-field {
+body:not([data-theme="black"]):not([data-theme="navy"]):not([data-theme="doom"]) .input-field {
   background: #ffffff !important;
   border: 1px solid #cbd5e1 !important;
   color: #0f172a !important;
 }
 
 [data-theme="classic"] .input-field:focus,
-body:not([data-theme="black"]):not([data-theme="navy"]) .input-field:focus {
+body:not([data-theme="black"]):not([data-theme="navy"]):not([data-theme="doom"]) .input-field:focus {
   border-color: #0284c7 !important;
   box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15) !important;
 }
 
 [data-theme="classic"] .modal-overlay,
-body:not([data-theme="black"]):not([data-theme="navy"]) .modal-overlay {
+body:not([data-theme="black"]):not([data-theme="navy"]):not([data-theme="doom"]) .modal-overlay {
   background: rgba(15, 23, 42, 0.45) !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
 
 [data-theme="classic"] .modal-card,
-body:not([data-theme="black"]):not([data-theme="navy"]) .modal-card {
+body:not([data-theme="black"]):not([data-theme="navy"]):not([data-theme="doom"]) .modal-card {
   background: #ffffff !important;
   border: 1px solid #cbd5e1 !important;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12) !important;
 }
 
 [data-theme="classic"] .hero-guide-btn,
-body:not([data-theme="black"]):not([data-theme="navy"]) .hero-guide-btn {
+body:not([data-theme="black"]):not([data-theme="navy"]):not([data-theme="doom"]) .hero-guide-btn {
   background: #ffffff !important;
   border: 1.5px solid #cbd5e1 !important;
   color: #0f172a !important;
@@ -133,14 +133,14 @@ body:not([data-theme="black"]):not([data-theme="navy"]) .hero-guide-btn {
 }
 
 [data-theme="classic"] .session-user-badge,
-body:not([data-theme="black"]):not([data-theme="navy"]) .session-user-badge {
+body:not([data-theme="black"]):not([data-theme="navy"]):not([data-theme="doom"]) .session-user-badge {
   background: #f1f5f9 !important;
   color: #0f172a !important;
   border: 1.5px solid #cbd5e1 !important;
 }
 
 [data-theme="classic"] .faq-item,
-body:not([data-theme="black"]):not([data-theme="navy"]) .faq-item {
+body:not([data-theme="black"]):not([data-theme="navy"]):not([data-theme="doom"]) .faq-item {
   background: #ffffff !important;
   border: 1px solid #e2e8f0 !important;
 }
@@ -820,110 +820,103 @@ table td strong {
 
 
 
-/* =========================================================
-   4. EMERALD GREEN (FOREST CLINICAL & CYBER HUD - REFERENCE MATCH)
-   ========================================================= */
-@keyframes emeraldGlowPulse {
-  0%, 100% {
-    box-shadow: 0 0 14px rgba(16, 185, 129, 0.35), inset 0 0 8px rgba(16, 185, 129, 0.2);
-    border-color: rgba(16, 185, 129, 0.5);
-  }
-  50% {
-    box-shadow: 0 0 28px rgba(0, 255, 136, 0.65), 0 0 45px rgba(16, 185, 129, 0.35), inset 0 0 14px rgba(0, 255, 136, 0.3);
-    border-color: #00ff88;
-  }
-}
 
+/* =========================================================
+   4. EMERALD GREEN (EXACT MATCH TO REFERENCE SCREENSHOT)
+   ========================================================= */
 [data-theme="doom"], body[data-theme="doom"] {
-  --void-950: #02140d;
-  --void-900: #042416;
-  --glass-1: rgba(6, 38, 25, 0.85);
-  --glass-2: rgba(8, 46, 30, 0.94);
-  --glass-border: rgba(16, 185, 129, 0.32);
+  --void-950: #041a12;
+  --void-900: #062319;
+  --glass-1: rgba(10, 51, 36, 0.9);
+  --glass-2: rgba(13, 61, 41, 0.95);
+  --glass-border: rgba(16, 185, 129, 0.35);
   --primary: #10b981;
-  --primary-dark: #047857;
-  --primary-bright: #00ff88;
+  --primary-dark: #059669;
+  --primary-bright: #34d399;
   --accent: #f59e0b;
-  --ink: #f0fdf4;
-  --ink-dim: #bbf7d0;
-  --muted: #6ee7b7;
-  --line: rgba(16, 185, 129, 0.22);
-  --topbar-bg: rgba(3, 20, 13, 0.96);
-  --body-bg: #02140d;
-  --shadow-panel: 0 12px 36px -6px rgba(0, 0, 0, 0.8), 0 0 24px rgba(16, 185, 129, 0.15);
+  --ink: #ffffff;
+  --ink-dim: #dcfce7;
+  --muted: #a7f3d0;
+  --line: rgba(16, 185, 129, 0.25);
+  --topbar-bg: #041e14;
+  --body-bg: #062319;
+  --shadow-panel: 0 10px 30px rgba(0, 0, 0, 0.6);
   color-scheme: dark;
 }
 
-/* Reference Exact Deep Forest Emerald Background */
-[data-theme="doom"] body {
-  background-color: #02140d !important;
-  background-image:
-    radial-gradient(120% 75% at 50% -10%, rgba(16, 185, 129, 0.22) 0%, transparent 65%),
-    radial-gradient(70% 50% at 85% 15%, rgba(0, 255, 136, 0.14) 0%, transparent 60%),
-    radial-gradient(60% 40% at 15% 75%, rgba(4, 120, 87, 0.2) 0%, transparent 60%),
-    linear-gradient(180deg, #02140d 0%, #052417 100%) !important;
+/* Reference Exact Dark Forest Green Canvas */
+[data-theme="doom"] body,
+body[data-theme="doom"] {
+  background-color: #062319 !important;
+  background-image: 
+    radial-gradient(100% 70% at 50% 0%, #0e3a2a 0%, #062319 65%, #041a12 100%) !important;
   background-attachment: fixed !important;
-  color: #f0fdf4 !important;
+  color: #ffffff !important;
 }
 
-/* Reference Top Appbar */
+/* Top Appbar */
 [data-theme="doom"] .top-appbar {
-  background: rgba(3, 20, 13, 0.94) !important;
-  backdrop-filter: blur(24px) !important;
-  -webkit-backdrop-filter: blur(24px) !important;
-  border-bottom: 1.5px solid rgba(16, 185, 129, 0.35) !important;
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.7) !important;
+  background: #041e14 !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-bottom: 1.5px solid rgba(16, 185, 129, 0.3) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6) !important;
 }
 
-/* Reference Glass Panels & Cards */
+/* Reference Exact Forest Green Cards & Panels */
 [data-theme="doom"] .glass-panel,
 [data-theme="doom"] .pillar-card,
 [data-theme="doom"] .auth-form-card,
 [data-theme="doom"] .rx-glass-card {
-  background: linear-gradient(145deg, rgba(6, 38, 25, 0.85), rgba(3, 22, 14, 0.92)) !important;
-  backdrop-filter: blur(20px) !important;
-  -webkit-backdrop-filter: blur(20px) !important;
-  border: 1.5px solid rgba(16, 185, 129, 0.32) !important;
+  background: #0a3324 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 1.5px solid rgba(16, 185, 129, 0.28) !important;
   border-radius: 18px !important;
-  box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.75), 0 0 20px rgba(16, 185, 129, 0.12) !important;
-  color: #f0fdf4 !important;
-  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease, border-color 0.35s ease, background 0.35s ease !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45) !important;
+  color: #ffffff !important;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease !important;
 }
 
 [data-theme="doom"] .glass-panel:hover,
 [data-theme="doom"] .pillar-card:hover {
-  transform: translateY(-3px) scale(1.006) !important;
-  border-color: rgba(0, 255, 136, 0.6) !important;
-  background: linear-gradient(145deg, rgba(8, 48, 32, 0.9), rgba(4, 28, 18, 0.95)) !important;
-  box-shadow: 0 20px 48px -6px rgba(0, 0, 0, 0.9), 0 0 30px rgba(16, 185, 129, 0.35) !important;
+  transform: translateY(-2px) !important;
+  border-color: #10b981 !important;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6), 0 0 20px rgba(16, 185, 129, 0.25) !important;
 }
 
-/* Reference Headings & Brand with Emerald Glow */
-[data-theme="doom"] .brand-name,
+/* Headings in Bright Crisp White */
 [data-theme="doom"] h1,
 [data-theme="doom"] h2,
 [data-theme="doom"] h3,
-[data-theme="doom"] .panel-title {
+[data-theme="doom"] .panel-title,
+[data-theme="doom"] .brand-name,
+[data-theme="doom"] strong {
   color: #ffffff !important;
-  text-shadow: 0 0 12px rgba(0, 255, 136, 0.35) !important;
-  letter-spacing: 0.3px !important;
+  text-shadow: none !important;
 }
 
-/* Reference Tactile Buttons & Chips */
+[data-theme="doom"] small,
+[data-theme="doom"] p,
+[data-theme="doom"] .text-muted,
+[data-theme="doom"] label {
+  color: #a7f3d0 !important;
+}
+
+/* Buttons in Emerald Theme */
 [data-theme="doom"] .btn-glass {
-  background: rgba(4, 28, 18, 0.85) !important;
+  background: #082a1d !important;
   border: 1.5px solid rgba(16, 185, 129, 0.4) !important;
-  color: #dcfce7 !important;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4) !important;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+  transition: all 0.2s ease !important;
 }
 
 [data-theme="doom"] .btn-glass:hover {
-  background: rgba(16, 185, 129, 0.25) !important;
-  border-color: #00ff88 !important;
-  color: #ffffff !important;
-  transform: translateY(-2px) !important;
-  box-shadow: 0 0 20px rgba(0, 255, 136, 0.4) !important;
+  background: #10b981 !important;
+  border-color: #34d399 !important;
+  color: #041e14 !important;
+  font-weight: 800 !important;
 }
 
 [data-theme="doom"] .auth-btn-primary {
@@ -931,98 +924,86 @@ table td strong {
   border: 1.5px solid #34d399 !important;
   color: #ffffff !important;
   font-weight: 800 !important;
-  box-shadow: 0 4px 18px rgba(16, 185, 129, 0.4) !important;
-  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease !important;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4) !important;
 }
 
 [data-theme="doom"] .auth-btn-primary:hover {
-  transform: translateY(-2px) !important;
-  box-shadow: 0 8px 26px rgba(16, 185, 129, 0.65) !important;
+  background: linear-gradient(135deg, #34d399, #10b981) !important;
+  color: #041e14 !important;
 }
 
-[data-theme="doom"] .auth-btn-primary:active,
-[data-theme="doom"] .btn-glass:active {
-  transform: scale(0.96) !important;
-}
-
-/* Reference Tactical Inputs */
+/* Tactical Dark Inputs */
 [data-theme="doom"] .input-field,
 [data-theme="doom"] .select-control {
-  background: rgba(3, 20, 13, 0.95) !important;
-  border: 1.5px solid rgba(16, 185, 129, 0.4) !important;
-  color: #f0fdf4 !important;
-  border-radius: 12px !important;
-  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.6) !important;
-  transition: all 0.25s ease !important;
+  background: #051e14 !important;
+  border: 1.5px solid rgba(16, 185, 129, 0.45) !important;
+  color: #ffffff !important;
+  border-radius: 10px !important;
 }
 
 [data-theme="doom"] .input-field:focus,
 [data-theme="doom"] .select-control:focus {
-  border-color: #00ff88 !important;
-  box-shadow: 0 0 0 3px rgba(0, 255, 136, 0.3), inset 0 2px 6px rgba(0, 0, 0, 0.6) !important;
+  border-color: #10b981 !important;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.3) !important;
 }
 
-/* Active User Badge (Reference Style) */
+/* User Badge & Language Selector */
 [data-theme="doom"] #activeUserBadge {
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.3), rgba(6, 78, 59, 0.8)) !important;
-  border: 1.5px solid #10b981 !important;
+  background: linear-gradient(135deg, #10b981, #059669) !important;
+  border: 1.5px solid #34d399 !important;
   color: #ffffff !important;
-  box-shadow: 0 0 16px rgba(16, 185, 129, 0.35) !important;
-  animation: emeraldGlowPulse 3s infinite ease-in-out !important;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4) !important;
 }
 
-/* Language Selector Dropdown */
 [data-theme="doom"] #langSelect {
-  background: rgba(4, 28, 18, 0.9) !important;
+  background: #082a1d !important;
   border: 1.5px solid rgba(16, 185, 129, 0.5) !important;
-  color: #dcfce7 !important;
-  box-shadow: 0 0 12px rgba(16, 185, 129, 0.2) !important;
+  color: #ffffff !important;
 }
 
-/* Reference Left Sidebar in Forest Green */
+/* Left Sidebar in Exact Forest Green */
 [data-theme="doom"] #appLeftSidebar {
-  background: linear-gradient(180deg, #02140d 0%, #042416 100%) !important;
-  border-right: 1.5px solid rgba(16, 185, 129, 0.35) !important;
-  box-shadow: 15px 0 50px rgba(0, 0, 0, 0.9) !important;
+  background: #041e14 !important;
+  border-right: 1.5px solid rgba(16, 185, 129, 0.3) !important;
+  box-shadow: 15px 0 50px rgba(0, 0, 0, 0.8) !important;
+  color: #ffffff !important;
 }
 
-/* Reference Table Styling */
+/* Tables & Rows */
 [data-theme="doom"] .admin-table th {
-  background: rgba(16, 185, 129, 0.15) !important;
-  color: #00ff88 !important;
-  border-bottom: 1.5px solid rgba(16, 185, 129, 0.4) !important;
+  background: #082a1d !important;
+  color: #34d399 !important;
+  border-bottom: 1.5px solid rgba(16, 185, 129, 0.3) !important;
 }
 
 [data-theme="doom"] .admin-table td {
-  border-bottom: 1px solid rgba(16, 185, 129, 0.18) !important;
-  color: #dcfce7 !important;
+  border-bottom: 1px solid rgba(16, 185, 129, 0.15) !important;
+  color: #e2e8f0 !important;
 }
 
 [data-theme="doom"] .admin-table tr:hover {
-  background: rgba(16, 185, 129, 0.14) !important;
-  box-shadow: inset 4px 0 0 #00ff88 !important;
+  background: rgba(16, 185, 129, 0.12) !important;
 }
 
-/* Badges & Metric Chips */
+/* Badges & Chips */
 [data-theme="doom"] .badge {
-  background: rgba(16, 185, 129, 0.2) !important;
-  color: #00ff88 !important;
-  border: 1px solid rgba(16, 185, 129, 0.5) !important;
-  box-shadow: 0 0 10px rgba(16, 185, 129, 0.25) !important;
+  background: rgba(16, 185, 129, 0.25) !important;
+  color: #34d399 !important;
+  border: 1px solid #10b981 !important;
 }
 
-/* Modal Overlay & Card */
+/* Modals */
 [data-theme="doom"] .modal-overlay {
-  background: rgba(2, 14, 9, 0.85) !important;
-  backdrop-filter: blur(8px) !important;
+  background: rgba(4, 26, 18, 0.85) !important;
 }
 
 [data-theme="doom"] .modal-card {
-  background: linear-gradient(145deg, #06281a, #02140d) !important;
-  border: 1.5px solid rgba(16, 185, 129, 0.5) !important;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.9), 0 0 30px rgba(16, 185, 129, 0.25) !important;
-  color: #f0fdf4 !important;
+  background: #0a3324 !important;
+  border: 1.5px solid rgba(16, 185, 129, 0.4) !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8) !important;
+  color: #ffffff !important;
 }
+
 
 
 
