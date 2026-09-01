@@ -75,12 +75,10 @@
       const docSelect = document.getElementById('patientVideoDoctorSelect');
       const memberSelect = document.getElementById('patientVideoMemberSelect');
       const complaintInput = document.getElementById('patientVideoComplaint');
-      const customRoomInput = document.getElementById('patientVideoCustomRoom');
 
       const chosenDoctor = docSelect ? docSelect.value : 'Dr. Priya Sharma, MBBS, MD';
       const chosenPatient = memberSelect ? memberSelect.value : 'Citizen Beneficiary';
       const complaint = complaintInput ? complaintInput.value.trim() : 'Telemedicine Video Consultation';
-      const customRoom = customRoomInput ? customRoomInput.value.trim() : '';
 
       this.closePatientVideoCallModal();
 
@@ -92,8 +90,7 @@
           callerPhone: user.phone || '9876543210',
           recipientRole: 'doctor',
           recipientName: chosenDoctor,
-          complaint: complaint,
-          roomUrl: customRoom || null
+          complaint: complaint
         });
       }
     }

@@ -397,12 +397,10 @@
       const patSelect = document.getElementById('ashaVideoPatientSelect');
       const docSelect = document.getElementById('ashaVideoDoctorSelect');
       const complaintInput = document.getElementById('ashaVideoComplaint');
-      const customRoomInput = document.getElementById('ashaVideoCustomRoom');
 
       const chosenPatient = patSelect ? patSelect.value : 'Village Beneficiary';
       const chosenDoctor = docSelect ? docSelect.value : 'Dr. Priya Sharma, MBBS, MD';
       const complaint = complaintInput ? complaintInput.value.trim() : 'Frontline Telemedicine Consultation';
-      const customRoom = customRoomInput ? customRoomInput.value.trim() : '';
 
       this.closeAshaVideoCallModal();
 
@@ -415,8 +413,7 @@
           recipientRole: 'doctor',
           recipientName: chosenDoctor,
           facilitatorName: activeAsha.name || 'ASHA Worker',
-          complaint: complaint,
-          roomUrl: customRoom || null
+          complaint: complaint
         });
       }
     }
