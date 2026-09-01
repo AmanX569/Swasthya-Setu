@@ -825,15 +825,16 @@ table td strong {
 
 <!-- TOP APPBAR -->
 
-<header class="top-appbar" style="background:var(--topbar-bg);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1.5px solid var(--glass-border);padding:10px 18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;position:sticky;top:0;z-index:1000;box-shadow:0 4px 20px rgba(0,0,0,0.15);">
+<header class="top-appbar" style="background:var(--topbar-bg);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1.5px solid var(--glass-border);padding:10px 18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;position:sticky;top:0;z-index:1000;box-shadow:0 4px 20px rgba(0,0,0,0.15);">
   
-  <!-- LEFT: ☰ SIDEBAR TOGGLE & BRAND LOGO -->
-  <div style="display:flex;align-items:center;gap:12px;">
-    <!-- ☰ SIDEBAR TOGGLE BUTTON (ON LEFT) -->
+  <!-- LEFT: ☰ SIDEBAR TOGGLE, BRAND LOGO, AND ACTIVE USER NAME (YELLOW POSITION) -->
+  <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+    <!-- ☰ SIDEBAR TOGGLE BUTTON -->
     <button type="button" id="btnToggleLeftSidebar" onclick="toggleLeftSidebar()" class="btn-glass" title="Toggle Navigation Sidebar" style="display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:10px;background:rgba(2,132,199,0.14);border:1.5px solid var(--primary-bright);color:var(--primary-bright);cursor:pointer;box-shadow:0 2px 10px rgba(2,132,199,0.2);transition:all 0.2s ease;">
       <span style="font-size:20px;line-height:1;">☰</span>
     </button>
 
+    <!-- BRAND LOGO & TITLE -->
     <div class="brand-title" onclick="handleLogoClick()" style="cursor:pointer;display:flex;align-items:center;gap:10px;">
       <img src="assets/logo.png" style="width:38px;height:38px;border-radius:50%;object-fit:cover;border:2px solid var(--primary-bright);box-shadow:0 2px 10px rgba(0,0,0,0.18);" alt="Swasthya Setu Logo">
       <div>
@@ -844,17 +845,17 @@ table td strong {
         <small style="display:block;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:0.5px;" data-i18n="app_tagline">RURAL HEALTHCARE CLOUD GRID</small>
       </div>
     </div>
-  </div>
 
-  <!-- RIGHT: ENLARGED USER NAME BOX FIRST, THEN LANGUAGE SELECTOR -->
-  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-    
-    <!-- 1. ENLARGED HIGH-CONTRAST USER NAME BADGE -->
+    <!-- 🟡 YELLOW POSITION: ACTIVE USER NAME BADGE (NEXT TO LOGO) -->
     <span id="activeUserBadge" style="display:none;background:linear-gradient(135deg, rgba(2,132,199,0.14) 0%, rgba(56,189,248,0.28) 100%);color:var(--ink);padding:8px 18px;border-radius:14px;font-size:13.5px;font-weight:800;border:1.5px solid var(--primary-bright);align-items:center;gap:8px;box-shadow:0 4px 14px rgba(2,132,199,0.22), inset 0 1px 0 rgba(255,255,255,0.5);letter-spacing:0.3px;backdrop-filter:blur(10px);">
       🌾 Citizen User
     </span>
+  </div>
 
-    <!-- 2. 🌐 LANGUAGE SELECTOR -->
+  <!-- RIGHT: 🔵 BLUE (LANGUAGE SELECTOR) & 🟢 GREEN (108 SOS) -->
+  <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+    
+    <!-- 🔵 BLUE POSITION: 🌐 LANGUAGE SELECTOR -->
     <select id="langSelect" class="select-control" onchange="onLanguageChange(this.value)" style="padding:8px 14px;border-radius:12px;font-weight:800;font-size:13px;background:rgba(2,132,199,0.12);border:1.5px solid var(--primary-bright);color:var(--ink);cursor:pointer;box-shadow:0 2px 10px rgba(2,132,199,0.15);">
       <option value="en">🌐 English</option>
       <option value="hi">हिंदी (Hindi)</option>
@@ -864,6 +865,11 @@ table td strong {
       <option value="bn">বাংলা (Bengali)</option>
       <option value="kn">ಕನ್ನಡ (Kannada)</option>
     </select>
+
+    <!-- 🟢 GREEN POSITION: 🚨 108 SOS BUTTON -->
+    <button type="button" class="auth-btn-primary" style="background:linear-gradient(135deg, #dc2626, #b91c1c);color:#ffffff;padding:9px 18px;font-size:13px;font-weight:900;border:1px solid #991b1b;border-radius:12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;box-shadow:0 4px 14px rgba(220,38,38,0.38);transition:all 0.2s ease;" onclick="patientController.triggerSos()" data-i18n="btn_sos">
+      <span>🚨</span> <span>108 SOS</span>
+    </button>
 
     <!-- Hidden dummy container to prevent errors if referenced in scripts -->
     <div id="sessionHeaderControls" style="display:none;"></div>
