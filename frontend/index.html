@@ -827,28 +827,28 @@ table td strong {
 
 <header class="top-appbar" style="background:var(--topbar-bg);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1.5px solid var(--glass-border);padding:10px 18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;position:sticky;top:0;z-index:1000;box-shadow:0 4px 20px rgba(0,0,0,0.15);">
   
-  <!-- LEFT: LOGO & BRAND -->
-  <div class="brand-title" onclick="handleLogoClick()" style="cursor:pointer;display:flex;align-items:center;gap:10px;">
-    <img src="assets/logo.png" style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid var(--primary-bright);box-shadow:0 2px 10px rgba(0,0,0,0.18);" alt="Swasthya Setu Logo">
-    <div>
-      <div style="font-size:19px;font-weight:900;letter-spacing:0.5px;color:var(--primary-bright);display:flex;align-items:center;gap:6px;">
-        <span data-i18n="app_title">Swasthya Setu</span>
-        <span style="display:inline-block;width:8px;height:8px;background:#22c55e;border-radius:50%;box-shadow:0 0 8px #22c55e;"></span>
+  <!-- LEFT: ☰ SIDEBAR TOGGLE & BRAND LOGO -->
+  <div style="display:flex;align-items:center;gap:12px;">
+    <!-- ☰ SIDEBAR TOGGLE BUTTON (ON LEFT) -->
+    <button type="button" id="btnToggleLeftSidebar" onclick="toggleLeftSidebar()" class="btn-glass" title="Toggle Navigation Sidebar" style="display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:10px;background:rgba(2,132,199,0.14);border:1.5px solid var(--primary-bright);color:var(--primary-bright);cursor:pointer;box-shadow:0 2px 10px rgba(2,132,199,0.2);transition:all 0.2s ease;">
+      <span style="font-size:20px;line-height:1;">☰</span>
+    </button>
+
+    <div class="brand-title" onclick="handleLogoClick()" style="cursor:pointer;display:flex;align-items:center;gap:10px;">
+      <img src="assets/logo.png" style="width:38px;height:38px;border-radius:50%;object-fit:cover;border:2px solid var(--primary-bright);box-shadow:0 2px 10px rgba(0,0,0,0.18);" alt="Swasthya Setu Logo">
+      <div>
+        <div style="font-size:19px;font-weight:900;letter-spacing:0.5px;color:var(--primary-bright);display:flex;align-items:center;gap:6px;">
+          <span data-i18n="app_title">Swasthya Setu</span>
+          <span style="display:inline-block;width:8px;height:8px;background:#22c55e;border-radius:50%;box-shadow:0 0 8px #22c55e;"></span>
+        </div>
+        <small style="display:block;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:0.5px;" data-i18n="app_tagline">RURAL HEALTHCARE CLOUD GRID</small>
       </div>
-      <small style="display:block;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:0.5px;" data-i18n="app_tagline">RURAL HEALTHCARE CLOUD GRID</small>
     </div>
   </div>
 
-  <!-- RIGHT: QUICK BAR TOGGLE & USER PROFILE CONTROLS -->
+  <!-- RIGHT: ACTIVE SESSION USER CONTROLS -->
   <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
     
-    <!-- ☰ QUICK BAR / TOOLS TOGGLE BUTTON -->
-    <button type="button" id="btnToggleQuickBar" onclick="toggleQuickFeaturesBar()" class="btn-glass" style="display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:800;padding:7px 14px;border-radius:12px;background:rgba(2,132,199,0.12);border:1.5px solid var(--primary-bright);color:var(--primary-bright);cursor:pointer;box-shadow:0 2px 10px rgba(2,132,199,0.18);transition:all 0.25s cubic-bezier(0.4,0,0.2,1);">
-      <span style="font-size:15px;">☰</span>
-      <span>Menu / Tools</span>
-      <span id="quickBarArrowIcon" style="font-size:10px;transition:transform 0.25s ease;display:inline-block;">▼</span>
-    </button>
-
     <!-- ACTIVE SESSION BADGE & ACTION BUTTONS -->
     <div id="sessionHeaderControls" style="display:none;align-items:center;gap:8px;flex-wrap:wrap;">
       <span id="activeUserBadge" style="background:linear-gradient(135deg, rgba(2,132,199,0.2), rgba(15,23,42,0.6));color:var(--ink);padding:7px 14px;border-radius:12px;font-size:13px;font-weight:800;border:1.5px solid var(--primary-bright);display:inline-flex;align-items:center;gap:6px;box-shadow:0 2px 10px rgba(2,132,199,0.2);">
@@ -860,55 +860,98 @@ table td strong {
       </button>
 
       <button type="button" class="btn-taskbar-logout" style="background:linear-gradient(135deg, #ef4444, #dc2626);color:#ffffff;padding:8px 16px;font-size:12px;font-weight:900;border:1px solid #b91c1c;border-radius:10px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;box-shadow:0 2px 12px rgba(239,68,68,0.4);transition:all 0.2s ease;" onclick="doLogout()" data-i18n="btn_logout">
-        <span>🚪</span> <span>Log Out / Switch</span>
+        <span>🚪</span> <span>Log Out / Change Portal</span>
       </button>
     </div>
 
   </div>
 
-  <!-- COLLAPSIBLE EXPANDABLE QUICK FEATURES BAR (Toggled by ☰ Menu / Tools button) -->
-  <div id="quickFeaturesBar" class="top-controls" style="width:100%;display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding-top:8px;border-top:1px solid var(--glass-border);margin-top:6px;transition:all 0.3s cubic-bezier(0.4, 0, 0.2, 1);overflow:hidden;">
-    
-    <span class="btn-glass btn-taskbar-item" id="networkStatusBadge" style="display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:800;padding:6px 10px;border-radius:10px;cursor:default;">
-      🟢 Online
-    </span>
+</header>
 
-    <button class="btn-glass btn-taskbar-item" id="btnNavHome" onclick="goToHome()" style="display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;padding:7px 12px;cursor:pointer;border-radius:10px;">
-      🏠 <span>Home</span>
-    </button>
+<!-- =========================================================
+     SLIDING LEFT SIDEBAR & BACKDROP OVERLAY
+     ========================================================= -->
+<div id="sidebarBackdrop" onclick="toggleLeftSidebar(false)" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,0.6);backdrop-filter:blur(4px);z-index:9998;transition:opacity 0.3s ease;"></div>
 
-    <button class="btn-glass btn-taskbar-item" id="btnNavGuide" onclick="openHelpGuideModal()" style="display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;padding:7px 12px;cursor:pointer;border-radius:10px;color:var(--primary-bright);border-color:rgba(2,132,199,0.3);">
-      ❓ <span>Guide</span>
-    </button>
-    
-    <button class="btn-glass" id="supabaseStatusBadge" style="display:none;" onclick="openSupabaseSettingsModal()" style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:7px 12px;cursor:pointer;border-radius:10px;">
-      ⚙️ <span>Supabase</span>
-    </button>
-
-    <button class="btn-glass" id="globalAudioToggleBtn" onclick="toggleReadAloud()" style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:7px 12px;border-radius:10px;">
-      <span>🔊</span> <span data-i18n="btn_read_aloud">Read Aloud</span>
-    </button>
-
-    <select id="langSelect" class="select-control" onchange="onLanguageChange(this.value)" style="padding:7px 10px;border-radius:10px;font-weight:700;">
-      <option value="en">🌐 English</option>
-      <option value="hi">हिंदी (Hindi)</option>
-      <option value="te">తెలుగు (Telugu)</option>
-      <option value="ta">தமிழ் (Tamil)</option>
-      <option value="mr">मराठी (Marathi)</option>
-      <option value="bn">বাংলা (Bengali)</option>
-      <option value="kn">ಕನ್ನಡ (Kannada)</option>
-    </select>
-
-    <button class="btn-glass" onclick="cycleTheme()" id="themeToggleBtn" data-i18n="theme_classic" style="font-size:12px;font-weight:700;padding:7px 12px;border-radius:10px;">
-      🏛️ Theme
-    </button>
-
-    <button class="auth-btn-primary" style="background:linear-gradient(135deg, #dc2626, #991b1b);border:none;padding:8px 14px;font-size:12px;font-weight:900;border-radius:10px;box-shadow:0 2px 10px rgba(220,38,38,0.4);" onclick="patientController.triggerSos()" data-i18n="btn_sos">
-      🚨 108 SOS
-    </button>
+<aside id="appLeftSidebar" style="position:fixed;top:0;left:0;bottom:0;width:300px;max-width:85vw;background:var(--bg-card);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-right:1.5px solid var(--glass-border);box-shadow:10px 0 40px rgba(0,0,0,0.6);z-index:9999;display:flex;flex-direction:column;transform:translateX(-100%);transition:transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);overflow-y:auto;">
+  
+  <!-- SIDEBAR HEADER -->
+  <div style="padding:16px 18px;border-bottom:1.5px solid var(--glass-border);display:flex;justify-content:space-between;align-items:center;background:rgba(2,132,199,0.06);">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <img src="assets/logo.png" style="width:34px;height:34px;border-radius:50%;border:2px solid var(--primary-bright);" alt="Logo">
+      <div>
+        <strong style="font-size:16px;font-weight:900;color:var(--primary-bright);display:block;">Swasthya Setu</strong>
+        <small style="font-size:10px;color:var(--muted);font-weight:700;">NAVIGATION & TOOLS</small>
+      </div>
+    </div>
+    <button onclick="toggleLeftSidebar(false)" style="background:none;border:none;font-size:20px;color:var(--muted);cursor:pointer;padding:4px 8px;border-radius:6px;transition:0.2s;">✕</button>
   </div>
 
-</header>
+  <!-- SIDEBAR BODY -->
+  <div style="padding:16px;flex:1;display:flex;flex-direction:column;gap:14px;">
+    
+    <!-- ONLINE STATUS CARD -->
+    <div style="background:var(--glass-2);border:1px solid var(--glass-border);border-radius:12px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="display:inline-block;width:10px;height:10px;background:#22c55e;border-radius:50%;box-shadow:0 0 10px #22c55e;"></span>
+        <span style="font-size:13px;font-weight:800;color:var(--ink);" id="networkStatusBadge">🟢 Online Mode</span>
+      </div>
+      <span class="badge" style="background:#0284c7;color:#fff;font-size:10px;font-weight:700;">Cloud Synced</span>
+    </div>
+
+    <!-- PRIMARY TOOLS & ACTIONS -->
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div style="font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px;">Quick Features</div>
+
+      <button class="btn-glass" onclick="goToHome(); toggleLeftSidebar(false);" style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;font-size:13px;font-weight:700;text-align:left;width:100%;">
+        <span style="font-size:16px;">🏠</span>
+        <span>Home Dashboard</span>
+      </button>
+
+      <button class="btn-glass" onclick="openHelpGuideModal(); toggleLeftSidebar(false);" style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;font-size:13px;font-weight:700;text-align:left;width:100%;color:var(--primary-bright);">
+        <span style="font-size:16px;">❓</span>
+        <span>User Guide & Manual</span>
+      </button>
+
+      <button class="btn-glass" id="globalAudioToggleBtn" onclick="toggleReadAloud()" style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;font-size:13px;font-weight:700;text-align:left;width:100%;">
+        <span style="font-size:16px;">🔊</span>
+        <span data-i18n="btn_read_aloud">Voice Read Aloud</span>
+      </button>
+
+      <button class="btn-glass" onclick="cycleTheme()" id="themeToggleBtn" style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;font-size:13px;font-weight:700;text-align:left;width:100%;">
+        <span style="font-size:16px;">🏛️</span>
+        <span data-i18n="theme_classic">Switch Color Theme</span>
+      </button>
+    </div>
+
+    <!-- LANGUAGE SELECTOR -->
+    <div style="background:var(--glass-2);border:1px solid var(--glass-border);border-radius:12px;padding:12px;">
+      <label style="font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:6px;">🌐 Choose Language</label>
+      <select id="langSelect" class="select-control" onchange="onLanguageChange(this.value)" style="width:100%;padding:8px 10px;border-radius:8px;font-weight:700;font-size:13px;">
+        <option value="en">🌐 English</option>
+        <option value="hi">हिंदी (Hindi)</option>
+        <option value="te">తెలుగు (Telugu)</option>
+        <option value="ta">தமிழ் (Tamil)</option>
+        <option value="mr">मराठी (Marathi)</option>
+        <option value="bn">বাংলা (Bengali)</option>
+        <option value="kn">ಕನ್ನಡ (Kannada)</option>
+      </select>
+    </div>
+
+    <!-- EMERGENCY 108 SOS -->
+    <button class="auth-btn-primary" style="background:linear-gradient(135deg, #dc2626, #991b1b);border:none;padding:12px 16px;font-size:14px;font-weight:900;border-radius:12px;box-shadow:0 4px 16px rgba(220,38,38,0.4);display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:4px;" onclick="patientController.triggerSos(); toggleLeftSidebar(false);" data-i18n="btn_sos">
+      <span>🚨</span> <span>108 Emergency SOS</span>
+    </button>
+
+  </div>
+
+  <!-- SIDEBAR FOOTER -->
+  <div style="padding:14px 18px;border-top:1.5px solid var(--glass-border);background:rgba(0,0,0,0.15);font-size:11px;color:var(--muted);text-align:center;">
+    <strong>Ayushman Bharat Digital Gateway</strong>
+    <div style="font-size:10px;opacity:0.8;margin-top:2px;">National Rural Telemedicine Grid v2.4</div>
+  </div>
+
+</aside>
 
 
 <main class="main-container">
@@ -3100,6 +3143,26 @@ document.addEventListener('DOMContentLoaded', () => {
         if (btn) btn.style.background = 'rgba(2,132,199,0.12)';
       }
     });
+  </script>
+
+
+  <script>
+    function toggleLeftSidebar(forceState) {
+      const sidebar = document.getElementById('appLeftSidebar');
+      const backdrop = document.getElementById('sidebarBackdrop');
+      if (!sidebar) return;
+
+      const isOpen = (sidebar.style.transform === 'translateX(0px)');
+      const nextState = (typeof forceState === 'boolean') ? forceState : !isOpen;
+
+      if (nextState) {
+        sidebar.style.transform = 'translateX(0px)';
+        if (backdrop) backdrop.style.display = 'block';
+      } else {
+        sidebar.style.transform = 'translateX(-100%)';
+        if (backdrop) backdrop.style.display = 'none';
+      }
+    }
   </script>
 
 </body>
