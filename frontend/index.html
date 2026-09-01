@@ -846,10 +846,15 @@ table td strong {
     </div>
   </div>
 
-  <!-- RIGHT: LANGUAGE SELECTOR & ACTIVE USER CONTROLS -->
+  <!-- RIGHT: ACTIVE USER NAME FIRST, THEN LANGUAGE SELECTOR, THEN LOGOUT -->
   <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
     
-    <!-- 🌐 LANGUAGE SELECTOR (IN PLACE OF CHANGE PASSWORD) -->
+    <!-- 1. ACTIVE USER NAME / BADGE (PLACED BEFORE LANGUAGE) -->
+    <span id="activeUserBadge" style="display:none;background:linear-gradient(135deg, rgba(2,132,199,0.2), rgba(15,23,42,0.6));color:var(--ink);padding:7px 14px;border-radius:12px;font-size:13px;font-weight:800;border:1.5px solid var(--primary-bright);align-items:center;gap:6px;box-shadow:0 2px 10px rgba(2,132,199,0.2);">
+      🌾 Citizen User
+    </span>
+
+    <!-- 2. 🌐 LANGUAGE SELECTOR (AFTER USER NAME) -->
     <select id="langSelect" class="select-control" onchange="onLanguageChange(this.value)" style="padding:7px 12px;border-radius:10px;font-weight:800;font-size:12.5px;background:rgba(2,132,199,0.12);border:1.5px solid var(--primary-bright);color:var(--ink);cursor:pointer;box-shadow:0 2px 10px rgba(2,132,199,0.15);">
       <option value="en">🌐 English</option>
       <option value="hi">हिंदी (Hindi)</option>
@@ -860,12 +865,8 @@ table td strong {
       <option value="kn">ಕನ್ನಡ (Kannada)</option>
     </select>
 
-    <!-- ACTIVE SESSION BADGE & ACTION BUTTONS -->
-    <div id="sessionHeaderControls" style="display:none;align-items:center;gap:8px;flex-wrap:wrap;">
-      <span id="activeUserBadge" style="background:linear-gradient(135deg, rgba(2,132,199,0.2), rgba(15,23,42,0.6));color:var(--ink);padding:7px 14px;border-radius:12px;font-size:13px;font-weight:800;border:1.5px solid var(--primary-bright);display:inline-flex;align-items:center;gap:6px;box-shadow:0 2px 10px rgba(2,132,199,0.2);">
-        🌾 Citizen User
-      </span>
-
+    <!-- 3. LOG OUT BUTTON -->
+    <div id="sessionHeaderControls" style="display:none;align-items:center;">
       <button type="button" class="btn-taskbar-logout" style="background:linear-gradient(135deg, #ef4444, #dc2626);color:#ffffff;padding:8px 16px;font-size:12px;font-weight:900;border:1px solid #b91c1c;border-radius:10px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;box-shadow:0 2px 12px rgba(239,68,68,0.4);transition:all 0.2s ease;" onclick="doLogout()" data-i18n="btn_logout">
         <span>🚪</span> <span>Log Out / Change Portal</span>
       </button>
@@ -876,78 +877,77 @@ table td strong {
 </header>
 
 <!-- =========================================================
-     SLIDING LEFT SIDEBAR & BACKDROP OVERLAY
+     SLIDING LEFT SIDEBAR & BACKDROP OVERLAY (HIGH CONTRAST & VISIBLE)
      ========================================================= -->
-<div id="sidebarBackdrop" onclick="toggleLeftSidebar(false)" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,0.6);backdrop-filter:blur(4px);z-index:9998;transition:opacity 0.3s ease;"></div>
+<div id="sidebarBackdrop" onclick="toggleLeftSidebar(false)" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,0.65);backdrop-filter:blur(4px);z-index:9998;transition:opacity 0.3s ease;"></div>
 
-<aside id="appLeftSidebar" style="position:fixed;top:0;left:0;bottom:0;width:300px;max-width:85vw;background:var(--bg-card);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-right:1.5px solid var(--glass-border);box-shadow:10px 0 40px rgba(0,0,0,0.6);z-index:9999;display:flex;flex-direction:column;transform:translateX(-100%);transition:transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);overflow-y:auto;">
+<aside id="appLeftSidebar" style="position:fixed;top:0;left:0;bottom:0;width:300px;max-width:85vw;background:#0f172a;border-right:1.5px solid rgba(56,189,248,0.3);box-shadow:15px 0 50px rgba(0,0,0,0.8);z-index:9999;display:flex;flex-direction:column;transform:translateX(-100%);transition:transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);overflow-y:auto;color:#ffffff;">
   
-  <!-- SIDEBAR HEADER -->
-  <div style="padding:16px 18px;border-bottom:1.5px solid var(--glass-border);display:flex;justify-content:space-between;align-items:center;background:rgba(2,132,199,0.06);">
+  <!-- SIDEBAR HEADER (HIGH VISIBILITY) -->
+  <div style="padding:16px 18px;border-bottom:1.5px solid rgba(255,255,255,0.12);display:flex;justify-content:space-between;align-items:center;background:rgba(2,132,199,0.15);">
     <div style="display:flex;align-items:center;gap:10px;">
-      <img src="assets/logo.png" style="width:34px;height:34px;border-radius:50%;border:2px solid var(--primary-bright);" alt="Logo">
+      <img src="assets/logo.png" style="width:36px;height:36px;border-radius:50%;border:2px solid #38bdf8;" alt="Logo">
       <div>
-        <strong style="font-size:16px;font-weight:900;color:var(--primary-bright);display:block;">Swasthya Setu</strong>
-        <small style="font-size:10px;color:var(--muted);font-weight:700;">NAVIGATION & TOOLS</small>
+        <strong style="font-size:16px;font-weight:900;color:#38bdf8;display:block;letter-spacing:0.5px;">Swasthya Setu</strong>
+        <small style="font-size:10px;color:#94a3b8;font-weight:800;letter-spacing:0.5px;">NAVIGATION & TOOLS</small>
       </div>
     </div>
-    <button onclick="toggleLeftSidebar(false)" style="background:none;border:none;font-size:20px;color:var(--muted);cursor:pointer;padding:4px 8px;border-radius:6px;transition:0.2s;">✕</button>
+    <button onclick="toggleLeftSidebar(false)" style="background:rgba(255,255,255,0.1);border:none;font-size:16px;color:#ffffff;cursor:pointer;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:0.2s;">✕</button>
   </div>
 
-  <!-- SIDEBAR BODY -->
+  <!-- SIDEBAR BODY (HIGH VISIBILITY) -->
   <div style="padding:16px;flex:1;display:flex;flex-direction:column;gap:14px;">
     
     <!-- ONLINE STATUS CARD -->
-    <div style="background:var(--glass-2);border:1px solid var(--glass-border);border-radius:12px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;">
+    <div style="background:#1e293b;border:1px solid rgba(56,189,248,0.3);border-radius:12px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;">
       <div style="display:flex;align-items:center;gap:8px;">
-        <span style="display:inline-block;width:10px;height:10px;background:#22c55e;border-radius:50%;box-shadow:0 0 10px #22c55e;"></span>
-        <span style="font-size:13px;font-weight:800;color:var(--ink);" id="networkStatusBadge">🟢 Online Mode</span>
+        <span style="font-size:13px;font-weight:800;color:#4ade80;">🟢 Online Mode</span>
       </div>
-      <span class="badge" style="background:#0284c7;color:#fff;font-size:10px;font-weight:700;">Cloud Synced</span>
+      <span class="badge" style="background:#0284c7;color:#ffffff;font-size:10px;font-weight:800;padding:3px 8px;border-radius:6px;">Cloud Synced</span>
     </div>
 
-    <!-- PRIMARY TOOLS & ACTIONS (INCLUDING CHANGE PASSWORD IN SIDEBAR) -->
+    <!-- PRIMARY TOOLS & ACTIONS -->
     <div style="display:flex;flex-direction:column;gap:8px;">
-      <div style="font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px;">Navigation & Settings</div>
+      <div style="font-size:11px;font-weight:800;color:#38bdf8;text-transform:uppercase;letter-spacing:1px;margin-bottom:2px;">Navigation & Settings</div>
 
-      <button class="btn-glass" onclick="goToHome(); toggleLeftSidebar(false);" style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;font-size:13px;font-weight:700;text-align:left;width:100%;">
+      <button onclick="goToHome(); toggleLeftSidebar(false);" style="background:#1e293b;border:1px solid rgba(255,255,255,0.12);color:#ffffff;display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:10px;font-size:13px;font-weight:700;text-align:left;width:100%;cursor:pointer;transition:all 0.2s ease;">
         <span style="font-size:16px;">🏠</span>
         <span>Home Dashboard</span>
       </button>
 
-      <!-- 🔑 CHANGE PASSWORD (IN PLACE OF LANGUAGE IN SIDEBAR) -->
-      <button class="btn-glass" onclick="openChangePasswordModal(); toggleLeftSidebar(false);" style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;font-size:13px;font-weight:700;text-align:left;width:100%;color:var(--ink);">
+      <!-- 🔑 CHANGE PASSWORD -->
+      <button onclick="openChangePasswordModal(); toggleLeftSidebar(false);" style="background:#1e293b;border:1px solid rgba(255,255,255,0.12);color:#ffffff;display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:10px;font-size:13px;font-weight:700;text-align:left;width:100%;cursor:pointer;transition:all 0.2s ease;">
         <span style="font-size:16px;">🔑</span>
         <span>Change Password</span>
       </button>
 
-      <button class="btn-glass" onclick="openHelpGuideModal(); toggleLeftSidebar(false);" style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;font-size:13px;font-weight:700;text-align:left;width:100%;color:var(--primary-bright);">
+      <button onclick="openHelpGuideModal(); toggleLeftSidebar(false);" style="background:#1e293b;border:1px solid rgba(255,255,255,0.12);color:#38bdf8;display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:10px;font-size:13px;font-weight:700;text-align:left;width:100%;cursor:pointer;transition:all 0.2s ease;">
         <span style="font-size:16px;">❓</span>
         <span>User Guide & Manual</span>
       </button>
 
-      <button class="btn-glass" id="globalAudioToggleBtn" onclick="toggleReadAloud()" style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;font-size:13px;font-weight:700;text-align:left;width:100%;">
+      <button id="globalAudioToggleBtn" onclick="toggleReadAloud()" style="background:#1e293b;border:1px solid rgba(255,255,255,0.12);color:#ffffff;display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:10px;font-size:13px;font-weight:700;text-align:left;width:100%;cursor:pointer;transition:all 0.2s ease;">
         <span style="font-size:16px;">🔊</span>
         <span data-i18n="btn_read_aloud">Voice Read Aloud</span>
       </button>
 
-      <button class="btn-glass" onclick="cycleTheme()" id="themeToggleBtn" style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;font-size:13px;font-weight:700;text-align:left;width:100%;">
+      <button onclick="cycleTheme()" id="themeToggleBtn" style="background:#1e293b;border:1px solid rgba(255,255,255,0.12);color:#ffffff;display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:10px;font-size:13px;font-weight:700;text-align:left;width:100%;cursor:pointer;transition:all 0.2s ease;">
         <span style="font-size:16px;">🏛️</span>
         <span data-i18n="theme_classic">Switch Color Theme</span>
       </button>
     </div>
 
     <!-- EMERGENCY 108 SOS -->
-    <button class="auth-btn-primary" style="background:linear-gradient(135deg, #dc2626, #991b1b);border:none;padding:12px 16px;font-size:14px;font-weight:900;border-radius:12px;box-shadow:0 4px 16px rgba(220,38,38,0.4);display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:auto;" onclick="patientController.triggerSos(); toggleLeftSidebar(false);" data-i18n="btn_sos">
+    <button class="auth-btn-primary" style="background:linear-gradient(135deg, #dc2626, #991b1b);border:none;padding:12px 16px;font-size:14px;font-weight:900;border-radius:12px;box-shadow:0 4px 16px rgba(220,38,38,0.4);display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:auto;color:#ffffff;cursor:pointer;" onclick="patientController.triggerSos(); toggleLeftSidebar(false);" data-i18n="btn_sos">
       <span>🚨</span> <span>108 Emergency SOS</span>
     </button>
 
   </div>
 
-  <!-- SIDEBAR FOOTER -->
-  <div style="padding:14px 18px;border-top:1.5px solid var(--glass-border);background:rgba(0,0,0,0.15);font-size:11px;color:var(--muted);text-align:center;">
-    <strong>Ayushman Bharat Digital Gateway</strong>
-    <div style="font-size:10px;opacity:0.8;margin-top:2px;">National Rural Telemedicine Grid v2.4</div>
+  <!-- SIDEBAR FOOTER (HIGH VISIBILITY) -->
+  <div style="padding:14px 18px;border-top:1.5px solid rgba(255,255,255,0.1);background:rgba(0,0,0,0.4);font-size:11px;color:#cbd5e1;text-align:center;">
+    <strong style="color:#38bdf8;">Ayushman Bharat Digital Gateway</strong>
+    <div style="font-size:10px;color:#94a3b8;margin-top:2px;">National Rural Telemedicine Grid v2.4</div>
   </div>
 
 </aside>
@@ -3011,6 +3011,8 @@ function renderActivePortalView() {
     });
     const headerControls = document.getElementById('sessionHeaderControls');
     if (headerControls) headerControls.style.display = 'none';
+    const userBadgeEl = document.getElementById('activeUserBadge');
+    if (userBadgeEl) userBadgeEl.style.display = 'none';
     return;
   }
 
@@ -3036,6 +3038,7 @@ function renderActivePortalView() {
   const userBadge = document.getElementById('activeUserBadge');
   if (headerControls && userBadge) {
     headerControls.style.display = 'flex';
+    userBadge.style.display = 'inline-flex';
     const user = session.user || {};
     const roleIcons = { patient: '🌾', doctor: '🩺', worker: '🤝', admin: '👑' };
     userBadge.textContent = (roleIcons[role] || '👤') + ' ' + (user.name || 'User');
