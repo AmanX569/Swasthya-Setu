@@ -38,15 +38,7 @@
     rtcpMuxPolicy: 'require'
   };
 
-  // Optimize SDP for 10ms Ultra-Low-Latency Opus and High-Bitrate Video
-  function optimizeSdp(sdp) {
-    if (!sdp) return sdp;
-    let modified = sdp;
-    if (modified.indexOf('opus/48000') !== -1) {
-      modified = modified.replace(/a=fmtp:(\d+) (.*)/g, 'a=fmtp:$1 $2;minptime=10;useinbandfec=1;stereo=1;maxaveragebitrate=128000;sprop-stereo=1;cbr=1');
-    }
-    return modified;
-  }
+  // Clean Native WebRTC SDP (No codec corruption)
 
   class VideoCallController {
     constructor() {
@@ -318,7 +310,7 @@
             offerToReceiveVideo: true,
             voiceActivityDetection: true
           });
-          offer.sdp = optimizeSdp(offer.sdp);
+          
           await this.peerConnection.setLocalDescription(offer);
 
           offerSdp = {
@@ -488,7 +480,7 @@
           const answer = await this.peerConnection.createAnswer({
             voiceActivityDetection: true
           });
-          answer.sdp = optimizeSdp(answer.sdp);
+          
           await this.peerConnection.setLocalDescription(answer);
 
           answerSdp = {
@@ -605,7 +597,7 @@
           }
         };
 
-                // On Remote Track Received -> Direct Single Clean Route to Device Speakers
+                        // On Remote Track Received -> Stream Video (Muted) and Play Audio via Dedicated Element
         this.peerConnection.ontrack = (event) => {
           console.log('[WebRTC] Remote media track received on device:', event.track.kind);
           let stream = event.streams && event.streams[0];
@@ -621,41 +613,43 @@
           const remoteVideo = document.getElementById('remoteVideoElement');
           if (remoteVideo) {
             remoteVideo.srcObject = stream;
-            remoteVideo.muted = true; // Essential: Muted to avoid echo loop
+            remoteVideo.muted = true; // Muted to prevent duplicate audio playback loop
             remoteVideo.play().catch(e => console.warn('Remote video playback:', e));
           }
 
-          // 2. Single Authoritative Audio Output (Web Audio API Destination)
+          // 2. Dedicated Unmuted Audio Element (Plays Single Clean Voice Stream)
+          const remoteAudio = document.getElementById('remoteAudioElement');
+          if (remoteAudio) {
+            if (event.track.kind === 'audio') {
+              remoteAudio.srcObject = new MediaStream([event.track]);
+            } else {
+              remoteAudio.srcObject = stream;
+            }
+            remoteAudio.muted = false;
+            remoteAudio.volume = 1.0;
+            remoteAudio.play().catch(e => console.warn('Remote audio element playback:', e));
+          }
+
+          // 3. Optional Web Audio Gain Boost
           if (event.track.kind === 'audio') {
             try {
               this.unlockAudioContext();
               if (this.audioContext) {
                 if (this.audioContext.state === 'suspended') this.audioContext.resume();
-                
-                // Disconnect previous if any
                 if (this.remoteAudioSource) {
                   try { this.remoteAudioSource.disconnect(); } catch (e) {}
                 }
-
                 this.remoteAudioSource = this.audioContext.createMediaStreamSource(new MediaStream([event.track]));
                 if (!this.audioGainNode) {
                   this.audioGainNode = this.audioContext.createGain();
-                  this.audioGainNode.gain.value = 2.0; // 2.0x Clear Voice Amplification
+                  this.audioGainNode.gain.value = 2.0; // 2x Gain
                   this.audioGainNode.connect(this.audioContext.destination);
                 }
                 this.remoteAudioSource.connect(this.audioGainNode);
-                this.hasDirectWebRtcAudio = true;
-                console.log('[WebRTC Audio] Remote voice stream connected directly to speakers with 2.0x gain (Zero Echo)');
+                console.log('[WebRTC Audio] Remote voice stream connected directly to speakers with 2.0x gain');
               }
             } catch (err) {
-              console.warn('[WebRTC Audio] AudioContext routing fallback to audio tag:', err);
-              const remoteAudio = document.getElementById('remoteAudioElement');
-              if (remoteAudio) {
-                remoteAudio.srcObject = new MediaStream([event.track]);
-                remoteAudio.muted = false;
-                remoteAudio.volume = 1.0;
-                remoteAudio.play().catch(() => {});
-              }
+              console.warn('[WebRTC Audio] AudioContext routing fallback notice:', err);
             }
           }
 
@@ -840,8 +834,8 @@
       }
     }
 
-        playRemoteAudioChunk(base64Chunk) {
-      if (!this.isSpeakerBoosted || !base64Chunk || this.hasDirectWebRtcAudio) return; // Prevent double-playback when WebRTC is active
+            playRemoteAudioChunk(base64Chunk) {
+      if (!this.isSpeakerBoosted || !base64Chunk) return;
       try {
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
         if (!AudioCtx) return;
@@ -859,7 +853,7 @@
         const channelData = audioBuffer.getChannelData(0);
 
         for (let i = 0; i < int8Array.length; i++) {
-          channelData[i] = (int8Array[i] / 127.0) * 2.0;
+          channelData[i] = (int8Array[i] / 127.0) * 1.8;
         }
 
         const source = this.audioContext.createBufferSource();
@@ -955,16 +949,10 @@
       this.unlockAudioContext();
       this.isSpeakerBoosted = !this.isSpeakerBoosted;
       const remoteAudio = document.getElementById('remoteAudioElement');
-      const remoteVideo = document.getElementById('remoteVideoElement');
       if (remoteAudio) {
-        remoteAudio.muted = false;
+        remoteAudio.muted = !this.isSpeakerBoosted;
         remoteAudio.volume = this.isSpeakerBoosted ? 1.0 : 0.0;
         remoteAudio.play().catch(() => {});
-      }
-      if (remoteVideo) {
-        remoteVideo.muted = false;
-        remoteVideo.volume = this.isSpeakerBoosted ? 1.0 : 0.0;
-        remoteVideo.play().catch(() => {});
       }
       if (this.audioGainNode) {
         this.audioGainNode.gain.value = this.isSpeakerBoosted ? 2.0 : 0.0;
@@ -974,7 +962,7 @@
         btn.style.background = this.isSpeakerBoosted ? 'rgba(34,197,94,0.3)' : 'rgba(220,38,38,0.3)';
         btn.innerHTML = this.isSpeakerBoosted ? '🔊 <span class="ctrl-lbl">Speaker 100%</span>' : '🔈 <span class="ctrl-lbl">Speaker Off</span>';
       }
-      if (global.toast) global.toast(this.isSpeakerBoosted ? '🔊 Speaker Active (2.5x Boost)' : '🔈 Speaker Muted');
+      if (global.toast) global.toast(this.isSpeakerBoosted ? '🔊 Speaker Active (100%)' : '🔈 Speaker Muted');
     }
 
     toggleVideo() {
