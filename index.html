@@ -3094,9 +3094,9 @@ table td strong {
         <span data-i18n="btn_read_aloud">Voice Read Aloud</span>
       </button>
 
-      <button onclick="cycleTheme()" id="themeToggleBtn" style="background:#1e293b;border:1px solid rgba(255,255,255,0.12);color:#ffffff;display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:10px;font-size:13px;font-weight:700;text-align:left;width:100%;cursor:pointer;transition:all 0.2s ease;">
+      <button onclick="openThemeSelectorModal(); toggleLeftSidebar(false);" id="themeToggleBtn" style="background:#1e293b;border:1px solid rgba(255,255,255,0.12);color:#ffffff;display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:10px;font-size:13px;font-weight:700;text-align:left;width:100%;cursor:pointer;transition:all 0.2s ease;">
         <span style="font-size:16px;">🏛️</span>
-        <span data-i18n="theme_classic">Switch Color Theme</span>
+        <span id="themeToggleBtnText">Switch Color Theme</span>
       </button>
 
       <!-- 🚪 LOG OUT / CHANGE PORTAL (INSIDE SIDEBAR) -->
@@ -12408,6 +12408,155 @@ document.addEventListener('DOMContentLoaded', () => {
         sidebar.style.transform = 'translateX(-100%)';
         if (backdrop) backdrop.style.display = 'none';
       }
+    }
+  </script>
+
+
+<!-- =========================================================
+     INTERACTIVE COLOR THEME PICKER MODAL
+     ========================================================= -->
+<div id="themeSelectorModal" class="modal-overlay">
+  <div class="modal-card" style="max-width:540px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:26px;">🎨</span>
+        <div>
+          <h3 style="color:var(--ink);font-size:18px;font-weight:800;">Choose Workspace Theme</h3>
+          <small style="color:var(--muted);">Select your preferred clinical environment & visual palette</small>
+        </div>
+      </div>
+      <button onclick="closeThemeSelectorModal()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:4px 8px;border-radius:6px;">✕</button>
+    </div>
+
+    <!-- THEME OPTIONS GRID -->
+    <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px;">
+      
+      <!-- 1. CLASSIC WHITE & SKY BLUE -->
+      <div onclick="selectTheme('classic')" id="themeCardClassic" class="theme-select-card" style="cursor:pointer;border:2px solid #0284c7;background:linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%);border-radius:14px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 4px 16px rgba(2,132,199,0.12);transition:all 0.2s ease;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="width:42px;height:42px;border-radius:12px;background:#0284c7;color:#ffffff;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 2px 8px rgba(2,132,199,0.3);">
+            🏛️
+          </div>
+          <div>
+            <div style="font-size:15px;font-weight:800;color:#0f172a;display:flex;align-items:center;gap:8px;">
+              <span>Classic Healthcare (White & Blue)</span>
+              <span id="badgeClassicActive" style="background:#0284c7;color:#ffffff;font-size:10px;font-weight:800;padding:2px 8px;border-radius:6px;">Active</span>
+            </div>
+            <small style="color:#64748b;font-size:12px;font-weight:600;">Daylight clinical clarity, soft mesh gradients & clean typography</small>
+          </div>
+        </div>
+        <div style="display:flex;gap:4px;">
+          <span style="width:14px;height:14px;border-radius:50%;background:#ffffff;border:1px solid #cbd5e1;"></span>
+          <span style="width:14px;height:14px;border-radius:50%;background:#0284c7;"></span>
+          <span style="width:14px;height:14px;border-radius:50%;background:#f0f9ff;border:1px solid #cbd5e1;"></span>
+        </div>
+      </div>
+
+      <!-- 2. DEEP NAVY BLUE GLASS -->
+      <div onclick="selectTheme('navy')" id="themeCardNavy" class="theme-select-card" style="cursor:pointer;border:2px solid transparent;background:linear-gradient(135deg, #030a16 0%, #07152b 100%);border-radius:14px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 4px 16px rgba(0,0,0,0.4);transition:all 0.2s ease;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="width:42px;height:42px;border-radius:12px;background:rgba(56,189,248,0.2);color:#38bdf8;border:1px solid #38bdf8;display:flex;align-items:center;justify-content:center;font-size:20px;">
+            🌌
+          </div>
+          <div>
+            <div style="font-size:15px;font-weight:800;color:#f8fafc;display:flex;align-items:center;gap:8px;">
+              <span>Midnight Clinical (Deep Navy Glass)</span>
+              <span id="badgeNavyActive" style="display:none;background:#38bdf8;color:#030a16;font-size:10px;font-weight:800;padding:2px 8px;border-radius:6px;">Active</span>
+            </div>
+            <small style="color:#94a3b8;font-size:12px;font-weight:600;">Deep sapphire crystal glass with luminous neon accents</small>
+          </div>
+        </div>
+        <div style="display:flex;gap:4px;">
+          <span style="width:14px;height:14px;border-radius:50%;background:#030a16;border:1px solid rgba(255,255,255,0.2);"></span>
+          <span style="width:14px;height:14px;border-radius:50%;background:#0284c7;"></span>
+          <span style="width:14px;height:14px;border-radius:50%;background:#38bdf8;"></span>
+        </div>
+      </div>
+
+      <!-- 3. PURE AMOLED PITCH BLACK -->
+      <div onclick="selectTheme('black')" id="themeCardBlack" class="theme-select-card" style="cursor:pointer;border:2px solid transparent;background:linear-gradient(135deg, #000000 0%, #0f172a 100%);border-radius:14px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 4px 16px rgba(0,0,0,0.6);transition:all 0.2s ease;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="width:42px;height:42px;border-radius:12px;background:rgba(16,185,129,0.2);color:#34d399;border:1px solid #10b981;display:flex;align-items:center;justify-content:center;font-size:20px;">
+            🖤
+          </div>
+          <div>
+            <div style="font-size:15px;font-weight:800;color:#ffffff;display:flex;align-items:center;gap:8px;">
+              <span>AMOLED Dark (Pure Pitch Black)</span>
+              <span id="badgeBlackActive" style="display:none;background:#10b981;color:#000000;font-size:10px;font-weight:800;padding:2px 8px;border-radius:6px;">Active</span>
+            </div>
+            <small style="color:#94a3b8;font-size:12px;font-weight:600;">100% true black for battery saving & high-efficiency displays</small>
+          </div>
+        </div>
+        <div style="display:flex;gap:4px;">
+          <span style="width:14px;height:14px;border-radius:50%;background:#000000;border:1px solid rgba(255,255,255,0.2);"></span>
+          <span style="width:14px;height:14px;border-radius:50%;background:#10b981;"></span>
+          <span style="width:14px;height:14px;border-radius:50%;background:#34d399;"></span>
+        </div>
+      </div>
+
+    </div>
+
+    <div style="display:flex;justify-content:flex-end;">
+      <button type="button" class="auth-btn-primary" style="background:#0284c7;border:none;padding:10px 20px;font-size:13px;font-weight:800;" onclick="closeThemeSelectorModal()">
+        ✓ Done
+      </button>
+    </div>
+  </div>
+</div>
+
+
+  <script>
+    function openThemeSelectorModal() {
+      const m = document.getElementById('themeSelectorModal');
+      if (!m) return;
+      updateThemeModalActiveBadges();
+      m.style.display = 'flex';
+    }
+
+    function closeThemeSelectorModal() {
+      const m = document.getElementById('themeSelectorModal');
+      if (m) m.style.display = 'none';
+    }
+
+    function updateThemeModalActiveBadges() {
+      const current = document.body.getAttribute('data-theme') || 'classic';
+      
+      const themes = ['classic', 'navy', 'black'];
+      themes.forEach(t => {
+        const card = document.getElementById('themeCard' + t.charAt(0).toUpperCase() + t.slice(1));
+        const badge = document.getElementById('badge' + t.charAt(0).toUpperCase() + t.slice(1) + 'Active');
+        if (card) {
+          if (t === current) {
+            card.style.borderColor = (t === 'classic') ? '#0284c7' : (t === 'navy') ? '#38bdf8' : '#10b981';
+          } else {
+            card.style.borderColor = 'transparent';
+          }
+        }
+        if (badge) {
+          badge.style.display = (t === current) ? 'inline-block' : 'none';
+        }
+      });
+
+      const btnText = document.getElementById('themeToggleBtnText');
+      if (btnText) {
+        const names = { classic: '🏛️ Classic (White & Blue)', navy: '🌌 Midnight (Deep Navy)', black: '🖤 Pure AMOLED (Black)' };
+        btnText.textContent = names[current] || 'Switch Theme';
+      }
+    }
+
+    function selectTheme(themeName) {
+      document.documentElement.setAttribute('data-theme', themeName);
+      document.body.setAttribute('data-theme', themeName);
+
+      if (window.appStore) window.appStore.setTheme(themeName);
+      localStorage.setItem('swasthya_setu_theme', themeName);
+
+      updateThemeModalActiveBadges();
+      if (typeof window.toast === 'function') {
+        const labels = { classic: '🏛️ Classic Healthcare (White & Blue)', navy: '🌌 Midnight Clinical (Deep Navy)', black: '🖤 Pure AMOLED Dark' };
+        window.toast('🎨 Applied: ' + (labels[themeName] || themeName));
+      }
+      setTimeout(closeThemeSelectorModal, 300);
     }
   </script>
 
