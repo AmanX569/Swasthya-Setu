@@ -359,6 +359,7 @@
 
     logout() {
       this.state.session = { isLoggedIn: false, role: null, user: null };
+      this.state.currentUser = null;
       this.saveState();
     }
 

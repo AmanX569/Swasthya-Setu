@@ -3107,9 +3107,20 @@ function showView(viewName) {
     });
 
     const headerControls = document.getElementById('sessionHeaderControls');
+    const userBadgeEl = document.getElementById('activeUserBadge');
     const session = window.appStore ? window.appStore.getState().session : { isLoggedIn: false };
+    
     if (headerControls) {
-      headerControls.style.display = (session && session.isLoggedIn && viewName !== 'Home') ? 'flex' : 'none';
+      headerControls.style.display = (session && session.isLoggedIn && viewName !== 'Home' && viewName !== 'Login') ? 'flex' : 'none';
+    }
+    if (userBadgeEl) {
+      if (session && session.isLoggedIn && session.user && viewName !== 'Home' && viewName !== 'Login') {
+        const roleIcons = { patient: '🌾', doctor: '🩺', worker: '🤝', admin: '👑' };
+        userBadgeEl.textContent = (roleIcons[session.role] || '👤') + ' ' + (session.user.name || 'User');
+        userBadgeEl.style.display = 'inline-flex';
+      } else {
+        userBadgeEl.style.display = 'none';
+      }
     }
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -3195,6 +3206,15 @@ function _legacyHandleLogoClick() {
 
 function doLogout() {
   if (window.appStore) window.appStore.logout();
+  const userBadgeEl = document.getElementById('activeUserBadge');
+  if (userBadgeEl) userBadgeEl.style.display = 'none';
+  
+  // Clear all login input fields on logout
+  ['patInputId', 'patInputOtp', 'docInputId', 'docInputPass', 'workerInputId', 'workerInputPass', 'adminInputId', 'adminInputPass'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+
   showView('Login');
   if (typeof window.toast === 'function') window.toast('🚪 Logged out to Healthcare Gateway');
 }

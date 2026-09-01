@@ -408,8 +408,9 @@
             pin: p.pin || p.password_hash || p.password || '123456'
           }));
 
-          if (patch.patients.length) {
-            patch.currentUser = patch.patients[0];
+          const currentSession = global.appStore ? global.appStore.getState().session : null;
+          if (currentSession && currentSession.isLoggedIn && currentSession.user) {
+            patch.currentUser = currentSession.user;
           } else {
             patch.currentUser = null;
           }
