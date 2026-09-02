@@ -165,7 +165,7 @@
       }
     }
 
-    handleIncomingSignal(signal) {
+        handleIncomingSignal(signal) {
       if (!signal || !signal.type) return;
       if (!this.store && global.appStore) this.store = global.appStore;
 
@@ -174,16 +174,29 @@
       const activeUser = (state.session && state.session.user) || {};
       
       const docPortalEl = document.getElementById('doctorPortal');
-      const isDoctorDeskOpen = docPortalEl && (docPortalEl.style.display !== 'none' && !docPortalEl.classList.contains('hidden'));
+      const isDoctorDeskOpen = docPortalEl && (docPortalEl.style.display !== 'none' && (!docPortalEl.classList || !docPortalEl.classList.contains('hidden')));
       const isDoctorRole = (activeRole === 'doctor' || activeRole === 'staff' || activeRole === 'admin' || (activeUser.role && activeUser.role.toLowerCase().includes('doc')));
 
-      // 1. Doctor receives incoming call alert (only if caller is NOT oneself)
+      const patPortalEl = document.getElementById('viewPatient') || document.getElementById('patientPortal');
+      const isPatientPortalOpen = patPortalEl && (patPortalEl.style.display !== 'none' && (!patPortalEl.classList || !patPortalEl.classList.contains('hidden')));
+      const isPatientRole = (activeRole === 'patient' || isPatientPortalOpen || (!isDoctorRole && !isDoctorDeskOpen));
+
+      // 1. INCOMING CALL ALERT (Bidirectional: Doctor <- Patient OR Patient <- Doctor)
       if (signal.type === 'CALL_INITIATED') {
         const isSelfCaller = (activeUser && (signal.callerPhone === activeUser.phone || signal.callerName === activeUser.name));
-        if (!isSelfCaller && (isDoctorRole || isDoctorDeskOpen)) {
+        if (isSelfCaller) return; // Prevent self-ringing
+
+        // CASE A: Doctor receives call from Patient or ASHA
+        if ((signal.callerRole === 'patient' || signal.callerRole === 'worker') && (isDoctorRole || isDoctorDeskOpen)) {
           console.log('[VideoCall] Doctor incoming call alert triggered for caller:', signal.callerName);
           this.pendingIncomingSignal = signal;
           this.showDoctorIncomingCallPopup(signal);
+        }
+        // CASE B: Patient receives call from Doctor
+        else if (signal.callerRole === 'doctor' && isPatientRole) {
+          console.log('[VideoCall] Patient incoming call alert triggered from doctor:', signal.callerName);
+          this.pendingIncomingSignal = signal;
+          this.showPatientIncomingCallPopup(signal);
         }
       }
 
@@ -332,7 +345,10 @@
           callerRole,
           callerName,
           callerPhone,
+          recipientRole,
+          recipientName,
           recipientDoctor: recipientName,
+          patientName: this.currentCallData.patientName,
           facilitatorName,
           complaint: this.currentCallData.complaint,
           offer: offerSdp
@@ -363,9 +379,11 @@
     }
 
     // -------------------------------------------------------------
-    // 3. DOCTOR INCOMING RINGING MODAL & ACCEPT/DECLINE
+        // -------------------------------------------------------------
+    // 3. INCOMING RINGING MODALS & ACCEPT/DECLINE (BIDIRECTIONAL)
     // -------------------------------------------------------------
     showDoctorIncomingCallPopup(signal) {
+      this.playChatNotificationChime();
       let modal = document.getElementById('doctorIncomingCallModal');
       if (!modal) {
         modal = document.createElement('div');
@@ -390,7 +408,7 @@
           </div>
 
           <span style="background:rgba(34,197,94,0.2);color:#4ade80;font-size:12px;font-weight:800;padding:4px 12px;border-radius:20px;text-transform:uppercase;letter-spacing:1px;">
-            Incoming Live Video Teleconsultation
+            Incoming Citizen Video Call
           </span>
 
           <h3 style="color:#ffffff;font-size:20px;font-weight:900;margin:12px 0 4px;">${signal.callerName || 'Citizen Patient'}</h3>
@@ -420,15 +438,73 @@
       }
     }
 
+    showPatientIncomingCallPopup(signal) {
+      this.playChatNotificationChime();
+      let modal = document.getElementById('patientIncomingCallModal');
+      if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'patientIncomingCallModal';
+        modal.className = 'modal-overlay';
+        modal.style.position = 'fixed';
+        modal.style.inset = '0';
+        modal.style.background = 'rgba(15, 23, 42, 0.92)';
+        modal.style.zIndex = '1000000';
+        modal.style.display = 'flex';
+        modal.style.alignItems = 'center';
+        modal.style.justifyContent = 'center';
+        modal.style.padding = '16px';
+        document.body.appendChild(modal);
+      }
+
+      modal.innerHTML = `
+        <div class="modal-card" style="max-width:480px;background:#1e293b;border:2px solid #0284c7;border-radius:20px;padding:26px;text-align:center;box-shadow:0 0 50px rgba(2,132,199,0.4);animation:pulse 1.5s infinite;">
+          
+          <div style="width:80px;height:80px;margin:0 auto 16px;background:linear-gradient(135deg, #0284c7, #0369a1);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:40px;box-shadow:0 0 30px rgba(2,132,199,0.6);">
+            🩺
+          </div>
+
+          <span style="background:rgba(2,132,199,0.2);color:#38bdf8;font-size:12px;font-weight:800;padding:4px 12px;border-radius:20px;text-transform:uppercase;letter-spacing:1px;">
+            Incoming Doctor Teleconsultation
+          </span>
+
+          <h3 style="color:#ffffff;font-size:20px;font-weight:900;margin:12px 0 4px;">${signal.callerName || 'Dr. Medical Officer'}</h3>
+          <p style="color:#38bdf8;font-size:13px;font-weight:600;margin:0;">
+            National Rural Telemedicine Grid · Kondapalli PHC
+          </p>
+
+          <div style="background:#0f172a;border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:10px 14px;margin:16px 0;text-align:left;font-size:12px;color:#cbd5e1;">
+            <strong style="color:#94a3b8;display:block;margin-bottom:2px;font-size:10px;text-transform:uppercase;">Reason for Call:</strong>
+            ${signal.complaint || 'Digital OPD Teleconsultation & Video Review'}
+          </div>
+
+          <div style="display:flex;gap:12px;justify-content:center;margin-top:20px;">
+            <button onclick="videoCallController.declineIncomingCall()" style="background:#dc2626;color:#ffffff;border:none;padding:12px 24px;border-radius:30px;font-size:13px;font-weight:800;cursor:pointer;flex:1;">
+              ✕ Decline
+            </button>
+            <button onclick="videoCallController.acceptIncomingCall()" style="background:linear-gradient(135deg, #16a34a, #22c55e);color:#ffffff;border:none;padding:12px 28px;border-radius:30px;font-size:14px;font-weight:900;cursor:pointer;flex:1.5;box-shadow:0 4px 18px rgba(34,197,94,0.5);">
+              🟢 Answer Video Call
+            </button>
+          </div>
+        </div>
+      `;
+      modal.style.display = 'flex';
+
+      if (global.toast) {
+        global.toast('📞 Incoming Video Call from ' + (signal.callerName || 'Doctor'));
+      }
+    }
+
     declineIncomingCall() {
-      const modal = document.getElementById('doctorIncomingCallModal');
-      if (modal) modal.style.display = 'none';
+      const docModal = document.getElementById('doctorIncomingCallModal');
+      if (docModal) docModal.style.display = 'none';
+      const patModal = document.getElementById('patientIncomingCallModal');
+      if (patModal) patModal.style.display = 'none';
 
       if (this.pendingIncomingSignal && global.supabaseService) {
         global.supabaseService.sendTeleconsultSignal({
           type: 'CALL_ENDED',
           callId: this.pendingIncomingSignal.callId,
-          reason: 'Doctor declined call'
+          reason: 'Call declined by recipient'
         });
       }
       this.pendingIncomingSignal = null;
@@ -436,14 +512,18 @@
 
     async acceptIncomingCall() {
       this.unlockAudioContext();
-      const modal = document.getElementById('doctorIncomingCallModal');
-      if (modal) modal.style.display = 'none';
+      const docModal = document.getElementById('doctorIncomingCallModal');
+      if (docModal) docModal.style.display = 'none';
+      const patModal = document.getElementById('patientIncomingCallModal');
+      if (patModal) patModal.style.display = 'none';
 
       const signal = this.pendingIncomingSignal;
       if (!signal) return;
 
       const state = this.store ? this.store.getState() : {};
-      const activeDoctor = (state.session && state.session.user) || { name: 'Dr. Priya Sharma, MBBS, MD' };
+      const activeRole = (state.session && state.session.role) || 'patient';
+      const activeUser = (state.session && state.session.user) || { name: 'User' };
+      const isDoctor = (activeRole === 'doctor' || (activeUser.role && activeUser.role.toLowerCase().includes('doc')));
 
       this.unreadChatCount = 0;
       this.hasDirectWebRtcAudio = false;
@@ -451,12 +531,12 @@
       this.currentCallData = {
         id: signal.callId || ('CALL-' + Date.now()),
         token: signal.token || 'VID-101',
-        callerRole: signal.callerRole || 'patient',
-        callerName: signal.callerName || 'Citizen Patient',
+        callerRole: signal.callerRole || (isDoctor ? 'patient' : 'doctor'),
+        callerName: signal.callerName || (isDoctor ? 'Citizen Patient' : 'Dr. Priya Sharma, MBBS, MD'),
         callerPhone: signal.callerPhone || '9876543210',
-        recipientRole: 'doctor',
-        recipientName: activeDoctor.name || 'Dr. Medical Officer',
-        patientName: signal.callerName || 'Citizen Patient',
+        recipientRole: isDoctor ? 'doctor' : 'patient',
+        recipientName: activeUser.name || (isDoctor ? 'Dr. Priya Sharma, MBBS, MD' : 'Citizen Beneficiary'),
+        patientName: signal.patientName || (signal.callerRole === 'patient' ? signal.callerName : (isDoctor ? signal.callerName : activeUser.name)),
         complaint: signal.complaint || 'Teleconsultation',
         startTime: Date.now(),
         date: new Date().toISOString().split('T')[0],
@@ -464,15 +544,14 @@
       };
 
       this.inCallMessages = [
-        { sender: 'System', text: '🔒 Doctor Accepted Consultation · 2-Way High Definition Stream Connected', time: this.currentCallData.time }
+        { sender: 'System', text: `🔒 Call Accepted by ${activeUser.name} · 2-Way High Definition Video & Audio Connected`, time: this.currentCallData.time }
       ];
 
-      // Open Doctor Video Window
+      // Open Video Window Viewport
       this.renderVideoCallModal();
       const callModal = document.getElementById('videoCallModal');
       if (callModal) callModal.style.display = 'flex';
 
-      // Ensure remote audio playback is activated on doctor device
       const remoteAudio = document.getElementById('remoteAudioElement');
       if (remoteAudio) {
         remoteAudio.muted = false;
@@ -482,13 +561,13 @@
         }
       }
 
-      // 1. Start Doctor Local Camera with 720p HD FIRST
+      // 1. Start Local Camera FIRST
       await this.initLocalMediaStream();
 
-      // 2. Setup WebRTC Peer Connection & Bind Doctor Tracks
+      // 2. Setup WebRTC Peer Connection
       this.setupPeerConnection();
 
-      // 3. Set Remote Description -> Generate Answer IMMEDIATELY (Zero Delay)
+      // 3. Set Remote Offer & Generate Answer
       let answerSdp = null;
       try {
         if (this.peerConnection && signal.offer) {
@@ -496,9 +575,7 @@
           const answer = await this.peerConnection.createAnswer({
             voiceActivityDetection: true
           });
-          
           await this.peerConnection.setLocalDescription(answer);
-
           answerSdp = {
             type: this.peerConnection.localDescription.type,
             sdp: this.peerConnection.localDescription.sdp
@@ -508,12 +585,13 @@
         console.warn('[WebRTC] Answer creation fallback:', err.message);
       }
 
-      // Send Answer Signal back to Patient IMMEDIATELY
+      // Send Answer Signal back to Caller IMMEDIATELY
       if (global.supabaseService) {
         global.supabaseService.sendTeleconsultSignal({
           type: 'CALL_ACCEPTED',
           callId: this.currentCallData.id,
-          doctorName: activeDoctor.name,
+          doctorName: isDoctor ? activeUser.name : signal.callerName,
+          responderName: activeUser.name,
           answer: answerSdp
         });
       }

@@ -651,8 +651,18 @@
       }
     }
 
-    sendTeleconsultSignal(signalData) {
-      // 1. Broadcast via Supabase Realtime Channel
+        sendTeleconsultSignal(signalData) {
+      // 1. Broadcast via Modern BroadcastChannel for instant 0ms cross-tab signaling
+      if (typeof window !== 'undefined' && typeof window.BroadcastChannel === 'function') {
+        try {
+          if (!this.localBroadcastChannel) {
+            this.localBroadcastChannel = new window.BroadcastChannel('swasthya_teleconsult_channel');
+          }
+          this.localBroadcastChannel.postMessage(signalData);
+        } catch (e) {}
+      }
+
+      // 2. Broadcast via Supabase Realtime Channel
       if (this.teleconsultChannel && this.isOnline) {
         try {
           this.teleconsultChannel.send({
@@ -665,7 +675,7 @@
         }
       }
 
-      // 2. Broadcast via Window LocalStorage for same-device multi-tab testing
+      // 3. Broadcast via Window LocalStorage for fallback cross-tab sync
       try {
         localStorage.setItem('swasthya_teleconsult_active_signal', JSON.stringify({
           ...signalData,
@@ -674,13 +684,27 @@
       } catch (e) {}
     }
 
-    onTeleconsultSignal(callback) {
+        onTeleconsultSignal(callback) {
       this.onSignalCallback = callback;
       if (!this.teleconsultChannel) {
         this.initTeleconsultChannel();
       }
 
-      // Also listen to storage events for cross-tab multi-device simulation
+      // 1. Listen to BroadcastChannel for instant 0ms tab-to-tab signaling
+      if (typeof window !== 'undefined' && typeof window.BroadcastChannel === 'function') {
+        try {
+          if (!this.localBroadcastChannel) {
+            this.localBroadcastChannel = new window.BroadcastChannel('swasthya_teleconsult_channel');
+          }
+          this.localBroadcastChannel.onmessage = (event) => {
+            if (event.data && typeof callback === 'function') {
+              callback(event.data);
+            }
+          };
+        } catch (e) {}
+      }
+
+      // 2. Listen to storage events for cross-tab simulation
       if (typeof window !== 'undefined' && window.addEventListener) {
         window.addEventListener('storage', (e) => {
           if (e.key === 'swasthya_teleconsult_active_signal' && e.newValue) {
