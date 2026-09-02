@@ -45,60 +45,59 @@
         // -------------------------------------------------------------
     // VIDEO TELECONSULTATION & CALL HISTORY
     // -------------------------------------------------------------
-    openPatientVideoCallModal() {
+        openPatientVideoCallModal() {
+      if (!this.store && global.appStore) this.store = global.appStore;
       const modal = document.getElementById('patientVideoCallModal');
       const docSelect = document.getElementById('patientVideoDoctorSelect');
       const memberSelect = document.getElementById('patientVideoMemberSelect');
 
-      if (this.store) {
-        const user = this.store.getState().currentUser || (this.store.getState().session && this.store.getState().session.user) || { name: 'Citizen Beneficiary', phone: '9876543210' };
-        const doctors = (this.store.getState().staff || []).filter(s => s.role === 'doctor');
-        const family = typeof this.store.getFamilyMembers === 'function' ? this.store.getFamilyMembers(user ? user.phone : null) : [];
+      try {
+        const state = (this.store && typeof this.store.getState === 'function') ? this.store.getState() : {};
+        const user = state.currentUser || (state.session && state.session.user) || { name: 'Citizen Beneficiary', phone: '9876543210' };
+        const doctors = (state.staff || []).filter(s => s.role === 'doctor');
+        const family = (this.store && typeof this.store.getFamilyMembers === 'function') ? this.store.getFamilyMembers(user ? user.phone : null) : [];
 
         if (docSelect) {
-          docSelect.innerHTML = doctors.map(d => `
-            <option value="${d.name}">
-              👨‍⚕️ ${d.name} · ${d.location || 'PHC/CHC'} (🟢 Online)
-            </option>
-          `).join('') || '<option value="Dr. Priya Sharma, MBBS, MD">👨‍⚕️ Dr. Priya Sharma, MBBS, MD (On Duty)</option>';
+          if (doctors.length > 0) {
+            docSelect.innerHTML = doctors.map(d => `
+              <option value="${d.name}">
+                👨‍⚕️ ${d.name} · ${d.location || 'PHC/CHC'} (🟢 Online)
+              </option>
+            `).join('');
+          } else {
+            docSelect.innerHTML = `
+              <option value="Dr. Priya Sharma, MBBS, MD">👨‍⚕️ Dr. Priya Sharma, MBBS, MD · Kondapalli PHC (🟢 Online)</option>
+              <option value="Dr. Ramesh Varma, MS (General Surgery)">👨‍⚕️ Dr. Ramesh Varma, MS · AIIMS Mangalagiri (🟢 Online)</option>
+              <option value="Dr. Ananya Reddy, MD (Pediatrics)">👩‍⚕️ Dr. Ananya Reddy, MD · District Hospital (🟢 Online)</option>
+            `;
+          }
         }
 
         if (memberSelect) {
           const membersList = [{ name: (user.name || 'Self (Account Holder)') + ' (Self)' }].concat(family.map(f => ({ name: f.name + ' (' + f.relation + ')' })));
           memberSelect.innerHTML = membersList.map(m => `<option value="${m.name}">👤 ${m.name}</option>`).join('');
         }
+      } catch (err) {
+        console.warn('[Patient Video Call]', err);
       }
 
-      if (modal) modal.style.display = 'flex';
+      if (modal) {
+        modal.style.display = 'flex';
+        modal.style.visibility = 'visible';
+        modal.style.opacity = '1';
+        if (typeof document !== 'undefined' && document.body) {
+          document.body.style.overflow = 'hidden';
+        }
+      }
     }
 
     closePatientVideoCallModal() {
       const modal = document.getElementById('patientVideoCallModal');
-      if (modal) modal.style.display = 'none';
-    }
-
-    submitPatientVideoCall(e) {
-      if (e) e.preventDefault();
-      const docSelect = document.getElementById('patientVideoDoctorSelect');
-      const memberSelect = document.getElementById('patientVideoMemberSelect');
-      const complaintInput = document.getElementById('patientVideoComplaint');
-
-      const chosenDoctor = docSelect ? docSelect.value : 'Dr. Priya Sharma, MBBS, MD';
-      const chosenPatient = memberSelect ? memberSelect.value : 'Citizen Beneficiary';
-      const complaint = complaintInput ? complaintInput.value.trim() : 'Telemedicine Video Consultation';
-
-      this.closePatientVideoCallModal();
-
-      if (global.videoCallController) {
-        const user = (this.store && (this.store.getState().currentUser || (this.store.getState().session && this.store.getState().session.user))) || { phone: '9876543210' };
-        global.videoCallController.startVideoCall({
-          callerRole: 'patient',
-          callerName: chosenPatient,
-          callerPhone: user.phone || '9876543210',
-          recipientRole: 'doctor',
-          recipientName: chosenDoctor,
-          complaint: complaint
-        });
+      if (modal) {
+        modal.style.display = 'none';
+        if (typeof document !== 'undefined' && document.body) {
+          document.body.style.overflow = '';
+        }
       }
     }
 
@@ -985,3 +984,11 @@
   global.patientController = new PatientController();
 
 })(typeof window !== 'undefined' ? window : this);
+
+  // Global Window Helpers for Patient Video Call
+  global.openPatientVideoCallModal = function() {
+    if (global.patientController) global.patientController.openPatientVideoCallModal();
+  };
+  global.closePatientVideoCallModal = function() {
+    if (global.patientController) global.patientController.closePatientVideoCallModal();
+  };

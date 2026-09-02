@@ -3712,15 +3712,6 @@ body[data-theme="doom"] {
           <small style="color:var(--muted);">Directly select a registered doctor, describe your illness, and join the digital OPD queue instantly.</small>
         </div>
       </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <button class="auth-btn-primary" style="background:linear-gradient(135deg, #16a34a, #15803d);border:none;padding:10px 18px;font-size:13px;font-weight:800;border-radius:10px;box-shadow:0 4px 14px rgba(22,163,74,0.4);cursor:pointer;" onclick="patientController.openPatientVideoCallModal()">
-          📹 Live Video Call Doctor
-        </button>
-        <button class="auth-btn-primary" style="background:linear-gradient(135deg, #0284c7, #0369a1);border:none;padding:10px 18px;font-size:13px;font-weight:800;border-radius:10px;box-shadow:0 4px 14px rgba(2,132,199,0.4);cursor:pointer;" onclick="patientController.openRequestConsultModal()">
-          + Request OPD Queue
-        </button>
-      </div>
-    </div>
 
     <!-- 2. 108 EMERGENCY AMBULANCE & EMBEDDED LIVE GPS RADAR MAP (SWAPPED POSITION) -->
     <div class="glass-panel" style="border:1.5px solid rgba(220,38,38,0.38);background:linear-gradient(145deg, rgba(220,38,38,0.08), rgba(15,23,42,0.4));border-radius:18px;padding:18px 20px;margin-bottom:20px;">
@@ -3793,7 +3784,7 @@ body[data-theme="doom"] {
 
     </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <button class="auth-btn-primary" style="background:linear-gradient(135deg, #16a34a, #15803d);border:none;padding:10px 18px;font-size:13px;font-weight:800;border-radius:10px;box-shadow:0 4px 14px rgba(22,163,74,0.4);cursor:pointer;" onclick="patientController.openPatientVideoCallModal()">
+        <button class="auth-btn-primary" style="background:linear-gradient(135deg, #16a34a, #15803d);border:none;padding:10px 18px;font-size:13px;font-weight:800;border-radius:10px;box-shadow:0 4px 14px rgba(22,163,74,0.4);cursor:pointer;" onclick="if (window.patientController) { window.patientController.openPatientVideoCallModal(); } else if (window.openPatientVideoCallModal) { window.openPatientVideoCallModal(); }">
           📹 Live Video Call Doctor
         </button>
         <button class="auth-btn-primary" style="background:linear-gradient(135deg, #0284c7, #0369a1);border:none;padding:10px 18px;font-size:13px;font-weight:800;border-radius:10px;box-shadow:0 4px 14px rgba(2,132,199,0.4);cursor:pointer;" onclick="patientController.openRequestConsultModal()">
@@ -5063,7 +5054,7 @@ body[data-theme="doom"] {
 
 
 <!-- PATIENT SELECT DOCTOR VIDEO CALL MODAL -->
-<div id="patientVideoCallModal" class="modal-overlay">
+<div id="patientVideoCallModal" class="modal-overlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;width:100vw;height:100vh;z-index:99999;background:rgba(15,23,42,0.88);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:14px;box-sizing:border-box;">
   <div class="modal-card" style="max-width:540px;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
       <div style="display:flex;align-items:center;gap:10px;">
@@ -5105,7 +5096,7 @@ body[data-theme="doom"] {
 </div>
 
 <!-- ASHA FACILITATE VIDEO CALL MODAL -->
-<div id="ashaVideoCallModal" class="modal-overlay">
+<div id="ashaVideoCallModal" class="modal-overlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;width:100vw;height:100vh;z-index:99999;background:rgba(15,23,42,0.88);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:14px;box-sizing:border-box;">
   <div class="modal-card" style="max-width:520px;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
       <div style="display:flex;align-items:center;gap:10px;">
@@ -11793,60 +11784,59 @@ body[data-theme="doom"] {
         // -------------------------------------------------------------
     // VIDEO TELECONSULTATION & CALL HISTORY
     // -------------------------------------------------------------
-    openPatientVideoCallModal() {
+        openPatientVideoCallModal() {
+      if (!this.store && global.appStore) this.store = global.appStore;
       const modal = document.getElementById('patientVideoCallModal');
       const docSelect = document.getElementById('patientVideoDoctorSelect');
       const memberSelect = document.getElementById('patientVideoMemberSelect');
 
-      if (this.store) {
-        const user = this.store.getState().currentUser || (this.store.getState().session && this.store.getState().session.user) || { name: 'Citizen Beneficiary', phone: '9876543210' };
-        const doctors = (this.store.getState().staff || []).filter(s => s.role === 'doctor');
-        const family = typeof this.store.getFamilyMembers === 'function' ? this.store.getFamilyMembers(user ? user.phone : null) : [];
+      try {
+        const state = (this.store && typeof this.store.getState === 'function') ? this.store.getState() : {};
+        const user = state.currentUser || (state.session && state.session.user) || { name: 'Citizen Beneficiary', phone: '9876543210' };
+        const doctors = (state.staff || []).filter(s => s.role === 'doctor');
+        const family = (this.store && typeof this.store.getFamilyMembers === 'function') ? this.store.getFamilyMembers(user ? user.phone : null) : [];
 
         if (docSelect) {
-          docSelect.innerHTML = doctors.map(d => `
-            <option value="${d.name}">
-              👨‍⚕️ ${d.name} · ${d.location || 'PHC/CHC'} (🟢 Online)
-            </option>
-          `).join('') || '<option value="Dr. Priya Sharma, MBBS, MD">👨‍⚕️ Dr. Priya Sharma, MBBS, MD (On Duty)</option>';
+          if (doctors.length > 0) {
+            docSelect.innerHTML = doctors.map(d => `
+              <option value="${d.name}">
+                👨‍⚕️ ${d.name} · ${d.location || 'PHC/CHC'} (🟢 Online)
+              </option>
+            `).join('');
+          } else {
+            docSelect.innerHTML = `
+              <option value="Dr. Priya Sharma, MBBS, MD">👨‍⚕️ Dr. Priya Sharma, MBBS, MD · Kondapalli PHC (🟢 Online)</option>
+              <option value="Dr. Ramesh Varma, MS (General Surgery)">👨‍⚕️ Dr. Ramesh Varma, MS · AIIMS Mangalagiri (🟢 Online)</option>
+              <option value="Dr. Ananya Reddy, MD (Pediatrics)">👩‍⚕️ Dr. Ananya Reddy, MD · District Hospital (🟢 Online)</option>
+            `;
+          }
         }
 
         if (memberSelect) {
           const membersList = [{ name: (user.name || 'Self (Account Holder)') + ' (Self)' }].concat(family.map(f => ({ name: f.name + ' (' + f.relation + ')' })));
           memberSelect.innerHTML = membersList.map(m => `<option value="${m.name}">👤 ${m.name}</option>`).join('');
         }
+      } catch (err) {
+        console.warn('[Patient Video Call]', err);
       }
 
-      if (modal) modal.style.display = 'flex';
+      if (modal) {
+        modal.style.display = 'flex';
+        modal.style.visibility = 'visible';
+        modal.style.opacity = '1';
+        if (typeof document !== 'undefined' && document.body) {
+          document.body.style.overflow = 'hidden';
+        }
+      }
     }
 
     closePatientVideoCallModal() {
       const modal = document.getElementById('patientVideoCallModal');
-      if (modal) modal.style.display = 'none';
-    }
-
-    submitPatientVideoCall(e) {
-      if (e) e.preventDefault();
-      const docSelect = document.getElementById('patientVideoDoctorSelect');
-      const memberSelect = document.getElementById('patientVideoMemberSelect');
-      const complaintInput = document.getElementById('patientVideoComplaint');
-
-      const chosenDoctor = docSelect ? docSelect.value : 'Dr. Priya Sharma, MBBS, MD';
-      const chosenPatient = memberSelect ? memberSelect.value : 'Citizen Beneficiary';
-      const complaint = complaintInput ? complaintInput.value.trim() : 'Telemedicine Video Consultation';
-
-      this.closePatientVideoCallModal();
-
-      if (global.videoCallController) {
-        const user = (this.store && (this.store.getState().currentUser || (this.store.getState().session && this.store.getState().session.user))) || { phone: '9876543210' };
-        global.videoCallController.startVideoCall({
-          callerRole: 'patient',
-          callerName: chosenPatient,
-          callerPhone: user.phone || '9876543210',
-          recipientRole: 'doctor',
-          recipientName: chosenDoctor,
-          complaint: complaint
-        });
+      if (modal) {
+        modal.style.display = 'none';
+        if (typeof document !== 'undefined' && document.body) {
+          document.body.style.overflow = '';
+        }
       }
     }
 
@@ -12733,6 +12723,14 @@ body[data-theme="doom"] {
   global.patientController = new PatientController();
 
 })(typeof window !== 'undefined' ? window : this);
+
+  // Global Window Helpers for Patient Video Call
+  global.openPatientVideoCallModal = function() {
+    if (global.patientController) global.patientController.openPatientVideoCallModal();
+  };
+  global.closePatientVideoCallModal = function() {
+    if (global.patientController) global.patientController.closePatientVideoCallModal();
+  };
 
 
 /* ==================== doctor.js ==================== */

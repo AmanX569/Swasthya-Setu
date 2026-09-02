@@ -1551,15 +1551,6 @@ body[data-theme="doom"] {
           <small style="color:var(--muted);">Directly select a registered doctor, describe your illness, and join the digital OPD queue instantly.</small>
         </div>
       </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <button class="auth-btn-primary" style="background:linear-gradient(135deg, #16a34a, #15803d);border:none;padding:10px 18px;font-size:13px;font-weight:800;border-radius:10px;box-shadow:0 4px 14px rgba(22,163,74,0.4);cursor:pointer;" onclick="patientController.openPatientVideoCallModal()">
-          📹 Live Video Call Doctor
-        </button>
-        <button class="auth-btn-primary" style="background:linear-gradient(135deg, #0284c7, #0369a1);border:none;padding:10px 18px;font-size:13px;font-weight:800;border-radius:10px;box-shadow:0 4px 14px rgba(2,132,199,0.4);cursor:pointer;" onclick="patientController.openRequestConsultModal()">
-          + Request OPD Queue
-        </button>
-      </div>
-    </div>
 
     <!-- 2. 108 EMERGENCY AMBULANCE & EMBEDDED LIVE GPS RADAR MAP (SWAPPED POSITION) -->
     <div class="glass-panel" style="border:1.5px solid rgba(220,38,38,0.38);background:linear-gradient(145deg, rgba(220,38,38,0.08), rgba(15,23,42,0.4));border-radius:18px;padding:18px 20px;margin-bottom:20px;">
@@ -1632,7 +1623,7 @@ body[data-theme="doom"] {
 
     </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <button class="auth-btn-primary" style="background:linear-gradient(135deg, #16a34a, #15803d);border:none;padding:10px 18px;font-size:13px;font-weight:800;border-radius:10px;box-shadow:0 4px 14px rgba(22,163,74,0.4);cursor:pointer;" onclick="patientController.openPatientVideoCallModal()">
+        <button class="auth-btn-primary" style="background:linear-gradient(135deg, #16a34a, #15803d);border:none;padding:10px 18px;font-size:13px;font-weight:800;border-radius:10px;box-shadow:0 4px 14px rgba(22,163,74,0.4);cursor:pointer;" onclick="if (window.patientController) { window.patientController.openPatientVideoCallModal(); } else if (window.openPatientVideoCallModal) { window.openPatientVideoCallModal(); }">
           📹 Live Video Call Doctor
         </button>
         <button class="auth-btn-primary" style="background:linear-gradient(135deg, #0284c7, #0369a1);border:none;padding:10px 18px;font-size:13px;font-weight:800;border-radius:10px;box-shadow:0 4px 14px rgba(2,132,199,0.4);cursor:pointer;" onclick="patientController.openRequestConsultModal()">
@@ -2902,7 +2893,7 @@ body[data-theme="doom"] {
 
 
 <!-- PATIENT SELECT DOCTOR VIDEO CALL MODAL -->
-<div id="patientVideoCallModal" class="modal-overlay">
+<div id="patientVideoCallModal" class="modal-overlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;width:100vw;height:100vh;z-index:99999;background:rgba(15,23,42,0.88);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:14px;box-sizing:border-box;">
   <div class="modal-card" style="max-width:540px;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
       <div style="display:flex;align-items:center;gap:10px;">
@@ -2944,7 +2935,7 @@ body[data-theme="doom"] {
 </div>
 
 <!-- ASHA FACILITATE VIDEO CALL MODAL -->
-<div id="ashaVideoCallModal" class="modal-overlay">
+<div id="ashaVideoCallModal" class="modal-overlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;width:100vw;height:100vh;z-index:99999;background:rgba(15,23,42,0.88);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:14px;box-sizing:border-box;">
   <div class="modal-card" style="max-width:520px;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
       <div style="display:flex;align-items:center;gap:10px;">
