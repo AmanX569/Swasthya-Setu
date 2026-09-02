@@ -3698,12 +3698,9 @@ body[data-theme="doom"] {
   <!-- =========================================================
        1. CITIZEN / PATIENT HUB
        ========================================================= -->
-  <section id="viewPatient" style="display:none;">
+      <section id="viewPatient" style="display:none;">
     
-
-    
-    
-        <!-- 1. DIRECT DOCTOR CONSULTATION REQUEST ACTION BANNER (TOP POSITION) -->
+    <!-- 1. DIRECT DOCTOR CONSULTATION REQUEST ACTION BANNER (TOP POSITION) -->
     <div style="background:linear-gradient(135deg, rgba(2,132,199,0.18), rgba(15,23,42,0.4));border:1.5px solid rgba(2,132,199,0.35);border-radius:16px;padding:16px 20px;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
       <div style="display:flex;align-items:center;gap:12px;">
         <span style="font-size:32px;">🩺</span>
@@ -3712,8 +3709,17 @@ body[data-theme="doom"] {
           <small style="color:var(--muted);">Directly select a registered doctor, describe your illness, and join the digital OPD queue instantly.</small>
         </div>
       </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="auth-btn-primary" style="background:linear-gradient(135deg, #16a34a, #15803d);border:none;padding:10px 18px;font-size:13px;font-weight:800;border-radius:10px;box-shadow:0 4px 14px rgba(22,163,74,0.4);cursor:pointer;" onclick="if (window.patientController) { window.patientController.openPatientVideoCallModal(); } else if (window.openPatientVideoCallModal) { window.openPatientVideoCallModal(); }">
+          📹 Live Video Call Doctor
+        </button>
+        <button class="auth-btn-primary" style="background:linear-gradient(135deg, #0284c7, #0369a1);border:none;padding:10px 18px;font-size:13px;font-weight:800;border-radius:10px;box-shadow:0 4px 14px rgba(2,132,199,0.4);cursor:pointer;" onclick="patientController.openRequestConsultModal()">
+          + Request OPD Queue
+        </button>
+      </div>
+    </div>
 
-    <!-- 2. 108 EMERGENCY AMBULANCE & EMBEDDED LIVE GPS RADAR MAP (SWAPPED POSITION) -->
+    <!-- 2. 108 EMERGENCY AMBULANCE & EMBEDDED LIVE GPS RADAR MAP (ORIGINAL EMBEDDED FORM) -->
     <div class="glass-panel" style="border:1.5px solid rgba(220,38,38,0.38);background:linear-gradient(145deg, rgba(220,38,38,0.08), rgba(15,23,42,0.4));border-radius:18px;padding:18px 20px;margin-bottom:20px;">
       
       <!-- TOP CONTROLS & STATUS BAR -->
@@ -3749,11 +3755,11 @@ body[data-theme="doom"] {
             <span>📞</span> <span>Call 108</span>
           </a>
 
-          <button id="btnDispatchAmbulance" type="button" onclick="gpsTrackingController.startAmbulanceDispatch()" class="auth-btn-primary" style="background:linear-gradient(135deg, #dc2626, #b91c1c);border:none;padding:8px 16px;font-size:12.5px;font-weight:800;border-radius:10px;box-shadow:0 4px 14px rgba(220,38,38,0.4);cursor:pointer;display:inline-flex;align-items:center;gap:6px;">
+          <button id="btnDispatchAmbulance" type="button" onclick="if (window.gpsTrackingController) { window.gpsTrackingController.startAmbulanceDispatch(); } else if (window.startAmbulanceDispatch) { window.startAmbulanceDispatch(); }" class="auth-btn-primary" style="background:linear-gradient(135deg, #dc2626, #b91c1c);border:none;padding:8px 16px;font-size:12.5px;font-weight:800;border-radius:10px;box-shadow:0 4px 14px rgba(220,38,38,0.4);cursor:pointer;display:inline-flex;align-items:center;gap:6px;">
             <span>🚨</span> <span>Dispatch 108 & Track</span>
           </button>
 
-          <button id="btnStopAmbulance" type="button" onclick="gpsTrackingController.stopAmbulanceDispatch()" class="btn-glass" style="display:none;background:rgba(220,38,38,0.15);color:#dc2626;border:1.5px solid #dc2626;padding:8px 14px;font-size:12.5px;font-weight:800;border-radius:10px;cursor:pointer;">
+          <button id="btnStopAmbulance" type="button" onclick="if (window.gpsTrackingController) { window.gpsTrackingController.stopAmbulanceDispatch(); }" class="btn-glass" style="display:none;background:rgba(220,38,38,0.15);color:#dc2626;border:1.5px solid #dc2626;padding:8px 14px;font-size:12.5px;font-weight:800;border-radius:10px;cursor:pointer;">
             <span>🛑</span> <span>Cancel 108</span>
           </button>
         </div>
@@ -3782,15 +3788,6 @@ body[data-theme="doom"] {
         </div>
       </div>
 
-    </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <button class="auth-btn-primary" style="background:linear-gradient(135deg, #16a34a, #15803d);border:none;padding:10px 18px;font-size:13px;font-weight:800;border-radius:10px;box-shadow:0 4px 14px rgba(22,163,74,0.4);cursor:pointer;" onclick="if (window.patientController) { window.patientController.openPatientVideoCallModal(); } else if (window.openPatientVideoCallModal) { window.openPatientVideoCallModal(); }">
-          📹 Live Video Call Doctor
-        </button>
-        <button class="auth-btn-primary" style="background:linear-gradient(135deg, #0284c7, #0369a1);border:none;padding:10px 18px;font-size:13px;font-weight:800;border-radius:10px;box-shadow:0 4px 14px rgba(2,132,199,0.4);cursor:pointer;" onclick="patientController.openRequestConsultModal()">
-          + Request OPD Queue
-        </button>
-      </div>
     </div>
 
     <!-- REAL-TIME DIGITAL E-PRESCRIPTIONS & CONSULTATION HISTORY -->
@@ -8355,7 +8352,7 @@ body[data-theme="doom"] {
   const DEFAULT_REGION = {
     lat: 16.6186,
     lng: 80.5364,
-    zoom: 13
+    zoom: 14
   };
 
   const HOSPITALS_GEO = [
@@ -8505,43 +8502,33 @@ body[data-theme="doom"] {
     }
 
     
-                    openGpsMapModal() {
+                        openGpsMapModal() {
       const modal = document.getElementById('liveGpsTrackingModal');
       if (modal) {
         modal.style.display = 'flex';
         modal.style.visibility = 'visible';
         modal.style.opacity = '1';
-        if (typeof document !== 'undefined' && document.body) {
-          document.body.style.overflow = 'hidden';
-        }
       }
 
       this.ensureLeafletLoaded();
 
-      const refreshMap = () => {
-        if (typeof global.L !== 'undefined') {
+      setTimeout(() => {
+        if (!this.maps['patientLiveGpsMap']) {
           this.initMap('patientLiveGpsMap');
+        } else {
           const inst = this.maps['patientLiveGpsMap'];
           if (inst && inst.map) {
-            inst.map.invalidateSize(true);
+            inst.map.invalidateSize();
             inst.map.setView([this.patientCoords.lat, this.patientCoords.lng], DEFAULT_REGION.zoom);
           }
         }
-      };
-
-      // Multi-phase refresh ensures map renders crisply across all devices
-      setTimeout(refreshMap, 50);
-      setTimeout(refreshMap, 200);
-      setTimeout(refreshMap, 500);
+      }, 100);
     }
 
     closeGpsMapModal() {
       const modal = document.getElementById('liveGpsTrackingModal');
       if (modal) {
         modal.style.display = 'none';
-        if (typeof document !== 'undefined' && document.body) {
-          document.body.style.overflow = '';
-        }
       }
     }
 
@@ -8569,45 +8556,42 @@ body[data-theme="doom"] {
     }
 
     // -------------------------------------------------------------
-    // 2. LEAFLET GOOGLE MAPS ENGINE
+        // -------------------------------------------------------------
+        // -------------------------------------------------------------
+    // 2. LEAFLET GOOGLE MAPS ENGINE (SINGLETON INSTANCE)
     // -------------------------------------------------------------
     initMap(containerId) {
       if (typeof document === 'undefined') return;
       const container = document.getElementById(containerId);
       if (!container) return;
 
-      // If Leaflet is not yet ready, retry shortly
       if (typeof global.L === 'undefined') {
-        setTimeout(() => this.initMap(containerId), 200);
+        this.ensureLeafletLoaded();
         return;
       }
 
       try {
-        // Setup wrapper structure with Google Maps HUD
-        if (!container.querySelector('.gmaps-leaflet-canvas')) {
-          this.buildMapHtmlStructure(container, containerId);
+        if (this.maps[containerId]) {
+          const inst = this.maps[containerId];
+          if (inst && inst.map) {
+            inst.map.invalidateSize();
+            inst.map.setView([this.patientCoords.lat, this.patientCoords.lng], DEFAULT_REGION.zoom);
+            return;
+          }
         }
+
+        this.buildMapHtmlStructure(container, containerId);
 
         const mapCanvasEl = container.querySelector('.gmaps-leaflet-canvas');
         if (!mapCanvasEl) return;
 
-        // Clean up existing map instance if any
-        if (this.maps[containerId]) {
-          try { this.maps[containerId].map.remove(); } catch (e) {}
-          delete this.maps[containerId];
-        }
-
-        const centerLat = this.patientCoords.lat;
-        const centerLng = this.patientCoords.lng;
-
         const map = global.L.map(mapCanvasEl, {
-          center: [centerLat, centerLng],
+          center: [this.patientCoords.lat, this.patientCoords.lng],
           zoom: DEFAULT_REGION.zoom,
           zoomControl: false,
           attributionControl: false
         });
 
-        // Add Google Maps Tile Layer
         const tileConfig = TILE_LAYERS[this.currentLayerKey] || TILE_LAYERS.streets;
         const tileLayer = global.L.tileLayer(tileConfig.url, {
           maxZoom: tileConfig.maxZoom,
@@ -8624,13 +8608,9 @@ body[data-theme="doom"] {
           hospitalMarkers: []
         };
 
-        // Render Patient Live Location
         this.renderPatientOnMap(instance);
-
-        // Render Hospitals Geo-Pins
         this.renderHospitalsOnMap(instance);
 
-        // If 108 Dispatch is active, render ambulance & route
         if (this.dispatchState.isActive) {
           this.renderDispatchOnMap(instance);
         }
@@ -8638,15 +8618,17 @@ body[data-theme="doom"] {
         this.maps[containerId] = instance;
 
         setTimeout(() => {
-          map.invalidateSize();
-        }, 250);
+          if (map) map.invalidateSize();
+        }, 150);
 
       } catch (err) {
         console.error('[GPS Map Error]', err);
       }
     }
 
-        buildMapHtmlStructure(container, containerId) {
+
+
+    buildMapHtmlStructure(container, containerId) {
       container.style.position = 'relative';
       container.style.width = '100%';
       container.style.height = '100%';
@@ -9366,9 +9348,10 @@ body[data-theme="doom"] {
       const isDoctorDeskOpen = docPortalEl && (docPortalEl.style.display !== 'none' && !docPortalEl.classList.contains('hidden'));
       const isDoctorRole = (activeRole === 'doctor' || activeRole === 'staff' || activeRole === 'admin' || (activeUser.role && activeUser.role.toLowerCase().includes('doc')));
 
-      // 1. Doctor receives incoming call alert
+      // 1. Doctor receives incoming call alert (only if caller is NOT oneself)
       if (signal.type === 'CALL_INITIATED') {
-        if (isDoctorRole || isDoctorDeskOpen || true) {
+        const isSelfCaller = (activeUser && (signal.callerPhone === activeUser.phone || signal.callerName === activeUser.name));
+        if (!isSelfCaller && (isDoctorRole || isDoctorDeskOpen)) {
           console.log('[VideoCall] Doctor incoming call alert triggered for caller:', signal.callerName);
           this.pendingIncomingSignal = signal;
           this.showDoctorIncomingCallPopup(signal);

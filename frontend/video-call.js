@@ -177,9 +177,10 @@
       const isDoctorDeskOpen = docPortalEl && (docPortalEl.style.display !== 'none' && !docPortalEl.classList.contains('hidden'));
       const isDoctorRole = (activeRole === 'doctor' || activeRole === 'staff' || activeRole === 'admin' || (activeUser.role && activeUser.role.toLowerCase().includes('doc')));
 
-      // 1. Doctor receives incoming call alert
+      // 1. Doctor receives incoming call alert (only if caller is NOT oneself)
       if (signal.type === 'CALL_INITIATED') {
-        if (isDoctorRole || isDoctorDeskOpen || true) {
+        const isSelfCaller = (activeUser && (signal.callerPhone === activeUser.phone || signal.callerName === activeUser.name));
+        if (!isSelfCaller && (isDoctorRole || isDoctorDeskOpen)) {
           console.log('[VideoCall] Doctor incoming call alert triggered for caller:', signal.callerName);
           this.pendingIncomingSignal = signal;
           this.showDoctorIncomingCallPopup(signal);

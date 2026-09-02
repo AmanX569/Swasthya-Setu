@@ -13,7 +13,7 @@
   const DEFAULT_REGION = {
     lat: 16.6186,
     lng: 80.5364,
-    zoom: 13
+    zoom: 14
   };
 
   const HOSPITALS_GEO = [
@@ -163,43 +163,33 @@
     }
 
     
-                    openGpsMapModal() {
+                        openGpsMapModal() {
       const modal = document.getElementById('liveGpsTrackingModal');
       if (modal) {
         modal.style.display = 'flex';
         modal.style.visibility = 'visible';
         modal.style.opacity = '1';
-        if (typeof document !== 'undefined' && document.body) {
-          document.body.style.overflow = 'hidden';
-        }
       }
 
       this.ensureLeafletLoaded();
 
-      const refreshMap = () => {
-        if (typeof global.L !== 'undefined') {
+      setTimeout(() => {
+        if (!this.maps['patientLiveGpsMap']) {
           this.initMap('patientLiveGpsMap');
+        } else {
           const inst = this.maps['patientLiveGpsMap'];
           if (inst && inst.map) {
-            inst.map.invalidateSize(true);
+            inst.map.invalidateSize();
             inst.map.setView([this.patientCoords.lat, this.patientCoords.lng], DEFAULT_REGION.zoom);
           }
         }
-      };
-
-      // Multi-phase refresh ensures map renders crisply across all devices
-      setTimeout(refreshMap, 50);
-      setTimeout(refreshMap, 200);
-      setTimeout(refreshMap, 500);
+      }, 100);
     }
 
     closeGpsMapModal() {
       const modal = document.getElementById('liveGpsTrackingModal');
       if (modal) {
         modal.style.display = 'none';
-        if (typeof document !== 'undefined' && document.body) {
-          document.body.style.overflow = '';
-        }
       }
     }
 
@@ -227,45 +217,42 @@
     }
 
     // -------------------------------------------------------------
-    // 2. LEAFLET GOOGLE MAPS ENGINE
+        // -------------------------------------------------------------
+        // -------------------------------------------------------------
+    // 2. LEAFLET GOOGLE MAPS ENGINE (SINGLETON INSTANCE)
     // -------------------------------------------------------------
     initMap(containerId) {
       if (typeof document === 'undefined') return;
       const container = document.getElementById(containerId);
       if (!container) return;
 
-      // If Leaflet is not yet ready, retry shortly
       if (typeof global.L === 'undefined') {
-        setTimeout(() => this.initMap(containerId), 200);
+        this.ensureLeafletLoaded();
         return;
       }
 
       try {
-        // Setup wrapper structure with Google Maps HUD
-        if (!container.querySelector('.gmaps-leaflet-canvas')) {
-          this.buildMapHtmlStructure(container, containerId);
+        if (this.maps[containerId]) {
+          const inst = this.maps[containerId];
+          if (inst && inst.map) {
+            inst.map.invalidateSize();
+            inst.map.setView([this.patientCoords.lat, this.patientCoords.lng], DEFAULT_REGION.zoom);
+            return;
+          }
         }
+
+        this.buildMapHtmlStructure(container, containerId);
 
         const mapCanvasEl = container.querySelector('.gmaps-leaflet-canvas');
         if (!mapCanvasEl) return;
 
-        // Clean up existing map instance if any
-        if (this.maps[containerId]) {
-          try { this.maps[containerId].map.remove(); } catch (e) {}
-          delete this.maps[containerId];
-        }
-
-        const centerLat = this.patientCoords.lat;
-        const centerLng = this.patientCoords.lng;
-
         const map = global.L.map(mapCanvasEl, {
-          center: [centerLat, centerLng],
+          center: [this.patientCoords.lat, this.patientCoords.lng],
           zoom: DEFAULT_REGION.zoom,
           zoomControl: false,
           attributionControl: false
         });
 
-        // Add Google Maps Tile Layer
         const tileConfig = TILE_LAYERS[this.currentLayerKey] || TILE_LAYERS.streets;
         const tileLayer = global.L.tileLayer(tileConfig.url, {
           maxZoom: tileConfig.maxZoom,
@@ -282,13 +269,9 @@
           hospitalMarkers: []
         };
 
-        // Render Patient Live Location
         this.renderPatientOnMap(instance);
-
-        // Render Hospitals Geo-Pins
         this.renderHospitalsOnMap(instance);
 
-        // If 108 Dispatch is active, render ambulance & route
         if (this.dispatchState.isActive) {
           this.renderDispatchOnMap(instance);
         }
@@ -296,15 +279,17 @@
         this.maps[containerId] = instance;
 
         setTimeout(() => {
-          map.invalidateSize();
-        }, 250);
+          if (map) map.invalidateSize();
+        }, 150);
 
       } catch (err) {
         console.error('[GPS Map Error]', err);
       }
     }
 
-        buildMapHtmlStructure(container, containerId) {
+
+
+    buildMapHtmlStructure(container, containerId) {
       container.style.position = 'relative';
       container.style.width = '100%';
       container.style.height = '100%';
