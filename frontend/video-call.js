@@ -177,7 +177,7 @@
       }
     }
 
-            handleIncomingSignal(signal) {
+                handleIncomingSignal(signal) {
       if (!signal || !signal.type) return;
       if (!this.store && global.appStore) this.store = global.appStore;
 
@@ -187,31 +187,102 @@
       
       const docPortalEl = document.getElementById('doctorPortal');
       const isDoctorDeskOpen = docPortalEl && (docPortalEl.style.display !== 'none' && (!docPortalEl.classList || !docPortalEl.classList.contains('hidden')));
-      const isDoctorRole = (activeRole === 'doctor' || activeRole === 'staff' || activeRole === 'admin' || (activeUser.role && activeUser.role.toLowerCase().includes('doc')));
+      const isDoctorRole = (activeRole === 'doctor' || activeRole === 'staff' || activeRole === 'admin' || (activeUser.role && activeUser.role.toLowerCase().includes('doc')) || isDoctorDeskOpen);
       const isPatientRole = (activeRole === 'patient' || !isDoctorRole);
 
-      console.log('[VideoCall] Incoming Signal received:', signal.type, 'from role:', signal.callerRole, signal.callerName, '-> current role:', activeRole);
+      console.log('[VideoCall] Incoming Signal received:', signal.type, 'from role:', signal.callerRole, signal.callerName, '-> current role:', activeRole, 'user:', activeUser.name);
 
-      // 1. INCOMING CALL ALERT (Bidirectional: Doctor <-> Patient)
+      // 1. INCOMING CALL ALERT (Bidirectional: Doctor <-> Patient with strict recipient targeting)
       if (signal.type === 'CALL_INITIATED') {
-        // Only drop if user is on the exact same role and same name (prevent echo in same tab)
+        // Drop self-echo if user is caller in same tab/session
         const isExactSelf = (signal.callerRole === activeRole && signal.callerName === activeUser.name);
         if (isExactSelf) {
           console.log('[VideoCall] Dropping self-originated echo signal from same user');
           return;
         }
 
+        // -------------------------------------------------------------
         // CASE A: Incoming call for DOCTOR (from Patient or ASHA)
+        // -------------------------------------------------------------
         if ((signal.callerRole === 'patient' || signal.callerRole === 'worker') && isDoctorRole) {
-          console.log('[VideoCall] Doctor incoming call alert triggered for caller:', signal.callerName);
-          this.pendingIncomingSignal = signal;
-          this.showDoctorIncomingCallPopup(signal);
+          const currentDocName = (activeUser.name || '').trim().toLowerCase();
+          const targetDocName = (signal.recipientDoctor || signal.recipientName || '').trim().toLowerCase();
+
+          let isTargetDoctor = true;
+          // If a specific doctor was selected, only alert matching doctor
+          if (targetDocName && targetDocName !== 'any' && !targetDocName.includes('any available') && currentDocName) {
+            const cleanTarget = targetDocName.replace(/dr.?|mbbs|md|ms|dnb|,/gi, '').trim();
+            const cleanCurrent = currentDocName.replace(/dr.?|mbbs|md|ms|dnb|,/gi, '').trim();
+            
+            const targetWords = cleanTarget.split(/\s+/).filter(w => w.length > 2);
+            const currentWords = cleanCurrent.split(/\s+/).filter(w => w.length > 2);
+            
+            const hasWordMatch = targetWords.some(w => currentWords.includes(w));
+            const hasSubMatch = cleanCurrent.includes(cleanTarget) || cleanTarget.includes(cleanCurrent);
+            
+            isTargetDoctor = hasWordMatch || hasSubMatch;
+          }
+
+          if (isTargetDoctor) {
+            console.log('[VideoCall] Doctor incoming call alert matched for doctor:', activeUser.name, 'caller:', signal.callerName);
+            this.pendingIncomingSignal = signal;
+            this.showDoctorIncomingCallPopup(signal);
+          } else {
+            console.log('[VideoCall] Ignoring patient call: target doctor was "' + targetDocName + '" but logged-in doctor is "' + activeUser.name + '"');
+          }
         }
+
+        // -------------------------------------------------------------
         // CASE B: Incoming call for PATIENT (from Doctor)
+        // -------------------------------------------------------------
         else if (signal.callerRole === 'doctor' && isPatientRole) {
-          console.log('[VideoCall] Patient incoming call alert triggered from doctor:', signal.callerName);
-          this.pendingIncomingSignal = signal;
-          this.showPatientIncomingCallPopup(signal);
+          const currentPatName = (activeUser.name || '').trim().toLowerCase();
+          const currentPatPhone = (activeUser.phone || '').trim().replace(/\D/g, '');
+          const currentAbha = (activeUser.abhaId || '').trim().toLowerCase();
+
+          const targetPatName = (signal.recipientName || signal.patientName || '').trim().toLowerCase();
+          const targetPatPhone = (signal.recipientPhone || '').trim().replace(/\D/g, '');
+          const targetAbha = (signal.recipientAbha || '').trim().toLowerCase();
+
+          let isTargetPatient = false;
+
+          // 1. Match by Phone Number (Highest precision)
+          if (targetPatPhone && currentPatPhone) {
+            if (targetPatPhone === currentPatPhone || targetPatPhone.endsWith(currentPatPhone) || currentPatPhone.endsWith(targetPatPhone)) {
+              isTargetPatient = true;
+            }
+          }
+
+          // 2. Match by ABHA ID
+          if (!isTargetPatient && targetAbha && currentAbha) {
+            if (targetAbha === currentAbha) {
+              isTargetPatient = true;
+            }
+          }
+
+          // 3. Match by Name (Normalized word or substring matching)
+          if (!isTargetPatient && targetPatName && currentPatName) {
+            const cleanTarget = targetPatName.replace(/\(.*?\)/g, '').trim();
+            const cleanCurrent = currentPatName.replace(/\(.*?\)/g, '').trim();
+
+            const targetWords = cleanTarget.split(/\s+/).filter(w => w.length > 2);
+            const currentWords = cleanCurrent.split(/\s+/).filter(w => w.length > 2);
+
+            const hasWordMatch = targetWords.some(w => currentWords.includes(w));
+            const hasSubMatch = cleanCurrent.includes(cleanTarget) || cleanTarget.includes(cleanCurrent);
+
+            if (hasWordMatch || hasSubMatch) {
+              isTargetPatient = true;
+            }
+          }
+
+          if (isTargetPatient) {
+            console.log('[VideoCall] Patient incoming call alert matched for patient:', activeUser.name, 'from doctor:', signal.callerName);
+            this.pendingIncomingSignal = signal;
+            this.showPatientIncomingCallPopup(signal);
+          } else {
+            console.log('[VideoCall] Ignoring call from doctor: targeted recipient was "' + (targetPatName || targetPatPhone) + '" but active patient is "' + activeUser.name + '" (' + activeUser.phone + ')');
+          }
         }
       }
 
