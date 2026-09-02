@@ -101,6 +101,35 @@
       }
     }
 
+        submitPatientVideoCall(e) {
+      if (e && typeof e.preventDefault === 'function') e.preventDefault();
+      const docSelect = document.getElementById('patientVideoDoctorSelect');
+      const memberSelect = document.getElementById('patientVideoMemberSelect');
+      const complaintInput = document.getElementById('patientVideoComplaint');
+
+      const chosenDoctor = docSelect ? docSelect.value : 'Dr. Priya Sharma, MBBS, MD';
+      const chosenMember = memberSelect ? memberSelect.value : 'Self (Patient)';
+      const complaint = (complaintInput && complaintInput.value.trim()) ? complaintInput.value.trim() : 'Digital OPD Teleconsultation';
+
+      this.closePatientVideoCallModal();
+
+      if (global.videoCallController && typeof global.videoCallController.startVideoCall === 'function') {
+        const state = (this.store && typeof this.store.getState === 'function') ? this.store.getState() : {};
+        const user = state.currentUser || (state.session && state.session.user) || { name: 'Citizen Beneficiary', phone: '9876543210' };
+
+        global.videoCallController.startVideoCall({
+          callerRole: 'patient',
+          callerName: chosenMember || user.name || 'Citizen Patient',
+          callerPhone: user.phone || '9876543210',
+          recipientRole: 'doctor',
+          recipientName: chosenDoctor,
+          complaint: complaint
+        });
+      } else {
+        if (global.toast) global.toast('📹 Connecting live teleconsultation...');
+      }
+    }
+
     startVideoCallWithDoctor() {
       this.openPatientVideoCallModal();
     }
@@ -967,6 +996,181 @@
       const bank = this.store.getState().bloodBank || {};
 
       const inStockText = this.t('in_stock', '✓ In Stock');
+                   (this.store.getState().familyMembers || []);
+
+      if (!fams.length) {
+        el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);grid-column:1/-1;">No family members added yet. Tap "+ Add Member" above.</div>';
+        return;
+      }
+
+      el.innerHTML = fams.map(f => `
+        <div style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:14px;padding:14px;display:flex;justify-content:space-between;align-items:center;box-shadow:var(--shadow-panel);">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div style="width:42px;height:42px;background:rgba(2,132,199,0.12);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;">
+              ${f.gender === 'Female' ? '👩' : '👨'}
+            </div>
+            <div>
+              <strong style="color:var(--ink);font-size:15px;display:block;">${f.name} (${f.relation})</strong>
+              <small style="color:var(--muted);font-family:'IBM Plex Mono',monospace;">Age: ${f.age} · ABHA: ${f.abhaId || '14-XXXX'}</small>
+            </div>
+          </div>
+          <div style="text-align:right;">
+            <span class="badge" style="background:rgba(2,132,199,0.12);color:var(--primary-bright);padding:4px 8px;border-radius:12px;font-size:11px;font-weight:700;">${f.status || 'Active'}</span>
+            <button style="display:block;margin-top:4px;color:#dc2626;font-size:11px;cursor:pointer;background:none;border:none;font-weight:600;" onclick="patientController.removeFamilyMember('${f.id}')">✕ Remove</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    openAddFamilyModal() {
+      const modal = document.getElementById('addFamilyModal');
+      if (modal) modal.style.display = 'flex';
+    }
+
+    closeAddFamilyModal() {
+      const modal = document.getElementById('addFamilyModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    submitAddFamily(e) {
+      if (e) e.preventDefault();
+      const nameInput = document.getElementById('famName');
+      const relationInput = document.getElementById('famRelation');
+      const ageInput = document.getElementById('famAge');
+      const genderInput = document.getElementById('famGender');
+
+      const name = nameInput ? nameInput.value.trim() : '';
+      const relation = relationInput ? relationInput.value : 'Spouse';
+      const age = parseInt(ageInput ? ageInput.value : '25', 10) || 25;
+      const gender = genderInput ? genderInput.value : 'Female';
+
+      if (!name) {
+        alert('Please enter member name');
+        return;
+      }
+
+      const newFam = this.store.addFamilyMember({ name, relation, age, gender });
+      if (nameInput) nameInput.value = '';
+      if (ageInput) ageInput.value = '';
+      this.closeAddFamilyModal();
+      
+      // Immediately re-render Family Circle on the spot
+      this.renderFamilyCircle();
+      if (typeof window.toast === 'function') {
+        window.toast('✓ Added ' + name + ' (' + relation + ') to Family Health Circle');
+      }
+    }
+
+    removeFamilyMember(id) {
+      if (confirm('Are you sure you want to remove this member from your Family Health Circle?')) {
+        if (this.store) {
+          this.store.deleteFamilyMember(id);
+          this.renderFamilyCircle();
+          if (typeof window.toast === 'function') {
+            window.toast('🗑️ Family member removed successfully');
+          }
+        }
+      }
+    }
+
+    // -------------------------------------------------------------
+    // 6. JAN AUSHADHI MEDICINE TRACKER & SAVINGS (DYNAMIC CATALOG)
+    // -------------------------------------------------------------
+    renderDailyMedications() {
+      const el = document.getElementById('dailyMedsContainer') || document.getElementById('dailyMedsList');
+      if (!el || !this.store) return;
+      const meds = this.store.getState().medicines || [];
+
+      if (!meds.length) {
+        el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);">No medicines in Jan Aushadhi catalog.</div>';
+        return;
+      }
+
+      const savedWord = this.t('saved_text', 'saved');
+      const morningLabel = this.t('dose_morning', '☀️ Morning');
+      const noonLabel = this.t('dose_noon', '🌤️ Noon');
+      const nightLabel = this.t('dose_night', '🌙 Night');
+
+      el.innerHTML = meds.map(m => {
+        const savings = Math.max(0, (m.brandPrice || 0) - (m.genericPrice || 0));
+        const savingsPct = m.brandPrice > 0 ? Math.round((savings / m.brandPrice) * 100) : 0;
+        const savingText = `💰 ₹${savings} ${savedWord} (${savingsPct}% OFF)`;
+
+        return `
+          <div style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:14px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;box-shadow:var(--shadow-panel);">
+            <div>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <strong style="color:var(--ink);font-size:15px;">${m.name}</strong>
+                <span class="badge" style="background:rgba(22,163,74,0.15);color:#15803d;padding:2px 6px;border-radius:8px;font-size:10px;font-weight:800;">PMBJP</span>
+              </div>
+              <small style="color:var(--muted);display:block;margin-top:2px;">Category: ${m.category || 'General Medicine'} · Stock: ${m.stock || 100} ${m.unit || 'Tablets'}</small>
+              <div style="font-size:12px;margin-top:4px;">
+                <strong style="color:#15803d;font-size:14px;">₹${m.genericPrice}</strong>
+                ${m.brandPrice ? `<span style="text-decoration:line-through;color:var(--muted);margin-left:6px;font-size:12px;">₹${m.brandPrice}</span>` : ''}
+                ${savings > 0 ? `<span style="background:rgba(22,163,74,0.15);color:#15803d;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:800;margin-left:8px;">${savingText}</span>` : ''}
+              </div>
+            </div>
+
+            <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+              <button class="btn-glass" style="padding:6px 10px;font-size:11px;font-weight:700;" onclick="patientController.toggleDose('${m.id}', 'morning')">${morningLabel}</button>
+              <button class="btn-glass" style="padding:6px 10px;font-size:11px;font-weight:700;" onclick="patientController.toggleDose('${m.id}', 'noon')">${noonLabel}</button>
+              <button class="btn-glass" style="padding:6px 10px;font-size:11px;font-weight:700;" onclick="patientController.toggleDose('${m.id}', 'night')">${nightLabel}</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    toggleDose(medId, time) {
+      this.store.toggleDoseTaken(medId, time);
+    }
+
+    // -------------------------------------------------------------
+    // 7. LIVE HOSPITAL BEDS & BLOOD BANK
+    // -------------------------------------------------------------
+    renderLiveHospitals() {
+      const el = document.getElementById('hospitalBedsContainer') || document.getElementById('hospitalBedsList');
+      if (!el || !this.store) return;
+      const hosps = this.store.getState().hospitals || [];
+
+      const genBedsText = this.t('gen_beds', 'General Beds');
+      const icuBedsText = this.t('icu_beds', 'ICU Beds');
+      const oxyBedsText = this.t('oxy_beds', 'Oxygen Beds');
+      const availText = this.t('avail', 'Avail');
+
+      el.innerHTML = hosps.map(h => `
+        <div style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:var(--shadow-panel);">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;flex-wrap:wrap;gap:6px;">
+            <div>
+              <strong style="color:var(--primary-bright);font-size:15px;display:block;">${h.name}</strong>
+              <small style="color:var(--muted);">Distance: ${h.distance} · Doctor: ${h.doctorOnDuty}</small>
+            </div>
+            <a href="tel:${h.phone}" class="btn-glass" style="padding:4px 10px;font-size:12px;color:var(--primary-bright);">📞 Call ${h.phone}</a>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(90px, 1fr));gap:8px;margin-top:10px;text-align:center;">
+            <div style="background:rgba(22,163,74,0.12);border:1px solid rgba(22,163,74,0.3);padding:8px;border-radius:10px;">
+              <small style="color:#16a34a;font-size:11px;font-weight:600;display:block;">${genBedsText}</small>
+              <strong style="color:#16a34a;font-size:16px;">${h.genBedsAvail} ${availText}</strong>
+            </div>
+            <div style="background:rgba(220,38,38,0.12);border:1px solid rgba(220,38,38,0.3);padding:8px;border-radius:10px;">
+              <small style="color:#dc2626;font-size:11px;font-weight:600;display:block;">${icuBedsText}</small>
+              <strong style="color:#dc2626;font-size:16px;">${h.icuBedsAvail} ${availText}</strong>
+            </div>
+            <div style="background:rgba(2,132,199,0.12);border:1px solid rgba(2,132,199,0.3);padding:8px;border-radius:10px;">
+              <small style="color:#0284c7;font-size:11px;font-weight:600;display:block;">${oxyBedsText}</small>
+              <strong style="color:#0284c7;font-size:16px;">${h.oxygenBedsAvail} ${availText}</strong>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    renderLiveBloodBank() {
+      const el = document.getElementById('bloodBankGrid');
+      if (!el || !this.store) return;
+      const bank = this.store.getState().bloodBank || {};
+
+      const inStockText = this.t('in_stock', '✓ In Stock');
       const lowStockText = this.t('low_stock', '⚠️ Low');
 
       el.innerHTML = Object.entries(bank).map(([grp, count]) => `
@@ -983,12 +1187,17 @@
 
   global.patientController = new PatientController();
 
-})(typeof window !== 'undefined' ? window : this);
-
-  // Global Window Helpers for Patient Video Call
   global.openPatientVideoCallModal = function() {
     if (global.patientController) global.patientController.openPatientVideoCallModal();
   };
   global.closePatientVideoCallModal = function() {
     if (global.patientController) global.patientController.closePatientVideoCallModal();
   };
+
+  if (typeof window !== 'undefined') {
+    window.openPatientVideoCallModal = global.openPatientVideoCallModal;
+    window.closePatientVideoCallModal = global.closePatientVideoCallModal;
+    window.patientController = global.patientController;
+  }
+
+})(typeof window !== 'undefined' ? window : (typeof global !== 'undefined' ? global : this));

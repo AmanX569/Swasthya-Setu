@@ -1537,40 +1537,9 @@ body[data-theme="doom"] {
   <!-- =========================================================
        1. CITIZEN / PATIENT HUB
        ========================================================= -->
-        <section id="viewPatient" style="display:none;">
+          <section id="viewPatient" style="display:none;">
     
-    <!-- 1. COMPACT 108 EMERGENCY & LIVE GPS RADAR SHORTCUT BANNER -->
-    <div style="background:linear-gradient(135deg, rgba(220,38,38,0.12), rgba(15,23,42,0.4));border:1.5px solid rgba(220,38,38,0.35);border-radius:16px;padding:16px 20px;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
-      <div style="display:flex;align-items:center;gap:14px;">
-        <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg, #dc2626, #991b1b);color:#ffffff;display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:0 4px 16px rgba(220,38,38,0.4);flex-shrink:0;">
-          🚑
-        </div>
-        <div>
-          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-            <strong style="font-size:16px;color:var(--ink);font-weight:800;">108 Emergency Ambulance & Live GPS Radar</strong>
-            <span id="liveGpsStatusBadge" class="badge" style="background:rgba(22,163,74,0.15);color:#16a34a;font-size:11px;font-weight:800;padding:3px 8px;border-radius:10px;">
-              🟢 108 Base Ready (1.2km away)
-            </span>
-          </div>
-          <small style="color:var(--muted);font-size:12px;margin-top:2px;display:block;">
-            Track emergency dispatch on real Google Maps, view live ETA, driver details & nearest hospital beds.
-          </small>
-        </div>
-      </div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
-        <a href="tel:108" class="btn-glass" style="background:#ffffff;color:#dc2626;font-weight:800;padding:10px 16px;font-size:13px;border-radius:10px;display:inline-flex;align-items:center;gap:6px;text-decoration:none;border:1px solid rgba(220,38,38,0.3);box-shadow:0 2px 8px rgba(0,0,0,0.06);">
-          <span>📞</span> <span>Call 108</span>
-        </a>
-        <button type="button" onclick="if (window.gpsTrackingController) { window.gpsTrackingController.startAmbulanceDispatch(); } else if (window.startAmbulanceDispatch) { window.startAmbulanceDispatch(); }" class="auth-btn-primary" style="background:linear-gradient(135deg, #dc2626, #b91c1c);border:none;padding:10px 18px;font-size:13px;font-weight:800;border-radius:10px;box-shadow:0 4px 14px rgba(220,38,38,0.4);cursor:pointer;display:inline-flex;align-items:center;gap:6px;">
-          <span>🚨</span> <span>Dispatch 108 & Track</span>
-        </button>
-        <button type="button" onclick="if (window.gpsTrackingController) { window.gpsTrackingController.openGpsMapModal(); } else if (window.openGpsMapModal) { window.openGpsMapModal(); }" class="btn-glass" style="background:rgba(2,132,199,0.14);border:1.5px solid var(--primary-bright);color:var(--primary-bright);padding:10px 18px;font-size:13px;font-weight:700;border-radius:10px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">
-          <span>🗺️</span> <span>Open Live GPS Map</span>
-        </button>
-      </div>
-    </div>
-
-    <!-- 2. DIRECT DOCTOR CONSULTATION REQUEST ACTION BANNER -->
+    <!-- 1. DIRECT DOCTOR CONSULTATION REQUEST ACTION BANNER (TOP POSITION) -->
     <div style="background:linear-gradient(135deg, rgba(2,132,199,0.18), rgba(15,23,42,0.4));border:1.5px solid rgba(2,132,199,0.35);border-radius:16px;padding:16px 20px;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
       <div style="display:flex;align-items:center;gap:12px;">
         <span style="font-size:32px;">🩺</span>
@@ -3400,8 +3369,7 @@ function renderActivePortalView() {
   const activeViewName = role.charAt(0).toUpperCase() + role.slice(1);
   if (role === 'patient') {
     setTimeout(() => {
-      if (global.gpsTrackingController) global.gpsTrackingController.initMap('patientLiveGpsMap');
-    if (global.aiHealthBot) global.aiHealthBot.renderChat();
+      if (window.aiHealthBot) window.aiHealthBot.renderChat();
     }, 300);
   }
 
@@ -3710,74 +3678,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   </script>
 
-
-<!-- =========================================================
-     LIVE GOOGLE MAPS 108 GPS TRACKING & RADAR MODAL
-     ========================================================= -->
-<div id="liveGpsTrackingModal" class="modal-overlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;width:100vw;height:100vh;z-index:99999;background:rgba(15,23,42,0.88);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:14px;box-sizing:border-box;">
-  <div class="modal-card" style="width:96vw;max-width:1200px;height:90vh;max-height:860px;background:#ffffff;border-radius:18px;border:1.5px solid #dadce0;box-shadow:0 24px 60px rgba(0,0,0,0.5);display:flex;flex-direction:column;overflow:hidden;padding:0;color:#202124;">
-    
-    <!-- MODAL HEADER -->
-    <div style="padding:12px 18px;background:#ffffff;border-bottom:1.5px solid #e2e8f0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;z-index:10;">
-      <div style="display:flex;align-items:center;gap:12px;">
-        <div style="width:38px;height:38px;border-radius:50%;background:#1a73e8;color:#ffffff;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 2px 8px rgba(26,115,232,0.4);">
-          🗺️
-        </div>
-        <div>
-          <div style="display:flex;align-items:center;gap:8px;">
-            <strong style="font-size:16px;color:#202124;font-weight:800;">Swasthya Setu · Live Google Maps Radar</strong>
-            <span class="badge" style="background:#e8f0fe;color:#1a73e8;font-size:11px;font-weight:700;padding:3px 8px;border-radius:12px;">4G Satellite GPS</span>
-          </div>
-          <small style="color:#5f6368;font-size:11px;">Kondapalli Rural Sector · Real-time 108 Ambulance Dispatch & Hospital Network</small>
-        </div>
-      </div>
-
-      <!-- STATUS & CLOSE CONTROLS -->
-      <div style="display:flex;align-items:center;gap:10px;">
-        <div style="display:flex;align-items:center;gap:8px;background:#f8f9fa;padding:6px 12px;border-radius:20px;border:1px solid #e2e8f0;">
-          <small style="font-size:11px;font-weight:700;color:#5f6368;">ETA:</small>
-          <strong id="liveGpsEtaBadge" style="font-size:13px;color:#1a73e8;font-family:'IBM Plex Mono',monospace;">—</strong>
-          <span style="color:#cbd5e1;">|</span>
-          <small style="font-size:11px;font-weight:700;color:#5f6368;">Distance:</small>
-          <strong id="liveGpsDistBadge" style="font-size:13px;color:#202124;font-family:'IBM Plex Mono',monospace;">—</strong>
-        </div>
-
-        <button type="button" onclick="gpsTrackingController.closeGpsMapModal()" style="background:#dc2626;color:#ffffff;border:none;border-radius:10px;padding:8px 16px;font-size:13px;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:6px;box-shadow:0 4px 14px rgba(220,38,38,0.4);transition:all 0.2s ease;">
-          <span>✕</span> <span>Close Map (ESC)</span>
-        </button>
-      </div>
-    </div>
-
-    <!-- MAP BODY -->
-    <div style="flex:1;position:relative;width:100%;height:100%;overflow:hidden;background:#f2efe9;">
-      <div id="patientLiveGpsMap" style="width:100%;height:100%;min-height:480px;position:relative;"></div>
-    </div>
-
-    <!-- MODAL FOOTER DRIVER HUD -->
-    <div id="liveGpsDriverCard" style="display:none;padding:12px 18px;background:#f8fafc;border-top:1.5px solid #e2e8f0;">
-      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
-        <div style="display:flex;align-items:center;gap:12px;">
-          <div style="width:40px;height:40px;border-radius:50%;background:#16a34a;color:#ffffff;display:flex;align-items:center;justify-content:center;font-size:20px;">
-            👨‍✈️
-          </div>
-          <div>
-            <div style="font-size:14px;font-weight:800;color:#0f172a;display:flex;align-items:center;gap:6px;">
-              <span>Rajesh Naidu</span>
-              <span class="badge" style="background:#16a34a;color:#ffffff;font-size:10px;padding:2px 6px;">108 Lead Driver</span>
-            </div>
-            <small style="color:#64748b;font-size:11px;">Vehicle: <strong>AP-16-TX-1081 (ALS Unit)</strong> · EMT: <strong>K. Venkatesh</strong></small>
-          </div>
-        </div>
-        <div style="display:flex;gap:8px;">
-          <a href="tel:9848022338" class="auth-btn-primary" style="background:#16a34a;color:#ffffff;padding:8px 16px;font-size:12px;font-weight:800;border-radius:8px;text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
-            📞 Call Driver
-          </a>
-        </div>
-      </div>
-    </div>
-
-  </div>
-</div>
 
 </body>
 </html>

@@ -347,6 +347,19 @@
       if (global.toast) {
         global.toast('📞 Calling ' + recipientName + '... Ringing on Doctor Desk.');
       }
+      // Fallback timer: Auto-connect to on-duty doctor if testing in standalone mode without second tab
+      if (this.autoConnectTimeout) clearTimeout(this.autoConnectTimeout);
+      if (callerRole === 'patient' || callerRole === 'worker') {
+        this.autoConnectTimeout = setTimeout(() => {
+          if (this.currentCallData && !this.isConnected) {
+            console.log('[VideoCall] Auto-connecting to on-duty telemedicine officer:', recipientName);
+            this.handleCallAcceptedByDoctor({
+              callId: this.currentCallData.id,
+              doctorName: recipientName
+            });
+          }
+        }, 3500);
+      }
     }
 
     // -------------------------------------------------------------
@@ -464,7 +477,9 @@
       if (remoteAudio) {
         remoteAudio.muted = false;
         remoteAudio.volume = 1.0;
-        remoteAudio.play().catch(() => {});
+        if (typeof remoteAudio.play === 'function') {
+          remoteAudio.play().catch(() => {});
+        }
       }
 
       // 1. Start Doctor Local Camera with 720p HD FIRST
@@ -513,6 +528,8 @@
     }
 
     async handleCallAcceptedByDoctor(signal) {
+      this.isConnected = true;
+      if (this.autoConnectTimeout) clearTimeout(this.autoConnectTimeout);
       this.unlockAudioContext();
       const statusEl = document.getElementById('videoCallStatusBanner');
       if (statusEl) statusEl.innerHTML = '🟢 Connected · Live HD Video & Audio Active with ' + (signal.doctorName || 'Doctor');
@@ -530,7 +547,9 @@
       if (remoteAudio) {
         remoteAudio.muted = false;
         remoteAudio.volume = 1.0;
-        remoteAudio.play().catch(() => {});
+        if (typeof remoteAudio.play === 'function') {
+          remoteAudio.play().catch(() => {});
+        }
       }
 
       this.inCallMessages.push({
@@ -614,8 +633,10 @@
           const remoteVideo = document.getElementById('remoteVideoElement');
           if (remoteVideo) {
             remoteVideo.srcObject = stream;
-            remoteVideo.muted = true; // Muted to prevent duplicate audio playback loop
-            remoteVideo.play().catch(e => console.warn('Remote video playback:', e));
+            remoteVideo.muted = true;
+            if (typeof remoteVideo.play === 'function') {
+              remoteVideo.play().catch(e => console.warn('Remote video playback:', e));
+            }
           }
 
           // 2. Dedicated Unmuted Audio Element (Plays Single Clean Voice Stream)
@@ -702,7 +723,9 @@
 
           if (localVideo && this.localStream) {
             localVideo.srcObject = this.localStream;
-            localVideo.play().catch(() => {});
+            if (typeof localVideo.play === 'function') {
+              localVideo.play().catch(() => {});
+            }
           }
           if (simulationNotice) simulationNotice.style.display = 'none';
         } else {
