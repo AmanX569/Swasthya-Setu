@@ -49,9 +49,11 @@
       if (global.videoCallController) {
         global.videoCallController.startVideoCall({
           callerRole: 'doctor',
-          callerName: doctorUser.name || 'Medical Officer',
+          callerName: doctorUser.name || 'Dr. Priya Sharma, MBBS, MD',
+          callerPhone: doctorUser.phone || '9848011220',
           recipientRole: 'patient',
           recipientName: q ? q.patientName : 'Citizen Patient',
+          recipientPhone: (q && q.phone) ? q.phone : '9876543210',
           patientName: q ? q.patientName : 'Citizen Patient',
           patientAge: q ? q.age : 35,
           patientGender: q ? q.gender : 'M',
@@ -293,11 +295,12 @@
       if (global.videoCallController) {
         global.videoCallController.startVideoCall({
           callerRole: 'doctor',
-          callerName: doctorUser.name || 'Medical Officer',
+          callerName: doctorUser.name || 'Dr. Priya Sharma, MBBS, MD',
+          callerPhone: doctorUser.phone || '9848011220',
           recipientRole: 'patient',
           recipientName: patName,
+          recipientPhone: patPhone || '9876543210',
           patientName: patName,
-          callerPhone: patPhone || '9876543210',
           complaint: reason
         });
       }

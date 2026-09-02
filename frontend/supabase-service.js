@@ -638,8 +638,9 @@
         });
 
         this.teleconsultChannel.on('broadcast', { event: 'teleconsult_signal' }, (payload) => {
-          if (payload && payload.payload && typeof this.onSignalCallback === 'function') {
-            this.onSignalCallback(payload.payload);
+          const actualSignal = (payload && payload.payload) ? payload.payload : payload;
+          if (actualSignal && actualSignal.type && typeof this.onSignalCallback === 'function') {
+            this.onSignalCallback(actualSignal);
           }
         });
 

@@ -3403,6 +3403,7 @@ function renderActivePortalView() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
+  if (window.videoCallController) window.videoCallController.initIncomingSignalListener();
   if (role === 'patient' && window.patientController) window.patientController.renderAll();
   if (role === 'doctor' && window.doctorController) window.doctorController.init();
   if (role === 'worker' && window.workerController) window.workerController.renderAll();

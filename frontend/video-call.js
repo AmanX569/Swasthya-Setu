@@ -71,14 +71,26 @@
     }
 
     init() {
-      document.addEventListener('DOMContentLoaded', () => {
-        this.store = global.appStore;
+      const startListening = () => {
+        if (!this.store && global.appStore) this.store = global.appStore;
         this.initIncomingSignalListener();
-      });
+      };
+
+      if (typeof document !== 'undefined') {
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', startListening);
+        } else {
+          startListening();
+        }
+      }
+      // Guarantee immediate listener setup
+      setTimeout(() => startListening(), 50);
+      setTimeout(() => startListening(), 500);
     }
 
     unlockAudioContext() {
       try {
+        if (typeof window === 'undefined') return;
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
         if (AudioCtx) {
           if (!this.audioContext) {
@@ -165,7 +177,7 @@
       }
     }
 
-        handleIncomingSignal(signal) {
+            handleIncomingSignal(signal) {
       if (!signal || !signal.type) return;
       if (!this.store && global.appStore) this.store = global.appStore;
 
@@ -176,23 +188,26 @@
       const docPortalEl = document.getElementById('doctorPortal');
       const isDoctorDeskOpen = docPortalEl && (docPortalEl.style.display !== 'none' && (!docPortalEl.classList || !docPortalEl.classList.contains('hidden')));
       const isDoctorRole = (activeRole === 'doctor' || activeRole === 'staff' || activeRole === 'admin' || (activeUser.role && activeUser.role.toLowerCase().includes('doc')));
+      const isPatientRole = (activeRole === 'patient' || !isDoctorRole);
 
-      const patPortalEl = document.getElementById('viewPatient') || document.getElementById('patientPortal');
-      const isPatientPortalOpen = patPortalEl && (patPortalEl.style.display !== 'none' && (!patPortalEl.classList || !patPortalEl.classList.contains('hidden')));
-      const isPatientRole = (activeRole === 'patient' || isPatientPortalOpen || (!isDoctorRole && !isDoctorDeskOpen));
+      console.log('[VideoCall] Incoming Signal received:', signal.type, 'from role:', signal.callerRole, signal.callerName, '-> current role:', activeRole);
 
-      // 1. INCOMING CALL ALERT (Bidirectional: Doctor <- Patient OR Patient <- Doctor)
+      // 1. INCOMING CALL ALERT (Bidirectional: Doctor <-> Patient)
       if (signal.type === 'CALL_INITIATED') {
-        const isSelfCaller = (activeUser && (signal.callerPhone === activeUser.phone || signal.callerName === activeUser.name));
-        if (isSelfCaller) return; // Prevent self-ringing
+        // Only drop if user is on the exact same role and same name (prevent echo in same tab)
+        const isExactSelf = (signal.callerRole === activeRole && signal.callerName === activeUser.name);
+        if (isExactSelf) {
+          console.log('[VideoCall] Dropping self-originated echo signal from same user');
+          return;
+        }
 
-        // CASE A: Doctor receives call from Patient or ASHA
-        if ((signal.callerRole === 'patient' || signal.callerRole === 'worker') && (isDoctorRole || isDoctorDeskOpen)) {
+        // CASE A: Incoming call for DOCTOR (from Patient or ASHA)
+        if ((signal.callerRole === 'patient' || signal.callerRole === 'worker') && isDoctorRole) {
           console.log('[VideoCall] Doctor incoming call alert triggered for caller:', signal.callerName);
           this.pendingIncomingSignal = signal;
           this.showDoctorIncomingCallPopup(signal);
         }
-        // CASE B: Patient receives call from Doctor
+        // CASE B: Incoming call for PATIENT (from Doctor)
         else if (signal.callerRole === 'doctor' && isPatientRole) {
           console.log('[VideoCall] Patient incoming call alert triggered from doctor:', signal.callerName);
           this.pendingIncomingSignal = signal;
