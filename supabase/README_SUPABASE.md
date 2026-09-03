@@ -18,9 +18,11 @@ Follow these 3 quick steps to connect your own Supabase project:
 
 ### Step 3: Connect to Swasthya Setu Frontend
 1. In Supabase Dashboard, go to **Project Settings** (gear icon) $\rightarrow$ **API**.
-2. Copy your **Project URL** and **Anon Public API Key**.
-3. In Swasthya Setu, click **⚙️ Supabase Settings** in the top navigation bar and paste your URL & Key.
-*(Or edit `frontend/supabase-config.js` directly)*.
+2. Copy your **Project URL** and **Anon Public API Key** (publishable key).
+3. In your Vercel Dashboard, navigate to **Settings** $\rightarrow$ **Environment Variables** and add:
+   - `VITE_SUPABASE_URL` = your Supabase Project URL
+   - `VITE_SUPABASE_ANON_KEY` = your Supabase Anon Public Key
+*(Or specify them as build environment variables in `frontend/supabase-config.js`)*.
 
 ---
 

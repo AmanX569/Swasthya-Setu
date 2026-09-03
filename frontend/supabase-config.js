@@ -1,48 +1,53 @@
 /**
  * =========================================================
  * SWASTHYA SETU - SUPABASE CONFIGURATION (supabase-config.js)
- * Connected to Live Supabase Project: bqtinztvktsosuypuifi
+ * Secured configuration via environment variables & build flags
  * =========================================================
  */
 
 (function(global) {
   'use strict';
 
-  const STORAGE_KEY_URL = 'swasthya_setu_supabase_url';
-  const STORAGE_KEY_KEY = 'swasthya_setu_supabase_key';
+  // Fallback defaults for static deployment
+  const DEFAULT_URL = 'https://bqtinztvktsosuypuifi.supabase.co';
+  const DEFAULT_ANON_KEY = 'sb_publishable_TLWSYjSbIrgVfbt86PjgOQ_TaOyTtz4';
 
-  const PROJECT_URL = 'https://bqtinztvktsosuypuifi.supabase.co';
-  const PROJECT_KEY = 'sb_publishable_TLWSYjSbIrgVfbt86PjgOQ_TaOyTtz4';
+  // Read from environment variables (Vite / Vercel build or window injection)
+  let envUrl = '';
+  let envKey = '';
 
-  const savedUrl = localStorage.getItem(STORAGE_KEY_URL);
-  const savedKey = localStorage.getItem(STORAGE_KEY_KEY);
+  try {
+    const metaEnv = new Function('return typeof import.meta !== "undefined" && import.meta.env ? import.meta.env : null;')();
+    if (metaEnv) {
+      envUrl = metaEnv.VITE_SUPABASE_URL || '';
+      envKey = metaEnv.VITE_SUPABASE_ANON_KEY || '';
+    }
+  } catch (e) {}
+
+  if (!envUrl && typeof process !== 'undefined' && process.env) {
+    envUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || '';
+    envKey = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || '';
+  }
+
+  if (!envUrl && typeof window !== 'undefined') {
+    envUrl = window.VITE_SUPABASE_URL || window.SUPABASE_URL || '';
+    envKey = window.VITE_SUPABASE_ANON_KEY || window.SUPABASE_ANON_KEY || '';
+  }
+
+  // Cleanup legacy localStorage credentials if any were saved by old UI modal
+  try {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.removeItem('swasthya_setu_supabase_url');
+      localStorage.removeItem('swasthya_setu_supabase_key');
+    }
+  } catch (e) {}
 
   const supabaseConfigObj = {
-    url: savedUrl || PROJECT_URL,
-    anonKey: savedKey || PROJECT_KEY,
+    url: (envUrl || DEFAULT_URL).trim(),
+    anonKey: (envKey || DEFAULT_ANON_KEY).trim(),
 
     isConfigured: function() {
       return Boolean(this.url && this.anonKey && this.anonKey.length > 10);
-    },
-
-    saveCredentials: function(url, anonKey) {
-      this.url = (url || PROJECT_URL).trim();
-      this.anonKey = (anonKey || PROJECT_KEY).trim();
-      localStorage.setItem(STORAGE_KEY_URL, this.url);
-      localStorage.setItem(STORAGE_KEY_KEY, this.anonKey);
-      if (global.supabaseService) {
-        global.supabaseService.init();
-      }
-    },
-
-    clearCredentials: function() {
-      this.url = PROJECT_URL;
-      this.anonKey = PROJECT_KEY;
-      localStorage.removeItem(STORAGE_KEY_URL);
-      localStorage.removeItem(STORAGE_KEY_KEY);
-      if (global.supabaseService) {
-        global.supabaseService.init();
-      }
     }
   };
 

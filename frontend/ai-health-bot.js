@@ -798,7 +798,8 @@
     processAiResponse(query) {
       this.removeTypingIndicator();
 
-      const qRaw = query.toLowerCase();
+      try {
+        const qRaw = (query || '').toLowerCase();
       // Tokenize and remove stop words
       const rawTokens = qRaw.replace(/[^a-z0-9 ]/g, ' ').split(/\s+/);
       const filteredTokens = rawTokens.filter(w => w.length > 1 && !STOP_WORDS.has(w));
@@ -941,7 +942,32 @@
         });
       }
 
-      this.renderChat();
+      } catch (err) {
+        console.warn('[AI Bot] Clinical assistant processing error:', err);
+        this.messages.push({
+          sender: 'ai',
+          text: `### ⚠️ Service Notice\n\nUnable to reach the AI guide right now — please consult a doctor or use 108 SOS for emergencies.\n\nOur on-duty Medical Officers are active on the telemedicine grid to provide instant verified medical care.`,
+          severity: 'critical',
+          severityLabel: '🔴 EMERGENCY FALLBACK',
+          severityColor: '#dc2626',
+          steps: [
+            'For acute or life-threatening symptoms, tap **108 Emergency SOS** immediately.',
+            'Tap **Video Call Doctor** to connect directly with an active Medical Officer.',
+            'Visit your nearest Primary Health Centre (PHC) or Community Health Centre (CHC).'
+          ],
+          medicines: [],
+          redFlags: [
+            'Chest pain, shortness of breath, severe bleeding, or loss of consciousness require immediate 108 ambulance dispatch.'
+          ],
+          suggestedQuestions: [
+            'Would you like to connect to an on-duty doctor on video call?',
+            'Do you need 108 emergency ambulance assistance?'
+          ],
+          audioSummary: 'Unable to reach the AI guide right now — please consult a doctor or use 108 SOS for emergencies.',
+          time: this.getFormattedTime()
+        });
+        this.renderChat();
+      }
     }
 
     isFuzzyMatch(a, b) {
