@@ -58,6 +58,7 @@
       this.currentFacingMode = 'user'; // 'user' or 'environment'
       this.callStartTime = null;
       this.callTimerInterval = null;
+      this.iceCandidateQueue = [];
       this.frameSyncInterval = null;
       this.currentCallData = null;
       this.isWebRtcAudioActive = false;
@@ -443,6 +444,8 @@
 
       this.startCallTimer();
       this.startMicLevelMeter();
+      this.startFrameSyncStream();
+      this.startRealtimeVoiceStreaming();
 
       if (global.toast) {
         global.toast('📞 Calling ' + recipientName + '... Ringing on Doctor Desk.');
@@ -656,6 +659,7 @@
       try {
         if (this.peerConnection && signal.offer) {
           await this.peerConnection.setRemoteDescription(new RTCSessionDescription(signal.offer));
+          this.drainQueuedIceCandidates();
           const answer = await this.peerConnection.createAnswer({
             voiceActivityDetection: true
           });
@@ -697,6 +701,7 @@
       try {
         if (this.peerConnection && signal.answer) {
           await this.peerConnection.setRemoteDescription(new RTCSessionDescription(signal.answer));
+          this.drainQueuedIceCandidates();
           console.log('[WebRTC] Doctor answer accepted. 2-way peer connection established instantly!');
         }
       } catch (err) {
@@ -725,11 +730,32 @@
     }
 
     handleRemoteIceCandidate(candidate) {
+      if (!candidate) return;
+      if (!this.iceCandidateQueue) this.iceCandidateQueue = [];
+
+      if (!this.peerConnection || !this.peerConnection.remoteDescription || !this.peerConnection.remoteDescription.type) {
+        console.log('[WebRTC] Queuing ICE candidate until remote description is set');
+        this.iceCandidateQueue.push(candidate);
+        return;
+      }
+
       try {
-        if (this.peerConnection && this.peerConnection.remoteDescription) {
-          this.peerConnection.addIceCandidate(new RTCIceCandidate(candidate)).catch(() => {});
-        }
+        this.peerConnection.addIceCandidate(new RTCIceCandidate(candidate)).catch(err => {
+          console.warn('[WebRTC] Add ICE candidate warning:', err.message);
+        });
       } catch (e) {}
+    }
+
+    drainQueuedIceCandidates() {
+      if (this.peerConnection && this.peerConnection.remoteDescription && this.iceCandidateQueue && this.iceCandidateQueue.length > 0) {
+        console.log('[WebRTC] Draining', this.iceCandidateQueue.length, 'queued ICE candidates');
+        while (this.iceCandidateQueue.length > 0) {
+          const cand = this.iceCandidateQueue.shift();
+          try {
+            this.peerConnection.addIceCandidate(new RTCIceCandidate(cand)).catch(() => {});
+          } catch (e) {}
+        }
+      }
     }
 
     handleRemoteEndCall(signal) {
@@ -780,39 +806,32 @@
                         // On Remote Track Received -> Stream Video (Muted) and Play Audio via Dedicated Element
         this.peerConnection.ontrack = (event) => {
           console.log('[WebRTC] Remote media track received on device:', event.track.kind);
-          let stream = event.streams && event.streams[0];
-          if (!stream) {
-            if (!this.remoteStream) this.remoteStream = new MediaStream();
-            this.remoteStream.addTrack(event.track);
-            stream = this.remoteStream;
-          } else {
-            this.remoteStream = stream;
-          }
-
-          // 1. Remote Video Element Viewport (Video Only, Muted to Prevent Echo)
-          const remoteVideo = document.getElementById('remoteVideoElement');
-          if (remoteVideo) {
-            remoteVideo.srcObject = stream;
-            remoteVideo.muted = true;
-            if (typeof remoteVideo.play === 'function') {
-              remoteVideo.play().catch(e => console.warn('Remote video playback:', e));
+          
+          if (event.track.kind === 'video') {
+            const remoteVideo = document.getElementById('remoteVideoElement');
+            const remoteCanvas = document.getElementById('remoteVideoCanvas');
+            const remoteAvatar = document.getElementById('remoteAvatarPlaceholder');
+            if (remoteVideo) {
+              remoteVideo.srcObject = new MediaStream([event.track]);
+              remoteVideo.style.display = 'block';
+              remoteVideo.play().catch(e => console.warn('Remote video play:', e));
             }
+            if (remoteCanvas) remoteCanvas.style.display = 'none';
+            if (remoteAvatar) remoteAvatar.style.display = 'none';
           }
 
-          // 2. Dedicated Native High-Fidelity Audio Element (Pristine 48kHz Opus Voice)
-          const remoteAudio = document.getElementById('remoteAudioElement');
-          if (remoteAudio && event.track.kind === 'audio') {
-            remoteAudio.srcObject = new MediaStream([event.track]);
-            remoteAudio.muted = false;
-            remoteAudio.volume = 1.0;
-            if (typeof remoteAudio.play === 'function') {
-              remoteAudio.play().catch(e => console.warn('Remote audio playback:', e));
+          if (event.track.kind === 'audio') {
+            const remoteAudio = document.getElementById('remoteAudioElement');
+            if (remoteAudio) {
+              remoteAudio.srcObject = new MediaStream([event.track]);
+              remoteAudio.muted = false;
+              remoteAudio.volume = 1.0;
+              const p = remoteAudio.play();
+              if (p && p.catch) p.catch(e => console.warn('Remote audio play:', e));
             }
-            console.log('[WebRTC Audio] Pristine 48kHz Opus voice stream connected directly to output');
+            this.stopRealtimeVoiceStreaming();
+            console.log('[WebRTC Audio] Direct 48kHz Opus voice stream active');
           }
-
-          const remoteAvatar = document.getElementById('remoteAvatarPlaceholder');
-          if (remoteAvatar) remoteAvatar.style.display = 'none';
         };
 
         this.peerConnection.onconnectionstatechange = () => {
@@ -929,7 +948,59 @@
     // 6. REAL-TIME DIRECT VOICE STREAMING & ZERO-LAG PLAYBACK
     // -------------------------------------------------------------
     startRealtimeVoiceStreaming() {
-      // Pure WebRTC Opus handles high-definition real-time voice directly with zero lag
+      try {
+        if (!this.localStream) return;
+        const audioTrack = this.localStream.getAudioTracks()[0];
+        if (!audioTrack) return;
+
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        if (!this.audioContext) this.audioContext = new AudioCtx({ latencyHint: 'interactive' });
+        if (this.audioContext.state === 'suspended') this.audioContext.resume();
+
+        const source = this.audioContext.createMediaStreamSource(new MediaStream([audioTrack]));
+        this.audioScriptProcessor = this.audioContext.createScriptProcessor(2048, 1, 1);
+        this.silentGainNode = this.audioContext.createGain();
+        this.silentGainNode.gain.value = 0.0;
+        
+        let lastVoiceSend = 0;
+        this.audioScriptProcessor.onaudioprocess = (e) => {
+          if (this.isAudioMuted || !this.currentCallData) return;
+          // Stop fallback if native WebRTC P2P is connected
+          if (this.peerConnection && this.peerConnection.connectionState === 'connected') return;
+
+          const now = Date.now();
+          if (now - lastVoiceSend < 130) return; // Throttled: ~7 packets/sec instead of 50/sec
+
+          const inputData = e.inputBuffer.getChannelData(0);
+          let sum = 0;
+          for (let i = 0; i < inputData.length; i++) sum += inputData[i] * inputData[i];
+          const rms = Math.sqrt(sum / inputData.length);
+
+          if (rms > 0.008) {
+            lastVoiceSend = now;
+            const compressed = new Int8Array(inputData.length);
+            for (let i = 0; i < inputData.length; i++) {
+              compressed[i] = Math.max(-128, Math.min(127, Math.round(inputData[i] * 127)));
+            }
+            const base64Audio = btoa(String.fromCharCode.apply(null, new Uint8Array(compressed.buffer)));
+
+            if (global.supabaseService) {
+              global.supabaseService.sendTeleconsultSignal({
+                type: 'AUDIO_VOICE_STREAM',
+                callId: this.currentCallData.id,
+                audioChunk: base64Audio
+              });
+            }
+          }
+        };
+
+        source.connect(this.audioScriptProcessor);
+        this.audioScriptProcessor.connect(this.silentGainNode);
+        this.silentGainNode.connect(this.audioContext.destination);
+      } catch (e) {
+        console.warn('[Voice Engine] Streamer notice:', e);
+      }
     }
 
     stopRealtimeVoiceStreaming() {
@@ -937,14 +1008,80 @@
         try { this.audioScriptProcessor.disconnect(); } catch (e) {}
         this.audioScriptProcessor = null;
       }
+      if (this.silentGainNode) {
+        try { this.silentGainNode.disconnect(); } catch (e) {}
+        this.silentGainNode = null;
+      }
     }
 
     playRemoteAudioChunk(base64Chunk) {
-      // Disabled in favor of unlagged direct WebRTC audio
+      // If WebRTC direct P2P audio is active, ignore fallback chunks to prevent echo
+      if (this.peerConnection && this.peerConnection.connectionState === 'connected') return;
+      if (!this.isSpeakerBoosted || !base64Chunk) return;
+
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        if (!this.audioContext) this.audioContext = new AudioCtx({ latencyHint: 'interactive' });
+        if (this.audioContext.state === 'suspended') this.audioContext.resume();
+
+        const binaryStr = atob(base64Chunk);
+        const len = binaryStr.length;
+        const bytes = new Uint8Array(len);
+        for (let i = 0; i < len; i++) bytes[i] = binaryStr.charCodeAt(i);
+        const int8Array = new Int8Array(bytes.buffer);
+
+        const sampleRate = this.audioContext.sampleRate || 48000;
+        const audioBuffer = this.audioContext.createBuffer(1, int8Array.length, sampleRate);
+        const channelData = audioBuffer.getChannelData(0);
+
+        for (let i = 0; i < int8Array.length; i++) {
+          channelData[i] = (int8Array[i] / 127.0) * 1.2;
+        }
+
+        const source = this.audioContext.createBufferSource();
+        source.buffer = audioBuffer;
+        
+        const now = this.audioContext.currentTime;
+        if ((this.audioPlaybackTime - now) > 0.05 || this.audioPlaybackTime < now) {
+          this.audioPlaybackTime = now;
+        }
+        
+        source.connect(this.audioContext.destination);
+        source.start(this.audioPlaybackTime);
+        this.audioPlaybackTime += audioBuffer.duration;
+      } catch (e) {}
     }
 
     startFrameSyncStream() {
-      // Direct WebRTC PeerConnection streams 30-60 FPS HD video natively without WebSocket saturation
+      if (this.frameSyncInterval) clearInterval(this.frameSyncInterval);
+      if (typeof document === 'undefined' || !document.createElement) return;
+      const canvas = document.createElement('canvas');
+      if (!canvas || typeof canvas.getContext !== 'function') return;
+      canvas.width = 640;
+      canvas.height = 360; // 16:9 standard ratio
+      const ctx = canvas.getContext('2d', { alpha: false });
+      if (!ctx) return;
+      ctx.imageSmoothingQuality = 'medium';
+
+      // 120ms interval (~8 FPS) for smooth visual motion without clogging network
+      this.frameSyncInterval = setInterval(() => {
+        if (this.peerConnection && this.peerConnection.connectionState === 'connected') return;
+        const localVideo = document.getElementById('localVideoElement');
+        if (localVideo && localVideo.videoWidth > 0 && !this.isVideoMuted && this.currentCallData && ctx) {
+          try {
+            ctx.drawImage(localVideo, 0, 0, canvas.width, canvas.height);
+            const frameData = canvas.toDataURL('image/jpeg', 0.55);
+            if (global.supabaseService) {
+              global.supabaseService.sendTeleconsultSignal({
+                type: 'VIDEO_FRAME',
+                callId: this.currentCallData.id,
+                frameData
+              });
+            }
+          } catch (e) {}
+        }
+      }, 125);
     }
 
     stopFrameSyncStream() {
@@ -955,7 +1092,23 @@
     }
 
     renderRemoteVideoFrame(frameData) {
-      // Direct WebRTC handles video rendering natively
+      // If WebRTC direct P2P is connected, do not draw canvas
+      if (this.peerConnection && this.peerConnection.connectionState === 'connected') return;
+
+      const remoteCanvas = document.getElementById('remoteVideoCanvas');
+      const remoteAvatar = document.getElementById('remoteAvatarPlaceholder');
+      if (remoteCanvas && frameData) {
+        const img = new Image();
+        img.onload = () => {
+          remoteCanvas.style.display = 'block';
+          const ctx = remoteCanvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, remoteCanvas.width, remoteCanvas.height);
+          }
+          if (remoteAvatar) remoteAvatar.style.display = 'none';
+        };
+        img.src = frameData;
+      }
     }
 
     // -------------------------------------------------------------
