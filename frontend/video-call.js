@@ -442,9 +442,7 @@
       }
 
       this.startCallTimer();
-      this.startFrameSyncStream();
       this.startMicLevelMeter();
-      this.startRealtimeVoiceStreaming();
 
       if (global.toast) {
         global.toast('📞 Calling ' + recipientName + '... Ringing on Doctor Desk.');
@@ -686,9 +684,7 @@
       if (statusEl) statusEl.innerHTML = '🟢 Connected · 2-Way HD Video & Audio Active with ' + this.currentCallData.callerName;
 
       this.startCallTimer();
-      this.startFrameSyncStream();
       this.startMicLevelMeter();
-      this.startRealtimeVoiceStreaming();
     }
 
     async handleCallAcceptedByDoctor(signal) {
@@ -840,18 +836,15 @@
           try {
             this.localStream = await navigator.mediaDevices.getUserMedia({
               audio: {
-                echoCancellation: { ideal: true },
-                noiseSuppression: { ideal: true },
-                autoGainControl: { ideal: true },
-                sampleRate: { ideal: 48000 },
-                channelCount: { ideal: 1 }
+                echoCancellation: true,
+                noiseSuppression: true,
+                autoGainControl: true
               },
               video: {
                 facingMode: this.currentFacingMode,
-                aspectRatio: { ideal: 1.333333 }, // Natural 4:3 portrait/landscape ratio without wide distortion
-                width: { ideal: 1280, max: 1920 },
-                height: { ideal: 720, max: 1080 },
-                frameRate: { ideal: 30, min: 20 }
+                width: { ideal: 1280 },
+                height: { ideal: 720 },
+                frameRate: { ideal: 30 }
               }
             });
           } catch (e) {
@@ -936,56 +929,7 @@
     // 6. REAL-TIME DIRECT VOICE STREAMING & ZERO-LAG PLAYBACK
     // -------------------------------------------------------------
     startRealtimeVoiceStreaming() {
-      try {
-        if (!this.localStream) return;
-        const audioTrack = this.localStream.getAudioTracks()[0];
-        if (!audioTrack) return;
-
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        if (!AudioCtx) return;
-        if (!this.audioContext) this.audioContext = new AudioCtx({ latencyHint: 'interactive' });
-        if (this.audioContext.state === 'suspended') this.audioContext.resume();
-
-        const source = this.audioContext.createMediaStreamSource(new MediaStream([audioTrack]));
-        this.audioScriptProcessor = this.audioContext.createScriptProcessor(1024, 1, 1);
-        this.silentGainNode = this.audioContext.createGain();
-        this.silentGainNode.gain.value = 0.0;
-        
-        this.audioScriptProcessor.onaudioprocess = (e) => {
-          if (this.isAudioMuted || !this.currentCallData) return;
-          // Only send fallback chunks if WebRTC direct track is not yet connected (eliminates audio lag/echo)
-          const isP2pConnected = this.peerConnection && (this.peerConnection.connectionState === 'connected');
-          if (isP2pConnected) return;
-
-          const inputData = e.inputBuffer.getChannelData(0);
-          let sum = 0;
-          for (let i = 0; i < inputData.length; i++) sum += inputData[i] * inputData[i];
-          const rms = Math.sqrt(sum / inputData.length);
-
-          if (rms > 0.005) {
-            const compressed = new Int8Array(inputData.length);
-            for (let i = 0; i < inputData.length; i++) {
-              compressed[i] = Math.max(-128, Math.min(127, Math.round(inputData[i] * 127)));
-            }
-            const base64Audio = btoa(String.fromCharCode.apply(null, new Uint8Array(compressed.buffer)));
-
-            if (global.supabaseService) {
-              global.supabaseService.sendTeleconsultSignal({
-                type: 'AUDIO_VOICE_STREAM',
-                callId: this.currentCallData.id,
-                audioChunk: base64Audio
-              });
-            }
-          }
-        };
-
-        source.connect(this.audioScriptProcessor);
-        this.audioScriptProcessor.connect(this.silentGainNode);
-        this.silentGainNode.connect(this.audioContext.destination);
-        console.log('[Voice Engine] Real-time audio backup streamer active');
-      } catch (e) {
-        console.warn('[Voice Engine] Real-time streamer notice:', e);
-      }
+      // Pure WebRTC Opus handles high-definition real-time voice directly with zero lag
     }
 
     stopRealtimeVoiceStreaming() {
@@ -993,83 +937,14 @@
         try { this.audioScriptProcessor.disconnect(); } catch (e) {}
         this.audioScriptProcessor = null;
       }
-      if (this.silentGainNode) {
-        try { this.silentGainNode.disconnect(); } catch (e) {}
-        this.silentGainNode = null;
-      }
     }
 
     playRemoteAudioChunk(base64Chunk) {
-      // If WebRTC direct P2P audio is actively playing, ignore signaling fallback chunks to prevent lag/echo
-      const isP2pConnected = this.peerConnection && (this.peerConnection.connectionState === 'connected');
-      if (isP2pConnected || !this.isSpeakerBoosted || !base64Chunk) return;
-
-      try {
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        if (!AudioCtx) return;
-        if (!this.audioContext) this.audioContext = new AudioCtx({ latencyHint: 'interactive' });
-        if (this.audioContext.state === 'suspended') this.audioContext.resume();
-
-        const binaryStr = atob(base64Chunk);
-        const len = binaryStr.length;
-        const bytes = new Uint8Array(len);
-        for (let i = 0; i < len; i++) bytes[i] = binaryStr.charCodeAt(i);
-        const int8Array = new Int8Array(bytes.buffer);
-
-        const sampleRate = this.audioContext.sampleRate || 48000;
-        const audioBuffer = this.audioContext.createBuffer(1, int8Array.length, sampleRate);
-        const channelData = audioBuffer.getChannelData(0);
-
-        for (let i = 0; i < int8Array.length; i++) {
-          channelData[i] = (int8Array[i] / 127.0) * 1.8;
-        }
-
-        const source = this.audioContext.createBufferSource();
-        source.buffer = audioBuffer;
-        
-        const now = this.audioContext.currentTime;
-        if ((this.audioPlaybackTime - now) > 0.04 || this.audioPlaybackTime < now) {
-          this.audioPlaybackTime = now;
-        }
-        
-        source.connect(this.audioContext.destination);
-        source.start(this.audioPlaybackTime);
-        this.audioPlaybackTime += audioBuffer.duration;
-      } catch (e) {
-        console.warn('[Voice Playback] Buffer play notice:', e);
-      }
+      // Disabled in favor of unlagged direct WebRTC audio
     }
 
-    // -------------------------------------------------------------
-    // 7. HIGH-DEFINITION DUAL-MODE FRAME STREAMING (15-20 FPS)
-    // -------------------------------------------------------------
     startFrameSyncStream() {
-      if (this.frameSyncInterval) clearInterval(this.frameSyncInterval);
-      if (typeof document === 'undefined' || !document.createElement) return;
-      const canvas = document.createElement('canvas');
-      if (!canvas || typeof canvas.getContext !== 'function') return;
-      canvas.width = 640;
-      canvas.height = 480;
-      const ctx = canvas.getContext('2d', { alpha: false });
-      if (ctx) ctx.imageSmoothingQuality = 'high';
-
-      // 60ms interval (~16 FPS) for smooth visual motion
-      this.frameSyncInterval = setInterval(() => {
-        const localVideo = document.getElementById('localVideoElement');
-        if (localVideo && localVideo.videoWidth > 0 && !this.isVideoMuted && this.currentCallData && ctx) {
-          try {
-            ctx.drawImage(localVideo, 0, 0, canvas.width, canvas.height);
-            const frameData = canvas.toDataURL('image/jpeg', 0.65);
-            if (global.supabaseService) {
-              global.supabaseService.sendTeleconsultSignal({
-                type: 'VIDEO_FRAME',
-                callId: this.currentCallData.id,
-                frameData
-              });
-            }
-          } catch (e) {}
-        }
-      }, 70);
+      // Direct WebRTC PeerConnection streams 30-60 FPS HD video natively without WebSocket saturation
     }
 
     stopFrameSyncStream() {
@@ -1080,21 +955,7 @@
     }
 
     renderRemoteVideoFrame(frameData) {
-      const remoteCanvas = document.getElementById('remoteVideoCanvas');
-      const remoteAvatar = document.getElementById('remoteAvatarPlaceholder');
-      if (remoteCanvas && frameData) {
-        const img = new Image();
-        img.onload = () => {
-          remoteCanvas.style.display = 'block';
-          const ctx = remoteCanvas.getContext('2d');
-          if (ctx) {
-            ctx.imageSmoothingQuality = 'high';
-            ctx.drawImage(img, 0, 0, remoteCanvas.width, remoteCanvas.height);
-          }
-          if (remoteAvatar) remoteAvatar.style.display = 'none';
-        };
-        img.src = frameData;
-      }
+      // Direct WebRTC handles video rendering natively
     }
 
     // -------------------------------------------------------------
@@ -1452,16 +1313,15 @@
     }
 
     toggleVideoFit() {
+      const card = document.getElementById('videoViewportCard');
       const remoteVideo = document.getElementById('remoteVideoElement');
-      const remoteCanvas = document.getElementById('remoteVideoCanvas');
       const btn = document.getElementById('btnToggleFit');
-      if (!remoteVideo) return;
-      const currentFit = remoteVideo.style.objectFit || 'contain';
-      const newFit = currentFit === 'contain' ? 'cover' : 'contain';
-      remoteVideo.style.objectFit = newFit;
-      if (remoteCanvas) remoteCanvas.style.objectFit = newFit;
-      if (btn) btn.innerHTML = newFit === 'contain' ? '🔍 <span>Fit (Natural)</span>' : '🔍 <span>Fill (Crop)</span>';
-      if (global.toast) global.toast(newFit === 'contain' ? '🔍 Natural Proportions (No Distortion)' : '🔍 Fill Screen (Crop)');
+      if (!card || !remoteVideo) return;
+      const currentRatio = card.style.aspectRatio || '16/9';
+      const newRatio = (currentRatio === '16/9' || currentRatio === '16 / 9') ? '4/3' : '16/9';
+      card.style.aspectRatio = newRatio;
+      if (btn) btn.innerHTML = newRatio === '4/3' ? '🔍 <span>4:3 Portrait</span>' : '🔍 <span>16:9 Wide</span>';
+      if (global.toast) global.toast('🔍 Switched Viewport to ' + (newRatio === '4/3' ? '4:3 Portrait' : '16:9 Standard HD'));
     }
 
         renderVideoCallModal() {
@@ -1505,7 +1365,7 @@
                 </div>
                 <span id="micAudioStatusText" style="font-size:10px;color:#38bdf8;font-weight:700;">Live</span>
               </div>
-              <button id="btnToggleFit" onclick="videoCallController.toggleVideoFit()" style="background:rgba(0,0,0,0.5);color:#cbd5e1;border:1px solid rgba(255,255,255,0.15);font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;cursor:pointer;">🔍 <span>Fit (Natural)</span></button>
+              <button id="btnToggleFit" onclick="videoCallController.toggleVideoFit()" style="background:rgba(0,0,0,0.5);color:#cbd5e1;border:1px solid rgba(255,255,255,0.15);font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;cursor:pointer;">🔍 <span>16:9 HD</span></button>
               <span id="videoCameraFacingBadge" style="background:rgba(0,0,0,0.5);color:#cbd5e1;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;border:1px solid rgba(255,255,255,0.15);">📷 Front</span>
               <span id="videoCallTimerDisplay" style="background:rgba(22,163,74,0.25);color:#4ade80;border:1px solid rgba(34,197,94,0.4);font-size:12px;font-weight:800;padding:4px 10px;border-radius:20px;font-family:'IBM Plex Mono',monospace;">⏱️ 00:00</span>
             </div>
