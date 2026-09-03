@@ -9131,40 +9131,16 @@ body[data-theme="doom"] {
             }
           }
 
-          // 2. Dedicated Unmuted Audio Element (Plays Single Clean Voice Stream)
+          // 2. Dedicated Native High-Fidelity Audio Element (Pristine 48kHz Opus Voice)
           const remoteAudio = document.getElementById('remoteAudioElement');
-          if (remoteAudio) {
-            if (event.track.kind === 'audio') {
-              remoteAudio.srcObject = new MediaStream([event.track]);
-            } else {
-              remoteAudio.srcObject = stream;
-            }
+          if (remoteAudio && event.track.kind === 'audio') {
+            remoteAudio.srcObject = new MediaStream([event.track]);
             remoteAudio.muted = false;
             remoteAudio.volume = 1.0;
-            remoteAudio.play().catch(e => console.warn('Remote audio element playback:', e));
-          }
-
-          // 3. Optional Web Audio Gain Boost
-          if (event.track.kind === 'audio') {
-            try {
-              this.unlockAudioContext();
-              if (this.audioContext) {
-                if (this.audioContext.state === 'suspended') this.audioContext.resume();
-                if (this.remoteAudioSource) {
-                  try { this.remoteAudioSource.disconnect(); } catch (e) {}
-                }
-                this.remoteAudioSource = this.audioContext.createMediaStreamSource(new MediaStream([event.track]));
-                if (!this.audioGainNode) {
-                  this.audioGainNode = this.audioContext.createGain();
-                  this.audioGainNode.gain.value = 2.0; // 2x Gain
-                  this.audioGainNode.connect(this.audioContext.destination);
-                }
-                this.remoteAudioSource.connect(this.audioGainNode);
-                console.log('[WebRTC Audio] Remote voice stream connected directly to speakers with 2.0x gain');
-              }
-            } catch (err) {
-              console.warn('[WebRTC Audio] AudioContext routing fallback notice:', err);
+            if (typeof remoteAudio.play === 'function') {
+              remoteAudio.play().catch(e => console.warn('Remote audio playback:', e));
             }
+            console.log('[WebRTC Audio] Pristine 48kHz Opus voice stream connected directly to output');
           }
 
           const remoteAvatar = document.getElementById('remoteAvatarPlaceholder');
@@ -9192,15 +9168,17 @@ body[data-theme="doom"] {
           try {
             this.localStream = await navigator.mediaDevices.getUserMedia({
               audio: {
-                echoCancellation: true,
-                noiseSuppression: true,
-                autoGainControl: true,
-                channelCount: 1 // Mono stream: 50% packet weight, sub-40ms latency
+                echoCancellation: { ideal: true },
+                noiseSuppression: { ideal: true },
+                autoGainControl: { ideal: true },
+                sampleRate: { ideal: 48000 },
+                channelCount: { ideal: 1 }
               },
               video: {
                 facingMode: this.currentFacingMode,
-                width: { ideal: 1280, min: 640 },
-                height: { ideal: 720, min: 480 },
+                aspectRatio: { ideal: 1.333333 }, // Natural 4:3 portrait/landscape ratio without wide distortion
+                width: { ideal: 1280, max: 1920 },
+                height: { ideal: 720, max: 1080 },
                 frameRate: { ideal: 30, min: 20 }
               }
             });
@@ -9806,12 +9784,12 @@ body[data-theme="doom"] {
       const remoteCanvas = document.getElementById('remoteVideoCanvas');
       const btn = document.getElementById('btnToggleFit');
       if (!remoteVideo) return;
-      const currentFit = remoteVideo.style.objectFit || 'cover';
-      const newFit = currentFit === 'cover' ? 'contain' : 'cover';
+      const currentFit = remoteVideo.style.objectFit || 'contain';
+      const newFit = currentFit === 'contain' ? 'cover' : 'contain';
       remoteVideo.style.objectFit = newFit;
       if (remoteCanvas) remoteCanvas.style.objectFit = newFit;
-      if (btn) btn.innerHTML = newFit === 'contain' ? '🔍 <span>Fill</span>' : '🔍 <span>Fit</span>';
-      if (global.toast) global.toast(newFit === 'contain' ? '🔍 Video Fit (Full Frame Visible)' : '🔍 Video Fill (Edge to Edge)');
+      if (btn) btn.innerHTML = newFit === 'contain' ? '🔍 <span>Fit (Natural)</span>' : '🔍 <span>Fill (Crop)</span>';
+      if (global.toast) global.toast(newFit === 'contain' ? '🔍 Natural Proportions (No Distortion)' : '🔍 Fill Screen (Crop)');
     }
 
         renderVideoCallModal() {
@@ -9855,23 +9833,23 @@ body[data-theme="doom"] {
                 </div>
                 <span id="micAudioStatusText" style="font-size:10px;color:#38bdf8;font-weight:700;">Live</span>
               </div>
-              <button id="btnToggleFit" onclick="videoCallController.toggleVideoFit()" style="background:rgba(0,0,0,0.5);color:#cbd5e1;border:1px solid rgba(255,255,255,0.15);font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;cursor:pointer;">🔍 <span>Fit</span></button>
+              <button id="btnToggleFit" onclick="videoCallController.toggleVideoFit()" style="background:rgba(0,0,0,0.5);color:#cbd5e1;border:1px solid rgba(255,255,255,0.15);font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;cursor:pointer;">🔍 <span>Fit (Natural)</span></button>
               <span id="videoCameraFacingBadge" style="background:rgba(0,0,0,0.5);color:#cbd5e1;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;border:1px solid rgba(255,255,255,0.15);">📷 Front</span>
               <span id="videoCallTimerDisplay" style="background:rgba(22,163,74,0.25);color:#4ade80;border:1px solid rgba(34,197,94,0.4);font-size:12px;font-weight:800;padding:4px 10px;border-radius:20px;font-family:'IBM Plex Mono',monospace;">⏱️ 00:00</span>
             </div>
           </div>
 
-          <!-- FULL EDGE-TO-EDGE VIDEO STAGE -->
-          <div style="flex:1;width:100%;height:100%;position:relative;background:#000000;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+          <!-- FULL NATURAL RATIO VIDEO STAGE -->
+          <div style="flex:1;width:100%;height:100%;position:relative;background:#090d16;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:8px;box-sizing:border-box;">
             
-            <!-- NATIVE REMOTE VIDEO ELEMENT (FULLSCREEN ADAPTIVE) -->
-            <video id="remoteVideoElement" autoplay playsinline style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;"></video>
+            <!-- NATIVE REMOTE VIDEO ELEMENT (NATURAL ASPECT RATIO PRESERVED - NO WIDE DISTORTION) -->
+            <video id="remoteVideoElement" autoplay playsinline style="width:100%;height:100%;max-width:100%;max-height:100%;object-fit:contain;margin:auto;position:relative;z-index:2;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.7);"></video>
 
-            <!-- UNMUTED DEDICATED REMOTE AUDIO PLAYBACK -->
-            <audio id="remoteAudioElement" autoplay playsinline style="position:absolute;top:6px;left:6px;width:120px;height:24px;opacity:0.01;z-index:1;"></audio>
+            <!-- UNMUTED DEDICATED REMOTE AUDIO PLAYBACK (HIDDEN NATIVE OPUS DECODER) -->
+            <audio id="remoteAudioElement" autoplay playsinline style="position:absolute;width:1px;height:1px;opacity:0.01;pointer-events:none;"></audio>
 
             <!-- HIGH-RES CANVAS BACKUP (15-20 FPS) -->
-            <canvas id="remoteVideoCanvas" width="640" height="480" style="display:none;width:100%;height:100%;object-fit:cover;position:absolute;inset:0;"></canvas>
+            <canvas id="remoteVideoCanvas" width="640" height="480" style="display:none;width:100%;height:100%;max-width:100%;max-height:100%;object-fit:contain;margin:auto;position:relative;z-index:2;border-radius:12px;"></canvas>
 
             <!-- REMOTE AVATAR / CONNECTING PLACEHOLDER -->
             <div id="remoteAvatarPlaceholder" style="text-align:center;padding:20px;z-index:2;">
@@ -9887,7 +9865,7 @@ body[data-theme="doom"] {
             </div>
 
             <!-- COMPACT LOCAL PICTURE-IN-PICTURE (PIP) -->
-            <div id="localPipContainer" style="position:absolute;bottom:85px;right:14px;width:clamp(110px, 22vw, 150px);height:clamp(80px, 16vw, 110px);background:#1e293b;border:2px solid #0284c7;border-radius:12px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,0.8);z-index:25;transition:all 0.3s ease;">
+            <div id="localPipContainer" style="position:absolute;bottom:85px;right:14px;width:clamp(120px, 20vw, 170px);aspect-ratio:4/3;background:#1e293b;border:2px solid #0284c7;border-radius:14px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,0.85);z-index:25;transition:all 0.3s ease;">
               <video id="localVideoElement" autoplay muted playsinline style="width:100%;height:100%;object-fit:cover;transform:scaleX(-1);"></video>
               <div id="localVideoPlaceholder" style="display:none;width:100%;height:100%;align-items:center;justify-content:center;background:#0f172a;color:#94a3b8;font-size:11px;flex-direction:column;gap:2px;">
                 <span>🚫</span> Off
