@@ -720,14 +720,24 @@
       this.closeApiKeyModal();
     }
 
-    updateModelBadge() {
-      const badge = document.getElementById('floatingAiModelBadge');
+        updateModelBadge() {
+      const floatBadge = document.getElementById('floatingAiModelBadge');
+      const inlineBadge = document.getElementById('inlineGeminiBadge');
       const hasKey = Boolean(this.getApiKey());
-      if (badge) {
-        badge.textContent = hasKey ? '✨ Gemini AI' : '⚡ Offline Clinical';
-        if (badge.style) {
-          badge.style.borderColor = hasKey ? '#10b981' : '#0284c7';
-          badge.style.color = hasKey ? '#34d399' : '#38bdf8';
+
+      if (floatBadge) {
+        floatBadge.textContent = hasKey ? '✨ Gemini 1.5 Live' : '✨ Powered by Gemini';
+        if (floatBadge.style) {
+          floatBadge.style.borderColor = hasKey ? '#10b981' : '#38bdf8';
+          floatBadge.style.color = hasKey ? '#34d399' : '#38bdf8';
+        }
+      }
+
+      if (inlineBadge) {
+        inlineBadge.textContent = hasKey ? '✨ Gemini 1.5 Flash (Live)' : '✨ Powered by Gemini AI';
+        if (inlineBadge.style) {
+          inlineBadge.style.borderColor = hasKey ? '#10b981' : 'rgba(56,189,248,0.4)';
+          inlineBadge.style.color = hasKey ? '#34d399' : '#38bdf8';
         }
       }
     }
@@ -778,7 +788,7 @@
       this.messages = [
         {
           sender: 'ai',
-          text: 'Namaste! I am your **24x7 Swasthya AI Clinical Health Assistant**. If our doctors are busy or you need immediate guidance, describe your symptoms below (in English, Hindi, or Telugu) or tap any quick symptom pill above. I will provide instant clinical assessment, first-aid steps, danger red flags, and affordable Jan Aushadhi medicine guidance.',
+          text: 'Namaste! I am your **24x7 Swasthya AI Clinical Health Assistant** (Powered by Google Gemini). If our doctors are busy or you need immediate guidance, describe your symptoms below (in any Indian language) or tap any quick symptom pill above. I provide instant clinical triage, emergency first-aid, danger red flags, and affordable PMBJP Jan Aushadhi generic medicines.',
           time: this.getFormattedTime(),
           audioSummary: 'Namaste! I am your 24x7 Swasthya AI Clinical Health Assistant. Describe your symptoms or tap any quick symptom for instant first aid and medicine guidance.'
         }
@@ -883,7 +893,7 @@
                 ` : ''}
 
                 <div style="font-size:10px;color:var(--muted);text-align:right;margin-top:8px;">
-                  ${m.time} · Swasthya AI Clinical Protocol
+                  ${m.time} · Swasthya AI · ✨ Powered by Gemini AI
                 </div>
 
               </div>

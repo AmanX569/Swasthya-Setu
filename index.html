@@ -1149,72 +1149,96 @@ body[data-theme="doom"] {
 
 /* FLOATING SWASTHYA AI WIDGET STYLES */
 #aiFloatingTriggerBtn {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #10b981, #059669);
-  color: #ffffff;
-  border: 2.5px solid #34d399;
-  box-shadow: 0 8px 28px rgba(16, 185, 129, 0.45);
-  cursor: pointer;
-  z-index: 10000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 28px;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  animation: pulseGlow 3s infinite;
+  position: fixed !important;
+  bottom: 24px !important;
+  right: 24px !important;
+  height: 52px !important;
+  padding: 0 18px 0 14px !important;
+  border-radius: 26px !important;
+  background: linear-gradient(135deg, #10b981, #059669) !important;
+  color: #ffffff !important;
+  border: 2.5px solid #6ee7b7 !important;
+  box-shadow: 0 8px 30px rgba(16, 185, 129, 0.55), 0 0 15px rgba(52, 211, 153, 0.35) !important;
+  cursor: pointer !important;
+  z-index: 999999 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  font-family: inherit !important;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  animation: pulseGlow 3s infinite !important;
+}
+
+@keyframes pulseGlow {
+  0% {
+    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.5), 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+  70% {
+    box-shadow: 0 8px 35px rgba(16, 185, 129, 0.7), 0 0 0 12px rgba(16, 185, 129, 0);
+  }
+  100% {
+    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.5), 0 0 0 0 rgba(16, 185, 129, 0);
+  }
 }
 
 #aiFloatingTriggerBtn:hover {
-  transform: scale(1.08) translateY(-3px);
-  box-shadow: 0 12px 36px rgba(16, 185, 129, 0.6);
+  transform: scale(1.05) translateY(-3px) !important;
+  box-shadow: 0 12px 36px rgba(16, 185, 129, 0.7) !important;
 }
 
 #aiFloatingTriggerBtn:active {
-  transform: scale(0.94);
+  transform: scale(0.95) !important;
 }
 
 #swasthyaAiFloatingModal {
   display: none;
-  position: fixed;
-  bottom: 96px;
-  right: 24px;
-  width: 440px;
-  max-width: calc(100vw - 32px);
-  height: 620px;
-  max-height: calc(100vh - 120px);
-  background: #0f172a;
-  border: 1.5px solid rgba(16, 185, 129, 0.45);
-  border-radius: 20px;
-  box-shadow: 0 16px 50px rgba(0, 0, 0, 0.6), 0 0 24px rgba(16, 185, 129, 0.25);
-  z-index: 10001;
-  flex-direction: column;
-  backdrop-filter: blur(20px);
-  overflow: hidden;
-  animation: pageEnterSmooth 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  position: fixed !important;
+  bottom: 86px !important;
+  right: 24px !important;
+  width: 440px !important;
+  max-width: calc(100vw - 32px) !important;
+  height: 620px !important;
+  max-height: calc(100vh - 110px) !important;
+  background: #0f172a !important;
+  border: 1.5px solid rgba(16, 185, 129, 0.45) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.75), 0 0 30px rgba(16, 185, 129, 0.3) !important;
+  z-index: 1000000 !important;
+  flex-direction: column !important;
+  backdrop-filter: blur(20px) !important;
+  overflow: hidden !important;
+  animation: pageEnterSmooth 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 600px) {
   #swasthyaAiFloatingModal {
-    bottom: 0;
-    right: 0;
-    width: 100vw;
-    max-width: 100vw;
-    height: 90vh;
-    max-height: 90vh;
-    border-radius: 20px 20px 0 0;
-    border-bottom: none;
+    bottom: 0 !important;
+    right: 0 !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: 90vh !important;
+    max-height: 90vh !important;
+    border-radius: 20px 20px 0 0 !important;
+    border-bottom: none !important;
+  }
+  #aiFloatingTriggerBtn .fab-text {
+    display: none !important;
   }
   #aiFloatingTriggerBtn {
-    bottom: 18px;
-    right: 18px;
-    width: 54px;
-    height: 54px;
-    font-size: 24px;
+    bottom: 18px !important;
+    right: 18px !important;
+    width: 56px !important;
+    height: 56px !important;
+    padding: 0 !important;
+    border-radius: 50% !important;
+    justify-content: center !important;
+  }
+  #aiFloatingTriggerBtn .fab-badge {
+    position: absolute !important;
+    top: -4px !important;
+    right: -4px !important;
+    font-size: 9px !important;
+    padding: 1px 5px !important;
   }
 }
 </style>
@@ -3965,9 +3989,12 @@ body[data-theme="doom"] {
             🤖
           </div>
           <div>
-            <h2 class="panel-title" style="color:var(--ink);font-size:17px;font-weight:800;display:flex;align-items:center;gap:8px;">
+            <h2 class="panel-title" style="color:var(--ink);font-size:17px;font-weight:800;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
               <span>Swasthya AI Health Guide & Symptom Assistant</span>
               <span class="badge" style="background:rgba(16,185,129,0.15);color:#10b981;font-size:10px;padding:3px 8px;border-radius:10px;">24x7 Live</span>
+              <span id="inlineGeminiBadge" class="badge" style="background:rgba(56,189,248,0.15);color:#38bdf8;font-size:10px;padding:3px 8px;border-radius:10px;border:1px solid rgba(56,189,248,0.3);cursor:pointer;" onclick="aiHealthBot.openApiKeyModal()" title="Click to configure Google Gemini AI Key">
+                ✨ Powered by Gemini AI
+              </span>
             </h2>
             <small style="color:var(--muted);">Instant clinical triage, emergency first-aid, home care remedies & medicine guide when doctor is offline</small>
           </div>
@@ -3987,6 +4014,10 @@ body[data-theme="doom"] {
               <option value="kn">ಕನ್ನಡ (Kannada)</option>
             </select>
           </div>
+          <!-- ⚙️ GEMINI API KEY BUTTON -->
+          <button type="button" class="btn-glass" style="padding:6px 12px;font-size:12px;border-radius:8px;border-color:rgba(56,189,248,0.4);color:#38bdf8;" onclick="aiHealthBot.openApiKeyModal()" title="Connect Google Gemini API Key">
+            ✨ Gemini API
+          </button>
           <button type="button" class="btn-glass" style="padding:6px 12px;font-size:12px;border-radius:8px;" onclick="aiHealthBot.clearChat()">
             🧹 Clear Chat
           </button>
@@ -10936,14 +10967,24 @@ body[data-theme="doom"] {
       this.closeApiKeyModal();
     }
 
-    updateModelBadge() {
-      const badge = document.getElementById('floatingAiModelBadge');
+        updateModelBadge() {
+      const floatBadge = document.getElementById('floatingAiModelBadge');
+      const inlineBadge = document.getElementById('inlineGeminiBadge');
       const hasKey = Boolean(this.getApiKey());
-      if (badge) {
-        badge.textContent = hasKey ? '✨ Gemini AI' : '⚡ Offline Clinical';
-        if (badge.style) {
-          badge.style.borderColor = hasKey ? '#10b981' : '#0284c7';
-          badge.style.color = hasKey ? '#34d399' : '#38bdf8';
+
+      if (floatBadge) {
+        floatBadge.textContent = hasKey ? '✨ Gemini 1.5 Live' : '✨ Powered by Gemini';
+        if (floatBadge.style) {
+          floatBadge.style.borderColor = hasKey ? '#10b981' : '#38bdf8';
+          floatBadge.style.color = hasKey ? '#34d399' : '#38bdf8';
+        }
+      }
+
+      if (inlineBadge) {
+        inlineBadge.textContent = hasKey ? '✨ Gemini 1.5 Flash (Live)' : '✨ Powered by Gemini AI';
+        if (inlineBadge.style) {
+          inlineBadge.style.borderColor = hasKey ? '#10b981' : 'rgba(56,189,248,0.4)';
+          inlineBadge.style.color = hasKey ? '#34d399' : '#38bdf8';
         }
       }
     }
@@ -10994,7 +11035,7 @@ body[data-theme="doom"] {
       this.messages = [
         {
           sender: 'ai',
-          text: 'Namaste! I am your **24x7 Swasthya AI Clinical Health Assistant**. If our doctors are busy or you need immediate guidance, describe your symptoms below (in English, Hindi, or Telugu) or tap any quick symptom pill above. I will provide instant clinical assessment, first-aid steps, danger red flags, and affordable Jan Aushadhi medicine guidance.',
+          text: 'Namaste! I am your **24x7 Swasthya AI Clinical Health Assistant** (Powered by Google Gemini). If our doctors are busy or you need immediate guidance, describe your symptoms below (in any Indian language) or tap any quick symptom pill above. I provide instant clinical triage, emergency first-aid, danger red flags, and affordable PMBJP Jan Aushadhi generic medicines.',
           time: this.getFormattedTime(),
           audioSummary: 'Namaste! I am your 24x7 Swasthya AI Clinical Health Assistant. Describe your symptoms or tap any quick symptom for instant first aid and medicine guidance.'
         }
@@ -11099,7 +11140,7 @@ body[data-theme="doom"] {
                 ` : ''}
 
                 <div style="font-size:10px;color:var(--muted);text-align:right;margin-top:8px;">
-                  ${m.time} · Swasthya AI Clinical Protocol
+                  ${m.time} · Swasthya AI · ✨ Powered by Gemini AI
                 </div>
 
               </div>
@@ -15492,9 +15533,10 @@ checkDemoModeFlag();
      ========================================================= -->
 
 <!-- FLOATING TRIGGER ICON (FAB) -->
-<button type="button" id="aiFloatingTriggerBtn" onclick="aiHealthBot.toggleFloatingWidget()" title="Chat with Swasthya AI (Gemini Powered)">
-  <span id="aiFloatingIcon">🤖</span>
-  <span style="position:absolute;top:-4px;right:-4px;background:#ef4444;color:#ffffff;font-size:10px;font-weight:900;padding:2px 6px;border-radius:10px;border:1.5px solid #ffffff;box-shadow:0 2px 6px rgba(0,0,0,0.3);">AI</span>
+<button type="button" id="aiFloatingTriggerBtn" onclick="aiHealthBot.toggleFloatingWidget()" title="Chat with Swasthya AI (Powered by Gemini)">
+  <span style="font-size:22px;display:inline-flex;align-items:center;">🤖</span>
+  <span class="fab-text" style="font-size:13px;font-weight:800;white-space:nowrap;letter-spacing:0.2px;">Ask Swasthya AI</span>
+  <span class="fab-badge" style="background:rgba(255,255,255,0.22);color:#ffffff;font-size:10px;font-weight:900;padding:2px 7px;border-radius:10px;border:1px solid rgba(255,255,255,0.4);white-space:nowrap;">✨ Gemini</span>
 </button>
 
 <!-- FLOATING POPUP CHAT WINDOW -->
