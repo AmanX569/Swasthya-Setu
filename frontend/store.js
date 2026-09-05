@@ -84,9 +84,11 @@
     ],
 
     hospitals: [
-      { id: 'HOSP-01', name: 'Kondapalli Primary Health Centre (PHC)', type: 'PHC', distance: '1.2 km', totalBeds: 20, genBedsAvail: 8, icuBedsAvail: 2, oxygenBedsAvail: 6, doctorOnDuty: 'Dr. Priya Sharma', phone: '0866-281001' },
-      { id: 'HOSP-02', name: 'Ibrahimpatnam Community Health Centre (CHC)', type: 'CHC', distance: '6.5 km', totalBeds: 60, genBedsAvail: 18, icuBedsAvail: 5, oxygenBedsAvail: 14, doctorOnDuty: 'Dr. Rajesh Verma', phone: '0866-282002' },
-      { id: 'HOSP-03', name: 'Government General Hospital (GGH), Vijayawada', type: 'District Hospital', distance: '16.0 km', totalBeds: 500, genBedsAvail: 74, icuBedsAvail: 12, oxygenBedsAvail: 45, doctorOnDuty: 'Emergency Trauma Team', phone: '0866-257000' }
+      { id: 'HOSP-01', name: 'Kondapalli Primary Health Centre (PHC)', type: 'PHC', distance: '1.2 km', lat: 16.6198, lng: 80.5401, totalBeds: 20, genBedsAvail: 8, icuBedsAvail: 2, oxygenBedsAvail: 6, doctorOnDuty: 'Dr. Priya Sharma, MBBS, MD', phone: '0866-281001', address: 'Ward 4, Near Bus Stand, Kondapalli' },
+      { id: 'HOSP-02', name: 'Ibrahimpatnam Community Health Centre (CHC)', type: 'CHC', distance: '6.5 km', lat: 16.5925, lng: 80.5218, totalBeds: 60, genBedsAvail: 18, icuBedsAvail: 5, oxygenBedsAvail: 14, doctorOnDuty: 'Dr. Rajesh Verma, MBBS, MS', phone: '0866-282002', address: 'Main Road, Ibrahimpatnam' },
+      { id: 'HOSP-03', name: 'Government General Hospital (GGH), Vijayawada', type: 'District Hospital', distance: '16.0 km', lat: 16.5062, lng: 80.6480, totalBeds: 500, genBedsAvail: 74, icuBedsAvail: 12, oxygenBedsAvail: 45, doctorOnDuty: 'Emergency Trauma Care Team', phone: '0866-257000', address: 'Hanumanpet, Vijayawada' },
+      { id: 'HOSP-04', name: 'Gollapudi Health Sub-Centre (HSC)', type: 'Sub-Centre', distance: '4.8 km', lat: 16.5492, lng: 80.5786, totalBeds: 10, genBedsAvail: 4, icuBedsAvail: 0, oxygenBedsAvail: 3, doctorOnDuty: 'Dr. Ramesh Babu, MBBS', phone: '0866-283003', address: 'Gollapudi Village Centre' },
+      { id: 'HOSP-05', name: 'Mylavaram Community Health Centre (CHC)', type: 'CHC', distance: '18.4 km', lat: 16.7628, lng: 80.6385, totalBeds: 50, genBedsAvail: 14, icuBedsAvail: 3, oxygenBedsAvail: 10, doctorOnDuty: 'Dr. K. Sujatha, MBBS, DGO', phone: '08659-222005', address: 'Hospital Road, Mylavaram' }
     ],
 
     bloodBank: {

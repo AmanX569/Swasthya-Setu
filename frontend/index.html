@@ -1799,7 +1799,13 @@ body[data-theme="doom"] {
     <!-- LIVE HOSPITAL BED GRID -->
     <div class="glass-panel">
       <div class="panel-header">
-        <h2 class="panel-title" data-i18n="hosp_title">🏥 Live Hospital Bed & Oxygen Availability</h2>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:24px;">🏥</span>
+          <div>
+            <h2 class="panel-title" style="margin:0;color:var(--ink);font-size:17px;font-weight:800;">Nearby Hospitals &amp; Live Emergency Bed Grid</h2>
+            <small style="color:var(--muted);font-size:12px;">Real-time GPS distance calculation, live ICU/Oxygen bed tracking &amp; Google Maps navigation</small>
+          </div>
+        </div>
       </div>
       <div id="hospitalBedsContainer"></div>
     </div>

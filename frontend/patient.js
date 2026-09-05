@@ -11,6 +11,10 @@
   class PatientController {
     constructor() {
       this.store = global.appStore;
+      this.userLocation = null;
+      this.locationStatus = 'idle'; // 'idle', 'requesting', 'granted', 'denied', 'unsupported'
+      this.hospitalFilter = 'all';
+      this.hospitalSearch = '';
     }
 
     init() {
@@ -951,76 +955,8 @@
     }
 
     // -------------------------------------------------------------
-    // 7. LIVE HOSPITAL BEDS & BLOOD BANK
+    // 7. FAMILY HEALTH CIRCLE & MEMBERSHIP
     // -------------------------------------------------------------
-    renderLiveHospitals() {
-      const el = document.getElementById('hospitalBedsContainer') || document.getElementById('hospitalBedsList');
-      if (!el || !this.store) return;
-      const hosps = this.store.getState().hospitals || [];
-
-      const genBedsText = this.t('gen_beds', 'General Beds');
-      const icuBedsText = this.t('icu_beds', 'ICU Beds');
-      const oxyBedsText = this.t('oxy_beds', 'Oxygen Beds');
-      const availText = this.t('avail', 'Avail');
-
-      el.innerHTML = hosps.map(h => `
-        <div style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:var(--shadow-panel);">
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;flex-wrap:wrap;gap:6px;">
-            <div>
-              <strong style="color:var(--primary-bright);font-size:15px;display:block;">${h.name}</strong>
-              <small style="color:var(--muted);">Distance: ${h.distance} · Doctor: ${h.doctorOnDuty}</small>
-            </div>
-            <a href="tel:${h.phone}" class="btn-glass" style="padding:4px 10px;font-size:12px;color:var(--primary-bright);">📞 Call ${h.phone}</a>
-          </div>
-          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(90px, 1fr));gap:8px;margin-top:10px;text-align:center;">
-            <div style="background:rgba(22,163,74,0.12);border:1px solid rgba(22,163,74,0.3);padding:8px;border-radius:10px;">
-              <small style="color:#16a34a;font-size:11px;font-weight:600;display:block;">${genBedsText}</small>
-              <strong style="color:#16a34a;font-size:16px;">${h.genBedsAvail} ${availText}</strong>
-            </div>
-            <div style="background:rgba(220,38,38,0.12);border:1px solid rgba(220,38,38,0.3);padding:8px;border-radius:10px;">
-              <small style="color:#dc2626;font-size:11px;font-weight:600;display:block;">${icuBedsText}</small>
-              <strong style="color:#dc2626;font-size:16px;">${h.icuBedsAvail} ${availText}</strong>
-            </div>
-            <div style="background:rgba(2,132,199,0.12);border:1px solid rgba(2,132,199,0.3);padding:8px;border-radius:10px;">
-              <small style="color:#0284c7;font-size:11px;font-weight:600;display:block;">${oxyBedsText}</small>
-              <strong style="color:#0284c7;font-size:16px;">${h.oxygenBedsAvail} ${availText}</strong>
-            </div>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    renderLiveBloodBank() {
-      const el = document.getElementById('bloodBankGrid');
-      if (!el || !this.store) return;
-      const bank = this.store.getState().bloodBank || {};
-
-      const inStockText = this.t('in_stock', '✓ In Stock');
-                   (this.store.getState().familyMembers || []);
-
-      if (!fams.length) {
-        el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);grid-column:1/-1;">No family members added yet. Tap "+ Add Member" above.</div>';
-        return;
-      }
-
-      el.innerHTML = fams.map(f => `
-        <div style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:14px;padding:14px;display:flex;justify-content:space-between;align-items:center;box-shadow:var(--shadow-panel);">
-          <div style="display:flex;align-items:center;gap:12px;">
-            <div style="width:42px;height:42px;background:rgba(2,132,199,0.12);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;">
-              ${f.gender === 'Female' ? '👩' : '👨'}
-            </div>
-            <div>
-              <strong style="color:var(--ink);font-size:15px;display:block;">${f.name} (${f.relation})</strong>
-              <small style="color:var(--muted);font-family:'IBM Plex Mono',monospace;">Age: ${f.age} · ABHA: ${f.abhaId || '14-XXXX'}</small>
-            </div>
-          </div>
-          <div style="text-align:right;">
-            <span class="badge" style="background:rgba(2,132,199,0.12);color:var(--primary-bright);padding:4px 8px;border-radius:12px;font-size:11px;font-weight:700;">${f.status || 'Active'}</span>
-            <button style="display:block;margin-top:4px;color:#dc2626;font-size:11px;cursor:pointer;background:none;border:none;font-weight:600;" onclick="patientController.removeFamilyMember('${f.id}')">✕ Remove</button>
-          </div>
-        </div>
-      `).join('');
-    }
 
     openAddFamilyModal() {
       const modal = document.getElementById('addFamilyModal');
@@ -1128,41 +1064,292 @@
     // -------------------------------------------------------------
     // 7. LIVE HOSPITAL BEDS & BLOOD BANK
     // -------------------------------------------------------------
+    calculateDistance(lat1, lon1, lat2, lon2) {
+      if (!lat1 || !lon1 || !lat2 || !lon2) return null;
+      const R = 6371; // Earth radius in km
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return parseFloat((R * c).toFixed(1));
+    }
+
+    enableLocationAndFindHospitals() {
+      if (typeof navigator === 'undefined' || !navigator.geolocation) {
+        this.locationStatus = 'unsupported';
+        if (global.toast) global.toast('⚠️ Geolocation is not supported by your browser.');
+        this.renderLiveHospitals();
+        return;
+      }
+
+      this.locationStatus = 'requesting';
+      if (global.toast) global.toast('📍 Detecting your device GPS location...');
+      this.renderLiveHospitals();
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          this.userLocation = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+            accuracy: position.coords.accuracy
+          };
+          this.locationStatus = 'granted';
+          if (global.toast) global.toast('✓ Location Enabled! Sorted by nearest proximity.');
+          this.renderLiveHospitals();
+        },
+        (error) => {
+          console.warn('[Location] GPS position error:', error);
+          this.locationStatus = 'denied';
+          if (global.toast) global.toast('⚠️ Location access was denied. Showing regional facilities.');
+          this.renderLiveHospitals();
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+      );
+    }
+
+    setHospitalFilter(filter) {
+      this.hospitalFilter = filter;
+      this.renderLiveHospitals();
+    }
+
+    setHospitalSearch(query) {
+      this.hospitalSearch = (query || '').toLowerCase().trim();
+      this.renderLiveHospitals();
+    }
+
+    escapeHtml(text) {
+      if (!text) return '';
+      return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    }
+
     renderLiveHospitals() {
       const el = document.getElementById('hospitalBedsContainer') || document.getElementById('hospitalBedsList');
       if (!el || !this.store) return;
-      const hosps = this.store.getState().hospitals || [];
+      let hosps = [...(this.store.getState().hospitals || [])];
 
+      // 1. Calculate live distances if location is granted
+      if (this.userLocation && this.userLocation.lat && this.userLocation.lng) {
+        hosps.forEach(h => {
+          if (h.lat && h.lng) {
+            h.liveDistanceKm = this.calculateDistance(this.userLocation.lat, this.userLocation.lng, h.lat, h.lng);
+            h.displayDistance = h.liveDistanceKm + ' km away';
+          } else {
+            h.liveDistanceKm = 999;
+            h.displayDistance = h.distance || 'Regional';
+          }
+        });
+        // Sort closest first!
+        hosps.sort((a, b) => (a.liveDistanceKm || 999) - (b.liveDistanceKm || 999));
+      } else {
+        hosps.forEach(h => {
+          h.displayDistance = h.distance || 'Regional';
+        });
+      }
+
+      // 2. Apply search filter
+      if (this.hospitalSearch) {
+        const q = this.hospitalSearch;
+        hosps = hosps.filter(h => 
+          (h.name && h.name.toLowerCase().includes(q)) ||
+          (h.type && h.type.toLowerCase().includes(q)) ||
+          (h.doctorOnDuty && h.doctorOnDuty.toLowerCase().includes(q)) ||
+          (h.address && h.address.toLowerCase().includes(q))
+        );
+      }
+
+      // 3. Apply category filter
+      if (this.hospitalFilter === 'phc') {
+        hosps = hosps.filter(h => h.type === 'PHC' || h.type === 'Sub-Centre');
+      } else if (this.hospitalFilter === 'chc') {
+        hosps = hosps.filter(h => h.type === 'CHC');
+      } else if (this.hospitalFilter === 'district') {
+        hosps = hosps.filter(h => h.type === 'District Hospital');
+      } else if (this.hospitalFilter === 'icu') {
+        hosps = hosps.filter(h => (h.icuBedsAvail || 0) > 0);
+      } else if (this.hospitalFilter === 'oxygen') {
+        hosps = hosps.filter(h => (h.oxygenBedsAvail || 0) > 0);
+      }
+
+      // 4. Build Location Header Bar
+      let locationBannerHtml = '';
+      if (this.locationStatus === 'idle') {
+        locationBannerHtml = `
+          <div style="background:linear-gradient(135deg, rgba(2,132,199,0.14), rgba(56,189,248,0.22));border:1.5px solid var(--primary-bright);border-radius:14px;padding:16px 18px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;box-shadow:0 4px 16px rgba(2,132,199,0.15);">
+            <div style="display:flex;align-items:center;gap:12px;max-width:680px;">
+              <div style="width:44px;height:44px;border-radius:12px;background:rgba(2,132,199,0.2);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;">
+                📍
+              </div>
+              <div>
+                <strong style="color:var(--ink);font-size:15px;display:block;font-weight:800;">Find Nearby Healthcare Facilities</strong>
+                <small style="color:var(--muted);font-size:12.5px;line-height:1.4;display:block;margin-top:2px;">
+                  Enable your device GPS location to sort Primary Health Centres (PHC), Community Centres (CHC), and Emergency Trauma Units by real-time distance from your current village.
+                </small>
+              </div>
+            </div>
+            <button type="button" class="auth-btn-primary" onclick="patientController.enableLocationAndFindHospitals()" style="background:linear-gradient(135deg, #0284c7, #0369a1);border:none;padding:10px 18px;font-size:13px;font-weight:800;border-radius:10px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;box-shadow:0 4px 12px rgba(2,132,199,0.35);white-space:nowrap;">
+              <span>📍</span> <span>Enable Location &amp; Find Nearest</span>
+            </button>
+          </div>
+        `;
+      } else if (this.locationStatus === 'requesting') {
+        locationBannerHtml = `
+          <div style="background:rgba(245,158,11,0.12);border:1.5px solid #f59e0b;border-radius:14px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;gap:12px;">
+            <div style="font-size:20px;">⏳</div>
+            <div>
+              <strong style="color:#d97706;font-size:14px;font-weight:800;display:block;">Detecting Device Location Coordinates...</strong>
+              <small style="color:var(--muted);font-size:12px;">Please allow the browser location prompt to calculate exact distances to all hospitals.</small>
+            </div>
+          </div>
+        `;
+      } else if (this.locationStatus === 'granted' && this.userLocation) {
+        locationBannerHtml = `
+          <div style="background:linear-gradient(135deg, rgba(22,163,74,0.12), rgba(34,197,94,0.18));border:1.5px solid #16a34a;border-radius:14px;padding:12px 18px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="font-size:20px;">🟢</span>
+              <div>
+                <strong style="color:#16a34a;font-size:14px;font-weight:800;display:block;">GPS Location Active · Sorted by Proximity (Closest First)</strong>
+                <small style="color:var(--muted);font-size:11.5px;font-family:'IBM Plex Mono',monospace;">
+                  Coordinates: ${this.userLocation.lat.toFixed(4)}° N, ${this.userLocation.lng.toFixed(4)}° E · Accurate within ~${Math.round(this.userLocation.accuracy || 15)}m
+                </small>
+              </div>
+            </div>
+            <button type="button" class="btn-glass" onclick="patientController.enableLocationAndFindHospitals()" style="padding:6px 14px;font-size:12px;font-weight:700;border-radius:8px;display:inline-flex;align-items:center;gap:6px;">
+              <span>🔄</span> <span>Refresh GPS Location</span>
+            </button>
+          </div>
+        `;
+      } else {
+        locationBannerHtml = `
+          <div style="background:rgba(220,38,38,0.08);border:1.5px solid rgba(220,38,38,0.3);border-radius:14px;padding:12px 18px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="font-size:18px;">ℹ️</span>
+              <div>
+                <strong style="color:var(--ink);font-size:13.5px;font-weight:700;display:block;">GPS Location Denied or Unavailable</strong>
+                <small style="color:var(--muted);font-size:11.5px;">Displaying district healthcare network with baseline regional distances.</small>
+              </div>
+            </div>
+            <button type="button" class="btn-glass" onclick="patientController.enableLocationAndFindHospitals()" style="padding:5px 12px;font-size:12px;color:var(--primary-bright);border-radius:8px;">
+              📍 Retry Location Access
+            </button>
+          </div>
+        `;
+      }
+
+      // 5. Search & Filter Bar
+      const filters = [
+        { id: 'all', label: '🏥 All Facilities' },
+        { id: 'phc', label: '🌾 PHC / Sub-Centres' },
+        { id: 'chc', label: '🩺 CHC (Community)' },
+        { id: 'district', label: '🏢 District Hospitals' },
+        { id: 'icu', label: '🚨 ICU Available' },
+        { id: 'oxygen', label: '🫁 Oxygen Beds' }
+      ];
+
+      const filterChipsHtml = `
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center;">
+          <input type="text" placeholder="🔍 Search hospital, doctor, or village..." value="${this.escapeHtml(this.hospitalSearch)}" oninput="patientController.setHospitalSearch(this.value)" class="input-field" style="max-width:280px;padding:7px 14px;font-size:12.5px;border-radius:10px;margin-right:4px;">
+          ${filters.map(f => `
+            <button type="button" onclick="patientController.setHospitalFilter('${f.id}')" class="btn-glass" style="padding:6px 12px;font-size:12px;font-weight:700;border-radius:20px;cursor:pointer;${this.hospitalFilter === f.id ? 'background:var(--primary-bright);color:#ffffff;border-color:var(--primary-bright);box-shadow:0 2px 8px rgba(2,132,199,0.3);' : ''}">
+              ${f.label}
+            </button>
+          `).join('')}
+        </div>
+      `;
+
+      // 6. Hospital Cards List
       const genBedsText = this.t('gen_beds', 'General Beds');
       const icuBedsText = this.t('icu_beds', 'ICU Beds');
       const oxyBedsText = this.t('oxy_beds', 'Oxygen Beds');
       const availText = this.t('avail', 'Avail');
 
-      el.innerHTML = hosps.map(h => `
-        <div style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:var(--shadow-panel);">
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;flex-wrap:wrap;gap:6px;">
-            <div>
-              <strong style="color:var(--primary-bright);font-size:15px;display:block;">${h.name}</strong>
-              <small style="color:var(--muted);">Distance: ${h.distance} · Doctor: ${h.doctorOnDuty}</small>
-            </div>
-            <a href="tel:${h.phone}" class="btn-glass" style="padding:4px 10px;font-size:12px;color:var(--primary-bright);">📞 Call ${h.phone}</a>
-          </div>
-          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(90px, 1fr));gap:8px;margin-top:10px;text-align:center;">
-            <div style="background:rgba(22,163,74,0.12);border:1px solid rgba(22,163,74,0.3);padding:8px;border-radius:10px;">
-              <small style="color:#16a34a;font-size:11px;font-weight:600;display:block;">${genBedsText}</small>
-              <strong style="color:#16a34a;font-size:16px;">${h.genBedsAvail} ${availText}</strong>
-            </div>
-            <div style="background:rgba(220,38,38,0.12);border:1px solid rgba(220,38,38,0.3);padding:8px;border-radius:10px;">
-              <small style="color:#dc2626;font-size:11px;font-weight:600;display:block;">${icuBedsText}</small>
-              <strong style="color:#dc2626;font-size:16px;">${h.icuBedsAvail} ${availText}</strong>
-            </div>
-            <div style="background:rgba(2,132,199,0.12);border:1px solid rgba(2,132,199,0.3);padding:8px;border-radius:10px;">
-              <small style="color:#0284c7;font-size:11px;font-weight:600;display:block;">${oxyBedsText}</small>
-              <strong style="color:#0284c7;font-size:16px;">${h.oxygenBedsAvail} ${availText}</strong>
+      let cardsHtml = '';
+      if (!hosps.length) {
+        cardsHtml = `
+          <div style="text-align:center;padding:32px 16px;color:var(--muted);background:var(--glass-2);border-radius:14px;border:1px dashed var(--glass-border);">
+            <div style="font-size:32px;margin-bottom:8px;">🏥</div>
+            <strong style="font-size:15px;color:var(--ink);display:block;">No facilities found matching your criteria</strong>
+            <small style="font-size:12.5px;">Try clearing search filters or refreshing location</small>
+            <div style="margin-top:12px;">
+              <button type="button" class="btn-glass" onclick="patientController.setHospitalFilter('all'); patientController.setHospitalSearch('');">Clear Filters</button>
             </div>
           </div>
-        </div>
-      `).join('');
+        `;
+      } else {
+        cardsHtml = hosps.map((h, index) => {
+          const isNearest = (this.userLocation && index === 0);
+          const mapUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent((h.lat && h.lng ? (h.lat + ',' + h.lng) : h.name))}`;
+          const typeColors = {
+            'PHC': '#16a34a',
+            'Sub-Centre': '#10b981',
+            'CHC': '#0284c7',
+            'District Hospital': '#8b5cf6',
+            'Area Hospital': '#6366f1'
+          };
+          const typeBadgeColor = typeColors[h.type] || '#0284c7';
+
+          return `
+            <div style="background:var(--glass-2);border:1.5px solid ${isNearest ? 'var(--primary-bright)' : 'var(--glass-border)'};border-radius:16px;padding:16px 18px;margin-bottom:14px;box-shadow:${isNearest ? '0 6px 22px rgba(2,132,199,0.22)' : 'var(--shadow-panel)'};position:relative;transition:all 0.2s ease;">
+              
+              ${isNearest ? `
+                <div style="position:absolute;top:-10px;right:16px;background:linear-gradient(135deg, #0284c7, #0369a1);color:#ffffff;font-size:10px;font-weight:900;padding:2px 10px;border-radius:12px;letter-spacing:0.5px;box-shadow:0 2px 8px rgba(2,132,199,0.4);">
+                  🌟 NEAREST FACILITY
+                </div>
+              ` : ''}
+
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;margin-bottom:10px;">
+                <div>
+                  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px;">
+                    <strong style="color:var(--ink);font-size:16px;font-weight:800;">${h.name}</strong>
+                    <span class="badge" style="background:rgba(2,132,199,0.12);color:${typeBadgeColor};border:1px solid ${typeBadgeColor};font-size:10px;font-weight:800;padding:2px 8px;border-radius:8px;">
+                      ${h.type || 'Hospital'}
+                    </span>
+                    <span class="badge" style="background:${isNearest ? 'rgba(22,163,74,0.15)' : 'rgba(2,132,199,0.1)'};color:${isNearest ? '#16a34a' : 'var(--primary-bright)'};font-size:11px;font-weight:800;padding:2px 8px;border-radius:8px;">
+                      📍 ${h.displayDistance}
+                    </span>
+                  </div>
+                  <div style="color:var(--muted);font-size:12px;display:flex;gap:12px;flex-wrap:wrap;">
+                    <span>👨‍⚕️ <strong>Doctor:</strong> ${h.doctorOnDuty || 'Medical Officer'}</span>
+                    ${h.address ? `<span>📍 ${h.address}</span>` : ''}
+                  </div>
+                </div>
+
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                  <a href="tel:${h.phone}" class="btn-glass" style="padding:6px 12px;font-size:12px;font-weight:700;color:#16a34a;border-color:rgba(22,163,74,0.3);display:inline-flex;align-items:center;gap:4px;border-radius:8px;text-decoration:none;">
+                    <span>📞</span> <span>Call ${h.phone}</span>
+                  </a>
+                  <a href="${mapUrl}" target="_blank" rel="noopener noreferrer" class="btn-glass" style="padding:6px 12px;font-size:12px;font-weight:700;color:var(--primary-bright);border-color:rgba(2,132,199,0.3);display:inline-flex;align-items:center;gap:4px;border-radius:8px;text-decoration:none;">
+                    <span>🧭</span> <span>Directions</span>
+                  </a>
+                </div>
+              </div>
+
+              <!-- LIVE BED AVAILABILITY GRID -->
+              <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(90px, 1fr));gap:8px;margin-top:10px;text-align:center;">
+                <div style="background:rgba(220,38,38,0.1);border:1px solid rgba(22,163,74,0.25);background:rgba(22,163,74,0.1);padding:8px 10px;border-radius:10px;">
+                  <small style="color:#16a34a;font-size:11px;font-weight:700;display:block;">${genBedsText}</small>
+                  <strong style="color:#16a34a;font-size:16px;">${h.genBedsAvail} ${availText}</strong>
+                  <small style="color:var(--muted);font-size:10px;display:block;">Total: ${h.totalBeds || 20}</small>
+                </div>
+                <div style="background:rgba(220,38,38,0.1);border:1px solid rgba(220,38,38,0.25);padding:8px 10px;border-radius:10px;">
+                  <small style="color:#dc2626;font-size:11px;font-weight:700;display:block;">${icuBedsText}</small>
+                  <strong style="color:#dc2626;font-size:16px;">${h.icuBedsAvail} ${availText}</strong>
+                  <small style="color:${(h.icuBedsAvail || 0) > 0 ? '#16a34a' : '#dc2626'};font-size:10px;display:block;">${(h.icuBedsAvail || 0) > 0 ? '🟢 Available' : '🔴 Full'}</small>
+                </div>
+                <div style="background:rgba(2,132,199,0.1);border:1px solid rgba(2,132,199,0.25);padding:8px 10px;border-radius:10px;">
+                  <small style="color:#0284c7;font-size:11px;font-weight:700;display:block;">${oxyBedsText}</small>
+                  <strong style="color:#0284c7;font-size:16px;">${h.oxygenBedsAvail} ${availText}</strong>
+                  <small style="color:${(h.oxygenBedsAvail || 0) > 0 ? '#16a34a' : '#dc2626'};font-size:10px;display:block;">${(h.oxygenBedsAvail || 0) > 0 ? '🟢 Ready' : '🔴 Low'}</small>
+                </div>
+              </div>
+
+            </div>
+          `;
+        }).join('');
+      }
+
+      el.innerHTML = locationBannerHtml + filterChipsHtml + cardsHtml;
     }
 
     renderLiveBloodBank() {
