@@ -3816,6 +3816,20 @@ body[data-theme="doom"] {
       </div>
     </div>
 
+    <!-- 2. NEARBY HOSPITALS & LIVE EMERGENCY BEDS (LOCATION ENABLED) -->
+    <div class="glass-panel" id="patientNearbyHospitalsPanel" style="border:1.5px solid rgba(2,132,199,0.35);background:linear-gradient(145deg, rgba(2,132,199,0.07), rgba(15,23,42,0.3));">
+      <div class="panel-header" style="margin-bottom:14px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:24px;">🏥</span>
+          <div>
+            <h2 class="panel-title" style="margin:0;color:var(--ink);font-size:17px;font-weight:800;">Nearby Hospitals &amp; Live Emergency Bed Grid</h2>
+            <small style="color:var(--muted);font-size:12px;">Real-time GPS distance calculation, live ICU/Oxygen bed tracking &amp; Google Maps navigation</small>
+          </div>
+        </div>
+      </div>
+      <div id="hospitalBedsContainer"></div>
+    </div>
+
     <!-- REAL-TIME DIGITAL E-PRESCRIPTIONS & CONSULTATION HISTORY -->
     <div class="glass-panel" id="patientPrescriptionsPanel" style="border:1.5px solid rgba(2,132,199,0.3);background:linear-gradient(145deg, rgba(2,132,199,0.08), rgba(15,23,42,0.3));">
       <div class="panel-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
@@ -3955,20 +3969,6 @@ body[data-theme="doom"] {
         </button>
       </div>
       <div id="familyMembersGrid" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));gap:12px;"></div>
-    </div>
-
-    <!-- LIVE HOSPITAL BED GRID -->
-    <div class="glass-panel">
-      <div class="panel-header">
-        <div style="display:flex;align-items:center;gap:10px;">
-          <span style="font-size:24px;">🏥</span>
-          <div>
-            <h2 class="panel-title" style="margin:0;color:var(--ink);font-size:17px;font-weight:800;">Nearby Hospitals &amp; Live Emergency Bed Grid</h2>
-            <small style="color:var(--muted);font-size:12px;">Real-time GPS distance calculation, live ICU/Oxygen bed tracking &amp; Google Maps navigation</small>
-          </div>
-        </div>
-      </div>
-      <div id="hospitalBedsContainer"></div>
     </div>
 
     <!-- LIVE BLOOD BANK STOCK -->
