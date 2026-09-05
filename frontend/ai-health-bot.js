@@ -29,8 +29,8 @@
   const CLINICAL_KB = [
     {
       id: 'leg_joint_muscle_pain',
-      primaryKeys: ['leg pain', 'pain in leg', 'knee pain', 'joint pain', 'muscle pain', 'back pain', 'kamar dard', 'per dard', 'pair dard', 'pair me dard', 'guthno me dard', 'sprain', 'moch', 'kaalu noppi', 'legs pain', 'body pain', 'ankle pain', 'calf pain', 'pain in legs', 'leg', 'legs'],
-      keywords: ['leg', 'knee', 'joint', 'muscle', 'back', 'pain', 'kamar', 'per', 'pair', 'guthna', 'sprain', 'moch', 'kaalu', 'bone', 'swelling', 'cramp', 'legs'],
+      primaryKeys: ['muscle strain', 'muscle strain in leg', 'strain in leg', 'leg strain', 'pulled muscle', 'muscle pull', 'hamstring strain', 'calf strain', 'leg pain', 'pain in leg', 'knee pain', 'joint pain', 'muscle pain', 'back pain', 'kamar dard', 'per dard', 'pair dard', 'pair me dard', 'guthno me dard', 'sprain', 'moch', 'kaalu noppi', 'legs pain', 'body pain', 'ankle pain', 'calf pain', 'pain in legs', 'leg', 'legs', 'strain'],
+      keywords: ['strain', 'sprain', 'muscle', 'pulled', 'cramp', 'ligament', 'leg', 'knee', 'joint', 'back', 'pain', 'kamar', 'per', 'pair', 'guthna', 'moch', 'kaalu', 'bone', 'swelling', 'legs'],
       title: 'Leg Pain, Joint Pain & Musculoskeletal Strain (पैरों व जोड़ों में दर्द / కాళ్ళ మరియు కీళ్ళ నొప్పులు)',
       severity: 'mild',
       severityLabel: '🟢 MILD TO MODERATE · R.I.C.E. FIRST-AID & PAIN RELIEF',
@@ -628,7 +628,45 @@
     constructor() {
       this.messages = [];
       this.isTyping = false;
+      this.currentLanguage = 'en'; // 'en', 'hi', 'te', 'ta', 'mr', 'bn', 'kn'
       this.initDefaultChat();
+    }
+
+    setLanguage(lang) {
+      if (!lang) return;
+      this.currentLanguage = lang;
+      const select = document.getElementById('aiLanguageSelect');
+      if (select && select.value !== lang) {
+        select.value = lang;
+      }
+      this.updateInputPlaceholder();
+      const langNames = {
+        en: 'English',
+        hi: 'हिंदी (Hindi)',
+        te: 'తెలుగు (Telugu)',
+        ta: 'தமிழ் (Tamil)',
+        mr: 'मराठी (Marathi)',
+        bn: 'বাংলা (Bengali)',
+        kn: 'ಕನ್ನಡ (Kannada)'
+      };
+      if (typeof window !== 'undefined' && window.toast) {
+        window.toast('🌐 AI Clinical Language: ' + (langNames[lang] || lang));
+      }
+    }
+
+    updateInputPlaceholder() {
+      const input = document.getElementById('aiChatInput');
+      if (!input) return;
+      const placeholders = {
+        en: 'Describe symptoms (e.g. muscle strain in leg, child has fever, chest tightness)...',
+        hi: 'लक्षण बताएं (जैसे पैर की मांसपेशियों में खिंचाव, बुखार, खांसी, गैस)...',
+        te: 'లక్షణాలు వివరించండి (ఉదా: కాలు కండరాల నొప్పి, తీవ్రమైన జ్వరం, దగ్గు)...',
+        ta: 'அறிகுறிகளை விவரிக்கவும் (எ.கா. தசைப்பிடிப்பு, காய்ச்சல், இருமல்)...',
+        mr: 'लक्षणे सांगा (उदा. पायातील स्नायू ताणणे, ताप, खोकला, पोटदुखी)...',
+        bn: 'লক্ষণগুলি বর্ণনা করুন (যেমন পায়ে পেশীর টান, জ্বর, কাশি)...',
+        kn: 'ರೋಗಲಕ್ಷಣಗಳನ್ನು ವಿವರಿಸಿ (ಉದಾ. ಸ್ನಾಯು ಸೆಳೆತ, ಜ್ವರ, ಕೆಮ್ಮು)...'
+      };
+      input.placeholder = placeholders[this.currentLanguage] || placeholders.en;
     }
 
     initDefaultChat() {
@@ -895,52 +933,11 @@
         return;
       }
 
-      // If matched with significant score (>= 12), return verified clinical protocol
-      if (bestMatch && maxScore >= 12) {
-        this.messages.push({
-          sender: 'ai',
-          text: `### ${bestMatch.title}\n${bestMatch.summary}`,
-          severity: bestMatch.severity,
-          severityLabel: bestMatch.severityLabel,
-          severityColor: bestMatch.severityColor,
-          steps: bestMatch.steps,
-          medicines: bestMatch.medicines,
-          redFlags: bestMatch.redFlags,
-          suggestedQuestions: bestMatch.suggestedQuestions,
-          audioSummary: bestMatch.audioSummary,
-          time: this.getFormattedTime()
-        });
-      } else {
-        // Intelligent Comprehensive Fallback
-        this.messages.push({
-          sender: 'ai',
-          text: `### Clinical Assessment for: "${this.escapeHtml(query)}"\n\nBased on national rural telemedicine clinical guidelines:\n\n1. **First-Aid & Rest**: Rest in an airy environment, stay hydrated with clean water/ORS, and monitor symptom progression.\n2. **Connect with Doctor**: Since our on-duty Medical Officers are active on the telemedicine grid, tap **Video Call Doctor** below for a verified digital diagnosis and prescription.\n3. **Emergency Alert**: If you or the patient experience severe breathing difficulty, continuous chest heaviness, deep bleeding, or seizures, tap **Call 108 Ambulance** immediately.`,
-          severity: 'moderate',
-          severityLabel: '🟡 CLINICAL TRIAGE ADVISORY',
-          severityColor: '#0284c7',
-          steps: [
-            'Note the exact start time, duration, and any aggravating factors of the symptoms.',
-            'Check vital signs (temperature, pulse, BP) if household instruments are available.',
-            'Keep your 14-digit ABHA ID card ready for the doctor video consultation.'
-          ],
-          medicines: [
-            '**Paracetamol 500mg** (Jan Aushadhi: ₹1.50 per strip) — For mild pain/fever.',
-            '**WHO-ORS Electrolyte Sachet** (Jan Aushadhi: ₹4.00) — For fluid restoration.'
-          ],
-          redFlags: [
-            'Sudden chest tightness or shortness of breath.',
-            'Loss of consciousness, slurred speech, or continuous vomiting.',
-            'High fever >103°F with neck stiffness.'
-          ],
-          suggestedQuestions: [
-            'How many hours or days have you had this symptom?',
-            'Is the discomfort mild, moderate, or severe?',
-            'Are there any known medical conditions or allergies?'
-          ],
-          audioSummary: 'Clinical advice: Rest and stay hydrated. We recommend connecting to an on-duty doctor via live video call or visiting the nearest PHC.',
-          time: this.getFormattedTime()
-        });
-      }
+      // Generate multilingual clinical response based on this.currentLanguage
+      const lang = this.currentLanguage || 'en';
+      const aiResponse = this.generateMultilingualResponse(bestMatch, maxScore, query, lang);
+      this.messages.push(aiResponse);
+      this.renderChat();
 
       } catch (err) {
         console.warn('[AI Bot] Clinical assistant processing error:', err);
@@ -1065,6 +1062,202 @@
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#039;');
+    }
+
+    generateMultilingualResponse(bestMatch, maxScore, query, lang) {
+      const timeStr = this.getFormattedTime();
+
+      // If matched with good confidence (>= 8)
+      if (bestMatch && maxScore >= 8) {
+        if (lang === 'hi') {
+          return {
+            sender: 'ai',
+            text: `### ${bestMatch.title}\n\n**हिंदी क्लिनिकल मूल्यांकन (Clinical Assessment):**\n${bestMatch.summary}\n\n**प्राथमिक उपचार एवं देखभाल (First-Aid):**\n- प्रभावित हिस्से को आराम दें और अत्यधिक गति या वजन डालने से बचें।\n- सूजन या तीव्र दर्द में 15 मिनट के लिए बर्फ की सिंकाई (Cold Compress) करें।\n- पैरों या जोड़ों के दर्द में अंग को तकिए पर थोड़ा ऊपर उठाकर रखें (Elevation)।`,
+            severity: bestMatch.severity,
+            severityLabel: '🟢 क्लिनिकल प्रोटोकॉल · प्राथमिक उपचार व दवा',
+            severityColor: bestMatch.severityColor || '#16a34a',
+            steps: bestMatch.steps,
+            medicines: bestMatch.medicines,
+            redFlags: bestMatch.redFlags,
+            suggestedQuestions: [
+              'क्या दर्द किसी खिंचाव या चोट के बाद शुरू हुआ?',
+              'क्या चलने या खड़े होने में अत्यधिक कठिनाई हो रही है?'
+            ],
+            audioSummary: 'क्लिनिकल सलाह: प्रभावित हिस्से को आराम दें, गर्म या ठंडी सिंकाई करें और पैरासिटामोल लें। असहनीय दर्द होने पर तुरंत डॉक्टर से वीडियो परामर्श लें।',
+            time: timeStr
+          };
+        } else if (lang === 'te') {
+          return {
+            sender: 'ai',
+            text: `### ${bestMatch.title}\n\n**తెలుగు క్లినికల్ సలహా (Clinical Assessment):**\n${bestMatch.summary}\n\n**తక్షణ ప్రథమ చికిత్స (First-Aid & Rest):**\n- కాలు లేదా కండరాలపై ఒత్తిడి తగ్గించి విశ్రాంతి తీసుకోండి.\n- వాపు తగ్గేందుకు ఐస్ ప్యాక్‌తో 15 నిమిషాలు కాపడం పెట్టండి.\n- కాలును దిండుపై కొద్దిగా ఎత్తుగా ఉంచండి (Elevation) రక్తప్రసరణ మెరుగుపడుతుంది.`,
+            severity: bestMatch.severity,
+            severityLabel: '🟢 క్లినికల్ ప్రోటోకాల్ · ప్రథమ చికిత్స',
+            severityColor: bestMatch.severityColor || '#16a34a',
+            steps: bestMatch.steps,
+            medicines: bestMatch.medicines,
+            redFlags: bestMatch.redFlags,
+            suggestedQuestions: [
+              'నొప్పి ఏదైనా బరువు ఎత్తడం లేదా పడటం వల్ల వచ్చిందా?',
+              'నడవలేనంత తీవ్రమైన నొప్పి లేదా వాపు ఉందా?'
+            ],
+            audioSummary: 'వైద్య సలహా: కండరాల నొప్పి నివారణకు విశ్రాంతి తీసుకోండి, ఐస్ ప్యాక్ పెట్టండి మరియు భోజనం తర్వాత పారాసిటమాల్ వేసుకోండి. తీవ్రమైన వాపు ఉంటే వైద్యుడిని సంప్రదించండి.',
+            time: timeStr
+          };
+        } else if (lang === 'ta') {
+          return {
+            sender: 'ai',
+            text: `### ${bestMatch.title}\n\n**தமிழ் மருத்துவ வழிகாட்டுதல் (Clinical Guidance):**\n${bestMatch.summary}\n\n**முதலுதவி முறைகள் (First-Aid Steps):**\n- பாதிக்கப்பட்ட பகுதிக்கு முழு ஓய்வு அளிக்கவும், அதிக எடை போடுவதை தவிர்க்கவும்.\n- வீக்கம் குறைய 15 நிமிடங்கள் ஐஸ் பேக் ஒத்தடம் கொடுக்கவும்.\n- கால்களை தலையணை மீது உயர்த்தி வைக்கவும்.`,
+            severity: bestMatch.severity,
+            severityLabel: '🟢 மருத்துவ வழிகாட்டுதல் · முதலுதவி',
+            severityColor: bestMatch.severityColor || '#16a34a',
+            steps: bestMatch.steps,
+            medicines: bestMatch.medicines,
+            redFlags: bestMatch.redFlags,
+            suggestedQuestions: ['வலி எப்போது தொடங்கியது?', 'நடக்க முடியாத அளவு வலி உள்ளதா?'],
+            audioSummary: 'மருத்துவ ஆலோசனை: ஓய்வு எடுக்கவும், ஐஸ் ஒத்தடம் கொடுக்கவும் மற்றும் வலி நிவாரணி மாத்திரை எடுத்துக்கொள்ளவும்.',
+            time: timeStr
+          };
+        } else if (lang === 'mr') {
+          return {
+            sender: 'ai',
+            text: `### ${bestMatch.title}\n\n**मराठी वैद्यकीय सल्ला (Clinical Guidance):**\n${bestMatch.summary}\n\n**प्रथमोपचार व काळजी (First-Aid Steps):**\n- स्नायूंना विश्रांती द्या आणि वजन टाकणे टाळा.\n- सूज कमी करण्यासाठी बर्फाने 15 मिनिटे शेक द्या.\n- पाय उशीवर ठेवून थोडा उंच ठेवा.`,
+            severity: bestMatch.severity,
+            severityLabel: '🟢 वैद्यकीय सल्ला · प्रथमोपचार',
+            severityColor: bestMatch.severityColor || '#16a34a',
+            steps: bestMatch.steps,
+            medicines: bestMatch.medicines,
+            redFlags: bestMatch.redFlags,
+            suggestedQuestions: ['वेदना अचानक सुरू झाल्या का?', 'चालणे अशक्य होत आहे का?'],
+            audioSummary: 'वैद्यकीय सल्ला: स्नायूंना विश्रांती द्या, बर्फाने शेक द्या आणि वेदनाशामक गोळी घ्या.',
+            time: timeStr
+          };
+        } else if (lang === 'bn') {
+          return {
+            sender: 'ai',
+            text: `### ${bestMatch.title}\n\n**বাংলা চিকিৎসা পরামর্শ (Clinical Guidance):**\n${bestMatch.summary}\n\n**প্রাথমিক চিকিৎসা ও যত্ন (First-Aid):**\n- আক্রান্ত অংশকে পূর্ণ বিশ্রাম দিন এবং অতিরিক্ত নড়াচড়া বন্ধ রাখুন।\n- ফোলা কমাতে ১৫ মিনিট বরফের সেঁক দিন।\n- পা বালিশের উপর কিছুটা উঁচু করে রাখুন।`,
+            severity: bestMatch.severity,
+            severityLabel: '🟢 চিকিৎসা নির্দেশিকা · প্রাথমিক যত্ন',
+            severityColor: bestMatch.severityColor || '#16a34a',
+            steps: bestMatch.steps,
+            medicines: bestMatch.medicines,
+            redFlags: bestMatch.redFlags,
+            suggestedQuestions: ['ব্যথা কি কোনো আঘাতের পর শুরু হয়েছে?'],
+            audioSummary: 'চিকিৎসা পরামর্শ: বিশ্রাম নিন, বরফের সেঁক দিন এবং প্যারাসিটামল সেবন করুন।',
+            time: timeStr
+          };
+        } else if (lang === 'kn') {
+          return {
+            sender: 'ai',
+            text: `### ${bestMatch.title}\n\n**ಕನ್ನಡ ವೈದ್ಯಕೀಯ ಮಾರ್ಗದರ್ಶನ (Clinical Guidance):**\n${bestMatch.summary}\n\n**ಪ್ರಥಮ ಚಿಕಿತ್ಸೆ (First-Aid Steps):**\n- ಪೀಡಿತ ಕಾಲಿಗೆ ವಿಶ್ರಾಂತಿ ನೀಡಿ ಮತ್ತು ತೂಕ ಹಾಕುವುದನ್ನು ತಪ್ಪಿಸಿ.\n- ಊತ ಕಡಿಮೆಯಾಗಲು 15 ನಿಮಿಷಗಳ ಕಾಲ ಐಸ್ ಪ್ಯಾಕ್ ಇರಿಸಿ.\n- ಮಲಗುವಾಗ ಕಾಲನ್ನು ದಿಂಬಿನ ಮೇಲೆ ಎತ್ತರಿಸಿ ಇರಿಸಿ.`,
+            severity: bestMatch.severity,
+            severityLabel: '🟢 ವೈದ್ಯಕೀಯ ಪ್ರೋಟೋಕಾಲ್ · ಆರೈಕೆ',
+            severityColor: bestMatch.severityColor || '#16a34a',
+            steps: bestMatch.steps,
+            medicines: bestMatch.medicines,
+            redFlags: bestMatch.redFlags,
+            suggestedQuestions: ['ನೋವು ಗಾಯದ ನಂತರ ಪ್ರಾರಂಭವಾಯಿತೇ?'],
+            audioSummary: 'ವೈದ್ಯಕೀಯ ಸಲಹೆ: ವಿಶ್ರಾಂತಿ ತೆಗೆದುಕೊಳ್ಳಿ, ಐಸ್ ಪ್ಯಾಕ್ ಇರಿಸಿ ಮತ್ತು ಪ್ಯಾರಾಸಿಟಮಾಲ್ ತೆಗೆದುಕೊಳ್ಳಿ.',
+            time: timeStr
+          };
+        }
+
+        // Default English
+        return {
+          sender: 'ai',
+          text: `### ${bestMatch.title}\n${bestMatch.summary}`,
+          severity: bestMatch.severity,
+          severityLabel: bestMatch.severityLabel,
+          severityColor: bestMatch.severityColor,
+          steps: bestMatch.steps,
+          medicines: bestMatch.medicines,
+          redFlags: bestMatch.redFlags,
+          suggestedQuestions: bestMatch.suggestedQuestions,
+          audioSummary: bestMatch.audioSummary,
+          time: timeStr
+        };
+      }
+
+      // Fallback response in selected language
+      if (lang === 'hi') {
+        return {
+          sender: 'ai',
+          text: `### क्लिनिकल परामर्श: "${this.escapeHtml(query)}"\n\nराष्ट्रीय ग्रामीण टेलीमेडिसिन दिशा-निर्देशों के अनुसार:\n\n1. **विश्राम एवं हाइड्रेशन**: पर्याप्त आराम करें, स्वच्छ पानी और ओआरएस पिएं।\n2. **डॉक्टर से परामर्श**: हमारे ऑन-ड्यूटी डॉक्टर टेलीमेडिसिन ग्रिड पर सक्रिय हैं। नीचे **Video Call Doctor** पर टैप करके तुरंत परामर्श प्राप्त करें।\n3. **आपातकाल**: अत्यधिक सांस फूलने, छाती में जकड़न या बेहोशी की स्थिति में तुरंत **108 एम्बुलेंस** पर कॉल करें।`,
+          severity: 'moderate',
+          severityLabel: '🟡 क्लिनिकल परामर्श सलाह',
+          severityColor: '#0284c7',
+          steps: [
+            'लक्षणों के शुरू होने का समय और तीव्रता नोट करें।',
+            'घर में उपलब्ध थर्मामीटर या बीपी यंत्र से जांच करें।',
+            'डॉक्टर परामर्श के लिए अपना आभा (ABHA) हेल्थ कार्ड तैयार रखें।'
+          ],
+          medicines: [
+            '**पैरासिटामोल 500mg** (जन औषधि: ₹1.50) — हल्के दर्द व बुखार हेतु।',
+            '**WHO-ORS इलेक्ट्रोल पाउडर** (जन औषधि: ₹4.00) — पानी की कमी पूरी करने हेतु।'
+          ],
+          redFlags: [
+            'अचानक छाती में दर्द या सांस लेने में गंभीर तकलीफ।',
+            'बेहोशी, तेज उल्टी या अस्पष्ट आवाज में बोलना।'
+          ],
+          suggestedQuestions: [
+            'यह लक्षण कितने समय से महसूस हो रहा है?',
+            'क्या आपको कोई पुरानी बीमारी या एलर्जी है?'
+          ],
+          audioSummary: 'क्लिनिकल सलाह: आराम करें और पर्याप्त पानी पिएं। डॉक्टर से वीडियो कॉल पर परामर्श लेने की सिफारिश की जाती है।',
+          time: timeStr
+        };
+      } else if (lang === 'te') {
+        return {
+          sender: 'ai',
+          text: `### క్లినికల్ సలహా: "${this.escapeHtml(query)}"\n\nజాతీయ గ్రామీణ టెలిమెడిసిన్ మార్గదర్శకాల ప్రకారం:\n\n1. **విశ్రాంతి & హైడ్రేషన్**: విశ్రాంతి తీసుకోండి మరియు శుభ్రమైన నీరు లేదా ఓఆర్ఎస్ తాగండి.\n2. **వైద్యుల సంప్రదింపులు**: మా డ్యూటీ మెడికల్ ఆఫీసర్లు అందుబాటులో ఉన్నారు. కింద ఉన్న **Video Call Doctor** బటన్ ద్వారా లైవ్ వీడియో కాల్ చేయండి.\n3. **అత్యవసరం**: తీవ్రమైన శ్వాస సమస్య లేదా ఛాతీలో నొప్పి ఉంటే వెంటనే **108 అంబులెన్స్**కు కాల్ చేయండి.`,
+          severity: 'moderate',
+          severityLabel: '🟡 క్లినికల్ సలహా',
+          severityColor: '#0284c7',
+          steps: [
+            'లక్షణాలు ఎప్పుడు ప్రారంభమయ్యాయో గమనించండి.',
+            'వైద్యుల సంప్రదింపుల కోసం మీ 14 అంకెల ABHA కార్డు సిద్ధంగా ఉంచుకోండి.'
+          ],
+          medicines: [
+            '**పారాసిటమాల్ 500mg** (జన్ ఔషధి: ₹1.50) — జ్వరం లేదా నొప్పి కోసం.',
+            '**WHO-ORS ప్యాకెట్** (జన్ ఔషధి: ₹4.00) — నీరసం తగ్గించేందుకు.'
+          ],
+          redFlags: [
+            'శ్వాస తీసుకోవడంలో తీవ్రమైన ఇబ్బంది లేదా ఛాతీ నొప్పి.',
+            'స్పృహ కోల్పోవడం లేదా నిరంతర వాంతులు.'
+          ],
+          suggestedQuestions: ['ఈ సమస్య ఎన్ని రోజుల నుంచి ఉంది?'],
+          audioSummary: 'క్లినికల్ సలహా: విశ్రాంతి తీసుకోండి మరియు నీరు తాగండి. లైవ్ వీడియో కాల్ ద్వారా వైద్యుడిని సంప్రదించండి.',
+          time: timeStr
+        };
+      }
+
+      // Default English fallback
+      return {
+        sender: 'ai',
+        text: `### Clinical Assessment for: "${this.escapeHtml(query)}"\n\nBased on national rural telemedicine clinical guidelines:\n\n1. **First-Aid & Rest**: Rest in an airy environment, stay hydrated with clean water/ORS, and monitor symptom progression.\n2. **Connect with Doctor**: Since our on-duty Medical Officers are active on the telemedicine grid, tap **Video Call Doctor** below for a verified digital diagnosis and prescription.\n3. **Emergency Alert**: If you or the patient experience severe breathing difficulty, continuous chest heaviness, deep bleeding, or seizures, tap **Call 108 Ambulance** immediately.`,
+        severity: 'moderate',
+        severityLabel: '🟡 CLINICAL TRIAGE ADVISORY',
+        severityColor: '#0284c7',
+        steps: [
+          'Note the exact start time, duration, and any aggravating factors of the symptoms.',
+          'Check vital signs (temperature, pulse, BP) if household instruments are available.',
+          'Keep your 14-digit ABHA ID card ready for the doctor video consultation.'
+        ],
+        medicines: [
+          '**Paracetamol 500mg** (Jan Aushadhi: ₹1.50 per strip) — For mild pain/fever.',
+          '**WHO-ORS Electrolyte Sachet** (Jan Aushadhi: ₹4.00) — For fluid restoration.'
+        ],
+        redFlags: [
+          'Sudden chest tightness or shortness of breath.',
+          'Loss of consciousness, slurred speech, or continuous vomiting.',
+          'High fever >103°F with neck stiffness.'
+        ],
+        suggestedQuestions: [
+          'How many hours or days have you had this symptom?',
+          'Is the discomfort mild, moderate, or severe?'
+        ],
+        audioSummary: 'Clinical advice: Rest and stay hydrated. We recommend connecting to an on-duty doctor via live video call or visiting the nearest PHC.',
+        time: timeStr
+      };
     }
   }
 

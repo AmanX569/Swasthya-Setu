@@ -1109,6 +1109,32 @@
       );
     }
 
+    toggleHospitalsView() {
+      this.isHospitalsMinimized = !this.isHospitalsMinimized;
+      const btn = document.getElementById('toggleHospitalBedsBtn');
+      const text = document.getElementById('toggleHospitalBedsText');
+      const icon = document.getElementById('toggleHospitalBedsIcon');
+      const pill = document.getElementById('hospitalBedsSummaryPill');
+      const container = document.getElementById('hospitalBedsContainer');
+
+      if (text && icon) {
+        text.textContent = this.isHospitalsMinimized ? 'Expand Beds Data' : 'Minimize Beds Data';
+        icon.textContent = this.isHospitalsMinimized ? '🔽' : '🔼';
+      }
+
+      if (pill) {
+        pill.style.display = this.isHospitalsMinimized ? 'flex' : 'none';
+      }
+
+      if (container) {
+        container.style.display = this.isHospitalsMinimized ? 'none' : 'block';
+      }
+
+      if (!this.isHospitalsMinimized) {
+        this.renderLiveHospitals();
+      }
+    }
+
     setHospitalFilter(filter) {
       this.hospitalFilter = filter;
       this.renderLiveHospitals();

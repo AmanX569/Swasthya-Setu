@@ -1012,6 +1012,9 @@
 
   global.onLanguageChange = function(lang) {
     global.i18n.setLanguage(lang);
+    if (global.aiHealthBot && typeof global.aiHealthBot.setLanguage === 'function') {
+      global.aiHealthBot.setLanguage(lang);
+    }
     const names = { en: 'English', hi: 'हिंदी', te: 'తెలుగు', ta: 'தமிழ்', mr: 'मराठी', bn: 'বাংলা', kn: 'ಕನ್ನಡ' };
     if (typeof window.toast === 'function') {
       window.toast('🌐 ' + (names[lang] || lang));
