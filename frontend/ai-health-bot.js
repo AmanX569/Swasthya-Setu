@@ -720,24 +720,13 @@
       this.closeApiKeyModal();
     }
 
-        updateModelBadge() {
+            updateModelBadge() {
       const floatBadge = document.getElementById('floatingAiModelBadge');
-      const inlineBadge = document.getElementById('inlineGeminiBadge');
-      const hasKey = Boolean(this.getApiKey());
-
       if (floatBadge) {
-        floatBadge.textContent = hasKey ? '✨ Gemini 1.5 Live' : '✨ Powered by Gemini';
+        floatBadge.textContent = '24x7 Live';
         if (floatBadge.style) {
-          floatBadge.style.borderColor = hasKey ? '#10b981' : '#38bdf8';
-          floatBadge.style.color = hasKey ? '#34d399' : '#38bdf8';
-        }
-      }
-
-      if (inlineBadge) {
-        inlineBadge.textContent = hasKey ? '✨ Gemini 1.5 Flash (Live)' : '✨ Powered by Gemini AI';
-        if (inlineBadge.style) {
-          inlineBadge.style.borderColor = hasKey ? '#10b981' : 'rgba(56,189,248,0.4)';
-          inlineBadge.style.color = hasKey ? '#34d399' : '#38bdf8';
+          floatBadge.style.borderColor = '#10b981';
+          floatBadge.style.color = '#34d399';
         }
       }
     }
@@ -788,7 +777,7 @@
       this.messages = [
         {
           sender: 'ai',
-          text: 'Namaste! I am your **24x7 Swasthya AI Clinical Health Assistant** (Powered by Google Gemini). If our doctors are busy or you need immediate guidance, describe your symptoms below (in any Indian language) or tap any quick symptom pill above. I provide instant clinical triage, emergency first-aid, danger red flags, and affordable PMBJP Jan Aushadhi generic medicines.',
+          text: 'Namaste! I am your **24x7 Swasthya AI Clinical Health Assistant** . If our doctors are busy or you need immediate guidance, describe your symptoms below (in any Indian language) or tap any quick symptom pill above. I provide instant clinical triage, emergency first-aid, danger red flags, and affordable PMBJP Jan Aushadhi generic medicines.',
           time: this.getFormattedTime(),
           audioSummary: 'Namaste! I am your 24x7 Swasthya AI Clinical Health Assistant. Describe your symptoms or tap any quick symptom for instant first aid and medicine guidance.'
         }
@@ -893,7 +882,7 @@
                 ` : ''}
 
                 <div style="font-size:10px;color:var(--muted);text-align:right;margin-top:8px;">
-                  ${m.time} · Swasthya AI · ✨ Powered by Gemini AI
+                  ${m.time} · Swasthya AI · Swasthya AI Clinical Assistant
                 </div>
 
               </div>
@@ -966,7 +955,90 @@
       if (el2) el2.remove();
     }
 
+    
+    isGreeting(text) {
+      if (!text) return false;
+      const t = text.trim().toLowerCase().replace(/[!.,?]/g, '');
+      const greetings = [
+        'hi', 'hello', 'hey', 'namaste', 'namaskar', 'namaskaram', 'vanakkam',
+        'good morning', 'good afternoon', 'good evening', 'good day', 'greetings',
+        'how are you', 'who are you', 'what is this', 'what can you do',
+        'help', 'help me', 'thanks', 'thank you', 'dhanyawad', 'shukriya',
+        'bye', 'goodbye', 'ok', 'okay', 'test'
+      ];
+      return greetings.includes(t);
+    }
+
+    getGreetingResponse(query, lang) {
+      const q = (query || '').trim().toLowerCase();
+      const isThanks = q.includes('thank') || q.includes('dhanyawad') || q.includes('shukriya');
+      const isBye = q.includes('bye');
+
+      if (isThanks) {
+        const thanksMap = {
+          en: 'You are welcome! 🙏 Take good care of your health. If you feel any discomfort or need advice, I am always here 24x7.',
+          hi: 'आपका स्वागत है! 🙏 अपने स्वास्थ्य का ध्यान रखें। किसी भी समय कोई परेशानी होने पर मुझसे बेझिझक पूछें।',
+          te: 'స్వాగతం! 🙏 మీ ఆరోగ్యాన్ని జాగ్రత్తగా చూసుకోండి. ఎటువంటి అసౌకర్యం కలిగినా 24x7 నన్ను అడగవచ్చు.',
+          ta: 'நல்வரவு! 🙏 உங்கள் உடலை கவனித்துக் கொள்ளுங்கள். எந்த நேரத்திலும் ஆலோசனை பெற என்னை அணுகலாம்.',
+          mr: 'आपले स्वागत आहे! 🙏 आरोग्याची काळजी घ्या. काही त्रास जाणवल्यास कधीही विचारा.',
+          bn: 'আপনাকে ধন্যবাদ! 🙏 নিজের স্বাস্থ্যের যত্ন নিন। প্রয়োজনে যে কোনো সময় সাহায্য নিতে পারেন।',
+          kn: 'ಸ್ವಾಗತ! 🙏 ನಿಮ್ಮ ಆರೋಗ್ಯವನ್ನು ಕಾಪಾಡಿಕೊಳ್ಳಿ. ಯಾವುದೇ ಸಮಯದಲ್ಲಿ ಮಾರ್ಗದರ್ಶನ ಪಡೆಯಿರಿ.'
+        };
+        return {
+          sender: 'ai',
+          text: thanksMap[lang] || thanksMap.en,
+          time: this.getFormattedTime()
+        };
+      }
+
+      if (isBye) {
+        const byeMap = {
+          en: 'Goodbye! Take care and stay healthy. Contact our on-duty doctors or 108 in case of emergencies.',
+          hi: 'अलविदा! अपना ध्यान रखें और स्वस्थ रहें। आपात स्थिति में हमारे डॉक्टरों या 108 से संपर्क करें।',
+          te: 'వీడ్కోలు! ఆరోగ్యాన్ని జాగ్రత్తగా చూసుకోండి. అత్యవసరమైతే మా వైద్యులను సంప్రదించండి.',
+          ta: 'சென்று வாருங்கள்! ஆரோக்கியமாக இருங்கள்.',
+          mr: 'काळजी घ्या आणि निरोगी रहा.',
+          bn: 'ভালো থাকুন এবং সুস্থ থাকুন।',
+          kn: 'ಆರೋಗ್ಯವಾಗಿರಿ ಮತ್ತು ಶುಭವಾಗಲಿ.'
+        };
+        return {
+          sender: 'ai',
+          text: byeMap[lang] || byeMap.en,
+          time: this.getFormattedTime()
+        };
+      }
+
+      const greetMap = {
+        en: 'Hello! 👋 I am your **Swasthya AI Health Assistant**.\n\nHow can I help you today? Please describe what symptoms or discomfort you are experiencing (e.g. fever, headache, body pain, cough, stomach ache), or tap any quick symptom button above.\n\n*If you need immediate doctor consultation, you can also tap **Video Call Doctor** below.*',
+        hi: 'नमस्ते! 👋 मैं आपका **स्वास्थ्य एआई (Swasthya AI)** सहायक हूँ।\n\nमैं आज आपकी क्या सहायता कर सकता हूँ? कृपया बताएं कि आप क्या लक्षण महसूस कर रहे हैं (जैसे बुखार, सिरदर्द, खांसी, बदन दर्द, पेट दर्द आदि), या ऊपर दिए गए किसी लक्षण पर टैप करें।\n\n*यदि आप डॉक्टर से बात करना चाहते हैं, तो नीचे **Video Call Doctor** पर टैप करें।*',
+        te: 'నమస్కారం! 👋 నేను మీ **స్వాస్థ్య AI (Swasthya AI)** ఆరోగ్య సహాయకుడిని.\n\nనేను మీకు ఎలా సహాయపడగలను? మీకు ఎలాంటి ఆరోగ్య సమస్య లేదా లక్షణాలు ఉన్నాయి (ఉదా: జ్వరం, తలనొప్పి, కండరాల నొప్పి, దగ్గు)? దయచేసి వివరించండి లేదా పై బటన్లలో ఒకదాన్ని ఎంచుకోండి.\n\n*వైద్యుడితో నేరుగా మాట్లాడేందుకు కింద ఉన్న **Video Call Doctor** పై నొక్కండి.*',
+        ta: 'வணக்கம்! 👋 நான் உங்கள் **ஸ்வஸ்த்யா AI** சுகாதார உதவியாளர்.\n\nஉங்களுக்கு என்ன அறிகுறிகள் உள்ளன? (எ.கா: காய்ச்சல், தலைவலி, இருமல்). தயவுசெய்து விவரிக்கவும்.',
+        mr: 'नमस्कार! 👋 मी तुमचा **स्वास्थ AI** आरोग्य सहाय्यक आहे.\n\nआपणास कोणती लक्षणे जाणवत आहेत (उदा. ताप, डोकेदुखी, खोकला)? कृपया सांगा.',
+        bn: 'নমস্কার! 👋 আমি আপনার **স্বাস্থ্য এআই** স্বাস্থ্য সহকারী।\n\nআপনার কী শারীরিক সমস্যা বা লক্ষণ হচ্ছে (যেমন জ্বর, মাথাব্যথা, কাশি)? অনুগ্রহ করে জানান।',
+        kn: 'ನಮಸ್ಕಾರ! 👋 ನಾನು ನಿಮ್ಮ **ಸ್ವಾಸ್ಥ್ಯ AI** ಆರೋಗ್ಯ ಸಹಾಯಕ.\n\nನಿಮಗೆ ಯಾವ ರೋಗಲಕ್ಷಣಗಳು ಕಾಣಿಸಿಕೊಂಡಿವೆ (ಉದಾ. ಜ್ವರ, ತಲೆನೋವು, ಕೆಮ್ಮು)? ದಯವಿಟ್ಟು ತಿಳಿಸಿ.'
+      };
+
+      return {
+        sender: 'ai',
+        text: greetMap[lang] || greetMap.en,
+        time: this.getFormattedTime(),
+        suggestedQuestions: [
+          'I have a fever and body ache',
+          'I have a muscle strain in leg',
+          'I have stomach ache and diarrhea'
+        ]
+      };
+    }
+
     processAiResponse(query) {
+      // Check for greeting / small-talk first!
+      if (this.isGreeting(query)) {
+        const lang = this.currentLanguage || 'en';
+        const greetResponse = this.getGreetingResponse(query, lang);
+        this.messages.push(greetResponse);
+        this.renderChat();
+        return;
+      }
       this.removeTypingIndicator();
 
       try {
