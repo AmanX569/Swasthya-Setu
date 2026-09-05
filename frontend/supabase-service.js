@@ -459,18 +459,29 @@
         }
 
         if (hospRes.data && hospRes.data.length) {
-          patch.hospitals = hospRes.data.map(h => ({
-            id: h.id,
-            name: h.name,
-            type: h.type,
-            distance: h.distance,
-            totalBeds: h.total_beds,
-            genBedsAvail: h.gen_beds_avail,
-            icuBedsAvail: h.icu_beds_avail,
-            oxygenBedsAvail: h.oxygen_beds_avail,
-            doctorOnDuty: h.doctor_on_duty,
-            phone: h.phone
-          }));
+          const seen = new Set();
+          patch.hospitals = hospRes.data
+            .filter(h => {
+              if (!h || !h.name) return false;
+              const norm = h.name.toLowerCase().trim().replace(/[^a-z0-9]/g, '');
+              if (!norm || seen.has(norm)) return false;
+              seen.add(norm);
+              const dist = parseFloat(h.distance);
+              if (!isNaN(dist) && dist > 25) return false;
+              return true;
+            })
+            .map(h => ({
+              id: h.id,
+              name: h.name,
+              type: h.type,
+              distance: h.distance,
+              totalBeds: h.total_beds,
+              genBedsAvail: h.gen_beds_avail,
+              icuBedsAvail: h.icu_beds_avail,
+              oxygenBedsAvail: h.oxygen_beds_avail,
+              doctorOnDuty: h.doctor_on_duty,
+              phone: h.phone
+            }));
         }
 
         if (bloodRes.data && bloodRes.data.length) {

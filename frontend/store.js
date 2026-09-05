@@ -114,6 +114,19 @@
         const saved = localStorage.getItem(STORAGE_KEY);
         if (saved) {
           const parsed = JSON.parse(saved);
+          // Deduplicate and filter hospitals within 25 km max
+          if (parsed.hospitals && Array.isArray(parsed.hospitals)) {
+            const seen = new Set();
+            parsed.hospitals = parsed.hospitals.filter(h => {
+              if (!h || !h.name) return false;
+              const norm = h.name.toLowerCase().trim().replace(/[^a-z0-9]/g, '');
+              if (!norm || seen.has(norm)) return false;
+              seen.add(norm);
+              const dist = parseFloat(h.distance);
+              if (!isNaN(dist) && dist > 25) return false;
+              return true;
+            });
+          }
           return { ...DEFAULT_INITIAL_STATE, ...parsed };
         }
       } catch (e) {

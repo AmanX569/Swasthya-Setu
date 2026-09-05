@@ -1153,26 +1153,49 @@
     renderLiveHospitals() {
       const el = document.getElementById('hospitalBedsContainer') || document.getElementById('hospitalBedsList');
       if (!el || !this.store) return;
-      let hosps = [...(this.store.getState().hospitals || [])];
+      let rawHosps = [...(this.store.getState().hospitals || [])];
 
-      // 1. Calculate live distances if location is granted
+      // 1. Deduplicate hospitals by normalized name
+      const seenNames = new Set();
+      let hosps = [];
+      for (const h of rawHosps) {
+        if (!h || !h.name) continue;
+        const normKey = h.name.toLowerCase().trim().replace(/[^a-z0-9]/g, '');
+        if (!normKey || seenNames.has(normKey)) continue;
+        seenNames.add(normKey);
+        hosps.push({ ...h });
+      }
+
+      // 2. Calculate live distances if location is granted
       if (this.userLocation && this.userLocation.lat && this.userLocation.lng) {
         hosps.forEach(h => {
           if (h.lat && h.lng) {
             h.liveDistanceKm = this.calculateDistance(this.userLocation.lat, this.userLocation.lng, h.lat, h.lng);
             h.displayDistance = h.liveDistanceKm + ' km away';
           } else {
-            h.liveDistanceKm = 999;
+            const parsed = parseFloat(h.distance);
+            h.liveDistanceKm = isNaN(parsed) ? 10 : parsed;
             h.displayDistance = h.distance || 'Regional';
           }
         });
-        // Sort closest first!
         hosps.sort((a, b) => (a.liveDistanceKm || 999) - (b.liveDistanceKm || 999));
       } else {
         hosps.forEach(h => {
+          const parsed = parseFloat(h.distance);
+          h.liveDistanceKm = isNaN(parsed) ? 10 : parsed;
           h.displayDistance = h.distance || 'Regional';
         });
+        hosps.sort((a, b) => (a.liveDistanceKm || 999) - (b.liveDistanceKm || 999));
       }
+
+      // 3. Filter hospitals within 25 km max emergency range
+      hosps = hosps.filter(h => {
+        if (typeof h.liveDistanceKm === 'number') {
+          return h.liveDistanceKm <= 25;
+        }
+        const parsed = parseFloat(h.distance);
+        return isNaN(parsed) || parsed <= 25;
+      });
 
       // 2. Apply search filter
       if (this.hospitalSearch) {
