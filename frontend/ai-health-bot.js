@@ -629,16 +629,18 @@
       this.messages = [];
       this.isTyping = false;
       this.currentLanguage = 'en'; // 'en', 'hi', 'te', 'ta', 'mr', 'bn', 'kn'
+      this.isFloatingOpen = false;
+      this.geminiApiKey = this.loadApiKey();
       this.initDefaultChat();
     }
 
     setLanguage(lang) {
       if (!lang) return;
       this.currentLanguage = lang;
-      const select = document.getElementById('aiLanguageSelect');
-      if (select && select.value !== lang) {
-        select.value = lang;
-      }
+      const select1 = document.getElementById('aiLanguageSelect');
+      if (select1 && select1.value !== lang) select1.value = lang;
+      const select2 = document.getElementById('floatingAiLangSelect');
+      if (select2 && select2.value !== lang) select2.value = lang;
       this.updateInputPlaceholder();
       const langNames = {
         en: 'English',
@@ -654,6 +656,107 @@
       }
     }
 
+
+    loadApiKey() {
+      if (typeof window === 'undefined') return '';
+      try {
+        let key = localStorage.getItem('swasthya_gemini_api_key') || '';
+        if (!key && window.VITE_GEMINI_API_KEY) key = window.VITE_GEMINI_API_KEY;
+        if (!key && typeof process !== 'undefined' && process.env && process.env.VITE_GEMINI_API_KEY) {
+          key = process.env.VITE_GEMINI_API_KEY;
+        }
+        return key;
+      } catch (e) {
+        return '';
+      }
+    }
+
+    getApiKey() {
+      if (!this.geminiApiKey) {
+        this.geminiApiKey = this.loadApiKey();
+      }
+      return this.geminiApiKey;
+    }
+
+    openApiKeyModal() {
+      const modal = document.getElementById('geminiApiKeyModal');
+      const input = document.getElementById('geminiApiKeyInput');
+      if (modal) {
+        if (input) input.value = this.getApiKey();
+        modal.style.display = 'flex';
+      }
+    }
+
+    closeApiKeyModal() {
+      const modal = document.getElementById('geminiApiKeyModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    saveApiKeyFromInput() {
+      const input = document.getElementById('geminiApiKeyInput');
+      const key = input ? input.value.trim() : '';
+      this.geminiApiKey = key;
+      try {
+        if (key) {
+          localStorage.setItem('swasthya_gemini_api_key', key);
+          if (typeof window !== 'undefined' && window.toast) window.toast('✨ Google Gemini API Key Connected!');
+        } else {
+          localStorage.removeItem('swasthya_gemini_api_key');
+        }
+      } catch (e) {}
+      this.updateModelBadge();
+      this.closeApiKeyModal();
+    }
+
+    clearApiKey() {
+      this.geminiApiKey = '';
+      try {
+        localStorage.removeItem('swasthya_gemini_api_key');
+      } catch (e) {}
+      const input = document.getElementById('geminiApiKeyInput');
+      if (input) input.value = '';
+      if (typeof window !== 'undefined' && window.toast) window.toast('Cleared Gemini API Key. Using offline clinical rules.');
+      this.updateModelBadge();
+      this.closeApiKeyModal();
+    }
+
+    updateModelBadge() {
+      const badge = document.getElementById('floatingAiModelBadge');
+      const hasKey = Boolean(this.getApiKey());
+      if (badge) {
+        badge.textContent = hasKey ? '✨ Gemini AI' : '⚡ Offline Clinical';
+        if (badge.style) {
+          badge.style.borderColor = hasKey ? '#10b981' : '#0284c7';
+          badge.style.color = hasKey ? '#34d399' : '#38bdf8';
+        }
+      }
+    }
+
+    toggleFloatingWidget(forceState) {
+      this.isFloatingOpen = (typeof forceState === 'boolean') ? forceState : !this.isFloatingOpen;
+      const modal = document.getElementById('swasthyaAiFloatingModal');
+      const btn = document.getElementById('aiFloatingTriggerBtn');
+      if (modal) {
+        modal.style.display = this.isFloatingOpen ? 'flex' : 'none';
+      }
+      if (btn) {
+        btn.style.boxShadow = this.isFloatingOpen ? '0 0 0 4px rgba(16,185,129,0.5)' : '';
+      }
+      if (this.isFloatingOpen) {
+        this.renderChat();
+        const input = document.getElementById('aiFloatingChatInput');
+        if (input) input.focus();
+      }
+    }
+
+    sendUserQueryFromFloating() {
+      const input = document.getElementById('aiFloatingChatInput');
+      const text = input ? input.value.trim() : '';
+      if (!text) return;
+      input.value = '';
+      this.sendUserQuery(text);
+    }
+
     updateInputPlaceholder() {
       const input = document.getElementById('aiChatInput');
       if (!input) return;
@@ -667,6 +770,8 @@
         kn: 'ರೋಗಲಕ್ಷಣಗಳನ್ನು ವಿವರಿಸಿ (ಉದಾ. ಸ್ನಾಯು ಸೆಳೆತ, ಜ್ವರ, ಕೆಮ್ಮು)...'
       };
       input.placeholder = placeholders[this.currentLanguage] || placeholders.en;
+      const floatInput = document.getElementById('aiFloatingChatInput');
+      if (floatInput) floatInput.placeholder = placeholders[this.currentLanguage] || placeholders.en;
     }
 
     initDefaultChat() {
@@ -687,14 +792,15 @@
 
     renderChat() {
       if (typeof document === 'undefined') return;
-      const container = document.getElementById('aiChatMessagesContainer');
-      if (!container) return;
+      const containerInline = document.getElementById('aiChatMessagesContainer');
+      const containerFloating = document.getElementById('aiFloatingMessagesContainer');
+      if (!containerInline && !containerFloating) return;
 
       if (!this.messages || this.messages.length === 0) {
         this.initDefaultChat();
       }
 
-      container.innerHTML = this.messages.map((m, idx) => {
+      const htmlContent = this.messages.map((m, idx) => {
         if (m.sender === 'user') {
           return `
             <div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
@@ -786,7 +892,15 @@
         }
       }).join('');
 
-      container.scrollTop = container.scrollHeight;
+      if (containerInline) {
+        containerInline.innerHTML = htmlContent;
+        containerInline.scrollTop = containerInline.scrollHeight;
+      }
+      if (containerFloating) {
+        containerFloating.innerHTML = htmlContent;
+        containerFloating.scrollTop = containerFloating.scrollHeight;
+      }
+      this.updateModelBadge();
     }
 
     sendUserQuery(queryText) {
@@ -811,8 +925,8 @@
     }
 
     showTypingIndicator() {
-      const container = document.getElementById('aiChatMessagesContainer');
-      if (!container) return;
+      const containerInline = document.getElementById('aiChatMessagesContainer');
+      const containerFloating = document.getElementById('aiFloatingMessagesContainer');
 
       const typingHtml = `
         <div id="aiTypingIndicator" style="display:flex;gap:10px;margin-bottom:12px;align-items:center;">
@@ -824,13 +938,22 @@
           </div>
         </div>
       `;
-      container.insertAdjacentHTML('beforeend', typingHtml);
-      container.scrollTop = container.scrollHeight;
+      if (containerInline) {
+        containerInline.insertAdjacentHTML('beforeend', typingHtml);
+        containerInline.scrollTop = containerInline.scrollHeight;
+      }
+      if (containerFloating) {
+        const floatTyping = typingHtml.replace('id="aiTypingIndicator"', 'id="aiTypingIndicatorFloat"');
+        containerFloating.insertAdjacentHTML('beforeend', floatTyping);
+        containerFloating.scrollTop = containerFloating.scrollHeight;
+      }
     }
 
     removeTypingIndicator() {
-      const el = document.getElementById('aiTypingIndicator');
-      if (el) el.remove();
+      const el1 = document.getElementById('aiTypingIndicator');
+      if (el1) el1.remove();
+      const el2 = document.getElementById('aiTypingIndicatorFloat');
+      if (el2) el2.remove();
     }
 
     processAiResponse(query) {
@@ -933,11 +1056,17 @@
         return;
       }
 
-      // Generate multilingual clinical response based on this.currentLanguage
+      // If Gemini API Key is available and user is online, attempt Google Gemini API!
       const lang = this.currentLanguage || 'en';
-      const aiResponse = this.generateMultilingualResponse(bestMatch, maxScore, query, lang);
-      this.messages.push(aiResponse);
-      this.renderChat();
+      const apiKey = this.getApiKey();
+
+      if (apiKey && typeof navigator !== 'undefined' && navigator.onLine) {
+        this.callGeminiApi(query, lang, bestMatch, maxScore);
+      } else {
+        const aiResponse = this.generateMultilingualResponse(bestMatch, maxScore, query, lang);
+        this.messages.push(aiResponse);
+        this.renderChat();
+      }
 
       } catch (err) {
         console.warn('[AI Bot] Clinical assistant processing error:', err);
@@ -1062,6 +1191,107 @@
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#039;');
+    }
+
+
+    async callGeminiApi(query, lang, fallbackMatch, fallbackScore) {
+      const apiKey = this.getApiKey();
+      const langNames = {
+        en: 'English',
+        hi: 'Hindi',
+        te: 'Telugu',
+        ta: 'Tamil',
+        mr: 'Marathi',
+        bn: 'Bengali',
+        kn: 'Kannada'
+      };
+      const langName = langNames[lang] || 'English';
+
+      try {
+        const endpoint = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + encodeURIComponent(apiKey);
+        const prompt = `You are Swasthya AI, an expert rural healthcare clinical assistant on the Indian telemedicine platform "Swasthya Setu".
+Evaluate the patient's symptoms: "${query}".
+Language to respond in: ${langName} (${lang}).
+
+Strict Clinical Guidelines:
+1. Provide clinical assessment and probable cause in ${langName}.
+2. State Emergency Triage Level clearly:
+   - 🟢 Mild / Home Care
+   - 🟡 Moderate / Consult Doctor
+   - 🔴 Critical Emergency / Call 108
+3. Provide 3-4 immediate evidence-based First-Aid steps (e.g. R.I.C.E., oral rehydration, positioning, rest).
+4. Recommend affordable PMBJP Jan Aushadhi generic medicines with generic names and dosages (e.g. Paracetamol 500mg, ORS, Cetirizine 10mg, Diclofenac 1% gel).
+5. State 2-3 Danger Red Flags requiring immediate 108 emergency ambulance dispatch.
+6. Provide a 1-sentence Audio Summary for the patient.
+
+Format your output cleanly in Markdown with bold headers. Be compassionate, concise, and medically accurate.`;
+
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [
+              {
+                role: 'user',
+                parts: [{ text: prompt }]
+              }
+            ],
+            generationConfig: {
+              temperature: 0.2,
+              maxOutputTokens: 600
+            }
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error('Gemini API returned status ' + response.status);
+        }
+
+        const data = await response.json();
+        const candidate = data.candidates && data.candidates[0];
+        const textOutput = candidate && candidate.content && candidate.content.parts && candidate.content.parts[0] && candidate.content.parts[0].text;
+
+        if (textOutput) {
+          const isCritical = textOutput.includes('Critical') || textOutput.includes('🔴') || textOutput.includes('Emergency') || textOutput.includes('108');
+          const isModerate = textOutput.includes('Moderate') || textOutput.includes('🟡');
+
+          this.messages.push({
+            sender: 'ai',
+            text: textOutput,
+            severity: isCritical ? 'critical' : (isModerate ? 'moderate' : 'mild'),
+            severityLabel: isCritical ? '🔴 GEMINI CLINICAL · CRITICAL 108 SOS' : (isModerate ? '🟡 GEMINI CLINICAL · MODERATE' : '🟢 GEMINI CLINICAL · MILD / HOME CARE'),
+            severityColor: isCritical ? '#dc2626' : (isModerate ? '#0284c7' : '#16a34a'),
+            steps: [
+              'Follow the evidence-based clinical steps outlined above.',
+              'Tap "Video Call Doctor" to speak with an on-duty medical officer.',
+              'For acute emergencies, dispatch 108 ambulance immediately.'
+            ],
+            medicines: [
+              'Available at nearest Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP) Kendra.'
+            ],
+            redFlags: [
+              'Chest pain, shortness of breath, sudden weakness, or deep bleeding require emergency 108 dispatch.'
+            ],
+            suggestedQuestions: [
+              'Would you like to start a video consultation with a doctor?',
+              'Do you need directions to the nearest hospital?'
+            ],
+            audioSummary: 'Gemini AI clinical guide: Follow first-aid and medication steps. If severe symptoms occur, call 108 or consult an on-duty doctor on video call.',
+            time: this.getFormattedTime(),
+            source: 'gemini'
+          });
+          this.renderChat();
+          return;
+        } else {
+          throw new Error('No text generated from Gemini response');
+        }
+      } catch (geminiError) {
+        console.warn('[Gemini AI] API call failed or quota exceeded, seamlessly falling back to offline clinical KB:', geminiError);
+        const aiResponse = this.generateMultilingualResponse(fallbackMatch, fallbackScore, query, lang);
+        aiResponse.text = `> *✨ Swasthya AI (Offline Clinical Mode)*\n\n` + aiResponse.text;
+        this.messages.push(aiResponse);
+        this.renderChat();
+      }
     }
 
     generateMultilingualResponse(bestMatch, maxScore, query, lang) {

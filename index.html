@@ -1146,6 +1146,77 @@ body[data-theme="doom"] {
   backdrop-filter: blur(12px);
   animation: pageEnterSmooth 0.3s ease;
 }
+
+/* FLOATING SWASTHYA AI WIDGET STYLES */
+#aiFloatingTriggerBtn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #ffffff;
+  border: 2.5px solid #34d399;
+  box-shadow: 0 8px 28px rgba(16, 185, 129, 0.45);
+  cursor: pointer;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: pulseGlow 3s infinite;
+}
+
+#aiFloatingTriggerBtn:hover {
+  transform: scale(1.08) translateY(-3px);
+  box-shadow: 0 12px 36px rgba(16, 185, 129, 0.6);
+}
+
+#aiFloatingTriggerBtn:active {
+  transform: scale(0.94);
+}
+
+#swasthyaAiFloatingModal {
+  display: none;
+  position: fixed;
+  bottom: 96px;
+  right: 24px;
+  width: 440px;
+  max-width: calc(100vw - 32px);
+  height: 620px;
+  max-height: calc(100vh - 120px);
+  background: #0f172a;
+  border: 1.5px solid rgba(16, 185, 129, 0.45);
+  border-radius: 20px;
+  box-shadow: 0 16px 50px rgba(0, 0, 0, 0.6), 0 0 24px rgba(16, 185, 129, 0.25);
+  z-index: 10001;
+  flex-direction: column;
+  backdrop-filter: blur(20px);
+  overflow: hidden;
+  animation: pageEnterSmooth 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (max-width: 480px) {
+  #swasthyaAiFloatingModal {
+    bottom: 0;
+    right: 0;
+    width: 100vw;
+    max-width: 100vw;
+    height: 90vh;
+    max-height: 90vh;
+    border-radius: 20px 20px 0 0;
+    border-bottom: none;
+  }
+  #aiFloatingTriggerBtn {
+    bottom: 18px;
+    right: 18px;
+    width: 54px;
+    height: 54px;
+    font-size: 24px;
+  }
+}
 </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -10774,16 +10845,18 @@ body[data-theme="doom"] {
       this.messages = [];
       this.isTyping = false;
       this.currentLanguage = 'en'; // 'en', 'hi', 'te', 'ta', 'mr', 'bn', 'kn'
+      this.isFloatingOpen = false;
+      this.geminiApiKey = this.loadApiKey();
       this.initDefaultChat();
     }
 
     setLanguage(lang) {
       if (!lang) return;
       this.currentLanguage = lang;
-      const select = document.getElementById('aiLanguageSelect');
-      if (select && select.value !== lang) {
-        select.value = lang;
-      }
+      const select1 = document.getElementById('aiLanguageSelect');
+      if (select1 && select1.value !== lang) select1.value = lang;
+      const select2 = document.getElementById('floatingAiLangSelect');
+      if (select2 && select2.value !== lang) select2.value = lang;
       this.updateInputPlaceholder();
       const langNames = {
         en: 'English',
@@ -10799,6 +10872,107 @@ body[data-theme="doom"] {
       }
     }
 
+
+    loadApiKey() {
+      if (typeof window === 'undefined') return '';
+      try {
+        let key = localStorage.getItem('swasthya_gemini_api_key') || '';
+        if (!key && window.VITE_GEMINI_API_KEY) key = window.VITE_GEMINI_API_KEY;
+        if (!key && typeof process !== 'undefined' && process.env && process.env.VITE_GEMINI_API_KEY) {
+          key = process.env.VITE_GEMINI_API_KEY;
+        }
+        return key;
+      } catch (e) {
+        return '';
+      }
+    }
+
+    getApiKey() {
+      if (!this.geminiApiKey) {
+        this.geminiApiKey = this.loadApiKey();
+      }
+      return this.geminiApiKey;
+    }
+
+    openApiKeyModal() {
+      const modal = document.getElementById('geminiApiKeyModal');
+      const input = document.getElementById('geminiApiKeyInput');
+      if (modal) {
+        if (input) input.value = this.getApiKey();
+        modal.style.display = 'flex';
+      }
+    }
+
+    closeApiKeyModal() {
+      const modal = document.getElementById('geminiApiKeyModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    saveApiKeyFromInput() {
+      const input = document.getElementById('geminiApiKeyInput');
+      const key = input ? input.value.trim() : '';
+      this.geminiApiKey = key;
+      try {
+        if (key) {
+          localStorage.setItem('swasthya_gemini_api_key', key);
+          if (typeof window !== 'undefined' && window.toast) window.toast('✨ Google Gemini API Key Connected!');
+        } else {
+          localStorage.removeItem('swasthya_gemini_api_key');
+        }
+      } catch (e) {}
+      this.updateModelBadge();
+      this.closeApiKeyModal();
+    }
+
+    clearApiKey() {
+      this.geminiApiKey = '';
+      try {
+        localStorage.removeItem('swasthya_gemini_api_key');
+      } catch (e) {}
+      const input = document.getElementById('geminiApiKeyInput');
+      if (input) input.value = '';
+      if (typeof window !== 'undefined' && window.toast) window.toast('Cleared Gemini API Key. Using offline clinical rules.');
+      this.updateModelBadge();
+      this.closeApiKeyModal();
+    }
+
+    updateModelBadge() {
+      const badge = document.getElementById('floatingAiModelBadge');
+      const hasKey = Boolean(this.getApiKey());
+      if (badge) {
+        badge.textContent = hasKey ? '✨ Gemini AI' : '⚡ Offline Clinical';
+        if (badge.style) {
+          badge.style.borderColor = hasKey ? '#10b981' : '#0284c7';
+          badge.style.color = hasKey ? '#34d399' : '#38bdf8';
+        }
+      }
+    }
+
+    toggleFloatingWidget(forceState) {
+      this.isFloatingOpen = (typeof forceState === 'boolean') ? forceState : !this.isFloatingOpen;
+      const modal = document.getElementById('swasthyaAiFloatingModal');
+      const btn = document.getElementById('aiFloatingTriggerBtn');
+      if (modal) {
+        modal.style.display = this.isFloatingOpen ? 'flex' : 'none';
+      }
+      if (btn) {
+        btn.style.boxShadow = this.isFloatingOpen ? '0 0 0 4px rgba(16,185,129,0.5)' : '';
+      }
+      if (this.isFloatingOpen) {
+        this.renderChat();
+        const input = document.getElementById('aiFloatingChatInput');
+        if (input) input.focus();
+      }
+    }
+
+    sendUserQueryFromFloating() {
+      const input = document.getElementById('aiFloatingChatInput');
+      const text = input ? input.value.trim() : '';
+      if (!text) return;
+      input.value = '';
+      this.sendUserQuery(text);
+    }
+
     updateInputPlaceholder() {
       const input = document.getElementById('aiChatInput');
       if (!input) return;
@@ -10812,6 +10986,8 @@ body[data-theme="doom"] {
         kn: 'ರೋಗಲಕ್ಷಣಗಳನ್ನು ವಿವರಿಸಿ (ಉದಾ. ಸ್ನಾಯು ಸೆಳೆತ, ಜ್ವರ, ಕೆಮ್ಮು)...'
       };
       input.placeholder = placeholders[this.currentLanguage] || placeholders.en;
+      const floatInput = document.getElementById('aiFloatingChatInput');
+      if (floatInput) floatInput.placeholder = placeholders[this.currentLanguage] || placeholders.en;
     }
 
     initDefaultChat() {
@@ -10832,14 +11008,15 @@ body[data-theme="doom"] {
 
     renderChat() {
       if (typeof document === 'undefined') return;
-      const container = document.getElementById('aiChatMessagesContainer');
-      if (!container) return;
+      const containerInline = document.getElementById('aiChatMessagesContainer');
+      const containerFloating = document.getElementById('aiFloatingMessagesContainer');
+      if (!containerInline && !containerFloating) return;
 
       if (!this.messages || this.messages.length === 0) {
         this.initDefaultChat();
       }
 
-      container.innerHTML = this.messages.map((m, idx) => {
+      const htmlContent = this.messages.map((m, idx) => {
         if (m.sender === 'user') {
           return `
             <div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
@@ -10931,7 +11108,15 @@ body[data-theme="doom"] {
         }
       }).join('');
 
-      container.scrollTop = container.scrollHeight;
+      if (containerInline) {
+        containerInline.innerHTML = htmlContent;
+        containerInline.scrollTop = containerInline.scrollHeight;
+      }
+      if (containerFloating) {
+        containerFloating.innerHTML = htmlContent;
+        containerFloating.scrollTop = containerFloating.scrollHeight;
+      }
+      this.updateModelBadge();
     }
 
     sendUserQuery(queryText) {
@@ -10956,8 +11141,8 @@ body[data-theme="doom"] {
     }
 
     showTypingIndicator() {
-      const container = document.getElementById('aiChatMessagesContainer');
-      if (!container) return;
+      const containerInline = document.getElementById('aiChatMessagesContainer');
+      const containerFloating = document.getElementById('aiFloatingMessagesContainer');
 
       const typingHtml = `
         <div id="aiTypingIndicator" style="display:flex;gap:10px;margin-bottom:12px;align-items:center;">
@@ -10969,13 +11154,22 @@ body[data-theme="doom"] {
           </div>
         </div>
       `;
-      container.insertAdjacentHTML('beforeend', typingHtml);
-      container.scrollTop = container.scrollHeight;
+      if (containerInline) {
+        containerInline.insertAdjacentHTML('beforeend', typingHtml);
+        containerInline.scrollTop = containerInline.scrollHeight;
+      }
+      if (containerFloating) {
+        const floatTyping = typingHtml.replace('id="aiTypingIndicator"', 'id="aiTypingIndicatorFloat"');
+        containerFloating.insertAdjacentHTML('beforeend', floatTyping);
+        containerFloating.scrollTop = containerFloating.scrollHeight;
+      }
     }
 
     removeTypingIndicator() {
-      const el = document.getElementById('aiTypingIndicator');
-      if (el) el.remove();
+      const el1 = document.getElementById('aiTypingIndicator');
+      if (el1) el1.remove();
+      const el2 = document.getElementById('aiTypingIndicatorFloat');
+      if (el2) el2.remove();
     }
 
     processAiResponse(query) {
@@ -11078,11 +11272,17 @@ body[data-theme="doom"] {
         return;
       }
 
-      // Generate multilingual clinical response based on this.currentLanguage
+      // If Gemini API Key is available and user is online, attempt Google Gemini API!
       const lang = this.currentLanguage || 'en';
-      const aiResponse = this.generateMultilingualResponse(bestMatch, maxScore, query, lang);
-      this.messages.push(aiResponse);
-      this.renderChat();
+      const apiKey = this.getApiKey();
+
+      if (apiKey && typeof navigator !== 'undefined' && navigator.onLine) {
+        this.callGeminiApi(query, lang, bestMatch, maxScore);
+      } else {
+        const aiResponse = this.generateMultilingualResponse(bestMatch, maxScore, query, lang);
+        this.messages.push(aiResponse);
+        this.renderChat();
+      }
 
       } catch (err) {
         console.warn('[AI Bot] Clinical assistant processing error:', err);
@@ -11207,6 +11407,107 @@ body[data-theme="doom"] {
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#039;');
+    }
+
+
+    async callGeminiApi(query, lang, fallbackMatch, fallbackScore) {
+      const apiKey = this.getApiKey();
+      const langNames = {
+        en: 'English',
+        hi: 'Hindi',
+        te: 'Telugu',
+        ta: 'Tamil',
+        mr: 'Marathi',
+        bn: 'Bengali',
+        kn: 'Kannada'
+      };
+      const langName = langNames[lang] || 'English';
+
+      try {
+        const endpoint = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + encodeURIComponent(apiKey);
+        const prompt = `You are Swasthya AI, an expert rural healthcare clinical assistant on the Indian telemedicine platform "Swasthya Setu".
+Evaluate the patient's symptoms: "${query}".
+Language to respond in: ${langName} (${lang}).
+
+Strict Clinical Guidelines:
+1. Provide clinical assessment and probable cause in ${langName}.
+2. State Emergency Triage Level clearly:
+   - 🟢 Mild / Home Care
+   - 🟡 Moderate / Consult Doctor
+   - 🔴 Critical Emergency / Call 108
+3. Provide 3-4 immediate evidence-based First-Aid steps (e.g. R.I.C.E., oral rehydration, positioning, rest).
+4. Recommend affordable PMBJP Jan Aushadhi generic medicines with generic names and dosages (e.g. Paracetamol 500mg, ORS, Cetirizine 10mg, Diclofenac 1% gel).
+5. State 2-3 Danger Red Flags requiring immediate 108 emergency ambulance dispatch.
+6. Provide a 1-sentence Audio Summary for the patient.
+
+Format your output cleanly in Markdown with bold headers. Be compassionate, concise, and medically accurate.`;
+
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [
+              {
+                role: 'user',
+                parts: [{ text: prompt }]
+              }
+            ],
+            generationConfig: {
+              temperature: 0.2,
+              maxOutputTokens: 600
+            }
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error('Gemini API returned status ' + response.status);
+        }
+
+        const data = await response.json();
+        const candidate = data.candidates && data.candidates[0];
+        const textOutput = candidate && candidate.content && candidate.content.parts && candidate.content.parts[0] && candidate.content.parts[0].text;
+
+        if (textOutput) {
+          const isCritical = textOutput.includes('Critical') || textOutput.includes('🔴') || textOutput.includes('Emergency') || textOutput.includes('108');
+          const isModerate = textOutput.includes('Moderate') || textOutput.includes('🟡');
+
+          this.messages.push({
+            sender: 'ai',
+            text: textOutput,
+            severity: isCritical ? 'critical' : (isModerate ? 'moderate' : 'mild'),
+            severityLabel: isCritical ? '🔴 GEMINI CLINICAL · CRITICAL 108 SOS' : (isModerate ? '🟡 GEMINI CLINICAL · MODERATE' : '🟢 GEMINI CLINICAL · MILD / HOME CARE'),
+            severityColor: isCritical ? '#dc2626' : (isModerate ? '#0284c7' : '#16a34a'),
+            steps: [
+              'Follow the evidence-based clinical steps outlined above.',
+              'Tap "Video Call Doctor" to speak with an on-duty medical officer.',
+              'For acute emergencies, dispatch 108 ambulance immediately.'
+            ],
+            medicines: [
+              'Available at nearest Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP) Kendra.'
+            ],
+            redFlags: [
+              'Chest pain, shortness of breath, sudden weakness, or deep bleeding require emergency 108 dispatch.'
+            ],
+            suggestedQuestions: [
+              'Would you like to start a video consultation with a doctor?',
+              'Do you need directions to the nearest hospital?'
+            ],
+            audioSummary: 'Gemini AI clinical guide: Follow first-aid and medication steps. If severe symptoms occur, call 108 or consult an on-duty doctor on video call.',
+            time: this.getFormattedTime(),
+            source: 'gemini'
+          });
+          this.renderChat();
+          return;
+        } else {
+          throw new Error('No text generated from Gemini response');
+        }
+      } catch (geminiError) {
+        console.warn('[Gemini AI] API call failed or quota exceeded, seamlessly falling back to offline clinical KB:', geminiError);
+        const aiResponse = this.generateMultilingualResponse(fallbackMatch, fallbackScore, query, lang);
+        aiResponse.text = `> *✨ Swasthya AI (Offline Clinical Mode)*\n\n` + aiResponse.text;
+        this.messages.push(aiResponse);
+        this.renderChat();
+      }
     }
 
     generateMultilingualResponse(bestMatch, maxScore, query, lang) {
@@ -15184,6 +15485,121 @@ checkDemoModeFlag();
 
 </script>
 
+
+
+<!-- =========================================================
+     FLOATING SWASTHYA AI CHATBOT WIDGET (GEMINI POWERED)
+     ========================================================= -->
+
+<!-- FLOATING TRIGGER ICON (FAB) -->
+<button type="button" id="aiFloatingTriggerBtn" onclick="aiHealthBot.toggleFloatingWidget()" title="Chat with Swasthya AI (Gemini Powered)">
+  <span id="aiFloatingIcon">🤖</span>
+  <span style="position:absolute;top:-4px;right:-4px;background:#ef4444;color:#ffffff;font-size:10px;font-weight:900;padding:2px 6px;border-radius:10px;border:1.5px solid #ffffff;box-shadow:0 2px 6px rgba(0,0,0,0.3);">AI</span>
+</button>
+
+<!-- FLOATING POPUP CHAT WINDOW -->
+<div id="swasthyaAiFloatingModal">
+  <!-- FLOATING HEADER -->
+  <div style="padding:14px 16px;background:linear-gradient(135deg, rgba(16,185,129,0.2), rgba(15,23,42,0.8));border-bottom:1.5px solid rgba(16,185,129,0.3);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg, #10b981, #059669);display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 2px 8px rgba(16,185,129,0.4);">
+        🤖
+      </div>
+      <div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <strong style="color:#ffffff;font-size:14px;font-weight:800;">Swasthya AI Guide</strong>
+          <span id="floatingAiModelBadge" class="badge" style="background:rgba(16,185,129,0.2);color:#34d399;font-size:9.5px;padding:2px 6px;border-radius:8px;border:1px solid #10b981;">✨ Gemini 1.5</span>
+        </div>
+        <small style="color:#94a3b8;font-size:10.5px;display:block;">Rural Clinical Triage &amp; Medicine Assistant</small>
+      </div>
+    </div>
+
+    <!-- HEADER ACTIONS -->
+    <div style="display:flex;align-items:center;gap:6px;">
+      <!-- Language selector -->
+      <select id="floatingAiLangSelect" onchange="aiHealthBot.setLanguage(this.value)" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.18);color:#38bdf8;font-weight:800;font-size:11px;padding:4px 6px;border-radius:8px;cursor:pointer;outline:none;">
+        <option value="en" selected>EN</option>
+        <option value="hi">हिंदी</option>
+        <option value="te">తెలుగు</option>
+        <option value="ta">தமிழ்</option>
+        <option value="mr">मराठी</option>
+        <option value="bn">বাংলা</option>
+        <option value="kn">ಕನ್ನಡ</option>
+      </select>
+      <!-- Settings / API Key button -->
+      <button type="button" onclick="aiHealthBot.openApiKeyModal()" title="Configure Gemini API Key" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.18);color:#ffffff;cursor:pointer;width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;">
+        ⚙️
+      </button>
+      <!-- Clear chat -->
+      <button type="button" onclick="aiHealthBot.clearChat()" title="Clear Chat" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.18);color:#ffffff;cursor:pointer;width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;">
+        🧹
+      </button>
+      <!-- Minimize / Close -->
+      <button type="button" onclick="aiHealthBot.toggleFloatingWidget(false)" title="Minimize AI Chat" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.18);color:#ffffff;cursor:pointer;width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;">
+        ✕
+      </button>
+    </div>
+  </div>
+
+  <!-- QUICK SYMPTOM CHIPS CAROUSEL -->
+  <div style="padding:8px 12px;background:rgba(15,23,42,0.85);border-bottom:1px solid rgba(255,255,255,0.08);overflow-x:auto;white-space:nowrap;display:flex;gap:6px;scrollbar-width:none;flex-shrink:0;">
+    <button type="button" onclick="aiHealthBot.triggerSymptomPill('fever')" class="btn-glass" style="padding:4px 10px;font-size:11px;font-weight:700;border-radius:14px;color:#ffffff;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);cursor:pointer;flex-shrink:0;">🌡️ Fever</button>
+    <button type="button" onclick="aiHealthBot.triggerSymptomPill('snakebite')" class="btn-glass" style="padding:4px 10px;font-size:11px;font-weight:700;border-radius:14px;color:#f87171;background:rgba(220,38,38,0.15);border:1px solid rgba(220,38,38,0.3);cursor:pointer;flex-shrink:0;">🐍 Snake Bite</button>
+    <button type="button" onclick="aiHealthBot.triggerSymptomPill('chestpain')" class="btn-glass" style="padding:4px 10px;font-size:11px;font-weight:700;border-radius:14px;color:#f87171;background:rgba(220,38,38,0.15);border:1px solid rgba(220,38,38,0.3);cursor:pointer;flex-shrink:0;">🫀 Chest Pain</button>
+    <button type="button" onclick="aiHealthBot.triggerSymptomPill('diarrhea')" class="btn-glass" style="padding:4px 10px;font-size:11px;font-weight:700;border-radius:14px;color:#38bdf8;background:rgba(2,132,199,0.15);border:1px solid rgba(2,132,199,0.3);cursor:pointer;flex-shrink:0;">💧 Diarrhea</button>
+    <button type="button" onclick="aiHealthBot.sendUserQuery('I have a muscle strain in leg')" class="btn-glass" style="padding:4px 10px;font-size:11px;font-weight:700;border-radius:14px;color:#4ade80;background:rgba(22,163,74,0.15);border:1px solid rgba(22,163,74,0.3);cursor:pointer;flex-shrink:0;">🦵 Muscle Strain</button>
+  </div>
+
+  <!-- FLOATING MESSAGES CONTAINER -->
+  <div id="aiFloatingMessagesContainer" style="flex:1;overflow-y:auto;padding:14px;background:rgba(15,23,42,0.92);scroll-behavior:smooth;"></div>
+
+  <!-- FLOATING CHAT INPUT BAR -->
+  <form onsubmit="event.preventDefault(); aiHealthBot.sendUserQueryFromFloating();" style="padding:10px 12px;background:rgba(15,23,42,0.98);border-top:1px solid rgba(255,255,255,0.1);display:flex;gap:8px;align-items:center;flex-shrink:0;">
+    <div style="flex:1;position:relative;">
+      <input type="text" id="aiFloatingChatInput" class="input-field" placeholder="Describe symptoms (e.g. fever, muscle strain, gas)..." style="width:100%;padding:10px 38px 10px 12px;font-size:12.5px;border-radius:10px;box-shadow:none;background:#1e293b;border:1px solid rgba(255,255,255,0.15);color:#ffffff;">
+      <button type="button" onclick="aiHealthBot.startVoiceInput('floating')" title="Voice Search" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:16px;cursor:pointer;color:#34d399;padding:2px;">
+        🎙️
+      </button>
+    </div>
+    <button type="submit" class="auth-btn-primary" style="padding:10px 16px;background:linear-gradient(135deg, #10b981, #059669);border:none;font-size:12.5px;font-weight:800;border-radius:10px;box-shadow:0 3px 10px rgba(16,185,129,0.35);cursor:pointer;display:inline-flex;align-items:center;gap:4px;color:#ffffff;white-space:nowrap;">
+      <span>💬</span> <span>Ask</span>
+    </button>
+  </form>
+</div>
+
+<!-- GEMINI API KEY CONFIGURATION MODAL -->
+<div id="geminiApiKeyModal" class="modal-overlay" style="display:none;z-index:100002;">
+  <div class="modal-card" style="max-width:480px;background:#0f172a;border:1.5px solid #10b981;border-radius:18px;color:#ffffff;padding:22px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:22px;">✨</span>
+        <strong style="color:#ffffff;font-size:16px;">Google Gemini AI Configuration</strong>
+      </div>
+      <button onclick="aiHealthBot.closeApiKeyModal()" style="background:none;border:none;font-size:20px;color:#94a3b8;cursor:pointer;">✕</button>
+    </div>
+    <p style="font-size:12.5px;color:#94a3b8;line-height:1.5;margin-bottom:14px;">
+      Connect your Google Gemini API key to enable real-time generative clinical intelligence across all Indian languages. If no key is set, Swasthya AI uses the built-in clinical triage rule engine with 100% offline support.
+    </p>
+    <div style="margin-bottom:12px;">
+      <label style="font-size:11.5px;font-weight:700;color:#cbd5e1;display:block;margin-bottom:6px;">Google Gemini API Key:</label>
+      <input type="password" id="geminiApiKeyInput" class="input-field" placeholder="AIzaSy..." style="width:100%;background:#1e293b;border:1px solid rgba(255,255,255,0.2);color:#ffffff;padding:10px 14px;border-radius:10px;font-size:13px;font-family:monospace;">
+      <small style="display:block;color:#64748b;font-size:11px;margin-top:4px;">Key is stored securely in your browser localStorage.</small>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:16px;">
+      <button type="button" onclick="aiHealthBot.clearApiKey()" class="btn-glass" style="padding:8px 14px;font-size:12px;color:#f87171;border-color:rgba(248,113,113,0.3);">
+        Clear Key
+      </button>
+      <div style="display:flex;gap:8px;">
+        <button type="button" onclick="aiHealthBot.closeApiKeyModal()" class="btn-glass" style="padding:8px 14px;font-size:12px;color:#ffffff;">
+          Cancel
+        </button>
+        <button type="button" onclick="aiHealthBot.saveApiKeyFromInput()" class="auth-btn-primary" style="padding:8px 18px;font-size:12px;font-weight:800;background:#10b981;border:none;border-radius:8px;color:#ffffff;cursor:pointer;">
+          ✓ Save &amp; Connect
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
