@@ -208,26 +208,30 @@
         registeredPatients.push(this.state.currentUser);
       }
 
+      const cleanLast10 = digitsOnly ? digitsOnly.slice(-10) : '';
       const cleanInputAbha = inputId.toLowerCase().replace(/[^a-z0-9]/g, '');
       const inputName = inputId.toLowerCase().trim();
 
       const matchingPatients = registeredPatients.filter(p => {
-        const pPhone = (p.phone || '').replace(/\D/g, '');
+        const pPhone = (p.phone || '').replace(/\D/g, '').slice(-10);
         const pAbha = (p.abhaId || p.abha_id || '').toLowerCase().replace(/[^a-z0-9]/g, '');
         const pName = (p.name || '').toLowerCase().trim();
-        return (digitsOnly && pPhone && (pPhone === digitsOnly || pPhone.slice(-10) === digitsOnly.slice(-10))) || 
-               (pAbha && cleanInputAbha && pAbha === cleanInputAbha) ||
-               (inputName && pName && (pName === inputName || pName.includes(inputName)));
+        return (cleanLast10 && pPhone && pPhone === cleanLast10) || 
+               (cleanInputAbha && pAbha && pAbha === cleanInputAbha) ||
+               (inputName && pName && (pName === inputName || (inputName.length >= 4 && pName.includes(inputName))));
       });
 
       // Auto-provision citizen if logging into citizen/patient portal with a 10-digit mobile number or ABHA ID
-      if (role === 'patient' && (digitsOnly.length >= 10 || cleanInputAbha.length >= 6 || inputId.length >= 3)) {
+      if (role === 'patient' && (cleanLast10.length >= 10 || cleanInputAbha.length >= 6 || inputId.length >= 3)) {
         if (matchingPatients.length === 0) {
-          const cleanLast10 = digitsOnly ? digitsOnly.slice(-10) : '9876543210';
           const newPat = {
-            id: 'USR-PAT-' + cleanLast10.slice(-4),
-            name: 'Verified Citizen (' + cleanLast10.slice(-4) + ')',
-            phone: cleanLast10,
+            id: 'USR-PAT-' + (cleanLast10 ? cleanLast10.slice(-4) : Math.floor(1000 + Math.random() * 9000)),
+            name: 'Verified Citizen (' + (cleanLast10 ? cleanLast10.slice(-4) : 'User') + ')',
+            phone: cleanLast10 || '9876543210',
+            age: 32,
+            gender: 'Male',
+            village: 'Kondapalli Sub-Centre',
+            bloodGroup: 'B+',
             abhaId: cleanInputAbha && cleanInputAbha.length >= 10 ? inputId : ('14-' + Math.floor(1000 + Math.random() * 9000) + '-' + Math.floor(1000 + Math.random() * 9000) + '-' + Math.floor(1000 + Math.random() * 9000)),
             role: 'patient',
             customRole: 'citizen',
@@ -536,17 +540,29 @@
 
     // Patient Direct Teleconsultation Request to Doctor
     requestDoctorConsult(consultData) {
-      const user = this.state.currentUser || (this.state.session && this.state.session.user) || { name: 'Citizen Patient', phone: '9876543210' };
+      const user = this.state.currentUser || (this.state.session && this.state.session.user);
       const tokenNum = String((this.state.consultQueue || []).length + 1).padStart(2, '0');
       
+      const cleanPhone = user ? (user.phone || '').replace(/\D/g, '').slice(-10) : '';
+      const matchedProfile = (this.state.patients || []).find(p => {
+        const pPhone = (p.phone || '').replace(/\D/g, '').slice(-10);
+        return cleanPhone && pPhone && pPhone === cleanPhone;
+      }) || {};
+
+      const uName = (user && user.name) || matchedProfile.name || 'Citizen Patient';
+      const uPhone = cleanPhone || (matchedProfile.phone || '').replace(/\D/g, '').slice(-10) || '9876543210';
+      const uAbha = (user && (user.abhaId || user.abha_id)) || matchedProfile.abhaId || '14-XXXX-XXXX-XXXX';
+      const uAge = (user && user.age) || matchedProfile.age || 32;
+      const uGender = (user && (user.gender === 'Female' || user.gender === 'F')) ? 'F' : 'M';
+
       const queueItem = {
         id: 'Q-' + String(Date.now()).slice(-4),
         token: `T-${tokenNum}`,
-        patientName: user.name || 'Citizen Patient',
-        patientPhone: user.phone || '9876543210',
-        abhaId: user.abhaId || '14-8921-4402-9912',
-        age: user.age || 35,
-        gender: (user.gender === 'Female' || user.gender === 'F') ? 'F' : 'M',
+        patientName: uName,
+        patientPhone: uPhone,
+        abhaId: uAbha,
+        age: uAge,
+        gender: uGender,
         complaint: consultData.complaint || 'Direct Teleconsultation Request',
         vitals: consultData.vitals || { bp: '120/80', spo2: '98%', temp: '98.6°F', pulse: '76 bpm' },
         triage: consultData.triage || 'Green',
@@ -576,20 +592,23 @@
 
     getFamilyMembers(patientPhoneOrId) {
       const user = this.state.currentUser || (this.state.session && this.state.session.user);
-      const targetPhone = patientPhoneOrId || (user ? (user.phone || '').replace(/\D/g, '') : null);
+      const rawPhone = patientPhoneOrId || (user ? user.phone : null);
+      if (!rawPhone) return [];
+      const targetPhone = String(rawPhone).replace(/\D/g, '').slice(-10);
       if (!targetPhone) return [];
       return (this.state.familyMembers || []).filter(f => {
-        const fOwner = (f.ownerPhone || '').replace(/\D/g, '');
+        const fOwner = (f.ownerPhone || '').replace(/\D/g, '').slice(-10);
         return fOwner && fOwner === targetPhone;
       });
     }
 
     addFamilyMember(member) {
       const user = this.state.currentUser || (this.state.session && this.state.session.user);
-      const ownerPhone = member.ownerPhone || (user && user.phone ? user.phone : '9876543210');
+      const rawPhone = member.ownerPhone || (user && user.phone ? user.phone : '');
+      const ownerPhone = String(rawPhone).replace(/\D/g, '').slice(-10) || '9876543210';
       const id = 'FAM-' + String(Date.now()).slice(-4);
       const abha = member.abhaId || `14-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}`;
-      const newFam = { id, abhaId: abha, status: 'Healthy', ownerPhone, ...member };
+      const newFam = { id, abhaId: abha, status: 'Healthy', ...member, ownerPhone };
       if (!this.state.familyMembers) this.state.familyMembers = [];
       this.state.familyMembers.push(newFam);
       this.saveState();
@@ -605,12 +624,14 @@
     // VIDEO TELECONSULTATION MANAGEMENT
     // =========================================================
     recordVideoCall(callData) {
+      const rawCallerPhone = callData.callerPhone || (callData.patientPhone ? callData.patientPhone : '');
       const callRecord = {
         id: callData.id || ('CALL-' + String(Date.now()).slice(-4)),
         token: callData.token || ('VID-' + Math.floor(1000 + Math.random() * 9000)),
         callerRole: callData.callerRole || 'patient',
         callerName: callData.callerName || 'Citizen Patient',
-        callerPhone: callData.callerPhone || '9876543210',
+        callerPhone: rawCallerPhone ? String(rawCallerPhone).replace(/\D/g, '').slice(-10) : '',
+        abhaId: callData.abhaId || null,
         recipientRole: callData.recipientRole || 'doctor',
         recipientName: callData.recipientName || 'Dr. Medical Officer',
         facilitatorName: callData.facilitatorName || null,
@@ -648,9 +669,24 @@
       if (!this.state.videoCallHistory) return;
       if (!role) {
         this.state.videoCallHistory = [];
+      } else if (role === 'patient') {
+        const user = this.state.currentUser || (this.state.session && this.state.session.user);
+        if (!user) return;
+        const uPhone = (user.phone || '').replace(/\D/g, '').slice(-10);
+        const uAbha = (user.abhaId || user.abha_id || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+        const uName = (user.name || '').trim().toLowerCase();
+
+        this.state.videoCallHistory = (this.state.videoCallHistory || []).filter(c => {
+          const cPhone = (c.callerPhone || c.patientPhone || '').replace(/\D/g, '').slice(-10);
+          const cAbha = (c.abhaId || c.abha_id || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+          const cName = (c.callerName || c.patientName || '').trim().toLowerCase();
+          const isThisPatient = (uPhone && cPhone && uPhone === cPhone) ||
+                                (uAbha && cAbha && uAbha === cAbha) ||
+                                (uName && cName && uName === cName && !['patient', 'citizen', 'citizen patient', 'verified citizen'].includes(uName));
+          return !isThisPatient; // keep everyone else's records!
+        });
       } else {
         const toKeep = this.state.videoCallHistory.filter(c => {
-          if (role === 'patient' && c.callerRole === 'patient') return false;
           if (role === 'doctor' && c.recipientRole === 'doctor') return false;
           if (role === 'worker' && (c.facilitatorName || c.callerRole === 'worker')) return false;
           return true;
@@ -666,13 +702,21 @@
       if (!role) return all;
       if (role === 'patient') {
         const user = this.state.currentUser || (this.state.session && this.state.session.user);
-        if (!user) return all;
-        const uPhone = (user.phone || '').replace(/\D/g, '');
+        if (!user) return [];
+        const uPhone = (user.phone || '').replace(/\D/g, '').slice(-10);
+        const uAbha = (user.abhaId || user.abha_id || '').toLowerCase().replace(/[^a-z0-9]/g, '');
         const uName = (user.name || '').trim().toLowerCase();
+        if (!uPhone && !uAbha && !uName) return [];
         return all.filter(c => {
-          const cPhone = (c.callerPhone || '').replace(/\D/g, '');
-          const cName = (c.callerName || '').trim().toLowerCase();
-          return (uPhone && cPhone && uPhone === cPhone) || (uName && cName && (cName === uName || cName.startsWith(uName)));
+          const cPhone = (c.callerPhone || c.patientPhone || '').replace(/\D/g, '').slice(-10);
+          const cAbha = (c.abhaId || c.abha_id || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+          const cName = (c.callerName || c.patientName || '').trim().toLowerCase();
+          if (uPhone && cPhone && uPhone === cPhone) return true;
+          if (uAbha && cAbha && uAbha === cAbha) return true;
+          if (uName && cName && uName === cName && !['patient', 'citizen', 'citizen patient', 'verified citizen'].includes(uName)) {
+            return true;
+          }
+          return false;
         });
       }
       if (role === 'doctor') {
@@ -737,15 +781,26 @@
 
     completeConsult(queueId, prescriptionData) {
       console.log('[Store] Completing consultation for Queue ID:', queueId);
+      const qItem = (this.state.consultQueue || []).find(q => q.id === queueId);
       this.state.consultQueue = (this.state.consultQueue || []).filter(q => q.id !== queueId);
       
       let newRx = null;
       if (prescriptionData) {
+        const patientPhone = prescriptionData.patientPhone || (qItem ? qItem.patientPhone : null);
+        const abhaId = prescriptionData.abhaId || (qItem ? qItem.abhaId : null);
         newRx = {
           id: 'RX-' + String(Date.now()).slice(-4),
           date: new Date().toISOString().split('T')[0],
+          patientPhone: patientPhone ? String(patientPhone).replace(/\D/g, '').slice(-10) : null,
+          abhaId: abhaId || null,
           ...prescriptionData
         };
+        if (!newRx.patientPhone && patientPhone) {
+          newRx.patientPhone = String(patientPhone).replace(/\D/g, '').slice(-10);
+        }
+        if (!newRx.abhaId && abhaId) {
+          newRx.abhaId = abhaId;
+        }
         if (!this.state.prescriptions) this.state.prescriptions = [];
         this.state.prescriptions.unshift(newRx);
         

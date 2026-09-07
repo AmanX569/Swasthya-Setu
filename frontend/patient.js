@@ -57,9 +57,10 @@
 
       try {
         const state = (this.store && typeof this.store.getState === 'function') ? this.store.getState() : {};
-        const user = state.currentUser || (state.session && state.session.user) || { name: 'Citizen Beneficiary', phone: '9876543210' };
+        const user = state.currentUser || (state.session && state.session.user);
         const doctors = (state.staff || []).filter(s => s.role === 'doctor');
-        const family = (this.store && typeof this.store.getFamilyMembers === 'function') ? this.store.getFamilyMembers(user ? user.phone : null) : [];
+        const userPhone = user ? (user.phone || '').replace(/\D/g, '').slice(-10) : null;
+        const family = (this.store && typeof this.store.getFamilyMembers === 'function' && userPhone) ? this.store.getFamilyMembers(userPhone) : [];
 
         if (docSelect) {
           if (doctors.length > 0) {
@@ -119,12 +120,14 @@
 
       if (global.videoCallController && typeof global.videoCallController.startVideoCall === 'function') {
         const state = (this.store && typeof this.store.getState === 'function') ? this.store.getState() : {};
-        const user = state.currentUser || (state.session && state.session.user) || { name: 'Citizen Beneficiary', phone: '9876543210' };
+        const user = state.currentUser || (state.session && state.session.user) || { name: 'Citizen Patient', phone: '9876543210' };
+        const cleanUserPhone = (user.phone || '').replace(/\D/g, '').slice(-10) || '9876543210';
 
         global.videoCallController.startVideoCall({
           callerRole: 'patient',
           callerName: chosenMember || user.name || 'Citizen Patient',
-          callerPhone: user.phone || '9876543210',
+          callerPhone: cleanUserPhone,
+          abhaId: user.abhaId || null,
           recipientRole: 'doctor',
           recipientName: chosenDoctor,
           complaint: complaint
@@ -247,14 +250,34 @@
       const container = document.getElementById('abhaCardContainer');
       if (!container || !this.store) return;
       const state = this.store.getState();
-      const user = state.currentUser || (state.session ? state.session.user : null) || {
-        name: 'Citizen Patient',
-        phone: '9876543210',
-        age: 38,
-        gender: 'Male',
-        village: 'Kondapalli Sub-Centre',
-        bloodGroup: 'O+',
-        abhaId: '14-8921-4402-9912'
+      const rawUser = state.currentUser || (state.session ? state.session.user : null);
+      if (!rawUser) {
+        container.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);background:var(--glass-2);border-radius:12px;border:1px dashed var(--glass-border);">Please sign in as a Citizen to view your Digital ABHA Card.</div>';
+        return;
+      }
+
+      const cleanPhone = (rawUser.phone || '').replace(/\D/g, '').slice(-10);
+      const matchedProfile = (state.patients || []).find(p => {
+        const pPhone = (p.phone || '').replace(/\D/g, '').slice(-10);
+        return cleanPhone && pPhone && pPhone === cleanPhone;
+      }) || {};
+
+      let abhaNum = rawUser.abhaId || matchedProfile.abhaId || rawUser.abha_id || matchedProfile.abha_id;
+      if (!abhaNum) {
+        const seed = cleanPhone ? (parseInt(cleanPhone.slice(-6), 10) || 4402) : 4402;
+        abhaNum = `14-${String(1000 + (seed % 8999))}-${String(2000 + ((seed * 3) % 7999))}-${String(cleanPhone ? cleanPhone.slice(-4) : '9912')}`;
+        if (rawUser) rawUser.abhaId = abhaNum;
+        if (matchedProfile) matchedProfile.abhaId = abhaNum;
+      }
+
+      const user = {
+        name: rawUser.name || matchedProfile.name || 'Verified Citizen',
+        phone: cleanPhone || (matchedProfile.phone || '').replace(/\D/g, '').slice(-10) || '9876543210',
+        age: rawUser.age || matchedProfile.age || 32,
+        gender: rawUser.gender || matchedProfile.gender || 'Male',
+        village: rawUser.village || matchedProfile.village || 'Kondapalli Sub-Centre',
+        bloodGroup: rawUser.bloodGroup || matchedProfile.bloodGroup || 'B+',
+        abhaId: abhaNum
       };
 
       container.innerHTML = `
@@ -316,18 +339,34 @@
       const container = document.getElementById('patientPrescriptionsContainer');
       if (!container || !this.store) return;
 
-      const user = this.store.getState().currentUser || {};
+      const user = this.store.getState().currentUser || (this.store.getState().session && this.store.getState().session.user);
       const allRx = this.store.getState().prescriptions || [];
 
-      // Filter prescriptions for this patient (or show all if demo/all)
-      const uPhone = (user.phone || '').replace(/\D/g, '');
+      if (!user) {
+        container.innerHTML = `
+          <div style="text-align:center;padding:24px 16px;background:var(--glass-2);border-radius:14px;border:1px dashed var(--glass-border);color:var(--muted);">
+            <div style="font-size:32px;margin-bottom:8px;">📜</div>
+            <strong style="color:var(--ink);display:block;font-size:14px;">Please Sign In</strong>
+            <small>Sign in as a Citizen to view your official digital prescriptions.</small>
+          </div>
+        `;
+        return;
+      }
+
+      const uPhone = (user.phone || '').replace(/\D/g, '').slice(-10);
+      const uAbha = (user.abhaId || user.abha_id || '').toLowerCase().replace(/[^a-z0-9]/g, '');
       const uName = (user.name || '').trim().toLowerCase();
 
       const myRx = allRx.filter(r => {
-        const rPhone = (r.patientPhone || '').replace(/\D/g, '');
+        const rPhone = (r.patientPhone || r.phone || '').replace(/\D/g, '').slice(-10);
+        const rAbha = (r.abhaId || r.abha_id || '').toLowerCase().replace(/[^a-z0-9]/g, '');
         const rName = (r.patientName || '').trim().toLowerCase();
-        if (uPhone && rPhone) return uPhone === rPhone;
-        if (uName && rName) return rName === uName || rName.includes(uName) || uName.includes(rName);
+
+        if (uPhone && rPhone && uPhone === rPhone) return true;
+        if (uAbha && rAbha && uAbha === rAbha) return true;
+        if (uName && rName && uName === rName && !['patient', 'citizen', 'citizen patient', 'verified citizen'].includes(uName)) {
+          return true;
+        }
         return false;
       });
 
@@ -396,16 +435,21 @@
       }).join('');
     }
 
-        // Direct High-Contrast Vector PDF Generator for e-Prescriptions
+    // Direct High-Contrast Vector PDF Generator for e-Prescriptions
     downloadPrescriptionPdf(rxId) {
       const allRx = (this.store && this.store.getState().prescriptions) || [];
       const rx = allRx.find(r => r.id === rxId) || (allRx.length ? allRx[0] : null);
-      const user = (this.store && (this.store.getState().currentUser || (this.store.getState().session && this.store.getState().session.user))) || {
-        name: 'Citizen Patient',
-        age: 38,
-        gender: 'Male',
-        abhaId: '14-8921-4402-9912',
-        village: 'Kondapalli Sub-Centre'
+      const activeUser = (this.store && (this.store.getState().currentUser || (this.store.getState().session && this.store.getState().session.user)));
+      const cleanUserPhone = activeUser ? (activeUser.phone || '').replace(/\D/g, '').slice(-10) : '';
+      const matchedProfile = cleanUserPhone ? ((this.store && this.store.getState().patients) || []).find(p => (p.phone || '').replace(/\D/g, '').slice(-10) === cleanUserPhone) : null;
+      
+      const user = {
+        name: (rx && rx.patientName) || (activeUser && activeUser.name) || (matchedProfile && matchedProfile.name) || 'Citizen Patient',
+        phone: (rx && rx.patientPhone) || cleanUserPhone || (matchedProfile && matchedProfile.phone) || '',
+        age: (activeUser && activeUser.age) || (matchedProfile && matchedProfile.age) || 35,
+        gender: (activeUser && activeUser.gender) || (matchedProfile && matchedProfile.gender) || 'Male',
+        abhaId: (rx && rx.abhaId) || (activeUser && activeUser.abhaId) || (matchedProfile && matchedProfile.abhaId) || '14-8921-4402-9912',
+        village: (activeUser && activeUser.village) || (matchedProfile && matchedProfile.village) || 'Kondapalli Sub-Centre'
       };
 
       if (!rx) {
@@ -740,11 +784,14 @@
     // -------------------------------------------------------------
     triggerSos() {
       const state = this.store.getState();
-      const user = state.currentUser || (state.session ? state.session.user : null) || {
-        name: 'Citizen Patient',
-        phone: '9876543210',
-        village: 'Kondapalli Ward 4',
-        abhaId: '14-8921-4402-9912'
+      const rawUser = state.currentUser || (state.session ? state.session.user : null);
+      const cleanPhone = rawUser ? (rawUser.phone || '').replace(/\D/g, '').slice(-10) : '';
+      const matchedProfile = cleanPhone ? ((state.patients || []).find(p => (p.phone || '').replace(/\D/g, '').slice(-10) === cleanPhone)) : null;
+      const user = {
+        name: (rawUser && rawUser.name) || (matchedProfile && matchedProfile.name) || 'Citizen Patient',
+        phone: cleanPhone || (matchedProfile && matchedProfile.phone) || '108',
+        village: (rawUser && rawUser.village) || (matchedProfile && matchedProfile.village) || 'Kondapalli Sub-Centre',
+        abhaId: (rawUser && (rawUser.abhaId || rawUser.abha_id)) || (matchedProfile && matchedProfile.abhaId) || '14-XXXX-XXXX-XXXX'
       };
       const message = `🚨 EMERGENCY 108 SOS!\n\nPatient: ${user.name}\nPhone: +91 ${user.phone}\nLocation: ${user.village}\nABHA: ${user.abhaId}\n\nEmergency ambulance dispatched.`;
       
@@ -841,9 +888,9 @@
       const el = document.getElementById('familyMembersGrid') || document.getElementById('familyMembersList');
       if (!el || !this.store) return;
       const user = this.store.getState().currentUser || (this.store.getState().session && this.store.getState().session.user);
-      const fams = typeof this.store.getFamilyMembers === 'function' ? 
-                   this.store.getFamilyMembers(user ? user.phone : null) : 
-                   (this.store.getState().familyMembers || []);
+      const userPhone = user ? (user.phone || '').replace(/\D/g, '').slice(-10) : null;
+      const fams = (typeof this.store.getFamilyMembers === 'function' && userPhone) ? 
+                   this.store.getFamilyMembers(userPhone) : [];
 
       if (!fams.length) {
         el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);grid-column:1/-1;">No family members added yet. Tap "+ Add Member" above.</div>';
@@ -896,114 +943,10 @@
         return;
       }
 
-      const newFam = this.store.addFamilyMember({ name, relation, age, gender });
-      if (nameInput) nameInput.value = '';
-      if (ageInput) ageInput.value = '';
-      this.closeAddFamilyModal();
-      
-      // Immediately re-render Family Circle on the spot
-      this.renderFamilyCircle();
-      if (typeof window.toast === 'function') {
-        window.toast('✓ Added ' + name + ' (' + relation + ') to Family Health Circle');
-      }
-    }
+      const user = this.store ? (this.store.getState().currentUser || (this.store.getState().session && this.store.getState().session.user)) : null;
+      const ownerPhone = user ? (user.phone || '').replace(/\D/g, '').slice(-10) : '';
 
-    removeFamilyMember(id) {
-      if (confirm('Are you sure you want to remove this member from your Family Health Circle?')) {
-        if (this.store) {
-          this.store.deleteFamilyMember(id);
-          this.renderFamilyCircle();
-          if (typeof window.toast === 'function') {
-            window.toast('🗑️ Family member removed successfully');
-          }
-        }
-      }
-    }
-
-    // -------------------------------------------------------------
-    // 6. JAN AUSHADHI MEDICINE TRACKER & SAVINGS (DYNAMIC CATALOG)
-    // -------------------------------------------------------------
-    renderDailyMedications() {
-      const el = document.getElementById('dailyMedsContainer') || document.getElementById('dailyMedsList');
-      if (!el || !this.store) return;
-      const meds = this.store.getState().medicines || [];
-
-      if (!meds.length) {
-        el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);">No medicines in Jan Aushadhi catalog.</div>';
-        return;
-      }
-
-      const savedWord = this.t('saved_text', 'saved');
-      const morningLabel = this.t('dose_morning', '☀️ Morning');
-      const noonLabel = this.t('dose_noon', '🌤️ Noon');
-      const nightLabel = this.t('dose_night', '🌙 Night');
-
-      el.innerHTML = meds.map(m => {
-        const savings = Math.max(0, (m.brandPrice || 0) - (m.genericPrice || 0));
-        const savingsPct = m.brandPrice > 0 ? Math.round((savings / m.brandPrice) * 100) : 0;
-        const savingText = `💰 ₹${savings} ${savedWord} (${savingsPct}% OFF)`;
-
-        return `
-          <div style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:14px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;box-shadow:var(--shadow-panel);">
-            <div>
-              <div style="display:flex;align-items:center;gap:8px;">
-                <strong style="color:var(--ink);font-size:15px;">${m.name}</strong>
-                <span class="badge" style="background:rgba(22,163,74,0.15);color:#15803d;padding:2px 6px;border-radius:8px;font-size:10px;font-weight:800;">PMBJP</span>
-              </div>
-              <small style="color:var(--muted);display:block;margin-top:2px;">Category: ${m.category || 'General Medicine'} · Stock: ${m.stock || 100} ${m.unit || 'Tablets'}</small>
-              <div style="font-size:12px;margin-top:4px;">
-                <strong style="color:#15803d;font-size:14px;">₹${m.genericPrice}</strong>
-                ${m.brandPrice ? `<span style="text-decoration:line-through;color:var(--muted);margin-left:6px;font-size:12px;">₹${m.brandPrice}</span>` : ''}
-                ${savings > 0 ? `<span style="background:rgba(22,163,74,0.15);color:#15803d;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:800;margin-left:8px;">${savingText}</span>` : ''}
-              </div>
-            </div>
-
-            <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
-              <button class="btn-glass" style="padding:6px 10px;font-size:11px;font-weight:700;" onclick="patientController.toggleDose('${m.id}', 'morning')">${morningLabel}</button>
-              <button class="btn-glass" style="padding:6px 10px;font-size:11px;font-weight:700;" onclick="patientController.toggleDose('${m.id}', 'noon')">${noonLabel}</button>
-              <button class="btn-glass" style="padding:6px 10px;font-size:11px;font-weight:700;" onclick="patientController.toggleDose('${m.id}', 'night')">${nightLabel}</button>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    toggleDose(medId, time) {
-      this.store.toggleDoseTaken(medId, time);
-    }
-
-    // -------------------------------------------------------------
-    // 7. FAMILY HEALTH CIRCLE & MEMBERSHIP
-    // -------------------------------------------------------------
-
-    openAddFamilyModal() {
-      const modal = document.getElementById('addFamilyModal');
-      if (modal) modal.style.display = 'flex';
-    }
-
-    closeAddFamilyModal() {
-      const modal = document.getElementById('addFamilyModal');
-      if (modal) modal.style.display = 'none';
-    }
-
-    submitAddFamily(e) {
-      if (e) e.preventDefault();
-      const nameInput = document.getElementById('famName');
-      const relationInput = document.getElementById('famRelation');
-      const ageInput = document.getElementById('famAge');
-      const genderInput = document.getElementById('famGender');
-
-      const name = nameInput ? nameInput.value.trim() : '';
-      const relation = relationInput ? relationInput.value : 'Spouse';
-      const age = parseInt(ageInput ? ageInput.value : '25', 10) || 25;
-      const gender = genderInput ? genderInput.value : 'Female';
-
-      if (!name) {
-        alert('Please enter member name');
-        return;
-      }
-
-      const newFam = this.store.addFamilyMember({ name, relation, age, gender });
+      const newFam = this.store.addFamilyMember({ name, relation, age, gender, ownerPhone });
       if (nameInput) nameInput.value = '';
       if (ageInput) ageInput.value = '';
       this.closeAddFamilyModal();

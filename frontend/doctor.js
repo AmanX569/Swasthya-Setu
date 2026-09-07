@@ -573,6 +573,8 @@
       const newRx = this.store.completeConsult(patient.id, {
         doctorName: activeDoctor.name || 'Dr. Medical Officer',
         patientName: patient.patientName,
+        patientPhone: patient.patientPhone,
+        abhaId: patient.abhaId,
         diagnosis,
         advice,
         medicines: medicines.length ? medicines : [{ name: 'Paracetamol 650mg', genericPrice: 8, dosage: '1 Tab TDS' }]

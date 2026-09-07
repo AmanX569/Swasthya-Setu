@@ -3656,6 +3656,11 @@ async function handleCitizenVerifyOtp(e) {
       id: 'USR-PAT-' + (cleanLast10 ? cleanLast10.slice(-4) : '7891'),
       name: 'Verified Citizen (' + (cleanLast10 ? cleanLast10.slice(-4) : 'User') + ')',
       phone: cleanLast10 || '9876543210',
+      age: 32,
+      gender: 'Male',
+      village: 'Kondapalli Sub-Centre',
+      bloodGroup: 'B+',
+      password: '1234',
       abhaId: '14-' + Math.floor(1000 + Math.random() * 9000) + '-' + Math.floor(1000 + Math.random() * 9000) + '-' + Math.floor(1000 + Math.random() * 9000),
       role: 'patient',
       customRole: 'citizen'
