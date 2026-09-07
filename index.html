@@ -15527,7 +15527,12 @@ function submitPatientRegistration(e) {
   if (window.appStore) {
     const res = window.appStore.registerPatientUser({ name, phone, age, gender, bloodGroup, village, password });
     closeRegistrationModal();
+    window.location.hash = '#/citizen';
+    if (typeof showView === 'function') showView('Patient');
     renderActivePortalView();
+    if (window.patientController && typeof window.patientController.renderAll === 'function') {
+      try { window.patientController.renderAll(); } catch (err) {}
+    }
     if (typeof window.toast === 'function') window.toast('🎉 Welcome ' + res.user.name + '! ABHA Card: ' + res.user.abhaId);
   }
 }
@@ -15892,6 +15897,18 @@ async function handleCitizenVerifyOtp(e) {
 }
 
 // =========================================================
+// CITIZEN PROFILE SYNC HELPER
+function linkCitizenProfile(phoneNumber, meta = {}) {
+  try {
+    if (window.supabaseService && typeof window.supabaseService.linkCitizenProfile === 'function') {
+      window.supabaseService.linkCitizenProfile(phoneNumber, meta);
+    }
+  } catch (e) {
+    console.warn('[Supabase] linkCitizenProfile notice:', e);
+  }
+}
+window.linkCitizenProfile = linkCitizenProfile;
+
 // CITIZEN AUTH MODES (PASSWORD / PIN & SMS OTP)
 // =========================================================
 function switchCitizenAuthMode(mode) {
@@ -15947,20 +15964,35 @@ async function handleCitizenPasswordAuth(e) {
     return;
   }
 
-  // Verify credentials in AppStore
-  const res = window.appStore.verifyAndLogin('patient', { id: inputId, phone: inputId, abhaId: inputId, password: inputPass });
-  if (res && res.success) {
-    // Synchronize Supabase profile metadata if available
-    linkCitizenProfile(inputId, { authMethod: 'password' });
+  try {
+    // Verify credentials in AppStore
+    const res = window.appStore.verifyAndLogin('patient', { id: inputId, phone: inputId, abhaId: inputId, password: inputPass });
+    if (res && res.success) {
+      if (errBanner) errBanner.style.display = 'none';
+      hideLoginError();
 
-    window.location.hash = '#/citizen';
-    if (typeof showView === 'function') showView('Patient');
-    renderActivePortalView();
-    if (typeof window.toast === 'function') {
-      window.toast('🌾 Welcome ' + (res.user ? res.user.name : 'Citizen') + '! Logged in with Password.');
+      // Synchronize Supabase profile metadata safely if available
+      try {
+        linkCitizenProfile(inputId, { authMethod: 'password' });
+      } catch (linkErr) {
+        console.warn('[Citizen Auth] Profile sync notice:', linkErr);
+      }
+
+      window.location.hash = '#/citizen';
+      if (typeof showView === 'function') showView('Patient');
+      renderActivePortalView();
+      if (window.patientController && typeof window.patientController.renderAll === 'function') {
+        try { window.patientController.renderAll(); } catch (err) {}
+      }
+      if (typeof window.toast === 'function') {
+        window.toast('🌾 Welcome ' + (res.user ? res.user.name : 'Citizen') + '! Logged in with Password.');
+      }
+    } else {
+      showErr((res && res.message) || '⚠️ Access Denied: Incorrect Mobile Number, ABHA ID or Password.');
     }
-  } else {
-    showErr((res && res.message) || '⚠️ Access Denied: Incorrect Mobile Number, ABHA ID or Password.');
+  } catch (authErr) {
+    console.error('[Citizen Auth] Login error:', authErr);
+    showErr('⚠️ Login failed: ' + (authErr.message || 'Please check your credentials.'));
   }
 }
 
