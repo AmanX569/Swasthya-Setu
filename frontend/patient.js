@@ -15,6 +15,8 @@
       this.locationStatus = 'idle'; // 'idle', 'requesting', 'granted', 'denied', 'unsupported'
       this.hospitalFilter = 'all';
       this.hospitalSearch = '';
+      this.isHistoryMinimized = false;
+      this.isMedsMinimized = false;
     }
 
     init() {
@@ -154,6 +156,22 @@
 
       if (container) {
         container.style.display = this.isHistoryMinimized ? 'none' : 'block';
+      }
+    }
+
+    toggleMedsView() {
+      this.isMedsMinimized = !this.isMedsMinimized;
+      const text = document.getElementById('patientMedsToggleText');
+      const icon = document.getElementById('patientMedsToggleIcon');
+      const container = document.getElementById('patientMedsContent');
+
+      if (text && icon) {
+        text.textContent = this.isMedsMinimized ? 'Expand' : 'Minimize';
+        icon.textContent = this.isMedsMinimized ? '🔽' : '🔼';
+      }
+
+      if (container) {
+        container.style.display = this.isMedsMinimized ? 'none' : 'block';
       }
     }
 
