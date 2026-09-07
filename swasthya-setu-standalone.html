@@ -4181,6 +4181,22 @@ body[data-theme="doom"] {
       <div id="abhaCardContainer"></div>
     </div>
 
+    <!-- JAN AUSHADHI MEDICINE TRACKER -->
+    <div class="glass-panel" id="patientMedsPanel">
+      <div class="panel-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:8px;">
+        <h2 class="panel-title" style="margin:0;" data-i18n="meds_title">💊 Jan Aushadhi Generic Medicine Savings</h2>
+        <button type="button" id="patientMedsToggleBtn" onclick="patientController.toggleMedsView()" class="btn-glass" style="padding:4px 10px;font-size:11px;font-weight:800;display:inline-flex;align-items:center;gap:4px;border-radius:8px;cursor:pointer;">
+          <span id="patientMedsToggleIcon">🔼</span> <span id="patientMedsToggleText">Minimize</span>
+        </button>
+      </div>
+      <div id="patientMedsContent" style="display:block;">
+        <p style="color:var(--muted);font-size:13px;margin-bottom:14px;" data-i18n="meds_subtitle">
+          PMBJP Jan Aushadhi generic medicines save up to 80% on everyday healthcare costs.
+        </p>
+        <div id="dailyMedsContainer"></div>
+      </div>
+    </div>
+
     <!-- FAMILY HEALTH CIRCLE -->
     <div class="glass-panel">
       <div class="panel-header">
@@ -13760,6 +13776,9 @@ The user's preferred language is ${SUPPORTED_LANGUAGES[this.currentLang]?.name |
       }
 
       const savedWord = this.t('saved_text', 'saved');
+      const morningLabel = this.t('dose_morning', '☀️ Morning');
+      const noonLabel = this.t('dose_noon', '🌤️ Noon');
+      const nightLabel = this.t('dose_night', '🌙 Night');
 
       el.innerHTML = meds.map(m => {
         const savings = Math.max(0, (m.brandPrice || 0) - (m.genericPrice || 0));
@@ -13779,6 +13798,12 @@ The user's preferred language is ${SUPPORTED_LANGUAGES[this.currentLang]?.name |
                 ${m.brandPrice ? `<span style="text-decoration:line-through;color:var(--muted);margin-left:6px;font-size:12px;">₹${m.brandPrice}</span>` : ''}
                 ${savings > 0 ? `<span style="background:rgba(22,163,74,0.15);color:#15803d;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:800;margin-left:8px;">${savingText}</span>` : ''}
               </div>
+            </div>
+
+            <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+              <button class="btn-glass" style="padding:6px 10px;font-size:11px;font-weight:700;" onclick="patientController.toggleDose('${m.id}', 'morning')">${morningLabel}</button>
+              <button class="btn-glass" style="padding:6px 10px;font-size:11px;font-weight:700;" onclick="patientController.toggleDose('${m.id}', 'noon')">${noonLabel}</button>
+              <button class="btn-glass" style="padding:6px 10px;font-size:11px;font-weight:700;" onclick="patientController.toggleDose('${m.id}', 'night')">${nightLabel}</button>
             </div>
           </div>
         `;

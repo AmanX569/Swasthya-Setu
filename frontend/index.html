@@ -2020,6 +2020,22 @@ body[data-theme="doom"] {
       <div id="abhaCardContainer"></div>
     </div>
 
+    <!-- JAN AUSHADHI MEDICINE TRACKER -->
+    <div class="glass-panel" id="patientMedsPanel">
+      <div class="panel-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:8px;">
+        <h2 class="panel-title" style="margin:0;" data-i18n="meds_title">💊 Jan Aushadhi Generic Medicine Savings</h2>
+        <button type="button" id="patientMedsToggleBtn" onclick="patientController.toggleMedsView()" class="btn-glass" style="padding:4px 10px;font-size:11px;font-weight:800;display:inline-flex;align-items:center;gap:4px;border-radius:8px;cursor:pointer;">
+          <span id="patientMedsToggleIcon">🔼</span> <span id="patientMedsToggleText">Minimize</span>
+        </button>
+      </div>
+      <div id="patientMedsContent" style="display:block;">
+        <p style="color:var(--muted);font-size:13px;margin-bottom:14px;" data-i18n="meds_subtitle">
+          PMBJP Jan Aushadhi generic medicines save up to 80% on everyday healthcare costs.
+        </p>
+        <div id="dailyMedsContainer"></div>
+      </div>
+    </div>
+
     <!-- FAMILY HEALTH CIRCLE -->
     <div class="glass-panel">
       <div class="panel-header">
