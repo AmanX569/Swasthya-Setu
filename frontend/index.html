@@ -1701,20 +1701,60 @@ body[data-theme="doom"] {
 
     
     
-    <!-- 1. CITIZEN / PATIENT LOGIN FORM (MOBILE SMS OTP ONLY) -->
+    <!-- 1. CITIZEN / PATIENT LOGIN FORM (MOBILE PASSWORD / PIN + SMS OTP) -->
     <div id="formCardPatient" class="auth-form-card">
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
         <div style="width:46px;height:46px;background:rgba(22,163,74,0.15);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;">
           🌾
         </div>
         <div>
           <h2 style="font-size:18px;color:var(--ink);font-weight:800;">Citizen &amp; Patient Portal</h2>
-          <small style="color:var(--muted);">Secure Passwordless Mobile SMS OTP Verification</small>
+          <small style="color:var(--muted);">Universal Access with Mobile Number, Password / PIN or SMS OTP</small>
         </div>
       </div>
 
-      <!-- CITIZEN SCREEN 1: PHONE NUMBER INPUT -->
-      <div id="citizenScreenPhone">
+      <!-- CITIZEN AUTH METHOD SUB-TABS -->
+      <div style="display:flex;gap:6px;background:rgba(0,0,0,0.22);padding:4px;border-radius:12px;margin-bottom:16px;border:1px solid rgba(255,255,255,0.08);">
+        <button type="button" id="btnCitizenTabPass" onclick="switchCitizenAuthMode('password')" class="btn-glass" style="flex:1;padding:8px 12px;font-size:12px;font-weight:800;border-radius:8px;background:var(--primary-bright);color:#ffffff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
+          <span>🔑</span> <span>Mobile &amp; Password / PIN</span>
+        </button>
+        <button type="button" id="btnCitizenTabOtp" onclick="switchCitizenAuthMode('otp')" class="btn-glass" style="flex:1;padding:8px 12px;font-size:12px;font-weight:800;border-radius:8px;background:transparent;color:var(--muted);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
+          <span>📲</span> <span>Mobile SMS OTP</span>
+        </button>
+      </div>
+
+      <!-- CITIZEN OPTION A: MOBILE + PASSWORD / PIN -->
+      <div id="citizenScreenPassword">
+        <div id="citizenPassError" style="display:none;background:rgba(220,38,38,0.12);border:1.5px solid #dc2626;border-radius:10px;padding:10px 14px;color:#dc2626;font-size:12.5px;font-weight:600;margin-bottom:14px;"></div>
+
+        <form onsubmit="handleCitizenPasswordAuth(event)">
+          <div style="margin-bottom:14px;">
+            <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:6px;">Registered Mobile Number or 14-Digit ABHA ID *</label>
+            <input type="text" id="patientInputId" class="input-field" placeholder="e.g. 9876543210 or 14-8921-4402-9912" autocomplete="username" required style="width:100%;height:46px;font-size:14px;font-weight:600;">
+          </div>
+
+          <div style="margin-bottom:18px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+              <label style="font-size:12px;font-weight:700;color:var(--ink-dim);">Account Password or Security PIN *</label>
+              <small style="color:var(--muted);font-size:11px;">Default test PIN: <strong>1234</strong></small>
+            </div>
+            <input type="password" id="patientInputPass" class="input-field" placeholder="Enter your password or 4-digit PIN" autocomplete="current-password" required style="width:100%;height:46px;font-size:14px;">
+          </div>
+
+          <button type="submit" class="auth-btn-primary" style="width:100%;padding:13px;background:linear-gradient(135deg, #16a34a, #15803d);border:none;font-size:15px;font-weight:800;border-radius:10px;cursor:pointer;box-shadow:0 4px 14px rgba(22,163,74,0.35);display:flex;align-items:center;justify-content:center;gap:8px;color:#ffffff;">
+            <span>✓</span> <span>Verify &amp; Enter Citizen Portal</span>
+          </button>
+
+          <div style="margin-top:14px;text-align:center;">
+            <button type="button" onclick="switchCitizenAuthMode('otp')" style="background:none;border:none;color:var(--primary-bright);font-size:12px;font-weight:700;cursor:pointer;text-decoration:underline;">
+              📲 Prefer SMS OTP? Click to verify via Mobile OTP instead
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- CITIZEN OPTION B SCREEN 1: PHONE NUMBER INPUT FOR SMS OTP -->
+      <div id="citizenScreenPhone" style="display:none;">
         <div id="citizenPhoneError" style="display:none;background:rgba(220,38,38,0.12);border:1.5px solid #dc2626;border-radius:10px;padding:10px 14px;color:#dc2626;font-size:12.5px;font-weight:600;margin-bottom:14px;"></div>
 
         <form onsubmit="handleCitizenSendOtp(event)">
@@ -1729,7 +1769,7 @@ body[data-theme="doom"] {
                 <option value="+65">🇸🇬 +65</option>
                 <option value="+61">🇦🇺 +61</option>
               </select>
-              <input type="tel" id="citizenPhoneInput" class="input-field" placeholder="98765 43210" style="flex:1;height:46px;font-size:15px;letter-spacing:0.5px;font-weight:600;" maxlength="14" autocomplete="tel" required>
+              <input type="tel" id="citizenPhoneInput" class="input-field" placeholder="98765 43210" style="flex:1;height:46px;font-size:15px;letter-spacing:0.5px;font-weight:600;" maxlength="14" autocomplete="tel">
             </div>
             <small style="display:block;color:var(--muted);font-size:11.5px;margin-top:5px;">We will send a 6-digit one-time PIN via SMS to verify your citizen profile.</small>
           </div>
@@ -1737,10 +1777,16 @@ body[data-theme="doom"] {
           <button type="submit" id="btnCitizenSendOtp" class="auth-btn-primary" style="width:100%;padding:13px;background:linear-gradient(135deg, #16a34a, #15803d);border:none;font-size:15px;font-weight:800;border-radius:10px;cursor:pointer;box-shadow:0 4px 14px rgba(22,163,74,0.35);display:flex;align-items:center;justify-content:center;gap:8px;color:#ffffff;">
             <span>📲</span> <span>Send OTP via SMS</span>
           </button>
+
+          <div style="margin-top:14px;text-align:center;">
+            <button type="button" onclick="switchCitizenAuthMode('password')" style="background:none;border:none;color:var(--primary-bright);font-size:12px;font-weight:700;cursor:pointer;text-decoration:underline;">
+              🔑 Know your password or PIN? Login with Password instead
+            </button>
+          </div>
         </form>
       </div>
 
-      <!-- CITIZEN SCREEN 2: 6-DIGIT PIN INPUT -->
+      <!-- CITIZEN OPTION B SCREEN 2: 6-DIGIT PIN INPUT -->
       <div id="citizenScreenOtp" style="display:none;">
         <div id="citizenOtpError" style="display:none;background:rgba(220,38,38,0.12);border:1.5px solid #dc2626;border-radius:10px;padding:10px 14px;color:#dc2626;font-size:12.5px;font-weight:600;margin-bottom:14px;"></div>
 
@@ -1781,7 +1827,7 @@ body[data-theme="doom"] {
       </div>
     </div>
 
-    <!-- 2. DOCTOR LOGIN FORM (EMAIL & PASSWORD) -->
+    <!-- 2. DOCTOR LOGIN FORM (MOBILE / ID & PASSWORD) -->
     <div id="formCardDoctor" class="auth-form-card" style="display:none;">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
         <div style="width:46px;height:46px;background:rgba(2,132,199,0.15);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;">
@@ -1789,7 +1835,7 @@ body[data-theme="doom"] {
         </div>
         <div>
           <h2 style="font-size:18px;color:var(--ink);font-weight:700;">Doctor Clinical Portal Login</h2>
-          <small style="color:var(--muted);">Medical Council Official Email &amp; Password Authentication</small>
+          <small style="color:var(--muted);">Medical Council Registered Mobile Number or Doctor ID &amp; Password</small>
         </div>
       </div>
 
@@ -1797,13 +1843,13 @@ body[data-theme="doom"] {
 
       <form onsubmit="handleStaffAuth(event, 'doctor')">
         <div style="margin-bottom:12px;">
-          <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">Official Doctor Email *</label>
-          <input type="email" id="docInputEmail" class="input-field" placeholder="doctor.priya@swasthyasetu.gov.in" autocomplete="email" required>
+          <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">Registered Mobile Number or Doctor ID *</label>
+          <input type="text" id="docInputMobile" class="input-field" placeholder="e.g. 9811122233 or DOC-101" autocomplete="username" required>
         </div>
 
         <div style="margin-bottom:16px;">
-          <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">Clinical Password / Security Passcode *</label>
-          <input type="password" id="docInputPass" class="input-field" placeholder="Enter clinical password" autocomplete="current-password" required>
+          <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">Clinical Password / Security PIN *</label>
+          <input type="password" id="docInputPass" class="input-field" placeholder="Enter clinical password (e.g. doc@123 or 1234)" autocomplete="current-password" required>
         </div>
 
         <button type="submit" class="auth-btn-primary" style="width:100%;padding:12px;background:#0284c7;border-color:#0369a1;font-size:15px;cursor:pointer;">
@@ -1812,7 +1858,7 @@ body[data-theme="doom"] {
       </form>
     </div>
 
-    <!-- 3. ASHA WORKER LOGIN FORM (EMAIL & PASSWORD) -->
+    <!-- 3. ASHA WORKER LOGIN FORM (MOBILE / ID & PASSWORD) -->
     <div id="formCardWorker" class="auth-form-card" style="display:none;">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
         <div style="width:46px;height:46px;background:rgba(217,119,6,0.15);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;">
@@ -1820,7 +1866,7 @@ body[data-theme="doom"] {
         </div>
         <div>
           <h2 style="font-size:18px;color:var(--ink);font-weight:700;">ASHA &amp; ANM Frontline Login</h2>
-          <small style="color:var(--muted);">Village Field Worker Official Email &amp; Password Verification</small>
+          <small style="color:var(--muted);">Village Field Worker Mobile Number or Worker ID &amp; PIN</small>
         </div>
       </div>
 
@@ -1828,13 +1874,13 @@ body[data-theme="doom"] {
 
       <form onsubmit="handleStaffAuth(event, 'worker')">
         <div style="margin-bottom:12px;">
-          <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">ASHA Field Worker Email *</label>
-          <input type="email" id="workerInputEmail" class="input-field" placeholder="asha.lakshmi@swasthyasetu.gov.in" autocomplete="email" required>
+          <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">ASHA Mobile Number or Worker ID *</label>
+          <input type="text" id="workerInputMobile" class="input-field" placeholder="e.g. 9833344455 or ASH-201" autocomplete="username" required>
         </div>
 
         <div style="margin-bottom:16px;">
-          <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">Sector Passcode / PIN *</label>
-          <input type="password" id="workerInputPass" class="input-field" placeholder="Enter sector passcode" autocomplete="current-password" required>
+          <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">Sector Passcode / Security PIN *</label>
+          <input type="password" id="workerInputPass" class="input-field" placeholder="Enter sector passcode (e.g. asha@123 or 1234)" autocomplete="current-password" required>
         </div>
 
         <button type="submit" class="auth-btn-primary" style="width:100%;padding:12px;background:#d97706;border-color:#b45309;font-size:15px;cursor:pointer;">
@@ -1866,7 +1912,7 @@ body[data-theme="doom"] {
       </div>
     </div>
 
-    <!-- 4. HEALTH ADMIN LOGIN FORM (EMAIL & PASSWORD) -->
+    <!-- 4. HEALTH ADMIN LOGIN FORM (MOBILE / ID & PASSWORD) -->
     <div id="formCardAdmin" class="auth-form-card" style="display:none;">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
         <div style="width:46px;height:46px;background:rgba(219,39,119,0.15);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;">
@@ -1874,7 +1920,7 @@ body[data-theme="doom"] {
         </div>
         <div>
           <h2 style="font-size:18px;color:var(--ink);font-weight:700;">District Health Administration</h2>
-          <small style="color:var(--muted);">Authorized District Officer Email &amp; Password Access</small>
+          <small style="color:var(--muted);">Authorized District Officer Mobile Number or Admin ID &amp; Passcode</small>
         </div>
       </div>
 
@@ -1882,13 +1928,13 @@ body[data-theme="doom"] {
 
       <form onsubmit="handleStaffAuth(event, 'admin')">
         <div style="margin-bottom:12px;">
-          <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">District Officer Email *</label>
-          <input type="email" id="adminInputEmail" class="input-field" placeholder="admin@swasthyasetu.gov.in" autocomplete="email" required>
+          <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">Official Mobile Number or Admin ID *</label>
+          <input type="text" id="adminInputMobile" class="input-field" placeholder="e.g. 7906684557 or ADM-7856" autocomplete="username" required>
         </div>
 
         <div style="margin-bottom:16px;">
-          <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">Admin Master Passcode *</label>
-          <input type="password" id="adminInputPass" class="input-field" placeholder="Enter master passcode" autocomplete="current-password" required>
+          <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">Admin Master Password / Passcode *</label>
+          <input type="password" id="adminInputPass" class="input-field" placeholder="Enter master passcode (e.g. Aman@123)" autocomplete="current-password" required>
         </div>
 
         <button type="submit" class="auth-btn-primary" style="width:100%;padding:12px;background:#db2777;border-color:#be185d;font-size:15px;cursor:pointer;">
@@ -1896,7 +1942,6 @@ body[data-theme="doom"] {
         </button>
       </form>
     </div>
-
   
     <!-- NEW USER REGISTRATION TRIGGER -->
     <div style="text-align:center;max-width:580px;margin:20px auto 10px;">
@@ -3663,20 +3708,92 @@ async function handleCitizenVerifyOtp(e) {
   }
 }
 
-// OTHER PORTALS (DOCTOR, STAFF, ADMIN): PRESERVE EMAIL & PASSWORD
+// =========================================================
+// CITIZEN AUTH MODES (PASSWORD / PIN & SMS OTP)
+// =========================================================
+function switchCitizenAuthMode(mode) {
+  const btnPass = document.getElementById('btnCitizenTabPass');
+  const btnOtp = document.getElementById('btnCitizenTabOtp');
+  const screenPass = document.getElementById('citizenScreenPassword');
+  const screenPhone = document.getElementById('citizenScreenPhone');
+  const screenOtp = document.getElementById('citizenScreenOtp');
+
+  if (mode === 'password') {
+    if (btnPass) { btnPass.style.background = 'var(--primary-bright)'; btnPass.style.color = '#ffffff'; }
+    if (btnOtp) { btnOtp.style.background = 'transparent'; btnOtp.style.color = 'var(--muted)'; }
+    if (screenPass) screenPass.style.display = 'block';
+    if (screenPhone) screenPhone.style.display = 'none';
+    if (screenOtp) screenOtp.style.display = 'none';
+  } else {
+    if (btnPass) { btnPass.style.background = 'transparent'; btnPass.style.color = 'var(--muted)'; }
+    if (btnOtp) { btnOtp.style.background = 'var(--primary-bright)'; btnOtp.style.color = '#ffffff'; }
+    if (screenPass) screenPass.style.display = 'none';
+    if (screenPhone) screenPhone.style.display = 'block';
+    if (screenOtp) screenOtp.style.display = 'none';
+  }
+}
+
+// CITIZEN AUTH: MOBILE / ABHA + PASSWORD / PIN
+async function handleCitizenPasswordAuth(e) {
+  if (e) e.preventDefault();
+  hideLoginError();
+
+  const idEl = document.getElementById('patientInputId');
+  const passEl = document.getElementById('patientInputPass');
+  const errBanner = document.getElementById('citizenPassError');
+
+  const inputId = idEl ? idEl.value.trim() : '';
+  const inputPass = passEl ? passEl.value.trim() : '';
+
+  const showErr = (msg) => {
+    if (errBanner) {
+      errBanner.textContent = msg;
+      errBanner.style.display = 'block';
+    }
+    showLoginError(msg);
+  };
+
+  if (errBanner) errBanner.style.display = 'none';
+
+  if (!inputId) {
+    showErr('Please enter your Mobile Number or 14-Digit ABHA ID.');
+    return;
+  }
+  if (!inputPass) {
+    showErr('Please enter your Password or Security PIN.');
+    return;
+  }
+
+  // Verify credentials in AppStore
+  const res = window.appStore.verifyAndLogin('patient', { id: inputId, phone: inputId, abhaId: inputId, password: inputPass });
+  if (res && res.success) {
+    // Synchronize Supabase profile metadata if available
+    linkCitizenProfile(inputId, { authMethod: 'password' });
+
+    window.location.hash = '#/citizen';
+    renderActivePortalView();
+    if (typeof window.toast === 'function') {
+      window.toast('🌾 Welcome ' + (res.user ? res.user.name : 'Citizen') + '! Logged in with Password.');
+    }
+  } else {
+    showErr((res && res.message) || '⚠️ Access Denied: Incorrect Mobile Number, ABHA ID or Password.');
+  }
+}
+
+// STAFF AUTH (DOCTOR, ASHA WORKER, ADMIN): MOBILE / ID & PASSWORD (NO EMAIL)
 async function handleStaffAuth(e, role) {
   if (e) e.preventDefault();
   hideLoginError();
 
-  const emailInputId = (role === 'doctor') ? 'docInputEmail' : (role === 'worker') ? 'workerInputEmail' : 'adminInputEmail';
+  const mobileInputId = (role === 'doctor') ? 'docInputMobile' : (role === 'worker') ? 'workerInputMobile' : 'adminInputMobile';
   const passInputId = (role === 'doctor') ? 'docInputPass' : (role === 'worker') ? 'workerInputPass' : 'adminInputPass';
   const errorBannerId = (role === 'doctor') ? 'doctorErrorBanner' : (role === 'worker') ? 'workerErrorBanner' : 'adminErrorBanner';
 
-  const emailEl = document.getElementById(emailInputId);
+  const mobileEl = document.getElementById(mobileInputId);
   const passEl = document.getElementById(passInputId);
   const errBanner = document.getElementById(errorBannerId);
 
-  const email = emailEl ? emailEl.value.trim() : '';
+  const identifier = mobileEl ? mobileEl.value.trim() : '';
   const password = passEl ? passEl.value.trim() : '';
 
   const showErr = (msg) => {
@@ -3689,8 +3806,8 @@ async function handleStaffAuth(e, role) {
 
   if (errBanner) errBanner.style.display = 'none';
 
-  if (!email) {
-    showErr('Please enter your official healthcare email address.');
+  if (!identifier) {
+    showErr('Please enter your Registered Mobile Number or Staff ID.');
     return;
   }
   if (!password) {
@@ -3698,28 +3815,8 @@ async function handleStaffAuth(e, role) {
     return;
   }
 
-  // 1. Authenticate via Supabase signInWithPassword
-  let supabaseAuthSuccess = false;
-  const supabase = (window.supabaseService && window.supabaseService.client) ||
-                   (window.supabase && typeof window.supabase.createClient === 'function' && window.SUPABASE_CONFIG ?
-                    window.supabase.createClient(window.SUPABASE_CONFIG.url, window.SUPABASE_CONFIG.anonKey) : null);
-
-  if (supabase && supabase.auth && typeof supabase.auth.signInWithPassword === 'function') {
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-      if (!error && data && data.user) {
-        supabaseAuthSuccess = true;
-        console.log('[Supabase Auth] signInWithPassword verified successfully:', data.user);
-      } else if (error) {
-        console.warn('[Supabase Auth] signInWithPassword notice:', error.message);
-      }
-    } catch (err) {
-      console.warn('[Supabase Auth] signInWithPassword exception:', err);
-    }
-  }
-
-  // 2. Validate against verified staff directory
-  const res = window.appStore.verifyAndLogin(role, { id: email, email, password });
+  // Validate against verified staff directory
+  const res = window.appStore.verifyAndLogin(role, { id: identifier, phone: identifier, password });
   if (res && res.multiRole) {
     showRoleChooser(res.availableRoles);
     return;
@@ -3733,30 +3830,11 @@ async function handleStaffAuth(e, role) {
     if (typeof window.toast === 'function') {
       window.toast('✓ Authenticated: Welcome ' + (res.user ? res.user.name : role.toUpperCase()));
     }
-  } else if (supabaseAuthSuccess) {
-    const staffMatch = (window.appStore.state.staff || []).find(s => s.role === role) || {
-      id: role.toUpperCase() + '-CLOUD',
-      name: email.split('@')[0],
-      role: role,
-      email: email
-    };
-    window.appStore.state.session = {
-      isLoggedIn: true,
-      role: role,
-      customRole: role,
-      metadata: { role: role },
-      user: staffMatch
-    };
-    window.appStore.saveState();
-    window.location.hash = '#/' + (role === 'worker' ? 'worker' : role);
-    renderActivePortalView();
-    if (typeof window.toast === 'function') {
-      window.toast('✓ Authenticated: Welcome ' + staffMatch.name);
-    }
   } else {
-    showErr((res && res.message) || '⚠️ Access Denied: Incorrect email or password for ' + role.toUpperCase() + ' portal.');
+    showErr((res && res.message) || '⚠️ Access Denied: Incorrect Mobile Number or Password for ' + role.toUpperCase() + ' portal.');
   }
 }
+
 
 // TAB SWITCHER & STATE SYNC
 function switchLoginTab(role) {
@@ -3997,7 +4075,7 @@ function doLogout() {
   if (userBadgeEl) userBadgeEl.style.display = 'none';
   
   // Clear all login input fields on logout
-  ['citizenPhoneInput', 'docInputEmail', 'docInputPass', 'workerInputEmail', 'workerInputPass', 'adminInputEmail', 'adminInputPass'].forEach(id => {
+  ['patientInputId', 'patientInputPass', 'citizenPhoneInput', 'docInputMobile', 'docInputPass', 'workerInputMobile', 'workerInputPass', 'adminInputMobile', 'adminInputPass'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });

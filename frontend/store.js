@@ -233,8 +233,10 @@
       const matchedRoles = [];
 
       matchingStaff.forEach(s => {
-        const staffPass = (s.password || s.pin || s.password_hash || '').trim();
-        if (staffPass === inputPass) {
+        const hasPassMatch = (s.password && s.password.trim() === inputPass);
+        const hasPinMatch = (s.pin && s.pin.trim() === inputPass);
+        const hasHashMatch = (s.password_hash && s.password_hash.trim() === inputPass);
+        if (hasPassMatch || hasPinMatch || hasHashMatch) {
           if (!matchedRoles.some(r => r.role === s.role)) {
             matchedRoles.push({ role: s.role, user: s, label: s.name + ' (' + s.role.toUpperCase() + ')' });
           }
@@ -279,7 +281,7 @@
       }
       this.saveState();
 
-      return { success: true, user: targetMatch.user, availableRoles: matchedRoles };
+      return { success: true, role: targetMatch.role, user: targetMatch.user, availableRoles: matchedRoles };
     }
 
     loginAs(role, user = null) {
