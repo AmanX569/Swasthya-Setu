@@ -3702,6 +3702,7 @@ async function handleCitizenVerifyOtp(e) {
   }
 
   window.location.hash = '#/citizen';
+  if (typeof showView === 'function') showView('Patient');
   renderActivePortalView();
   if (typeof window.toast === 'function') {
     window.toast('🌾 Welcome ' + (citizenUser.name || 'Citizen') + '! Verified via SMS OTP.');
@@ -3771,6 +3772,7 @@ async function handleCitizenPasswordAuth(e) {
     linkCitizenProfile(inputId, { authMethod: 'password' });
 
     window.location.hash = '#/citizen';
+    if (typeof showView === 'function') showView('Patient');
     renderActivePortalView();
     if (typeof window.toast === 'function') {
       window.toast('🌾 Welcome ' + (res.user ? res.user.name : 'Citizen') + '! Logged in with Password.');
@@ -3826,6 +3828,7 @@ async function handleStaffAuth(e, role) {
     if (errBanner) errBanner.style.display = 'none';
     hideLoginError();
     window.location.hash = '#/' + (role === 'worker' ? 'worker' : role);
+    if (typeof showView === 'function') showView(role === 'worker' ? 'Worker' : (role.charAt(0).toUpperCase() + role.slice(1)));
     renderActivePortalView();
     if (typeof window.toast === 'function') {
       window.toast('✓ Authenticated: Welcome ' + (res.user ? res.user.name : role.toUpperCase()));

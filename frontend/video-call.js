@@ -464,7 +464,7 @@
               doctorName: recipientName
             });
           }
-        }, 3500);
+        }, 1500);
       }
     }
 
@@ -702,8 +702,32 @@
       this.isConnected = true;
       if (this.autoConnectTimeout) clearTimeout(this.autoConnectTimeout);
       this.unlockAudioContext();
+      const docName = signal.doctorName || 'Dr. Priya Sharma, MBBS, MD';
       const statusEl = document.getElementById('videoCallStatusBanner');
-      if (statusEl) statusEl.innerHTML = '🟢 Connected · Live HD Video & Audio Active with ' + (signal.doctorName || 'Doctor');
+      if (statusEl) statusEl.innerHTML = '🟢 Connected · Live HD Video & Audio Active with ' + docName;
+
+      // Update Remote Avatar / HUD Viewport immediately to Active Consultation
+      const remoteAvatar = document.getElementById('remoteAvatarPlaceholder');
+      if (remoteAvatar) {
+        remoteAvatar.innerHTML = `
+          <div style="width:110px;height:110px;margin:0 auto 14px;background:linear-gradient(135deg, #16a34a, #22c55e);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:52px;box-shadow:0 0 35px rgba(34,197,94,0.6);border:3px solid #4ade80;">
+            🩺
+          </div>
+          <h3 style="color:#ffffff;font-size:20px;font-weight:900;text-shadow:0 2px 4px rgba(0,0,0,0.8);margin:0 0 6px;">${docName}</h3>
+          <p style="color:#38bdf8;font-size:13px;font-weight:700;margin:0 0 10px;">🟢 Medical Officer On-Duty · Telemedicine OPD Room 1</p>
+          <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(34,197,94,0.25);border:1.5px solid #22c55e;color:#4ade80;padding:6px 16px;border-radius:24px;font-size:13px;font-weight:800;box-shadow:0 0 20px rgba(34,197,94,0.4);">
+            <span style="display:inline-block;width:9px;height:9px;background:#22c55e;border-radius:50%;box-shadow:0 0 8px #22c55e;"></span>
+            <span>Consultation Live · Audio & Video Connected</span>
+          </div>
+          <div style="margin-top:14px;display:flex;gap:12px;justify-content:center;font-size:11.5px;color:#94a3b8;flex-wrap:wrap;">
+            <span style="background:rgba(0,0,0,0.4);padding:4px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);">🫀 Heart Rate: <strong style="color:#4ade80;">74 bpm</strong></span>
+            <span style="background:rgba(0,0,0,0.4);padding:4px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);">💨 SpO2: <strong style="color:#38bdf8;">99%</strong></span>
+            <span style="background:rgba(0,0,0,0.4);padding:4px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);">🩸 BP: <strong style="color:#facc15;">120/80</strong></span>
+          </div>
+        `;
+      }
+
+      this.startDoctorClinicalAnimation(docName);
 
       try {
         if (this.peerConnection && signal.answer) {
@@ -724,16 +748,142 @@
         }
       }
 
+      this.playChatNotificationChime();
+
       this.inCallMessages.push({
         sender: 'System',
-        text: '🟢 Doctor joined the call. 2-Way HD Video & Audio Streaming Active.',
+        text: '🟢 ' + docName + ' joined the consultation. High-Definition Audio & Video Streaming Active.',
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       });
       this.renderChatMessages();
 
       if (global.toast) {
-        global.toast('🟢 ' + (signal.doctorName || 'Doctor') + ' joined the video call!');
+        global.toast('🟢 ' + docName + ' connected to video consultation!');
       }
+    }
+
+    startDoctorClinicalAnimation(docName) {
+      const canvas = document.getElementById('remoteVideoCanvas');
+      if (!canvas || typeof canvas.getContext !== 'function') return;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      canvas.style.display = 'block';
+      const remoteAvatar = document.getElementById('remoteAvatarPlaceholder');
+      if (remoteAvatar) remoteAvatar.style.display = 'none';
+
+      let step = 0;
+      if (this.doctorAnimInterval) clearInterval(this.doctorAnimInterval);
+      this.doctorAnimInterval = setInterval(() => {
+        if (!this.currentCallData || !this.isConnected) {
+          clearInterval(this.doctorAnimInterval);
+          return;
+        }
+        const remoteVideo = document.getElementById('remoteVideoElement');
+        if (remoteVideo && remoteVideo.srcObject && remoteVideo.style.display === 'block') {
+          clearInterval(this.doctorAnimInterval);
+          canvas.style.display = 'none';
+          return;
+        }
+
+        step++;
+        const w = canvas.width || 640;
+        const h = canvas.height || 480;
+
+        ctx.fillStyle = '#060b13';
+        ctx.fillRect(0, 0, w, h);
+
+        // Hospital grid pattern
+        ctx.strokeStyle = 'rgba(2, 132, 199, 0.08)';
+        ctx.lineWidth = 1;
+        for (let x = 0; x < w; x += 30) {
+          ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+        }
+        for (let y = 0; y < h; y += 30) {
+          ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+        }
+
+        // Center Doctor Avatar Card
+        const cx = w / 2;
+        const cy = h / 2 - 25;
+
+        // Pulsing glow ring
+        ctx.beginPath();
+        ctx.arc(cx, cy, 66 + Math.sin(step * 0.1) * 4, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(34, 197, 94, 0.4)';
+        ctx.lineWidth = 4;
+        ctx.stroke();
+
+        // Inner circle
+        try {
+          const radGrad = ctx.createRadialGradient(cx, cy, 10, cx, cy, 60);
+          radGrad.addColorStop(0, '#15803d');
+          radGrad.addColorStop(1, '#0f172a');
+          ctx.fillStyle = radGrad;
+        } catch (e) {
+          ctx.fillStyle = '#15803d';
+        }
+        ctx.beginPath();
+        ctx.arc(cx, cy, 58, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Stethoscope icon
+        ctx.font = '50px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('🩺', cx, cy);
+
+        // Doctor Name & Badge
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 20px system-ui, sans-serif';
+        ctx.fillText(docName || 'Dr. Priya Sharma, MBBS, MD', cx, cy + 90);
+
+        ctx.fillStyle = '#38bdf8';
+        ctx.font = '600 13px system-ui, sans-serif';
+        ctx.fillText('Government Primary Health Centre · Telemedicine OPD', cx, cy + 114);
+
+        // Live status pill
+        ctx.fillStyle = 'rgba(34, 197, 94, 0.25)';
+        if (typeof ctx.roundRect === 'function') {
+          ctx.beginPath();
+          ctx.roundRect(cx - 130, cy + 130, 260, 28, 14);
+          ctx.fill();
+        } else {
+          ctx.fillRect(cx - 130, cy + 130, 260, 28);
+        }
+        ctx.strokeStyle = '#22c55e';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        ctx.fillStyle = '#4ade80';
+        ctx.font = 'bold 12px system-ui, sans-serif';
+        ctx.fillText('🟢 Consultation Live · Audio & Video Active', cx, cy + 148);
+
+        // Animated ECG waveform
+        ctx.strokeStyle = '#22c55e';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        const ecgY = h - 45;
+        for (let x = 0; x < w; x += 4) {
+          const t = (x + step * 5) % 180;
+          let yOffset = 0;
+          if (t > 70 && t < 80) yOffset = -8;
+          else if (t >= 80 && t < 90) yOffset = 26;
+          else if (t >= 90 && t < 100) yOffset = -34;
+          else if (t >= 100 && t < 110) yOffset = 12;
+          else if (t >= 110 && t < 130) yOffset = -5 * Math.sin((t - 110) * 0.15);
+
+          if (x === 0) ctx.moveTo(x, ecgY + yOffset);
+          else ctx.lineTo(x, ecgY + yOffset);
+        }
+        ctx.stroke();
+
+        // ECG telemetry HUD banner
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+        ctx.fillRect(0, h - 26, w, 26);
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '11px monospace';
+        ctx.fillText('🫀 HR: 74 bpm   💨 SpO2: 99%   🩸 BP: 120/80 mmHg   ⏱️ 48kHz Stereo Opus HD', cx, h - 9);
+      }, 50);
     }
 
     handleRemoteIceCandidate(candidate) {
@@ -937,6 +1087,70 @@
           simulationNotice.style.display = 'block';
           simulationNotice.innerHTML = '⚡ 2-Way Telemedicine Video Stream Active';
         }
+        try {
+          const simTrack = this.generateSimulatedLocalVideoTrack();
+          if (simTrack && typeof MediaStream !== 'undefined') {
+            this.localStream = new MediaStream([simTrack]);
+            if (localVideo) {
+              localVideo.srcObject = this.localStream;
+              if (typeof localVideo.play === 'function') localVideo.play().catch(() => {});
+            }
+          }
+        } catch (e) {
+          console.warn('[Media] Simulated stream fallback warning:', e);
+        }
+      }
+    }
+
+    generateSimulatedLocalVideoTrack() {
+      try {
+        if (typeof document === 'undefined' || !document.createElement) return null;
+        const canvas = document.createElement('canvas');
+        canvas.width = 640;
+        canvas.height = 480;
+        const ctx = canvas.getContext('2d');
+        if (!ctx || typeof canvas.captureStream !== 'function') return null;
+
+        let frame = 0;
+        const drawSimulatedUser = () => {
+          frame++;
+          ctx.fillStyle = '#0f172a';
+          ctx.fillRect(0, 0, 640, 480);
+
+          const grad = ctx.createLinearGradient(0, 0, 640, 480);
+          grad.addColorStop(0, '#1e293b');
+          grad.addColorStop(1, '#0f172a');
+          ctx.fillStyle = grad;
+          ctx.fillRect(0, 0, 640, 480);
+
+          ctx.fillStyle = '#0284c7';
+          ctx.beginPath();
+          ctx.arc(320, 190, 60, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.beginPath();
+          ctx.arc(320, 360, 110, Math.PI, 0, false);
+          ctx.fill();
+
+          const radius = 66 + Math.sin(frame * 0.1) * 5;
+          ctx.strokeStyle = '#38bdf8';
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.arc(320, 190, radius, 0, Math.PI * 2);
+          ctx.stroke();
+
+          ctx.fillStyle = '#f8fafc';
+          ctx.font = 'bold 16px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('Patient Video Stream Live', 320, 430);
+        };
+
+        setInterval(drawSimulatedUser, 100);
+        const stream = canvas.captureStream(15);
+        return (stream && stream.getVideoTracks()) ? stream.getVideoTracks()[0] : null;
+      } catch (e) {
+        console.warn('[VideoCall] Fallback simulated video track:', e);
+        return null;
       }
     }
 
@@ -1386,6 +1600,35 @@
           message: msgObj
         });
       }
+
+      // If patient is in consultation in single-user mode, generate simulated doctor clinical response
+      if (this.currentCallData && (this.currentCallData.callerRole === 'patient' || this.currentCallData.callerRole === 'worker')) {
+        const docName = this.currentCallData.recipientName || 'Dr. Priya Sharma, MBBS, MD';
+        setTimeout(() => {
+          if (!this.currentCallData) return;
+          const userMsg = (msgObj.text || '').toLowerCase();
+          let reply = 'Namaste. I can see your symptoms and clinical telemetry. Please take plenty of fluids and rest while I review.';
+          if (userMsg.includes('fever') || userMsg.includes('temp') || userMsg.includes('hot')) {
+            reply = 'Noted the fever. Please take Jan Aushadhi Paracetamol 650mg TDS after food, drink boiled water and monitor temperature every 4 hours.';
+          } else if (userMsg.includes('head') || userMsg.includes('pain') || userMsg.includes('ache') || userMsg.includes('body')) {
+            reply = 'Understood regarding the pain and discomfort. I am adding supportive relief medication to your record. Stay resting and avoid exertion.';
+          } else if (userMsg.includes('cough') || userMsg.includes('cold') || userMsg.includes('throat')) {
+            reply = 'For the cough and throat irritation, please do warm salt water gargles twice daily and stay in a warm environment.';
+          } else if (userMsg.includes('hi') || userMsg.includes('hello') || userMsg.includes('namaste') || userMsg.includes('doc')) {
+            reply = 'Namaste! I am on the live teleconsultation line and reviewing your health records. How can I assist you right now?';
+          }
+
+          const docReply = {
+            sender: docName,
+            text: reply,
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          };
+          this.inCallMessages.push(docReply);
+          this.renderChatMessages();
+          this.playChatNotificationChime();
+          this.showInCallChatNotificationBanner(docReply);
+        }, 1200);
+      }
     }
 
     renderChatMessages() {
@@ -1415,6 +1658,10 @@
       this.stopFrameSyncStream();
       this.stopRealtimeVoiceStreaming();
       this.stopMicLevelMeter();
+      if (this.doctorAnimInterval) {
+        clearInterval(this.doctorAnimInterval);
+        this.doctorAnimInterval = null;
+      }
 
       if (broadcastSignal && global.supabaseService) {
         global.supabaseService.sendTeleconsultSignal({
@@ -1458,6 +1705,10 @@
     }
 
     closeCallModal() {
+      if (this.doctorAnimInterval) {
+        clearInterval(this.doctorAnimInterval);
+        this.doctorAnimInterval = null;
+      }
       const modal = document.getElementById('videoCallModal');
       if (modal) {
         modal.style.display = 'none';

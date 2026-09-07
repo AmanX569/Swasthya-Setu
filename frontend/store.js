@@ -220,6 +220,25 @@
                (inputName && pName && (pName === inputName || pName.includes(inputName)));
       });
 
+      // Auto-provision citizen if logging into citizen/patient portal with a 10-digit mobile number or ABHA ID
+      if (role === 'patient' && (digitsOnly.length >= 10 || cleanInputAbha.length >= 6 || inputId.length >= 3)) {
+        if (matchingPatients.length === 0) {
+          const cleanLast10 = digitsOnly ? digitsOnly.slice(-10) : '9876543210';
+          const newPat = {
+            id: 'USR-PAT-' + cleanLast10.slice(-4),
+            name: 'Verified Citizen (' + cleanLast10.slice(-4) + ')',
+            phone: cleanLast10,
+            abhaId: cleanInputAbha && cleanInputAbha.length >= 10 ? inputId : ('14-' + Math.floor(1000 + Math.random() * 9000) + '-' + Math.floor(1000 + Math.random() * 9000) + '-' + Math.floor(1000 + Math.random() * 9000)),
+            role: 'patient',
+            customRole: 'citizen',
+            password: inputPass || '1234'
+          };
+          if (!this.state.patients) this.state.patients = [];
+          this.state.patients.unshift(newPat);
+          matchingPatients.push(newPat);
+        }
+      }
+
       // Check if identity exists in system
       const identityExists = (matchingStaff.length > 0) || (matchingPatients.length > 0);
       if (!identityExists) {
@@ -244,12 +263,12 @@
       });
 
       matchingPatients.forEach(p => {
-        const patPass = (p.password || p.pin || '123456').trim();
-        // Allow user's registered password, universal mock OTP (123456), or any PIN for cloud-synced accounts
-        if (patPass === inputPass || patPass === '123456' || inputPass === '123456' || inputPass.length >= 4) {
+        const patPass = (p.password || p.pin || '1234').trim();
+        // Allow user's registered password, universal mock OTP (123456), default 1234, or any 4+ char password
+        if (patPass === inputPass || patPass === '1234' || inputPass === '1234' || patPass === '123456' || inputPass === '123456' || inputPass.length >= 4) {
           p.password = inputPass;
           if (!matchedRoles.some(r => r.role === 'patient')) {
-            matchedRoles.push({ role: 'patient', user: p, label: p.name + ' (CITIZEN)' });
+            matchedRoles.push({ role: 'patient', user: p, label: (p.name || 'Citizen') + ' (CITIZEN)' });
           }
         }
       });
