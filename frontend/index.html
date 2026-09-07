@@ -2001,18 +2001,24 @@ body[data-theme="doom"] {
     </div>
 
     
-    <!-- TELECONSULTATION VIDEO CALL HISTORY -->
-    <div class="glass-panel">
-      <div class="panel-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-        <div style="display:flex;align-items:center;gap:10px;">
-          <span style="font-size:22px;">📹</span>
-          <div>
-            <h3 class="panel-title" style="color:var(--ink);font-size:16px;font-weight:800;">Teleconsultation Video Call History</h3>
-            <small style="color:var(--muted);">Past doctor video consultations, call durations & linked e-prescriptions</small>
-          </div>
+    <!-- COMPACT HISTORY SECTION -->
+    <div class="glass-panel" id="patientHistoryPanel" style="padding:14px 18px;margin-bottom:14px;border:1.5px solid var(--glass-border);border-radius:14px;">
+      <div class="panel-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0;flex-wrap:wrap;gap:8px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:18px;">📜</span>
+          <h3 class="panel-title" style="margin:0;color:var(--ink);font-size:15px;font-weight:800;">History</h3>
+          <span id="patientHistoryCountBadge" class="badge" style="background:rgba(2,132,199,0.12);color:var(--primary-bright);font-size:11px;font-weight:800;padding:2px 8px;border-radius:10px;">0 records</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <button type="button" id="patientHistoryClearBtn" onclick="patientController.clearAllCallHistory()" style="display:none;background:rgba(220,38,38,0.1);color:#dc2626;border:1px solid rgba(220,38,38,0.25);padding:4px 10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;">
+            🗑️ Clear
+          </button>
+          <button type="button" id="patientHistoryToggleBtn" onclick="patientController.toggleHistoryView()" class="btn-glass" style="padding:4px 10px;font-size:11px;font-weight:800;display:inline-flex;align-items:center;gap:4px;border-radius:8px;cursor:pointer;">
+            <span id="patientHistoryToggleIcon">🔼</span> <span id="patientHistoryToggleText">Minimize</span>
+          </button>
         </div>
       </div>
-      <div id="patientVideoCallHistoryContainer"></div>
+      <div id="patientVideoCallHistoryContainer" style="margin-top:10px;display:block;"></div>
     </div>
 
     <!-- DIGITAL ABHA HEALTH CARD -->

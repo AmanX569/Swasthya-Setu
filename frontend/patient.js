@@ -138,43 +138,61 @@
       this.openPatientVideoCallModal();
     }
 
-        renderVideoCallHistory() {
+    toggleHistoryView() {
+      this.isHistoryMinimized = !this.isHistoryMinimized;
+      const text = document.getElementById('patientHistoryToggleText');
+      const icon = document.getElementById('patientHistoryToggleIcon');
+      const container = document.getElementById('patientVideoCallHistoryContainer');
+
+      if (text && icon) {
+        text.textContent = this.isHistoryMinimized ? 'Expand' : 'Minimize';
+        icon.textContent = this.isHistoryMinimized ? '🔽' : '🔼';
+      }
+
+      if (container) {
+        container.style.display = this.isHistoryMinimized ? 'none' : 'block';
+      }
+    }
+
+    renderVideoCallHistory() {
       const el = document.getElementById('patientVideoCallHistoryContainer');
+      const countBadge = document.getElementById('patientHistoryCountBadge');
+      const clearBtn = document.getElementById('patientHistoryClearBtn');
       if (!el || !this.store) return;
       const history = this.store.getVideoCallHistory('patient') || [];
 
+      if (countBadge) {
+        countBadge.textContent = history.length === 1 ? '1 record' : `${history.length} records`;
+      }
+      if (clearBtn) {
+        clearBtn.style.display = history.length ? 'inline-block' : 'none';
+      }
+
       if (!history.length) {
-        el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);background:var(--glass-2);border-radius:12px;border:1px dashed var(--glass-border);grid-column:1/-1;">No video teleconsultations yet. Tap "📹 Start Video Teleconsultation" to connect with an on-duty doctor.</div>';
+        el.innerHTML = '<div style="text-align:center;padding:12px;color:var(--muted);font-size:12px;background:var(--glass-2);border-radius:10px;border:1px dashed var(--glass-border);">No past consultations recorded yet.</div>';
         return;
       }
 
-      el.innerHTML = `
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;width:100%;">
-          <span style="font-size:12px;color:var(--muted);font-weight:700;">Total Recorded Consultations: ${history.length}</span>
-          <button onclick="patientController.clearAllCallHistory()" style="background:rgba(220,38,38,0.12);color:#dc2626;border:1px solid rgba(220,38,38,0.3);padding:4px 10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;">
-            🗑️ Clear History
-          </button>
-        </div>
-      ` + history.map(c => `
-        <div style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:14px;padding:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;box-shadow:var(--shadow-panel);margin-bottom:10px;">
-          <div style="display:flex;align-items:center;gap:12px;">
-            <div style="width:42px;height:42px;background:rgba(2,132,199,0.12);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;">
+      el.innerHTML = history.map(c => `
+        <div style="background:var(--glass-2);border:1px solid var(--glass-border);border-radius:10px;padding:9px 12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:32px;height:32px;background:rgba(2,132,199,0.12);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;">
               📹
             </div>
             <div>
-              <strong style="color:var(--ink);font-size:14px;display:block;">${c.recipientName}</strong>
-              <small style="color:var(--muted);font-family:'IBM Plex Mono',monospace;">Token: ${c.token} · 📅 ${c.date} (${c.time})</small>
+              <strong style="color:var(--ink);font-size:13px;display:block;line-height:1.2;">${c.recipientName}</strong>
+              <small style="color:var(--muted);font-size:11px;font-family:'IBM Plex Mono',monospace;">Token: ${c.token} · 📅 ${c.date} (${c.time})</small>
             </div>
           </div>
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span class="badge" style="background:rgba(34,197,94,0.15);color:#16a34a;font-weight:700;font-size:11px;">⏱️ ${c.duration}</span>
-            <span class="badge" style="background:rgba(2,132,199,0.15);color:#0284c7;font-weight:700;font-size:11px;">✓ ${c.status}</span>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span class="badge" style="background:rgba(34,197,94,0.15);color:#16a34a;font-weight:700;font-size:10.5px;padding:2px 7px;">⏱️ ${c.duration}</span>
+            <span class="badge" style="background:rgba(2,132,199,0.15);color:#0284c7;font-weight:700;font-size:10.5px;padding:2px 7px;">✓ ${c.status}</span>
             ${c.rxId ? `
-              <button class="auth-btn-primary" style="background:#0284c7;padding:6px 12px;font-size:11px;font-weight:700;" onclick="patientController.downloadPrescriptionPdf('${c.rxId}')">
-                📥 View Rx PDF
+              <button class="auth-btn-primary" style="background:#0284c7;padding:3px 8px;font-size:10.5px;font-weight:700;border-radius:6px;" onclick="patientController.downloadPrescriptionPdf('${c.rxId}')">
+                📥 Rx PDF
               </button>
             ` : ''}
-            <button onclick="patientController.deleteCallRecord('${c.id}')" title="Delete record" style="background:none;border:none;color:#dc2626;cursor:pointer;font-size:16px;padding:4px 8px;border-radius:6px;">
+            <button onclick="patientController.deleteCallRecord('${c.id}')" title="Delete record" style="background:none;border:none;color:#dc2626;cursor:pointer;font-size:14px;padding:2px 4px;border-radius:4px;">
               🗑️
             </button>
           </div>

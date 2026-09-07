@@ -4162,18 +4162,24 @@ body[data-theme="doom"] {
     </div>
 
     
-    <!-- TELECONSULTATION VIDEO CALL HISTORY -->
-    <div class="glass-panel">
-      <div class="panel-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-        <div style="display:flex;align-items:center;gap:10px;">
-          <span style="font-size:22px;">📹</span>
-          <div>
-            <h3 class="panel-title" style="color:var(--ink);font-size:16px;font-weight:800;">Teleconsultation Video Call History</h3>
-            <small style="color:var(--muted);">Past doctor video consultations, call durations & linked e-prescriptions</small>
-          </div>
+    <!-- COMPACT HISTORY SECTION -->
+    <div class="glass-panel" id="patientHistoryPanel" style="padding:14px 18px;margin-bottom:14px;border:1.5px solid var(--glass-border);border-radius:14px;">
+      <div class="panel-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0;flex-wrap:wrap;gap:8px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:18px;">📜</span>
+          <h3 class="panel-title" style="margin:0;color:var(--ink);font-size:15px;font-weight:800;">History</h3>
+          <span id="patientHistoryCountBadge" class="badge" style="background:rgba(2,132,199,0.12);color:var(--primary-bright);font-size:11px;font-weight:800;padding:2px 8px;border-radius:10px;">0 records</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <button type="button" id="patientHistoryClearBtn" onclick="patientController.clearAllCallHistory()" style="display:none;background:rgba(220,38,38,0.1);color:#dc2626;border:1px solid rgba(220,38,38,0.25);padding:4px 10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;">
+            🗑️ Clear
+          </button>
+          <button type="button" id="patientHistoryToggleBtn" onclick="patientController.toggleHistoryView()" class="btn-glass" style="padding:4px 10px;font-size:11px;font-weight:800;display:inline-flex;align-items:center;gap:4px;border-radius:8px;cursor:pointer;">
+            <span id="patientHistoryToggleIcon">🔼</span> <span id="patientHistoryToggleText">Minimize</span>
+          </button>
         </div>
       </div>
-      <div id="patientVideoCallHistoryContainer"></div>
+      <div id="patientVideoCallHistoryContainer" style="margin-top:10px;display:block;"></div>
     </div>
 
     <!-- DIGITAL ABHA HEALTH CARD -->
@@ -8128,7 +8134,12 @@ body[data-theme="doom"] {
     "Video Consultation": {"hi":"वीडियो परामर्श","te":"వీడియో సంప్రదింపులు","ta":"வீடியோ ஆலோசனை","mr":"व्हिडिओ सल्लामसलत","bn":"ভিডিও পরামর্শ","kn":"ವೀಡಿಯೊ ಸಮಾಲೋಚನೆ"},
     "Enter Mobile Number": {"hi":"मोबाइल नंबर दर्ज करें","te":"మొబైల్ నంబర్ నమోదు చేయండి","ta":"கைபேசி எண்ணை உள்ளிடவும்","mr":"मोबाइल क्रमांक प्रविष्ट करा","bn":"মোবাইল নম্বর লিখুন","kn":"ಮೊಬೈಲ್ ಸಂಖ್ಯೆ ನಮೂದಿಸಿ"},
     "Enter Password": {"hi":"पासवर्ड दर्ज करें","te":"పాస్‌వర్డ్ నమోదు చేయండి","ta":"கடவுச்சொல்லை உள்ளிடவும்","mr":"पासवर्ड प्रविष्ट करा","bn":"পাসওয়ার্ড লিখুন","kn":"ಪಾಸ್‌ವರ್ಡ್ ನಮೂದಿಸಿ"},
-    "Login Securely": {"hi":"सुरक्षित लॉगिन करें","te":"సురక్షితంగా లాగిన్ అవ్వండి","ta":"பாதுகாப்பாக உள்நுழைக","mr":"सुरक्षित लॉग इन करा","bn":"নিরাপদে লগইন করুন","kn":"ಸುರಕ್ಷಿತವಾಗಿ ಲಾಗಿನ್ ಆಗಿ"},
+    "Login Securely": {"hi":"सुरक्षित लॉगिन करें","te":"సురಕ್ಷితంగా లాగిన్ అవ్వండి","ta":"பாதுகாப்பாக உள்நுழைக","mr":"सुरक्षित लॉग इन करा","bn":"নিরাপদে লগইন করুন","kn":"ಸುರಕ್ಷಿತವಾಗಿ ಲಾಗಿನ್ ಆಗಿ"},
+    "History": {"hi":"इतिहास","te":"చరిత్ర","ta":"வரலாறு","mr":"इतिहास","bn":"ইতিহাস","kn":"ಇತಿಹಾಸ"},
+    "Clear": {"hi":"साफ़ करें","te":"క్లియర్ చేయండి","ta":"அழிக்கவும்","mr":"साफ करा","bn":"মুছে ফেলুন","kn":"ತೆರವುಗೊಳಿಸಿ"},
+    "Minimize": {"hi":"छोटा करें","te":"తగ్గించండి","ta":"சுருக்குக","mr":"लहान करा","bn":"ছোট করুন","kn":"ಕಿರಿದಾಗಿಸಿ"},
+    "Expand": {"hi":"विस्तार करें","te":"విస్తరించండి","ta":"விரிவாக்குக","mr":"विस्तृत करा","bn":"বড় করুন","kn":"ವಿಸ್ತರಿಸಿ"},
+    "No past consultations recorded yet.": {"hi":"अभी तक कोई परामर्श रिकॉर्ड नहीं है।","te":"ఇంతవరకు ఎటువంటి సంప్రదింపులు నమోదు కాలేదు.","ta":"இதுவரை எந்த ஆலோசனையும் பதிவு செய்யப்படவில்லை.","mr":"अद्याप कोणताही सल्ला नोंदवलेला नाही.","bn":"এখনও পর্যন্ত কোনো পরামর্শের রেকর্ড নেই।","kn":"ಇದುವರೆಗೆ ಯಾವುದೇ ಸಮಾಲೋಚನೆ ದಾಖಲಾಗಿಲ್ಲ."},
 
     // --- EXPANDED HIGH-ACCURACY VERNACULAR DICTIONARY (HOME, PORTAL, OPD, ASHA, ADMIN) ---
     "Swasthya Setu · Rural Healthcare Grid": {"hi":"स्वास्थ्य सेतु • ग्रामीण स्वास्थ्य क्लाउड ग्रिड","te":"స్వాస్థ್ಯ సేతు • గ్రామీణ ఆరోగ్య క్లೌడ్ గ్రిడ్","ta":"ஸ்வாஸ்த்ய சேது • கிராமப்புற சுகாதார கட்டமைப்பு","mr":"स्वास्थ्य सेतू • ग्रामीण आरोग्य क्लाउड ग्रिड","bn":"স্বাস্থ্য সেতু • গ্রামীণ স্বাস্থ্য ক্লাউড গ্রিড","kn":"ಸ್ವಾಸ್ಥ್ಯ ಸೇತು • ಗ್ರಾಮೀಣ ಆರೋಗ್ಯ ಕ್ಲೌಡ್ ಗ್ರಿಡ್"},
@@ -12213,43 +12224,61 @@ The user's preferred language is ${SUPPORTED_LANGUAGES[this.currentLang]?.name |
       this.openPatientVideoCallModal();
     }
 
-        renderVideoCallHistory() {
+    toggleHistoryView() {
+      this.isHistoryMinimized = !this.isHistoryMinimized;
+      const text = document.getElementById('patientHistoryToggleText');
+      const icon = document.getElementById('patientHistoryToggleIcon');
+      const container = document.getElementById('patientVideoCallHistoryContainer');
+
+      if (text && icon) {
+        text.textContent = this.isHistoryMinimized ? 'Expand' : 'Minimize';
+        icon.textContent = this.isHistoryMinimized ? '🔽' : '🔼';
+      }
+
+      if (container) {
+        container.style.display = this.isHistoryMinimized ? 'none' : 'block';
+      }
+    }
+
+    renderVideoCallHistory() {
       const el = document.getElementById('patientVideoCallHistoryContainer');
+      const countBadge = document.getElementById('patientHistoryCountBadge');
+      const clearBtn = document.getElementById('patientHistoryClearBtn');
       if (!el || !this.store) return;
       const history = this.store.getVideoCallHistory('patient') || [];
 
+      if (countBadge) {
+        countBadge.textContent = history.length === 1 ? '1 record' : `${history.length} records`;
+      }
+      if (clearBtn) {
+        clearBtn.style.display = history.length ? 'inline-block' : 'none';
+      }
+
       if (!history.length) {
-        el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);background:var(--glass-2);border-radius:12px;border:1px dashed var(--glass-border);grid-column:1/-1;">No video teleconsultations yet. Tap "📹 Start Video Teleconsultation" to connect with an on-duty doctor.</div>';
+        el.innerHTML = '<div style="text-align:center;padding:12px;color:var(--muted);font-size:12px;background:var(--glass-2);border-radius:10px;border:1px dashed var(--glass-border);">No past consultations recorded yet.</div>';
         return;
       }
 
-      el.innerHTML = `
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;width:100%;">
-          <span style="font-size:12px;color:var(--muted);font-weight:700;">Total Recorded Consultations: ${history.length}</span>
-          <button onclick="patientController.clearAllCallHistory()" style="background:rgba(220,38,38,0.12);color:#dc2626;border:1px solid rgba(220,38,38,0.3);padding:4px 10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;">
-            🗑️ Clear History
-          </button>
-        </div>
-      ` + history.map(c => `
-        <div style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:14px;padding:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;box-shadow:var(--shadow-panel);margin-bottom:10px;">
-          <div style="display:flex;align-items:center;gap:12px;">
-            <div style="width:42px;height:42px;background:rgba(2,132,199,0.12);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;">
+      el.innerHTML = history.map(c => `
+        <div style="background:var(--glass-2);border:1px solid var(--glass-border);border-radius:10px;padding:9px 12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:32px;height:32px;background:rgba(2,132,199,0.12);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;">
               📹
             </div>
             <div>
-              <strong style="color:var(--ink);font-size:14px;display:block;">${c.recipientName}</strong>
-              <small style="color:var(--muted);font-family:'IBM Plex Mono',monospace;">Token: ${c.token} · 📅 ${c.date} (${c.time})</small>
+              <strong style="color:var(--ink);font-size:13px;display:block;line-height:1.2;">${c.recipientName}</strong>
+              <small style="color:var(--muted);font-size:11px;font-family:'IBM Plex Mono',monospace;">Token: ${c.token} · 📅 ${c.date} (${c.time})</small>
             </div>
           </div>
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span class="badge" style="background:rgba(34,197,94,0.15);color:#16a34a;font-weight:700;font-size:11px;">⏱️ ${c.duration}</span>
-            <span class="badge" style="background:rgba(2,132,199,0.15);color:#0284c7;font-weight:700;font-size:11px;">✓ ${c.status}</span>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span class="badge" style="background:rgba(34,197,94,0.15);color:#16a34a;font-weight:700;font-size:10.5px;padding:2px 7px;">⏱️ ${c.duration}</span>
+            <span class="badge" style="background:rgba(2,132,199,0.15);color:#0284c7;font-weight:700;font-size:10.5px;padding:2px 7px;">✓ ${c.status}</span>
             ${c.rxId ? `
-              <button class="auth-btn-primary" style="background:#0284c7;padding:6px 12px;font-size:11px;font-weight:700;" onclick="patientController.downloadPrescriptionPdf('${c.rxId}')">
-                📥 View Rx PDF
+              <button class="auth-btn-primary" style="background:#0284c7;padding:3px 8px;font-size:10.5px;font-weight:700;border-radius:6px;" onclick="patientController.downloadPrescriptionPdf('${c.rxId}')">
+                📥 Rx PDF
               </button>
             ` : ''}
-            <button onclick="patientController.deleteCallRecord('${c.id}')" title="Delete record" style="background:none;border:none;color:#dc2626;cursor:pointer;font-size:16px;padding:4px 8px;border-radius:6px;">
+            <button onclick="patientController.deleteCallRecord('${c.id}')" title="Delete record" style="background:none;border:none;color:#dc2626;cursor:pointer;font-size:14px;padding:2px 4px;border-radius:4px;">
               🗑️
             </button>
           </div>
