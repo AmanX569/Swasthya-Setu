@@ -1550,7 +1550,7 @@ body[data-theme="doom"] {
         Bridging Rural India to Modern Healthcare
       </h1>
       <div style="font-size:18px;font-weight:800;color:var(--primary-bright);margin-bottom:14px;letter-spacing:0.5px;">
-        स्वास्थ्य • सुरक्षा • सेवा (Swasthya • Suraksha • Seva)
+        <span data-i18n="hero_motto">Swasthya • Suraksha • Seva</span>
       </div>
       
       <p style="font-size:16px;color:var(--muted);max-width:700px;margin:0 auto 26px;line-height:1.6;">
@@ -1561,8 +1561,8 @@ body[data-theme="doom"] {
         <button type="button" class="hero-cta-btn" onclick="goToLogin()">
           <span style="font-size:18px;">🚀</span>
           <span class="cta-text-wrapper">
-            <span class="cta-en">Get Started</span>
-            <span class="cta-hi">पोर्टल में प्रवेश करें</span>
+            <span class="cta-en" data-i18n="btn_get_started">Get Started</span>
+            <span class="cta-hi" data-i18n="btn_enter_portal">Enter Portal</span>
           </span>
         </button>
         <button type="button" class="hero-guide-btn" onclick="openHelpGuideModal()">
@@ -2379,12 +2379,12 @@ body[data-theme="doom"] {
         <div>
           <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;" data-i18n="lbl_fam_rel">Relation *</label>
           <select id="famRelation" class="input-field" style="height:44px;" required>
-            <option value="Spouse">Spouse (पति/पत्नी)</option>
-            <option value="Son">Son (पुत्र)</option>
-            <option value="Daughter">Daughter (पुत्री)</option>
-            <option value="Father">Father (पिता)</option>
-            <option value="Mother">Mother (माता)</option>
-            <option value="Other">Other (अन्य)</option>
+            <option value="Spouse" data-i18n="rel_spouse">Spouse</option>
+            <option value="Son" data-i18n="rel_son">Son</option>
+            <option value="Daughter" data-i18n="rel_daughter">Daughter</option>
+            <option value="Father" data-i18n="rel_father">Father</option>
+            <option value="Mother" data-i18n="rel_mother">Mother</option>
+            <option value="Other" data-i18n="rel_other">Other</option>
           </select>
         </div>
         <div>
@@ -2395,9 +2395,9 @@ body[data-theme="doom"] {
       <div style="margin-bottom:16px;">
         <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;" data-i18n="lbl_fam_gender">Gender *</label>
         <select id="famGender" class="input-field" style="height:44px;" required>
-          <option value="Female">Female (महिला)</option>
-          <option value="Male">Male (पुरुष)</option>
-          <option value="Other">Other (अन्य)</option>
+          <option value="Female" data-i18n="gender_female">Female</option>
+          <option value="Male" data-i18n="gender_male">Male</option>
+          <option value="Other" data-i18n="gender_other">Other</option>
         </select>
       </div>
       <div style="display:flex;justify-content:flex-end;gap:8px;">
@@ -2428,9 +2428,9 @@ body[data-theme="doom"] {
         <div>
           <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;" data-i18n="lbl_q_gender">Gender *</label>
           <select id="qPatientGender" class="input-field" style="height:44px;" required>
-            <option value="M">Male (पुरुष)</option>
-            <option value="F">Female (महिला)</option>
-            <option value="O">Other (अन्य)</option>
+            <option value="M" data-i18n="gender_male">Male</option>
+            <option value="F" data-i18n="gender_female">Female</option>
+            <option value="O" data-i18n="gender_other">Other</option>
           </select>
         </div>
       </div>
@@ -2583,8 +2583,8 @@ body[data-theme="doom"] {
         <div>
           <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Gender *</label>
           <select id="immGender" class="input-field" style="height:44px;" required>
-            <option value="Male">Male (पुरुष)</option>
-            <option value="Female">Female (महिला)</option>
+            <option value="Male" data-i18n="gender_male">Male</option>
+            <option value="Female" data-i18n="gender_female">Female</option>
           </select>
         </div>
       </div>
@@ -2706,25 +2706,25 @@ body[data-theme="doom"] {
     <form id="regFormPatient" onsubmit="submitPatientRegistration(event)">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
         <div>
-          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Full Name (मरीज का नाम) *</label>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;" data-i18n="lbl_full_name">Full Name *</label>
           <input type="text" id="regPatName" class="input-field" placeholder="e.g. Ramesh Kumar" required>
         </div>
         <div>
-          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Mobile Number (मोबाइल नं.) *</label>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;" data-i18n="lbl_mobile">Mobile Number *</label>
           <input type="tel" id="regPatPhone" class="input-field" placeholder="e.g. 9876543210" maxlength="10" required>
         </div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px;">
         <div>
-          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Age (उम्र) *</label>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;" data-i18n="age_label">Age *</label>
           <input type="number" id="regPatAge" class="input-field" placeholder="35" min="1" max="120" required>
         </div>
         <div>
-          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Gender (लिंग) *</label>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;" data-i18n="gender_label">Gender *</label>
           <select id="regPatGender" class="input-field" style="height:44px;" required>
-            <option value="Male">Male (पुरुष)</option>
-            <option value="Female">Female (महिला)</option>
-            <option value="Other">Other (अन्य)</option>
+            <option value="Male" data-i18n="gender_male">Male</option>
+            <option value="Female" data-i18n="gender_female">Female</option>
+            <option value="Other" data-i18n="gender_other">Other</option>
           </select>
         </div>
         <div>
@@ -2742,7 +2742,7 @@ body[data-theme="doom"] {
         </div>
       </div>
       <div style="margin-bottom:12px;">
-        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Village / Sub-Centre Ward (ग्राम / वार्ड) *</label>
+        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;" data-i18n="lbl_village">Village / Sub-Centre Ward *</label>
         <input type="text" id="regPatVillage" class="input-field" placeholder="e.g. Kondapalli Sub-Centre, Ward 4" required>
       </div>
       <div style="margin-bottom:14px;">
@@ -2894,9 +2894,9 @@ body[data-theme="doom"] {
         <div>
           <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Gender *</label>
           <select id="refPatGender" class="input-field" style="height:44px;" required>
-            <option value="Female">Female (महिला)</option>
-            <option value="Male">Male (पुरुष)</option>
-            <option value="Other">Other (अन्य)</option>
+            <option value="Female" data-i18n="gender_female">Female</option>
+            <option value="Male" data-i18n="gender_male">Male</option>
+            <option value="Other" data-i18n="gender_other">Other</option>
           </select>
         </div>
         <div>
@@ -2911,12 +2911,12 @@ body[data-theme="doom"] {
       </div>
 
       <div style="margin-bottom:12px;">
-        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Village / Ward Address *</label>
+        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;" data-i18n="lbl_village_ward_addr">Village / Ward Address *</label>
         <input type="text" id="refPatVillage" class="input-field" placeholder="e.g. Kondapalli Ward 3" required>
       </div>
 
       <div style="margin-bottom:12px;">
-        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Select Registered Doctor to Refer to *</label>
+        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;" data-i18n="lbl_doc_refer_to">Select Registered Doctor to Refer to *</label>
         <select id="referDoctorSelect" class="input-field" style="height:44px;" required></select>
       </div>
 
@@ -3024,8 +3024,8 @@ body[data-theme="doom"] {
       <div style="display:flex;align-items:center;gap:10px;">
         <span style="font-size:28px;">📚</span>
         <div>
-          <h3 style="color:var(--ink);font-size:18px;font-weight:800;">Swasthya Setu User Guide & Help Center</h3>
-          <small style="color:var(--muted);">Role Tutorials, Step-by-Step Instructions & FAQs</small>
+          <h3 style="color:var(--ink);font-size:18px;font-weight:800;" data-i18n="help_guide_title">Swasthya Setu User Guide & Help Center</h3>
+          <small style="color:var(--muted);" data-i18n="help_guide_sub">Role Tutorials, Step-by-Step Instructions & FAQs</small>
         </div>
       </div>
       <button onclick="closeHelpGuideModal()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;">✕</button>
@@ -3033,22 +3033,22 @@ body[data-theme="doom"] {
 
     <!-- ROLE TABS -->
     <div style="display:grid;grid-template-columns:repeat(4, 1fr);gap:8px;margin-bottom:16px;">
-      <button class="help-tab-btn active" id="helpTabPat" onclick="switchHelpTab('pat')">🌾 Citizen</button>
-      <button class="help-tab-btn" id="helpTabDoc" onclick="switchHelpTab('doc')">🩺 Doctor</button>
-      <button class="help-tab-btn" id="helpTabAsh" onclick="switchHelpTab('ash')">🤝 ASHA</button>
-      <button class="help-tab-btn" id="helpTabAdm" onclick="switchHelpTab('adm')">👑 Admin</button>
+      <button class="help-tab-btn active" id="helpTabPat" onclick="switchHelpTab('pat')" data-i18n="role_patient">🌾 Citizen</button>
+      <button class="help-tab-btn" id="helpTabDoc" onclick="switchHelpTab('doc')" data-i18n="role_doctor">🩺 Doctor</button>
+      <button class="help-tab-btn" id="helpTabAsh" onclick="switchHelpTab('ash')" data-i18n="role_asha">🤝 ASHA</button>
+      <button class="help-tab-btn" id="helpTabAdm" onclick="switchHelpTab('adm')" data-i18n="role_admin">👑 Admin</button>
     </div>
 
     <!-- GUIDE 1: CITIZEN -->
     <div id="helpContentPat" style="display:block;">
       <div style="background:var(--glass-1);border:1px solid var(--glass-border);border-radius:12px;padding:14px;margin-bottom:14px;">
-        <h4 style="color:var(--primary-bright);font-size:14px;font-weight:800;margin-bottom:8px;">🌾 Citizen & Patient Quickstart Guide</h4>
+        <h4 style="color:var(--primary-bright);font-size:14px;font-weight:800;margin-bottom:8px;" data-i18n="guide_pat_head">🌾 Citizen & Patient Quickstart Guide</h4>
         <ul style="padding-left:20px;font-size:13px;color:var(--ink-dim);line-height:1.6;">
-          <li><strong>Self-Registration</strong>: Click <em>"New User? Register"</em> on the login screen. Fill in your details to automatically receive your 14-digit ABHA Card.</li>
-          <li><strong>Request Teleconsultation</strong>: Click <em>"+ Request Doctor Consultation"</em>, select your preferred registered doctor, type your symptoms, and send the request.</li>
-          <li><strong>Download e-Prescriptions</strong>: Once the doctor prescribes medications, you will hear a notification chime. Click <em>"📥 Download PDF"</em> on your prescription card to download your official ABDM PDF.</li>
-          <li><strong>Delete Prescriptions</strong>: Click <em>"🗑️ Delete"</em> after downloading to keep your health locker clean and save storage.</li>
-          <li><strong>Emergency 108 SOS</strong>: Click <em>"🚨 108 SOS"</em> or <em>"📍 GPS SOS"</em> for instant emergency ambulance dispatch.</li>
+          <li data-i18n="guide_pat_1"><strong>Self-Registration</strong>: Click <em>"New User? Register"</em> on the login screen. Fill in your details to automatically receive your 14-digit ABHA Card.</li>
+          <li data-i18n="guide_pat_2"><strong>Request Teleconsultation</strong>: Click <em>"+ Request Doctor Consultation"</em>, select your preferred registered doctor, type your symptoms, and send the request.</li>
+          <li data-i18n="guide_pat_3"><strong>Download e-Prescriptions</strong>: Once the doctor prescribes medications, you will hear a notification chime. Click <em>"📥 Download PDF"</em> on your prescription card to download your official ABDM PDF.</li>
+          <li data-i18n="guide_pat_4"><strong>Delete Prescriptions</strong>: Click <em>"🗑️ Delete"</em> after downloading to keep your health locker clean and save storage.</li>
+          <li data-i18n="guide_pat_5"><strong>Emergency 108 SOS</strong>: Click <em>"🚨 108 SOS"</em> or <em>"📍 GPS SOS"</em> for instant emergency ambulance dispatch.</li>
         </ul>
       </div>
     </div>
@@ -3056,12 +3056,12 @@ body[data-theme="doom"] {
     <!-- GUIDE 2: DOCTOR -->
     <div id="helpContentDoc" style="display:none;">
       <div style="background:var(--glass-1);border:1px solid var(--glass-border);border-radius:12px;padding:14px;margin-bottom:14px;">
-        <h4 style="color:#0284c7;font-size:14px;font-weight:800;margin-bottom:8px;">🩺 Medical Officer / Doctor Quickstart Guide</h4>
+        <h4 style="color:#0284c7;font-size:14px;font-weight:800;margin-bottom:8px;" data-i18n="guide_doc_head">🩺 Medical Officer / Doctor Quickstart Guide</h4>
         <ul style="padding-left:20px;font-size:13px;color:var(--ink-dim);line-height:1.6;">
-          <li><strong>Manage OPD Queue</strong>: The queue displays live walk-in patients, citizen consultation requests, and ASHA referrals with triage badges.</li>
-          <li><strong>Conduct Consultation</strong>: Click <em>"Consult & Prescribe"</em> on any patient in the queue. Select Jan Aushadhi generic medicines, enter advice, and submit.</li>
-          <li><strong>Instant Queue Removal</strong>: Upon prescription issuance, the patient is removed from the active queue and saved in your issued prescription history.</li>
-          <li><strong>Dynamic PDF Export</strong>: Prescriptions carry your name, medical registration number, and digital signature for ABDM compliance.</li>
+          <li data-i18n="guide_doc_1"><strong>Manage OPD Queue</strong>: The queue displays live walk-in patients, citizen consultation requests, and ASHA referrals with triage badges.</li>
+          <li data-i18n="guide_doc_2"><strong>Conduct Consultation</strong>: Click <em>"Consult & Prescribe"</em> on any patient in the queue. Select Jan Aushadhi generic medicines, enter advice, and submit.</li>
+          <li data-i18n="guide_doc_3"><strong>Instant Queue Removal</strong>: Upon prescription issuance, the patient is removed from the active queue and saved in your issued prescription history.</li>
+          <li data-i18n="guide_doc_4"><strong>Dynamic PDF Export</strong>: Prescriptions carry your name, medical registration number, and digital signature for ABDM compliance.</li>
         </ul>
       </div>
     </div>
@@ -3069,12 +3069,12 @@ body[data-theme="doom"] {
     <!-- GUIDE 3: ASHA WORKER -->
     <div id="helpContentAsh" style="display:none;">
       <div style="background:var(--glass-1);border:1px solid var(--glass-border);border-radius:12px;padding:14px;margin-bottom:14px;">
-        <h4 style="color:#d97706;font-size:14px;font-weight:800;margin-bottom:8px;">🤝 ASHA & ANM Frontline Field Worker Guide</h4>
+        <h4 style="color:#d97706;font-size:14px;font-weight:800;margin-bottom:8px;" data-i18n="guide_ash_head">🤝 ASHA & ANM Frontline Field Worker Guide</h4>
         <ul style="padding-left:20px;font-size:13px;color:var(--ink-dim);line-height:1.6;">
-          <li><strong>Register & Refer Patients</strong>: Click <em>"+ Register & Refer Patient to Doctor"</em> to create an ABHA card and dispatch a referral directly to a registered doctor.</li>
-          <li><strong>Maternal ANC Care</strong>: Register pregnant mothers, record gestational weeks, BP, Hb levels, and track high-risk pregnancies.</li>
-          <li><strong>Child UIP Immunization</strong>: Track vaccine doses (BCG, Pentavalent, Rotavirus, MR) and upcoming due dates.</li>
-          <li><strong>Master Field Registry</strong>: View all referrals, ANC records, vaccines, and home visit logs in a consolidated master table.</li>
+          <li data-i18n="guide_ash_1"><strong>Register & Refer Patients</strong>: Click <em>"+ Register & Refer Patient to Doctor"</em> to create an ABHA card and dispatch a referral directly to a registered doctor.</li>
+          <li data-i18n="guide_ash_2"><strong>Maternal ANC Care</strong>: Register pregnant mothers, record gestational weeks, BP, Hb levels, and track high-risk pregnancies.</li>
+          <li data-i18n="guide_ash_3"><strong>Child UIP Immunization</strong>: Track vaccine doses (BCG, Pentavalent, Rotavirus, MR) and upcoming due dates.</li>
+          <li data-i18n="guide_ash_4"><strong>Master Field Registry</strong>: View all referrals, ANC records, vaccines, and home visit logs in a consolidated master table.</li>
         </ul>
       </div>
     </div>
@@ -3082,51 +3082,51 @@ body[data-theme="doom"] {
     <!-- GUIDE 4: ADMIN -->
     <div id="helpContentAdm" style="display:none;">
       <div style="background:var(--glass-1);border:1px solid var(--glass-border);border-radius:12px;padding:14px;margin-bottom:14px;">
-        <h4 style="color:#db2777;font-size:14px;font-weight:800;margin-bottom:8px;">👑 District Health Administrator Guide</h4>
+        <h4 style="color:#db2777;font-size:14px;font-weight:800;margin-bottom:8px;" data-i18n="guide_adm_head">👑 District Health Administrator Guide</h4>
         <ul style="padding-left:20px;font-size:13px;color:var(--ink-dim);line-height:1.6;">
-          <li><strong>Provision Staff</strong>: Click <em>"+ Provision New Staff"</em> to create Doctors, ASHA workers, or other Admins with temporary credentials.</li>
-          <li><strong>Live Staff Removal</strong>: Click <em>"✕ Remove"</em> on any staff row to immediately delete from local memory and Supabase Cloud.</li>
-          <li><strong>Hospital Bed Allocation</strong>: Adjust general, ICU, and oxygen bed counts in real time.</li>
-          <li><strong>Blood Bank Stock</strong>: Manage blood unit inventory across all 8 blood groups.</li>
+          <li data-i18n="guide_adm_1"><strong>Provision Staff</strong>: Click <em>"+ Provision New Staff"</em> to create Doctors, ASHA workers, or other Admins with temporary credentials.</li>
+          <li data-i18n="guide_adm_2"><strong>Live Staff Removal</strong>: Click <em>"✕ Remove"</em> on any staff row to immediately delete from local memory and Supabase Cloud.</li>
+          <li data-i18n="guide_adm_3"><strong>Hospital Bed Allocation</strong>: Adjust general, ICU, and oxygen bed counts in real time.</li>
+          <li data-i18n="guide_adm_4"><strong>Blood Bank Stock</strong>: Manage blood unit inventory across all 8 blood groups.</li>
         </ul>
       </div>
     </div>
 
     <!-- FAQS ACCORDION -->
-    <h4 style="font-size:14px;font-weight:800;color:var(--ink);margin:16px 0 10px;">❓ Frequently Asked Questions (FAQ)</h4>
+    <h4 style="font-size:14px;font-weight:800;color:var(--ink);margin:16px 0 10px;" data-i18n="faq_header">❓ Frequently Asked Questions (FAQ)</h4>
     
     <div class="faq-item">
       <div class="faq-question" onclick="toggleFaq(this)">
-        <span>How do I create or find my 14-digit ABHA Card?</span>
+        <span data-i18n="faq_q1">How do I create or find my 14-digit ABHA Card?</span>
         <span>▼</span>
       </div>
-      <div class="faq-answer">
+      <div class="faq-answer" data-i18n="faq_a1">
         When you register as a Citizen / Patient, an official 14-digit Ayushman Bharat ABHA card is generated automatically. You can print or download your ABHA card from the Patient Hub.
       </div>
     </div>
 
     <div class="faq-item">
       <div class="faq-question" onclick="toggleFaq(this)">
-        <span>Can I log in using my mobile number?</span>
+        <span data-i18n="faq_q2">Can I log in using my mobile number?</span>
         <span>▼</span>
       </div>
-      <div class="faq-answer">
+      <div class="faq-answer" data-i18n="faq_a2">
         Yes! All roles (Citizens, Doctors, ASHA workers, and Admins) can log in using their 10-digit registered mobile number along with their private password. If you have multiple roles, a role selection menu will appear.
       </div>
     </div>
 
     <div class="faq-item">
       <div class="faq-question" onclick="toggleFaq(this)">
-        <span>How does live cloud synchronization work?</span>
+        <span data-i18n="faq_q3">How does live cloud synchronization work?</span>
         <span>▼</span>
       </div>
-      <div class="faq-answer">
+      <div class="faq-answer" data-i18n="faq_a3">
         Swasthya Setu is connected directly to Supabase PostgreSQL with real-time WebSockets. Any prescription issued, bed updated, or referral sent syncs instantly across all devices.
       </div>
     </div>
 
     <div style="margin-top:16px;text-align:right;">
-      <button type="button" class="auth-btn-primary" style="background:#0284c7;border-color:#0369a1;" onclick="closeHelpGuideModal()">
+      <button type="button" class="auth-btn-primary" style="background:#0284c7;border-color:#0369a1;" onclick="closeHelpGuideModal()" data-i18n="btn_close_guide">
         ✓ Got It, Close Guide
       </button>
     </div>

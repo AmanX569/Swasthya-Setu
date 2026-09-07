@@ -3711,7 +3711,7 @@ body[data-theme="doom"] {
         Bridging Rural India to Modern Healthcare
       </h1>
       <div style="font-size:18px;font-weight:800;color:var(--primary-bright);margin-bottom:14px;letter-spacing:0.5px;">
-        स्वास्थ्य • सुरक्षा • सेवा (Swasthya • Suraksha • Seva)
+        <span data-i18n="hero_motto">Swasthya • Suraksha • Seva</span>
       </div>
       
       <p style="font-size:16px;color:var(--muted);max-width:700px;margin:0 auto 26px;line-height:1.6;">
@@ -3722,8 +3722,8 @@ body[data-theme="doom"] {
         <button type="button" class="hero-cta-btn" onclick="goToLogin()">
           <span style="font-size:18px;">🚀</span>
           <span class="cta-text-wrapper">
-            <span class="cta-en">Get Started</span>
-            <span class="cta-hi">पोर्टल में प्रवेश करें</span>
+            <span class="cta-en" data-i18n="btn_get_started">Get Started</span>
+            <span class="cta-hi" data-i18n="btn_enter_portal">Enter Portal</span>
           </span>
         </button>
         <button type="button" class="hero-guide-btn" onclick="openHelpGuideModal()">
@@ -4540,12 +4540,12 @@ body[data-theme="doom"] {
         <div>
           <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;" data-i18n="lbl_fam_rel">Relation *</label>
           <select id="famRelation" class="input-field" style="height:44px;" required>
-            <option value="Spouse">Spouse (पति/पत्नी)</option>
-            <option value="Son">Son (पुत्र)</option>
-            <option value="Daughter">Daughter (पुत्री)</option>
-            <option value="Father">Father (पिता)</option>
-            <option value="Mother">Mother (माता)</option>
-            <option value="Other">Other (अन्य)</option>
+            <option value="Spouse" data-i18n="rel_spouse">Spouse</option>
+            <option value="Son" data-i18n="rel_son">Son</option>
+            <option value="Daughter" data-i18n="rel_daughter">Daughter</option>
+            <option value="Father" data-i18n="rel_father">Father</option>
+            <option value="Mother" data-i18n="rel_mother">Mother</option>
+            <option value="Other" data-i18n="rel_other">Other</option>
           </select>
         </div>
         <div>
@@ -4556,9 +4556,9 @@ body[data-theme="doom"] {
       <div style="margin-bottom:16px;">
         <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;" data-i18n="lbl_fam_gender">Gender *</label>
         <select id="famGender" class="input-field" style="height:44px;" required>
-          <option value="Female">Female (महिला)</option>
-          <option value="Male">Male (पुरुष)</option>
-          <option value="Other">Other (अन्य)</option>
+          <option value="Female" data-i18n="gender_female">Female</option>
+          <option value="Male" data-i18n="gender_male">Male</option>
+          <option value="Other" data-i18n="gender_other">Other</option>
         </select>
       </div>
       <div style="display:flex;justify-content:flex-end;gap:8px;">
@@ -4589,9 +4589,9 @@ body[data-theme="doom"] {
         <div>
           <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;" data-i18n="lbl_q_gender">Gender *</label>
           <select id="qPatientGender" class="input-field" style="height:44px;" required>
-            <option value="M">Male (पुरुष)</option>
-            <option value="F">Female (महिला)</option>
-            <option value="O">Other (अन्य)</option>
+            <option value="M" data-i18n="gender_male">Male</option>
+            <option value="F" data-i18n="gender_female">Female</option>
+            <option value="O" data-i18n="gender_other">Other</option>
           </select>
         </div>
       </div>
@@ -4744,8 +4744,8 @@ body[data-theme="doom"] {
         <div>
           <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Gender *</label>
           <select id="immGender" class="input-field" style="height:44px;" required>
-            <option value="Male">Male (पुरुष)</option>
-            <option value="Female">Female (महिला)</option>
+            <option value="Male" data-i18n="gender_male">Male</option>
+            <option value="Female" data-i18n="gender_female">Female</option>
           </select>
         </div>
       </div>
@@ -4867,25 +4867,25 @@ body[data-theme="doom"] {
     <form id="regFormPatient" onsubmit="submitPatientRegistration(event)">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
         <div>
-          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Full Name (मरीज का नाम) *</label>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;" data-i18n="lbl_full_name">Full Name *</label>
           <input type="text" id="regPatName" class="input-field" placeholder="e.g. Ramesh Kumar" required>
         </div>
         <div>
-          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Mobile Number (मोबाइल नं.) *</label>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;" data-i18n="lbl_mobile">Mobile Number *</label>
           <input type="tel" id="regPatPhone" class="input-field" placeholder="e.g. 9876543210" maxlength="10" required>
         </div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px;">
         <div>
-          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Age (उम्र) *</label>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;" data-i18n="age_label">Age *</label>
           <input type="number" id="regPatAge" class="input-field" placeholder="35" min="1" max="120" required>
         </div>
         <div>
-          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Gender (लिंग) *</label>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;" data-i18n="gender_label">Gender *</label>
           <select id="regPatGender" class="input-field" style="height:44px;" required>
-            <option value="Male">Male (पुरुष)</option>
-            <option value="Female">Female (महिला)</option>
-            <option value="Other">Other (अन्य)</option>
+            <option value="Male" data-i18n="gender_male">Male</option>
+            <option value="Female" data-i18n="gender_female">Female</option>
+            <option value="Other" data-i18n="gender_other">Other</option>
           </select>
         </div>
         <div>
@@ -4903,7 +4903,7 @@ body[data-theme="doom"] {
         </div>
       </div>
       <div style="margin-bottom:12px;">
-        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Village / Sub-Centre Ward (ग्राम / वार्ड) *</label>
+        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;" data-i18n="lbl_village">Village / Sub-Centre Ward *</label>
         <input type="text" id="regPatVillage" class="input-field" placeholder="e.g. Kondapalli Sub-Centre, Ward 4" required>
       </div>
       <div style="margin-bottom:14px;">
@@ -5055,9 +5055,9 @@ body[data-theme="doom"] {
         <div>
           <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Gender *</label>
           <select id="refPatGender" class="input-field" style="height:44px;" required>
-            <option value="Female">Female (महिला)</option>
-            <option value="Male">Male (पुरुष)</option>
-            <option value="Other">Other (अन्य)</option>
+            <option value="Female" data-i18n="gender_female">Female</option>
+            <option value="Male" data-i18n="gender_male">Male</option>
+            <option value="Other" data-i18n="gender_other">Other</option>
           </select>
         </div>
         <div>
@@ -5072,12 +5072,12 @@ body[data-theme="doom"] {
       </div>
 
       <div style="margin-bottom:12px;">
-        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Village / Ward Address *</label>
+        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;" data-i18n="lbl_village_ward_addr">Village / Ward Address *</label>
         <input type="text" id="refPatVillage" class="input-field" placeholder="e.g. Kondapalli Ward 3" required>
       </div>
 
       <div style="margin-bottom:12px;">
-        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Select Registered Doctor to Refer to *</label>
+        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;" data-i18n="lbl_doc_refer_to">Select Registered Doctor to Refer to *</label>
         <select id="referDoctorSelect" class="input-field" style="height:44px;" required></select>
       </div>
 
@@ -5185,8 +5185,8 @@ body[data-theme="doom"] {
       <div style="display:flex;align-items:center;gap:10px;">
         <span style="font-size:28px;">📚</span>
         <div>
-          <h3 style="color:var(--ink);font-size:18px;font-weight:800;">Swasthya Setu User Guide & Help Center</h3>
-          <small style="color:var(--muted);">Role Tutorials, Step-by-Step Instructions & FAQs</small>
+          <h3 style="color:var(--ink);font-size:18px;font-weight:800;" data-i18n="help_guide_title">Swasthya Setu User Guide & Help Center</h3>
+          <small style="color:var(--muted);" data-i18n="help_guide_sub">Role Tutorials, Step-by-Step Instructions & FAQs</small>
         </div>
       </div>
       <button onclick="closeHelpGuideModal()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;">✕</button>
@@ -5194,22 +5194,22 @@ body[data-theme="doom"] {
 
     <!-- ROLE TABS -->
     <div style="display:grid;grid-template-columns:repeat(4, 1fr);gap:8px;margin-bottom:16px;">
-      <button class="help-tab-btn active" id="helpTabPat" onclick="switchHelpTab('pat')">🌾 Citizen</button>
-      <button class="help-tab-btn" id="helpTabDoc" onclick="switchHelpTab('doc')">🩺 Doctor</button>
-      <button class="help-tab-btn" id="helpTabAsh" onclick="switchHelpTab('ash')">🤝 ASHA</button>
-      <button class="help-tab-btn" id="helpTabAdm" onclick="switchHelpTab('adm')">👑 Admin</button>
+      <button class="help-tab-btn active" id="helpTabPat" onclick="switchHelpTab('pat')" data-i18n="role_patient">🌾 Citizen</button>
+      <button class="help-tab-btn" id="helpTabDoc" onclick="switchHelpTab('doc')" data-i18n="role_doctor">🩺 Doctor</button>
+      <button class="help-tab-btn" id="helpTabAsh" onclick="switchHelpTab('ash')" data-i18n="role_asha">🤝 ASHA</button>
+      <button class="help-tab-btn" id="helpTabAdm" onclick="switchHelpTab('adm')" data-i18n="role_admin">👑 Admin</button>
     </div>
 
     <!-- GUIDE 1: CITIZEN -->
     <div id="helpContentPat" style="display:block;">
       <div style="background:var(--glass-1);border:1px solid var(--glass-border);border-radius:12px;padding:14px;margin-bottom:14px;">
-        <h4 style="color:var(--primary-bright);font-size:14px;font-weight:800;margin-bottom:8px;">🌾 Citizen & Patient Quickstart Guide</h4>
+        <h4 style="color:var(--primary-bright);font-size:14px;font-weight:800;margin-bottom:8px;" data-i18n="guide_pat_head">🌾 Citizen & Patient Quickstart Guide</h4>
         <ul style="padding-left:20px;font-size:13px;color:var(--ink-dim);line-height:1.6;">
-          <li><strong>Self-Registration</strong>: Click <em>"New User? Register"</em> on the login screen. Fill in your details to automatically receive your 14-digit ABHA Card.</li>
-          <li><strong>Request Teleconsultation</strong>: Click <em>"+ Request Doctor Consultation"</em>, select your preferred registered doctor, type your symptoms, and send the request.</li>
-          <li><strong>Download e-Prescriptions</strong>: Once the doctor prescribes medications, you will hear a notification chime. Click <em>"📥 Download PDF"</em> on your prescription card to download your official ABDM PDF.</li>
-          <li><strong>Delete Prescriptions</strong>: Click <em>"🗑️ Delete"</em> after downloading to keep your health locker clean and save storage.</li>
-          <li><strong>Emergency 108 SOS</strong>: Click <em>"🚨 108 SOS"</em> or <em>"📍 GPS SOS"</em> for instant emergency ambulance dispatch.</li>
+          <li data-i18n="guide_pat_1"><strong>Self-Registration</strong>: Click <em>"New User? Register"</em> on the login screen. Fill in your details to automatically receive your 14-digit ABHA Card.</li>
+          <li data-i18n="guide_pat_2"><strong>Request Teleconsultation</strong>: Click <em>"+ Request Doctor Consultation"</em>, select your preferred registered doctor, type your symptoms, and send the request.</li>
+          <li data-i18n="guide_pat_3"><strong>Download e-Prescriptions</strong>: Once the doctor prescribes medications, you will hear a notification chime. Click <em>"📥 Download PDF"</em> on your prescription card to download your official ABDM PDF.</li>
+          <li data-i18n="guide_pat_4"><strong>Delete Prescriptions</strong>: Click <em>"🗑️ Delete"</em> after downloading to keep your health locker clean and save storage.</li>
+          <li data-i18n="guide_pat_5"><strong>Emergency 108 SOS</strong>: Click <em>"🚨 108 SOS"</em> or <em>"📍 GPS SOS"</em> for instant emergency ambulance dispatch.</li>
         </ul>
       </div>
     </div>
@@ -5217,12 +5217,12 @@ body[data-theme="doom"] {
     <!-- GUIDE 2: DOCTOR -->
     <div id="helpContentDoc" style="display:none;">
       <div style="background:var(--glass-1);border:1px solid var(--glass-border);border-radius:12px;padding:14px;margin-bottom:14px;">
-        <h4 style="color:#0284c7;font-size:14px;font-weight:800;margin-bottom:8px;">🩺 Medical Officer / Doctor Quickstart Guide</h4>
+        <h4 style="color:#0284c7;font-size:14px;font-weight:800;margin-bottom:8px;" data-i18n="guide_doc_head">🩺 Medical Officer / Doctor Quickstart Guide</h4>
         <ul style="padding-left:20px;font-size:13px;color:var(--ink-dim);line-height:1.6;">
-          <li><strong>Manage OPD Queue</strong>: The queue displays live walk-in patients, citizen consultation requests, and ASHA referrals with triage badges.</li>
-          <li><strong>Conduct Consultation</strong>: Click <em>"Consult & Prescribe"</em> on any patient in the queue. Select Jan Aushadhi generic medicines, enter advice, and submit.</li>
-          <li><strong>Instant Queue Removal</strong>: Upon prescription issuance, the patient is removed from the active queue and saved in your issued prescription history.</li>
-          <li><strong>Dynamic PDF Export</strong>: Prescriptions carry your name, medical registration number, and digital signature for ABDM compliance.</li>
+          <li data-i18n="guide_doc_1"><strong>Manage OPD Queue</strong>: The queue displays live walk-in patients, citizen consultation requests, and ASHA referrals with triage badges.</li>
+          <li data-i18n="guide_doc_2"><strong>Conduct Consultation</strong>: Click <em>"Consult & Prescribe"</em> on any patient in the queue. Select Jan Aushadhi generic medicines, enter advice, and submit.</li>
+          <li data-i18n="guide_doc_3"><strong>Instant Queue Removal</strong>: Upon prescription issuance, the patient is removed from the active queue and saved in your issued prescription history.</li>
+          <li data-i18n="guide_doc_4"><strong>Dynamic PDF Export</strong>: Prescriptions carry your name, medical registration number, and digital signature for ABDM compliance.</li>
         </ul>
       </div>
     </div>
@@ -5230,12 +5230,12 @@ body[data-theme="doom"] {
     <!-- GUIDE 3: ASHA WORKER -->
     <div id="helpContentAsh" style="display:none;">
       <div style="background:var(--glass-1);border:1px solid var(--glass-border);border-radius:12px;padding:14px;margin-bottom:14px;">
-        <h4 style="color:#d97706;font-size:14px;font-weight:800;margin-bottom:8px;">🤝 ASHA & ANM Frontline Field Worker Guide</h4>
+        <h4 style="color:#d97706;font-size:14px;font-weight:800;margin-bottom:8px;" data-i18n="guide_ash_head">🤝 ASHA & ANM Frontline Field Worker Guide</h4>
         <ul style="padding-left:20px;font-size:13px;color:var(--ink-dim);line-height:1.6;">
-          <li><strong>Register & Refer Patients</strong>: Click <em>"+ Register & Refer Patient to Doctor"</em> to create an ABHA card and dispatch a referral directly to a registered doctor.</li>
-          <li><strong>Maternal ANC Care</strong>: Register pregnant mothers, record gestational weeks, BP, Hb levels, and track high-risk pregnancies.</li>
-          <li><strong>Child UIP Immunization</strong>: Track vaccine doses (BCG, Pentavalent, Rotavirus, MR) and upcoming due dates.</li>
-          <li><strong>Master Field Registry</strong>: View all referrals, ANC records, vaccines, and home visit logs in a consolidated master table.</li>
+          <li data-i18n="guide_ash_1"><strong>Register & Refer Patients</strong>: Click <em>"+ Register & Refer Patient to Doctor"</em> to create an ABHA card and dispatch a referral directly to a registered doctor.</li>
+          <li data-i18n="guide_ash_2"><strong>Maternal ANC Care</strong>: Register pregnant mothers, record gestational weeks, BP, Hb levels, and track high-risk pregnancies.</li>
+          <li data-i18n="guide_ash_3"><strong>Child UIP Immunization</strong>: Track vaccine doses (BCG, Pentavalent, Rotavirus, MR) and upcoming due dates.</li>
+          <li data-i18n="guide_ash_4"><strong>Master Field Registry</strong>: View all referrals, ANC records, vaccines, and home visit logs in a consolidated master table.</li>
         </ul>
       </div>
     </div>
@@ -5243,51 +5243,51 @@ body[data-theme="doom"] {
     <!-- GUIDE 4: ADMIN -->
     <div id="helpContentAdm" style="display:none;">
       <div style="background:var(--glass-1);border:1px solid var(--glass-border);border-radius:12px;padding:14px;margin-bottom:14px;">
-        <h4 style="color:#db2777;font-size:14px;font-weight:800;margin-bottom:8px;">👑 District Health Administrator Guide</h4>
+        <h4 style="color:#db2777;font-size:14px;font-weight:800;margin-bottom:8px;" data-i18n="guide_adm_head">👑 District Health Administrator Guide</h4>
         <ul style="padding-left:20px;font-size:13px;color:var(--ink-dim);line-height:1.6;">
-          <li><strong>Provision Staff</strong>: Click <em>"+ Provision New Staff"</em> to create Doctors, ASHA workers, or other Admins with temporary credentials.</li>
-          <li><strong>Live Staff Removal</strong>: Click <em>"✕ Remove"</em> on any staff row to immediately delete from local memory and Supabase Cloud.</li>
-          <li><strong>Hospital Bed Allocation</strong>: Adjust general, ICU, and oxygen bed counts in real time.</li>
-          <li><strong>Blood Bank Stock</strong>: Manage blood unit inventory across all 8 blood groups.</li>
+          <li data-i18n="guide_adm_1"><strong>Provision Staff</strong>: Click <em>"+ Provision New Staff"</em> to create Doctors, ASHA workers, or other Admins with temporary credentials.</li>
+          <li data-i18n="guide_adm_2"><strong>Live Staff Removal</strong>: Click <em>"✕ Remove"</em> on any staff row to immediately delete from local memory and Supabase Cloud.</li>
+          <li data-i18n="guide_adm_3"><strong>Hospital Bed Allocation</strong>: Adjust general, ICU, and oxygen bed counts in real time.</li>
+          <li data-i18n="guide_adm_4"><strong>Blood Bank Stock</strong>: Manage blood unit inventory across all 8 blood groups.</li>
         </ul>
       </div>
     </div>
 
     <!-- FAQS ACCORDION -->
-    <h4 style="font-size:14px;font-weight:800;color:var(--ink);margin:16px 0 10px;">❓ Frequently Asked Questions (FAQ)</h4>
+    <h4 style="font-size:14px;font-weight:800;color:var(--ink);margin:16px 0 10px;" data-i18n="faq_header">❓ Frequently Asked Questions (FAQ)</h4>
     
     <div class="faq-item">
       <div class="faq-question" onclick="toggleFaq(this)">
-        <span>How do I create or find my 14-digit ABHA Card?</span>
+        <span data-i18n="faq_q1">How do I create or find my 14-digit ABHA Card?</span>
         <span>▼</span>
       </div>
-      <div class="faq-answer">
+      <div class="faq-answer" data-i18n="faq_a1">
         When you register as a Citizen / Patient, an official 14-digit Ayushman Bharat ABHA card is generated automatically. You can print or download your ABHA card from the Patient Hub.
       </div>
     </div>
 
     <div class="faq-item">
       <div class="faq-question" onclick="toggleFaq(this)">
-        <span>Can I log in using my mobile number?</span>
+        <span data-i18n="faq_q2">Can I log in using my mobile number?</span>
         <span>▼</span>
       </div>
-      <div class="faq-answer">
+      <div class="faq-answer" data-i18n="faq_a2">
         Yes! All roles (Citizens, Doctors, ASHA workers, and Admins) can log in using their 10-digit registered mobile number along with their private password. If you have multiple roles, a role selection menu will appear.
       </div>
     </div>
 
     <div class="faq-item">
       <div class="faq-question" onclick="toggleFaq(this)">
-        <span>How does live cloud synchronization work?</span>
+        <span data-i18n="faq_q3">How does live cloud synchronization work?</span>
         <span>▼</span>
       </div>
-      <div class="faq-answer">
+      <div class="faq-answer" data-i18n="faq_a3">
         Swasthya Setu is connected directly to Supabase PostgreSQL with real-time WebSockets. Any prescription issued, bed updated, or referral sent syncs instantly across all devices.
       </div>
     </div>
 
     <div style="margin-top:16px;text-align:right;">
-      <button type="button" class="auth-btn-primary" style="background:#0284c7;border-color:#0369a1;" onclick="closeHelpGuideModal()">
+      <button type="button" class="auth-btn-primary" style="background:#0284c7;border-color:#0369a1;" onclick="closeHelpGuideModal()" data-i18n="btn_close_guide">
         ✓ Got It, Close Guide
       </button>
     </div>
@@ -7451,6 +7451,79 @@ body[data-theme="doom"] {
   // 1. LEGACY & CORE ATTRIBUTE KEY DICTIONARY
   const I18N_DICTIONARY = {
     en: {
+      role_asha: '🤝 ASHA',
+      hero_motto: 'Swasthya • Suraksha • Seva',
+      btn_get_started: 'Get Started',
+      lbl_full_name: 'Full Name *',
+      lbl_mobile: 'Mobile Number *',
+      gender_label: 'Gender *',
+      gender_male: 'Male',
+      gender_female: 'Female',
+      gender_other: 'Other',
+      lbl_village: 'Village / Sub-Centre Ward *',
+      lbl_village_ward: 'Village / Ward *',
+      lbl_village_ward_addr: 'Village / Ward Address *',
+      lbl_doc_refer_to: 'Select Registered Doctor to Refer to *',
+      rel_spouse: 'Spouse',
+      rel_son: 'Son',
+      rel_daughter: 'Daughter',
+      rel_father: 'Father',
+      rel_mother: 'Mother',
+      rel_other: 'Other',
+
+      // UI & Form Labels
+      hero_motto: 'Swasthya • Suraksha • Seva',
+      btn_get_started: 'Get Started',
+      lbl_full_name: 'Full Name *',
+      lbl_mobile: 'Mobile Number *',
+      gender_label: 'Gender *',
+      gender_male: 'Male',
+      gender_female: 'Female',
+      gender_other: 'Other',
+      lbl_village: 'Village / Sub-Centre Ward *',
+      lbl_village_ward: 'Village / Ward *',
+      lbl_village_ward_addr: 'Village / Ward Address *',
+      lbl_doc_refer_to: 'Select Registered Doctor to Refer to *',
+      rel_spouse: 'Spouse',
+      rel_son: 'Son',
+      rel_daughter: 'Daughter',
+      rel_father: 'Father',
+      rel_mother: 'Mother',
+      rel_other: 'Other',
+
+      // Help Guide Modal Keys
+      help_guide_title: 'Swasthya Setu User Guide & Help Center',
+      help_guide_sub: 'Role Tutorials, Step-by-Step Instructions & FAQs',
+      guide_pat_head: '🌾 Citizen & Patient Quickstart Guide',
+      guide_pat_1: '<strong>Self-Registration</strong>: Click <em>"New User? Register"</em> on the login screen. Fill in your details to automatically receive your 14-digit ABHA Card.',
+      guide_pat_2: '<strong>Request Teleconsultation</strong>: Click <em>"+ Request Doctor Consultation"</em>, select your preferred registered doctor, type your symptoms, and send the request.',
+      guide_pat_3: '<strong>Download e-Prescriptions</strong>: Once the doctor prescribes medications, you will hear a notification chime. Click <em>"📥 Download PDF"</em> on your prescription card to download your official ABDM PDF.',
+      guide_pat_4: '<strong>Delete Prescriptions</strong>: Click <em>"🗑️ Delete"</em> after downloading to keep your health locker clean and save storage.',
+      guide_pat_5: '<strong>Emergency 108 SOS</strong>: Click <em>"🚨 108 SOS"</em> or <em>"📍 GPS SOS"</em> for instant emergency ambulance dispatch.',
+      guide_doc_head: '🩺 Medical Officer / Doctor Quickstart Guide',
+      guide_doc_1: '<strong>Manage OPD Queue</strong>: The queue displays live walk-in patients, citizen consultation requests, and ASHA referrals with triage badges.',
+      guide_doc_2: '<strong>Conduct Consultation</strong>: Click <em>"Consult & Prescribe"</em> on any patient in the queue. Select Jan Aushadhi generic medicines, enter advice, and submit.',
+      guide_doc_3: '<strong>Instant Queue Removal</strong>: Upon prescription issuance, the patient is removed from the active queue and saved in your issued prescription history.',
+      guide_doc_4: '<strong>Dynamic PDF Export</strong>: Prescriptions carry your name, medical registration number, and digital signature for ABDM compliance.',
+      guide_ash_head: '🤝 ASHA & ANM Frontline Field Worker Guide',
+      guide_ash_1: '<strong>Register & Refer Patients</strong>: Click <em>"+ Register & Refer Patient to Doctor"</em> to create an ABHA card and dispatch a referral directly to a registered doctor.',
+      guide_ash_2: '<strong>Maternal ANC Care</strong>: Register pregnant mothers, record gestational weeks, BP, Hb levels, and track high-risk pregnancies.',
+      guide_ash_3: '<strong>Child UIP Immunization</strong>: Track vaccine doses (BCG, Pentavalent, Rotavirus, MR) and upcoming due dates.',
+      guide_ash_4: '<strong>Master Field Registry</strong>: View all referrals, ANC records, vaccines, and home visit logs in a consolidated master table.',
+      guide_adm_head: '👑 District Health Administrator Guide',
+      guide_adm_1: '<strong>Provision Staff</strong>: Click <em>"+ Provision New Staff"</em> to create Doctors, ASHA workers, or other Admins with temporary credentials.',
+      guide_adm_2: '<strong>Live Staff Removal</strong>: Click <em>"✕ Remove"</em> on any staff row to immediately delete from local memory and Supabase Cloud.',
+      guide_adm_3: '<strong>Hospital Bed Allocation</strong>: Adjust general, ICU, and oxygen bed counts in real time.',
+      guide_adm_4: '<strong>Blood Bank Stock</strong>: Manage blood unit inventory across all 8 blood groups.',
+      faq_header: '❓ Frequently Asked Questions (FAQ)',
+      faq_q1: 'How do I create or find my 14-digit ABHA Card?',
+      faq_a1: 'When you register as a Citizen / Patient, an official 14-digit Ayushman Bharat ABHA card is generated automatically. You can print or download your ABHA card from the Patient Hub.',
+      faq_q2: 'Can I log in using my mobile number?',
+      faq_a2: 'Yes! All roles (Citizens, Doctors, ASHA workers, and Admins) can log in using their 10-digit registered mobile number along with their private password. If you have multiple roles, a role selection menu will appear.',
+      faq_q3: 'How does live cloud synchronization work?',
+      faq_a3: 'Swasthya Setu is connected directly to Supabase PostgreSQL with real-time WebSockets. Any prescription issued, bed updated, or referral sent syncs instantly across all devices.',
+      btn_close_guide: '✓ Got It, Close Guide',
+
       app_title: 'Swasthya Setu',
       app_tagline: 'Rural Healthcare Cloud Grid',
       portal_welcome: 'Welcome to Swasthya Setu',
@@ -7555,6 +7628,61 @@ body[data-theme="doom"] {
       btn_print_rx: 'Print Rx'
     },
     hi: {
+      role_asha: '🤝 आशा',
+      hero_motto: 'स्वास्थ्य • सुरक्षा • सेवा',
+      btn_get_started: 'शुरू करें',
+      lbl_full_name: 'पूरा नाम *',
+      lbl_mobile: 'मोबाइल नंबर *',
+      gender_label: 'लिंग *',
+      gender_male: 'पुरुष',
+      gender_female: 'महिला',
+      gender_other: 'अन्य',
+      lbl_village: 'गांव / उप-केंद्र वार्ड *',
+      lbl_village_ward: 'गांव / वार्ड *',
+      lbl_village_ward_addr: 'गांव / वार्ड का पता *',
+      lbl_doc_refer_to: 'रेफर करने के लिए पंजीकृत डॉक्टर चुनें *',
+      rel_spouse: 'पति / पत्नी',
+      rel_son: 'पुत्र',
+      rel_daughter: 'पुत्री',
+      rel_father: 'पिता',
+      rel_mother: 'माता',
+      rel_other: 'अन्य',
+
+      // UI & Form Labels
+
+      // Help Guide Modal Keys
+      help_guide_title: 'स्वास्थ्य सेतु उपयोगकर्ता मार्गदर्शिका एवं सहायता केंद्र',
+      help_guide_sub: 'भूमिका ट्यूटोरियल, चरण-दर-चरण निर्देश एवं अक्सर पूछे जाने वाले प्रश्न',
+      guide_pat_head: '🌾 नागरिक एवं मरीज त्वरित मार्गदर्शिका',
+      guide_pat_1: '<strong>स्वयं-पंजीकरण</strong>: लॉगिन स्क्रीन पर <em>"नया उपयोगकर्ता? पंजीकरण करें"</em> पर क्लिक करें। अपना 14-अंकीय आभा कार्ड स्वचालित रूप से प्राप्त करने के लिए अपना विवरण भरें।',
+      guide_pat_2: '<strong>टेलीकंसल्टेशन का अनुरोध करें</strong>: <em>"+ डॉक्टर परामर्श का अनुरोध करें"</em> पर क्लिक करें, अपने पसंदीदा पंजीकृत डॉक्टर का चयन करें, अपने लक्षण लिखें और अनुरोध भेजें।',
+      guide_pat_3: '<strong>ई-प्रिस्क्रिप्शन डाउनलोड करें</strong>: डॉक्टर द्वारा दवाएं लिखे जाने पर आपको एक अधिसूचना घंटी सुनाई देगी। अपना आधिकारिक एबीडीएम पीडीएफ डाउनलोड करने के लिए प्रिस्क्रिप्शन कार्ड पर <em>"📥 डाउनलोड पीडीएफ"</em> पर क्लिक करें।',
+      guide_pat_4: '<strong>प्रिस्क्रिप्शन हटाएं</strong>: अपने स्वास्थ्य लॉकर को व्यवस्थित रखने और संग्रहण बचाने के लिए डाउनलोड करने के बाद <em>"🗑️ हटाएं"</em> पर क्लिक करें।',
+      guide_pat_5: '<strong>आपातकालीन 108 एसओएस</strong>: तत्काल आपातकालीन एम्बुलेंस सेवा के लिए <em>"🚨 108 एसओएस"</em> या <em>"📍 जीपीएस एसओएस"</em> पर क्लिक करें।',
+      guide_doc_head: '🩺 चिकित्सा अधिकारी / डॉक्टर त्वरित मार्गदर्शिका',
+      guide_doc_1: '<strong>ओपीडी कतार प्रबंधन</strong>: कतार में लाइव वॉक-इन मरीज, नागरिक परामर्श अनुरोध और ट्राइएज बैज के साथ आशा रेफरल प्रदर्शित होते हैं।',
+      guide_doc_2: '<strong>परामर्श संचालित करें</strong>: कतार में किसी भी मरीज पर <em>"परामर्श एवं दवा लिखें"</em> पर क्लिक करें। जन औषधि जेनेरिक दवाएं चुनें, सलाह दर्ज करें और जमा करें।',
+      guide_doc_3: '<strong>कतार से तत्काल निष्कासन</strong>: प्रिस्क्रिप्शन जारी होने पर, मरीज सक्रिय कतार से हट जाता है और आपके जारी किए गए प्रिस्क्रिप्शन इतिहास में सहेजा जाता है।',
+      guide_doc_4: '<strong>डायनामिक पीडीएफ निर्यात</strong>: प्रिस्क्रिप्शन में एबीडीएम अनुपालन के लिए आपका नाम, चिकित्सा पंजीकरण संख्या और डिजिटल हस्ताक्षर शामिल होते हैं।',
+      guide_ash_head: '🤝 आशा एवं एएनएम अग्रिम पंक्ति कार्यकर्ता मार्गदर्शिका',
+      guide_ash_1: '<strong>मरीजों का पंजीकरण और रेफरल</strong>: आभा कार्ड बनाने और पंजीकृत डॉक्टर को सीधे रेफरल भेजने के लिए <em>"+ मरीज को पंजीकृत और रेफर करें"</em> पर क्लिक करें।',
+      guide_ash_2: '<strong>मातृ एएनसी देखभाल</strong>: गर्भवती माताओं का पंजीकरण करें, गर्भकालीन सप्ताह, बीपी, हीमोग्लोबिन स्तर दर्ज करें और उच्च जोखिम वाली गर्भावस्था को ट्रैक करें।',
+      guide_ash_3: '<strong>बाल यूआईपी टीकाकरण</strong>: टीके की खुराक (बीसीजी, पेंटावेलेंट, रोटावायरस, एमआर) और आगामी देय तिथियों को ट्रैक करें।',
+      guide_ash_4: '<strong>मास्टर फील्ड रजिस्ट्री</strong>: एक समेकित मास्टर तालिका में सभी रेफरल, एएनसी रिकॉर्ड, टीके और गृह भ्रमण लॉग देखें।',
+      guide_adm_head: '👑 जिला स्वास्थ्य प्रशासक मार्गदर्शिका',
+      guide_adm_1: '<strong>कर्मचारी नियुक्ति</strong>: अस्थायी क्रेडेंशियल्स के साथ डॉक्टरों, आशा कार्यकर्ताओं या अन्य व्यवस्थापकों को जोड़ने के लिए <em>"+ नए कर्मचारियों की नियुक्ति करें"</em> पर क्लिक करें।',
+      guide_adm_2: '<strong>कर्मचारी निष्कासन</strong>: स्थानीय मेमोरी और सुपरबेस क्लाउड से तुरंत हटाने के लिए किसी भी कर्मचारी पंक्ति पर <em>"✕ हटाएं"</em> पर क्लिक करें।',
+      guide_adm_3: '<strong>अस्पताल बिस्तर आवंटन</strong>: वास्तविक समय में सामान्य, आईसीयू और ऑक्सीजन बिस्तर संख्या समायोजित करें।',
+      guide_adm_4: '<strong>रक्त बैंक स्टॉक</strong>: सभी 8 रक्त समूहों में रक्त इकाई सूची का प्रबंधन करें।',
+      faq_header: '❓ अक्सर पूछे जाने वाले प्रश्न (FAQ)',
+      faq_q1: 'मैं अपना 14-अंकीय आभा कार्ड कैसे बनाऊं या प्राप्त करूं?',
+      faq_a1: 'जब आप नागरिक / मरीज के रूप में पंजीकरण करते हैं, तो एक आधिकारिक 14-अंकीय आयुष्मान भारत आभा कार्ड स्वचालित रूप से उत्पन्न होता है। आप मरीज हब से अपना आभा कार्ड प्रिंट या डाउनलोड कर सकते हैं।',
+      faq_q2: 'क्या मैं अपने मोबाइल नंबर का उपयोग करके लॉगिन कर सकता हूँ?',
+      faq_a2: 'हाँ! सभी भूमिकाएं (नागरिक, डॉक्टर, आशा कार्यकर्ता और व्यवस्थापक) अपने 10-अंकीय पंजीकृत मोबाइल नंबर और पासवर्ड के साथ लॉगिन कर सकते हैं। यदि आपकी एक से अधिक भूमिकाएं हैं, तो भूमिका चयन मेनू दिखाई देगा।',
+      faq_q3: 'लाइव क्लाउड सिंक्रोनाइज़ेशन कैसे काम करता है?',
+      faq_a3: 'स्वास्थ्य सेतु रीयल-टाइम वेबसॉकेट्स के साथ सीधे सुपरबेस पोस्टग्रेएसक्यूएल से जुड़ा हुआ है। जारी किया गया कोई भी प्रिस्क्रिप्शन, अपडेट किया गया बिस्तर या भेजा गया रेफरल सभी उपकरणों पर तुरंत सिंक हो जाता है।',
+      btn_close_guide: '✓ समझ गए, गाइड बंद करें',
+
       app_title: 'स्वास्थ्य सेतु',
       app_tagline: 'ग्रामीण स्वास्थ्य क्लाउड ग्रिड',
       portal_welcome: 'स्वास्थ्य सेतु में आपका स्वागत है',
@@ -7659,6 +7787,61 @@ body[data-theme="doom"] {
       btn_print_rx: 'प्रिस्क्रिप्शन प्रिंट करें'
     },
     te: {
+      role_asha: '🤝 ఆశా',
+      hero_motto: 'స్వాస్థ్య • సురక్ష • సేవ',
+      btn_get_started: 'ప్రారంభించండి',
+      lbl_full_name: 'పూర్తి పేరు *',
+      lbl_mobile: 'మొబైల్ సంఖ్య *',
+      gender_label: 'లింగం *',
+      gender_male: 'పురుషుడు',
+      gender_female: 'స్త్రీ',
+      gender_other: 'ఇతర',
+      lbl_village: 'గ్రామం / ఉప-కేంద్ర వార్డు *',
+      lbl_village_ward: 'గ్రామం / వార్డు *',
+      lbl_village_ward_addr: 'గ్రామం / వార్డు చిరునామా *',
+      lbl_doc_refer_to: 'రిఫర్ చేయడానికి నమోదైన వైద్యుడిని ఎంచుకోండి *',
+      rel_spouse: 'భార్య / భర్త',
+      rel_son: 'కుమారుడు',
+      rel_daughter: 'కుమార్తె',
+      rel_father: 'తండ్రి',
+      rel_mother: 'తల్లి',
+      rel_other: 'ఇతర',
+
+      // UI & Form Labels
+
+      // Help Guide Modal Keys
+      help_guide_title: 'స్వాస్థ్య సేతు వినియోగదారు మార్గదర్శి & సహాయ కేంద్రం',
+      help_guide_sub: 'పాత్రల శిక్షణ, దశలవారీ సూచనలు & సాధారణ ప్రశ్నలు',
+      guide_pat_head: '🌾 పౌరులు & రోగుల త్వరిత మార్గదర్శి',
+      guide_pat_1: '<strong>స్వీయ-నమోదు</strong>: లాగిన్ స్క్రీన్‌పై <em>"కొత్త వినియోగదారుడా? నమోదు చేసుకోండి"</em> పై క్లిక్ చేయండి. మీ 14-అంకెల ఆభా కార్డును పొందడానికి వివరాలను నమోదు చేయండి.',
+      guide_pat_2: '<strong>టెలికన్సల్టేషన్ అభ్యర్థన</strong>: <em>"+ డాక్టర్ సంప్రదింపులను అభ్యర్థించండి"</em> పై క్లిక్ చేసి, వైద్యుడిని ఎంచుకుని, మీ లక్షణాలను రాసి అభ్యర్థన పంపండి.',
+      guide_pat_3: '<strong>ఇ-ప్రిస్క్రిప్షన్ డౌన్‌లోడ్</strong>: డాక్టర్ మందులు రాసిన తర్వాత నోటిఫికేషన్ శబ్దం వస్తుంది. అధికారిక ABDM PDF డౌన్‌లోడ్ చేయడానికి ప్రిస్క్రిప్షన్ కార్డుపై <em>"📥 PDF డౌన్‌లోడ్"</em> క్లిక్ చేయండి.',
+      guide_pat_4: '<strong>ప్రిస్క్రిప్షన్ తొలగించండి</strong>: మీ హెల్త్ లాకర్‌ను శుభ్రంగా ఉంచడానికి మరియు నిల్వను ఆదా చేయడానికి డౌన్‌లోడ్ చేసిన తర్వాత <em>"🗑️ తొలగించండి"</em> పై క్లిక్ చేయండి.',
+      guide_pat_5: '<strong>అత్యవసర 108 SOS</strong>: తక్షణ అంబులెన్స్ సేవ కోసం <em>"🚨 108 SOS"</em> లేదా <em>"📍 GPS SOS"</em> పై క్లిక్ చేయండి.',
+      guide_doc_head: '🩺 వైద్యాధికారి / డాక్టర్ త్వరిత మార్గదర్శి',
+      guide_doc_1: '<strong>OPD క్యూ నిర్వహణ</strong>: క్యూలో నేరుగా వచ్చే రోగులు, పౌరుల సంప్రదింపు అభ్యర్థనలు మరియు ఆశా రిఫరల్స్ కనిపిస్తాయి.',
+      guide_doc_2: '<strong>సంప్రదింపులు జరపండి</strong>: క్యూలోని రోగిపై <em>"సంప్రదించండి & మందులు రాయండి"</em> క్లిక్ చేయండి. జన్ ఔషధి జనరిక్ మందులను ఎంచుకుని, సలహాలు నమోదు చేసి సమర్పించండి.',
+      guide_doc_3: '<strong>క్యూ నుండి తక్షణ తొలగింపు</strong>: ప్రిస్క్రిప్షన్ జారీ చేసిన తర్వాత, రోగి సక్రియ క్యూ నుండి తొలగించబడి మీ ప్రిస్క్రిప్షన్ చరిత్రలో భద్రపరచబడతారు.',
+      guide_doc_4: '<strong>డైనమిక్ PDF ఎగుమతి</strong>: ABDM నిబంధనల ప్రకారం ప్రిస్క్రిప్షన్‌లో మీ పేరు, రిజిస్ట్రేషన్ సంఖ్య మరియు డిజిటల్ సంతకం ఉంటాయి.',
+      guide_ash_head: '🤝 ఆశా & ANM ఫ్రంట్‌లైన్ ఫీల్డ్ వర్కర్ మార్గదర్శి',
+      guide_ash_1: '<strong>రోగుల నమోదు & రిఫరల్</strong>: ఆభా కార్డును సృష్టించి నేరుగా వైద్యుడికి రిఫర్ చేయడానికి <em>"+ రోగిని నమోదు చేసి రిఫర్ చేయండి"</em> పై క్లిక్ చేయండి.',
+      guide_ash_2: '<strong>గర్భిణీల ANC సంరక్షణ</strong>: గర్భిణీ స్త్రీలను నమోదు చేయండి, గర్భధారణ వారాలు, రక్తపోటు, హిమోగ్లోబిన్ వివరాలు నమోదు చేసి హై-రిస్క్ కేసులను పర్యవేక్షించండి.',
+      guide_ash_3: '<strong>పిల్లల UIP టీకాలు</strong>: వ్యాక్సిన్ మోతాదులు (BCG, పెంటావాలెంట్, రోటావైరస్, MR) మరియు రాబోయే గడువు తేదీలను ట్రాక్ చేయండి.',
+      guide_ash_4: '<strong>మాస్టర్ ఫీల్డ్ రిజిస్ట్రీ</strong>: అన్ని రిఫరల్స్, ANC రికార్డులు, టీకాలు మరియు ఇంటి సందర్శనల వివరాలను ఒకే పట్టికలో వీక్షించండి.',
+      guide_adm_head: '👑 జిల్లా ఆరోగ్య నిర్వాహకుల మార్గదర్శి',
+      guide_adm_1: '<strong>సిబ్బంది నియామకం</strong>: తాత్కాలిక వివరాలతో వైద్యులు, ఆశా కార్యకర్తలు లేదా ఇతర నిర్వాహకులను చేర్చడానికి <em>"+ కొత్త సిబ్బందిని నియమించండి"</em> పై క్లిಕ್ చేయండి.',
+      guide_adm_2: '<strong>సిబ్బందిని తొలగించడం</strong>: స్థానిక మెమరీ మరియు సుపాబేస్ క్లౌడ్ నుండి తక్షణమే తొలగించడానికి సిబ్బంది వరుసపై <em>"✕ తొలగించండి"</em> క్లిక్ చేయండి.',
+      guide_adm_3: '<strong>ఆసుపత్రి బెడ్ కేటాయింపు</strong>: సాధారణ, ఐసియు మరియు ఆక్సిజన్ బెడ్ల సంఖ్యను రియల్ టైమ్‌లో సర్దుబాటు చేయండి.',
+      guide_adm_4: '<strong>బ్లడ్ బ్యాంక్ నిల్వ</strong>: మొత్తం 8 రక్త సమూహాలలో రక్తం యూనిట్ల నిల్వను నిర్వహించండి.',
+      faq_header: '❓ సాధారణ ప్రశ్నలు & సమాధానాలు (FAQ)',
+      faq_q1: 'నా 14-అంకెల ఆభా కార్డును ఎలా సృಷ್ಟించాలి లేదా కనుగొనాలి?',
+      faq_a1: 'మీరు పౌరుడు / రోగిగా నమోదు చేసుకున్నప్పుడు, అధికారిక 14-అంకెల ఆయుష్మాన్ భారత్ ఆభా కార్డ్ స్వయంచಾಲితంగా సృష్టించబడుతుంది. మీరు పేషెంట్ హబ్ నుండి మీ ఆభా కార్డును ప్రింట్ లేదా డౌన్‌లోడ్ చేసుకోవచ్చు.',
+      faq_q2: 'నేను నా మొబైల్ నంబర్‌తో లాగిన్ అవ్వవచ్చా?',
+      faq_a2: 'అవును! అన్ని పాత్రలు (పౌరులు, వైద్యులు, ఆశా కార్యకర్తలు మరియు నిర్వాహకులు) తమ 10-అంకెల నమోదిత మొబైల్ నంబర్ మరియు పాస్‌వర్డ్‌తో లాగిన్ అవ్వవచ్చు. బహుళ పాత్రలు ఉంటే ఎంపిక మెనూ కనిపిస్తుంది.',
+      faq_q3: 'లైవ్ క్లౌడ్ సింక్రొనైజేషన్ ఎలా పనిచేస్తుంది?',
+      faq_a3: 'స్వాస్థ್ಯ సేతు రియల్-టైమ్ వెబ్‌సాకెట్‌లతో నేరుగా సుపాబేస్ పోస్ట్‌గ్రేSQLకి అనుసంధానించబడింది. జారీ చేసిన ప్రిస్క్రిప్షన్, బెడ్ అప్‌డేట్ లేదా రిఫరల్ అన్ని పరికరాల్లో తక్షణమే సింక్ అవుతాయి.',
+      btn_close_guide: '✓ అర్థమైంది, గైడ్‌ను మూసివేయండి',
+
       app_title: 'స్వాస్థ్య సేతు',
       app_tagline: 'గ్రామీణ ఆరోగ్య క్లౌడ్ గ్రిడ్',
       portal_welcome: 'స్వాస్థ్య సేతుకు స్వాగతం',
@@ -7763,6 +7946,61 @@ body[data-theme="doom"] {
       btn_print_rx: 'ప్రిస్క్రిప్షన్ ప్రింట్'
     },
     ta: {
+      role_asha: '🤝 ஆஷா',
+      hero_motto: 'சுவாஸ்த்ய • சுரக்ஷா • சேவா',
+      btn_get_started: 'தொடங்குங்கள்',
+      lbl_full_name: 'முழு பெயர் *',
+      lbl_mobile: 'கைபேசி எண் *',
+      gender_label: 'பாலினம் *',
+      gender_male: 'ஆண்',
+      gender_female: 'பெண்',
+      gender_other: 'மற்றவை',
+      lbl_village: 'கிராமம் / துணை மைய வார்டு *',
+      lbl_village_ward: 'கிராமம் / வார்டு *',
+      lbl_village_ward_addr: 'கிராமம் / வார்டு முகவரி *',
+      lbl_doc_refer_to: 'பரிந்துரைக்க பதிவுசெய்த மருத்துவரைத் தேர்ந்தெடுக்கவும் *',
+      rel_spouse: 'மனைவி / கணவர்',
+      rel_son: 'மகன்',
+      rel_daughter: 'மகள்',
+      rel_father: 'தந்தை',
+      rel_mother: 'தாய்',
+      rel_other: 'மற்றவை',
+
+      // UI & Form Labels
+
+      // Help Guide Modal Keys
+      help_guide_title: 'ஸ்வாஸ்த்ய சேது பயனர் வழிகாட்டி மற்றும் உதவி மையம்',
+      help_guide_sub: 'பணிகளுக்கான பயிற்சிகள், படிப்படியான வழிமுறைகள் & அடிக்கடி கேட்கப்படும் கேள்விகள்',
+      guide_pat_head: '🌾 குடிமக்கள் & நோயாளிகள் விரைவு வழிகாட்டி',
+      guide_pat_1: '<strong>சுய பதிவு</strong>: உள்நுழைவுத் திரையில் <em>"புதிய பயனரா? பதிவு செய்யவும்"</em> என்பதைக் கிளிக் செய்யவும். உங்கள் 14-இலக்க ஆபா அட்டையை உடனடியாகப் பெற விவரங்களை நிரப்பவும்.',
+      guide_pat_2: '<strong>தொலைமருத்துவ ஆலோசனை</strong>: <em>"+ மருத்துவ ஆலோசனையைக் கோருங்கள்"</em> என்பதைக் கிளிக் செய்து, பதிவுசெய்த மருத்துவரைத் தேர்ந்தெடுத்து, உங்கள் அறிகுறிகளைப் பதிவிட்டு கோரிக்கையை அனுப்பவும்.',
+      guide_pat_3: '<strong>மின்-மருந்துச்சீட்டு பதிவிறக்கம்</strong>: மருத்துவர் மருந்துகளைப் பரிந்துரைத்ததும் ஒலி அறிவிப்பு வரும். உங்கள் அதிகாரப்பூர்வ ABDM PDF-ஐ பதிவிறக்க மருந்துச்சீட்டு அட்டையில் <em>"📥 PDF பதிவிறக்குக"</em> என்பதைக் கிளிக் செய்யவும்.',
+      guide_pat_4: '<strong>மருந்துச்சீட்டுகளை நீக்குதல்</strong>: உங்கள் சுகாதார சேமிப்பகத்தை தூய்மையாக வைத்திருக்க பதிவிறக்கிய பிறகு <em>"🗑️ நீக்குக"</em> என்பதைக் கிளிக் செய்யவும்.',
+      guide_pat_5: '<strong>அவசரகால 108 SOS</strong>: உடனடி அவசர ஆம்புலன்ஸ் சேவைக்கு <em>"🚨 108 SOS"</em> அல்லது <em>"📍 GPS SOS"</em> என்பதைக் கிளிக் செய்யவும்.',
+      guide_doc_head: '🩺 மருத்துவ அலுவலர் / மருத்துவர் விரைவு வழிகாட்டி',
+      guide_doc_1: '<strong>OPD வரிசை மேலாண்மை</strong>: இந்த வரிசை நேரடி நோயாளிகள், ஆலோசனைக் கோரிக்கைகள் மற்றும் ஆஷா பரிந்துரைகளை முன்னுரிமை பேட்ஜ்களுடன் காட்டுகிறது.',
+      guide_doc_2: '<strong>ஆலோசனை வழங்குதல்</strong>: வரிசையில் உள்ள எந்த நோயாளியையும் கிளிக் செய்து <em>"ஆலோசனை & மருந்துச்சீட்டு"</em> என்பதைத் தேர்ந்தெடுக்கவும். மக்கள் மருந்தக மருந்துகளைத் தேர்ந்தெடுத்து சமர்ப்பிக்கவும்.',
+      guide_doc_3: '<strong>வரிசையிலிருந்து உடனடி நீக்கம்</strong>: மருந்துச்சீட்டு வழங்கப்பட்டதும், நோயாளி செயலில் உள்ள வரிசையிலிருந்து நீக்கப்பட்டு உங்கள் வரலாறு பகுதியில் சேமிக்கப்படுவார்.',
+      guide_doc_4: '<strong>டைனமிக் PDF ஏற்றுமதி</strong>: மருந்துச்சீட்டில் ABDM விதிகளின்படி உங்கள் பெயர், மருத்துவ பதிவு எண் மற்றும் டிஜிட்டல் கையொப்பம் இடம்பெறும்.',
+      guide_ash_head: '🤝 ஆஷா & ஏஎன்எம் களப்பணியாளர் வழிகாட்டி',
+      guide_ash_1: '<strong>நோயாளிகளைப் பதிவுசெய்து பரிந்துரைத்தல்</strong>: ஆபா அட்டையை உருவாக்கி மருத்துவரிடம் பரிந்துரைக்க <em>"+ நோயாளியைப் பதிவு செய்து பரிந்துரைக்கவும்"</em> என்பதைக் கிளிக் செய்யவும்.',
+      guide_ash_2: '<strong>தாய்மை ANC பராமரிப்பு</strong>: கர்ப்பிணித் தாய்மார்களைப் பதிவுசெய்து, வாரங்கள், இரத்த அழுத்தம், ஹீமோகுளோபின் அளவுகளைப் பதிவுசெய்து அதிக ஆபத்துள்ள கர்ப்பங்களைக் கண்காணிக்கவும்.',
+      guide_ash_3: '<strong>குழந்தைகளுக்கான UIP தடுப்பூசி</strong>: தடுப்பூசி அளவுகள் (BCG, பென்டாவேலண்ட், ரோட்டாவைரஸ், MR) மற்றும் வரவிருக்கும் தேதிகளைக் கண்காணிக்கவும்.',
+      guide_ash_4: '<strong>முதன்மை களப் பதிவேடு</strong>: அனைத்து பரிந்துரைகள், ANC பதிவுகள், தடுப்பூசிகள் மற்றும் களப்பயண விவரங்களை ஒரே அட்டவணையில் காண்க.',
+      guide_adm_head: '👑 மாவட்ட சுகாதார நிர்வாகி வழிகாட்டி',
+      guide_adm_1: '<strong>பணியாளர் நியமனம்</strong>: தற்காலிக உள்நுழைவு விவரங்களுடன் மருத்துவர்கள், ஆஷா பணியாளர்கள் அல்லது நிர்வாகிகளைச் சேர்க்க <em>"+ புதிய பணியாளரை நியமிக்கவும்"</em> என்பதைக் கிளிக் செய்யவும்.',
+      guide_adm_2: '<strong>பணியாளர் நீக்கம்</strong>: மெமரி மற்றும் கிளவுடிலிருந்து உடனடியாக நீக்க எந்தவொரு பணியாளர் வரிசையிலும் <em>"✕ நீக்குக"</em> என்பதைக் கிளிக் செய்யவும்.',
+      guide_adm_3: '<strong>மருத்துவமனை படுக்கை ஒதுக்கீடு</strong>: பொது, ஐசியூ மற்றும் ஆக்சிஜன் படுக்கை எண்ணிக்கையை நிகழ்நேரத்தில் மாற்றியமைக்கவும்.',
+      guide_adm_4: '<strong>ரத்த வங்கி இருப்பு</strong>: அனைத்து 8 ரத்தப் பிரிவுகளிலும் ரத்த அலகுகளின் இருப்பை நிர்வகிக்கவும்.',
+      faq_header: '❓ அடிக்கடி கேட்கப்படும் கேள்விகள் (FAQ)',
+      faq_q1: 'எனது 14-இலக்க ஆபா அட்டையை எவ்வாறு உருவாக்குவது அல்லது கண்டுபிடிப்பது?',
+      faq_a1: 'நீங்கள் குடிமகன் / நோயாளியாகப் பதிவு செய்யும்போது, 14-இலக்க ஆயுஷ்மான் பாரத் ஆபா அட்டை தானாகவே உருவாக்கப்படும். நோயாளி மையத்திலிருந்து உங்கள் ஆபா அட்டையை அச்சிடலாம் அல்லது பதிவிறக்கலாம்.',
+      faq_q2: 'எனது கைபேசி எண்ணைப் பயன்படுத்தி உள்நுழைய முடியுமா?',
+      faq_a2: 'ஆம்! அனைத்து பொறுப்புகளும் (குடிமக்கள், மருத்துவர்கள், ஆஷா பணியாளர்கள் மற்றும் நிர்வாகிகள்) தங்கள் 10-இலக்க பதிவுசெய்யப்பட்ட கைபேசி எண் மற்றும் கடவுச்சொல் மூலம் உள்நுழையலாம். ஒன்றுக்கு மேற்பட்ட பொறுப்புகள் இருந்தால் தேர்வு மெனு தோன்றும்.',
+      faq_q3: 'நேரலை கிளவுட் ஒத்திசைவு எவ்வாறு செயல்படுகிறது?',
+      faq_a3: 'ஸ்வாஸ்த்ய சேது நிகழ்நேர வெப்சாக்கெட்டுகளுடன் நேரடியாக சூபாபேஸ் போஸ்ட்கிரெஸ்கியூஎல்-உடன் இணைக்கப்பட்டுள்ளது. பரிந்துரைக்கப்பட்ட மருந்துச்சீட்டு, படுக்கை விவரங்கள் அல்லது பரிந்துரைகள் அனைத்து சாதனங்களிலும் உடனடியாக ஒத்திசைக்கப்படும்.',
+      btn_close_guide: '✓ புரிந்தது, வழிகாட்டியை மூடவும்',
+
       app_title: 'ஸ்வாஸ்த்ய சேது',
       app_tagline: 'கிராமப்புற சுகாதார கிளவுட் கிரிட்',
       portal_welcome: 'ஸ்வாஸ்த்ய சேதுவிற்கு நல்வரவு',
@@ -7867,6 +8105,61 @@ body[data-theme="doom"] {
       btn_print_rx: 'மருந்துச் சீட்டை அச்சிடுக'
     },
     mr: {
+      role_asha: '🤝 आशा',
+      hero_motto: 'स्वास्थ्य • सुरक्षा • सेवा',
+      btn_get_started: 'सुरू करा',
+      lbl_full_name: 'पूर्ण नाव *',
+      lbl_mobile: 'मोबाईल नंबर *',
+      gender_label: 'लिंग *',
+      gender_male: 'पुरुष',
+      gender_female: 'महिला',
+      gender_other: 'इतर',
+      lbl_village: 'गाव / उप-केंद्र वॉर्ड *',
+      lbl_village_ward: 'गाव / वॉर्ड *',
+      lbl_village_ward_addr: 'गाव / वॉर्ड पत्ता *',
+      lbl_doc_refer_to: 'संदर्भ देण्यासाठी नोंदणीकृत डॉक्टर निवडा *',
+      rel_spouse: 'पती / पत्नी',
+      rel_son: 'मुलगा',
+      rel_daughter: 'मुलगी',
+      rel_father: 'वडील',
+      rel_mother: 'आई',
+      rel_other: 'इतर',
+
+      // UI & Form Labels
+
+      // Help Guide Modal Keys
+      help_guide_title: 'स्वास्थ्य सेतू वापरकर्ता मार्गदर्शिका आणि मदत केंद्र',
+      help_guide_sub: 'भूमिका ट्युटोरियल, टप्प्याटप्प्याने सूचना आणि वारंवार विचारले जाणारे प्रश्न',
+      guide_pat_head: '🌾 नागरिक आणि रुग्ण द्रुत मार्गदर्शिका',
+      guide_pat_1: '<strong>स्वयं-नोंदणी</strong>: लॉगिन स्क्रीनवर <em>"नवीन वापरकर्ता? नोंदणी करा"</em> वर क्लिक करा. तुमचे १४-अंकी आभा कार्ड मिळविण्यासाठी तुमचे तपशील भरा.',
+      guide_pat_2: '<strong>टेलिकन्सल्टेशन विनंती</strong>: <em>"+ डॉक्टर सल्लामसलत विनंती करा"</em> वर क्लिक करा, पसंतीचे नोंदणीकृत डॉक्टर निवडा, लक्षणे लिहा आणि विनंती पाठवा.',
+      guide_pat_3: '<strong>ई-प्रिस्क्रिप्शन डाउनलोड करा</strong>: डॉक्टरांनी औषधे लिहून दिल्यावर तुम्हाला सूचना आवाज ऐकू येईल. अधिकृत ABDM PDF डाउनलोड करण्यासाठी प्रिस्क्रिप्शन कार्डवर <em>"📥 पीडीएफ डाउनलोड करा"</em> वर क्लिक करा.',
+      guide_pat_4: '<strong>प्रिस्क्रिप्शन हटवा</strong>: आरोग्य लॉकर व्यवस्थित ठेवण्यासाठी डाउनलोड केल्यानंतर <em>"🗑️ हटवा"</em> वर क्लिक करा.',
+      guide_pat_5: '<strong>आपत्कालीन १०८ एसओएस</strong>: तात्काळ रुग्णवाहिका सेवेसाठी <em>"🚨 १०८ एसओएस"</em> किंवा <em>"📍 जीपीएस एसओएस"</em> वर क्लिक करा.',
+      guide_doc_head: '🩺 वैद्यकीय अधिकारी / डॉक्टर द्रुत मार्गदर्शिका',
+      guide_doc_1: '<strong>ओपीडी रांग व्यवस्थापन</strong>: रांगेत थेट येणारे रुग्ण, नागरिक सल्लामसलत विनंत्या आणि आशा संदर्भ ट्राइएज बॅजसह प्रदर्शित होतात.',
+      guide_doc_2: '<strong>सल्लामसलत करा</strong>: रांगेतील कोणत्याही रुग्णावर <em>"सल्ला द्या आणि प्रिस्क्रिप्शन लिहा"</em> वर क्लिक करा. जन औषधी जेनेरिक औषधे निवडा, सल्ला नोंदवा आणि सबमिट करा.',
+      guide_doc_3: '<strong>रांगेतून त्वरित काढणे</strong>: प्रिस्क्रिप्शन दिल्यानंतर रुग्ण सक्रिय रांगेतून निघून जातो आणि तुमच्या जारी केलेल्या प्रिस्क्रिप्शन इतिहासामध्ये जतन होतो.',
+      guide_doc_4: '<strong>डायनॅमिक पीडीएफ निर्यात</strong>: प्रिस्क्रिप्शनवर ABDM नियमांनुसार तुमचे नाव, वैद्यकीय नोंदणी क्रमांक आणि डिजिटल स्वाक्षरी असते.',
+      guide_ash_head: '🤝 आशा आणि एएनएम फ्रंटलाइन कार्यकर्त्या मार्गदर्शिका',
+      guide_ash_1: '<strong>रुग्ण नोंदणी आणि संदर्भ</strong>: आभा कार्ड तयार करण्यासाठी आणि नोंदणीकृत डॉक्टरांकडे संदर्भ पाठवण्यासाठी <em>"+ रुग्णाची नोंदणी करा आणि संदर्भ द्या"</em> वर क्लिक करा.',
+      guide_ash_2: '<strong>माता एएनसी काळजी</strong>: गरोदर मातांची नोंदणी करा, गर्भावस्थेचे आठवडे, बीपी, हिमोग्लोबिन पातळी नोंदवा आणि उच्च जोखमीच्या गर्भधारणेचा मागोवा घ्या.',
+      guide_ash_3: '<strong>बाल यूआयपी लसीकरण</strong>: लसीचे डोस (बीसीजी, पेंटाव्हॅलेंट, रोटाव्हायरस, एमआर) आणि आगामी देय तारखांचा मागोवा घ्या.',
+      guide_ash_4: '<strong>मास्टर फील्ड नोंदवही</strong>: सर्व संदर्भ, एएनसी नोंदी, लस आणि घरभेटींची माहिती एका एकत्रित तक्त्यामध्ये पहा.',
+      guide_adm_head: '👑 जिल्हा आरोग्य प्रशासक मार्गदर्शिका',
+      guide_adm_1: '<strong>कर्मचारी तरतूद</strong>: तात्पुरत्या ओळखपत्रांसह डॉक्टर, आशा कार्यकर्त्या किंवा इतर प्रशासक तयार करण्यासाठी <em>"+ नवीन कर्मचारी नियुक्त करा"</em> वर क्लिक करा.',
+      guide_adm_2: '<strong>कर्मचारी काढणे</strong>: स्थानिक मेमरी आणि क्लाउडवरून त्वरित हटवण्यासाठी कोणत्याही कर्मचाऱ्याच्या पंक्तीवर <em>"✕ हटवा"</em> वर क्लिक करा.',
+      guide_adm_3: '<strong>रुग्णालय खाटा वाटप</strong>: सर्वसाधारण, आयसीयू आणि ऑक्सिजन खाटांची संख्या थेट वेळेत समायोजित करा.',
+      guide_adm_4: '<strong>रक्तपेढी साठा</strong>: सर्व ८ रक्तगटांमधील रक्त युनिट साठ्याचे व्यवस्थापन करा.',
+      faq_header: '❓ वारंवार विचारले जाणारे प्रश्न (FAQ)',
+      faq_q1: 'मी माझे १४-अंकी आभा कार्ड कसे तयार करू किंवा शोधू?',
+      faq_a1: 'जेव्हा तुम्ही नागरिक / रुग्ण म्हणून नोंदणी करता तेव्हा अधिकृत १४-अंकी आयुष्मान भारत आभा कार्ड आपोआप तयार होते. तुम्ही पेशंट हबमधून तुमचे आभा कार्ड प्रिंट किंवा डाउनलोड करू शकता.',
+      faq_q2: 'मी माझ्या मोबाइल क्रमांकाने लॉग इन करू शकतो का?',
+      faq_a2: 'होय! सर्व भूमिका (नागरिक, डॉक्टर, आशा कार्यकर्त्या आणि प्रशासक) त्यांच्या १०-अंकी नोंदणीकृत मोबाइल क्रमांकाने आणि पासवर्डने लॉग इन करू शकतात. एकापेक्षा जास्त भूमिका असल्यास निवड मेनू दिसेल.',
+      faq_q3: 'थेट क्लाउड सिंक्रोनाइझेशन कसे कार्य करते?',
+      faq_a3: 'स्वास्थ्य सेतू थेट रीअल-टाइम वेबसॉकेट्सद्वारे सुपाबेसशी जोडलेला आहे. दिलेले कोणतेही प्रिस्क्रिप्शन, खाटांची माहिती किंवा पाठवलेला संदर्भ सर्व उपकरणांवर त्वरित सिंक होतो.',
+      btn_close_guide: '✓ समजले, मार्गदर्शक बंद करा',
+
       app_title: 'स्वास्थ्य सेतू',
       app_tagline: 'ग्रामीण आरोग्य क्लाउड ग्रिड',
       portal_welcome: 'स्वास्थ्य सेतू मध्ये आपले स्वागत आहे',
@@ -7971,6 +8264,61 @@ body[data-theme="doom"] {
       btn_print_rx: 'प्रिस्क्रिप्शन प्रिंट करा'
     },
     bn: {
+      role_asha: '🤝 আশা',
+      hero_motto: 'स्वास्थ्य • सुरक्षा • सेवा',
+      btn_get_started: 'শুরু করুন',
+      lbl_full_name: 'সম্পূর্ণ নাম *',
+      lbl_mobile: 'মোবাইল নম্বর *',
+      gender_label: 'লিঙ্গ *',
+      gender_male: 'পুরুষ',
+      gender_female: 'মহিলা',
+      gender_other: 'অন্যান্য',
+      lbl_village: 'গ্রাম / উপ-কেন্দ্র ওয়ার্ড *',
+      lbl_village_ward: 'গ্রাম / ওয়ার্ড *',
+      lbl_village_ward_addr: 'গ্রাম / ওয়ার্ডের ঠিকানা *',
+      lbl_doc_refer_to: 'রেফার করার জন্য নিবন্ধিত ডাক্তার নির্বাচন করুন *',
+      rel_spouse: 'স্বামী / স্ত্রী',
+      rel_son: 'ছেলে',
+      rel_daughter: 'মেয়ে',
+      rel_father: 'বাবা',
+      rel_mother: 'মা',
+      rel_other: 'অন্যান্য',
+
+      // UI & Form Labels
+
+      // Help Guide Modal Keys
+      help_guide_title: 'স্বাস্থ্য সেতু ব্যবহারকারী নির্দেশিকা ও সহায়তা কেন্দ্র',
+      help_guide_sub: 'ভূমিকা টিউটোরিয়াল, ধাপে ধাপে নির্দেশাবলী এবং সাধারণ প্রশ্নোত্তর',
+      guide_pat_head: '🌾 নাগরিক ও রোগী দ্রুত নির্দেশিকা',
+      guide_pat_1: '<strong>স্ব-নিবন্ধন</strong>: লগইন স্ক্রিনে <em>"নতুন ব্যবহারকারী? নিবন্ধন করুন"</em>-এ ক্লিক করুন। আপনার ১৪-সংখ্যার আভা কার্ড পেতে আপনার বিবরণ পূরণ করুন।',
+      guide_pat_2: '<strong>টেলিকনসাল্টেশন অনুরোধ</strong>: <em>"+ ডাক্তারের পরামর্শের অনুরোধ করুন"</em>-এ ক্লিক করুন, পছন্দের ডাক্তার নির্বাচন করুন, আপনার লক্ষণ লিখুন এবং অনুরোধ পাঠান।',
+      guide_pat_3: '<strong>ই-প্রেসক্রিপশন ডাউনলোড করুন</strong>: ডাক্তার ওষুধ লিখে দিলে আপনি একটি নোটিফিকেশন পাবেন। আপনার অফিসিয়াল ABDM PDF ডাউনলোড করতে প্রেসক্রিপশন কার্ডে <em>"📥 পিডিএফ ডাউনলোড করুন"</em>-এ ক্লিক করুন।',
+      guide_pat_4: '<strong>প্রেসক্রিপশন মুছুন</strong>: আপনার স্বাস্থ্য লকার পরিষ্কার রাখতে এবং স্টোরেজ বাঁচাতে ডাউনলোড করার পরে <em>"🗑️ মুছুন"</em>-এ ক্লিক করুন।',
+      guide_pat_5: '<strong>জরুরি ১০৮ এসওএস</strong>: তাত্ক্ষণিক জরুরি অ্যাম্বুলেন্স পরিষেবার জন্য <em>"🚨 ১০৮ এসওএস"</em> বা <em>"📍 জিপিএস এসওএস"</em>-এ ক্লিক করুন।',
+      guide_doc_head: '🩺 মেডিকেল অফিসার / ডাক্তার দ্রুত নির্দেশিকা',
+      guide_doc_1: '<strong>ওপিডি সারি ব্যবস্থাপনা</strong>: সারিতে সরাসরি আসা রোগী, নাগরিক পরামর্শ অনুরোধ এবং ট্রায়াজ ব্যাজ সহ আশা রেফারেল প্রদর্শিত হয়।',
+      guide_doc_2: '<strong>পরামর্শ পরিচালনা করুন</strong>: সারির যেকোনো রোগীর উপর <em>"পরামর্শ ও প্রেসক্রিপশন"</em>-এ ক্লিক করুন। জন ঔষধি জেনেরিক ওষুধ নির্বাচন করুন, পরামর্শ দিন এবং জমা দিন।',
+      guide_doc_3: '<strong>সারি থেকে তাত্ক্ষণিক অপসারণ</strong>: প্রেসক্রিপশন জারির পর রোগী সক্রিয় সারি থেকে অপসারিত হয় এবং আপনার প্রেসক্রিপশন ইতিহাসে সংরক্ষিত হয়।',
+      guide_doc_4: '<strong>ডায়নামিক পিডিএফ রপ্তানি</strong>: প্রেসক্রিপশনে ABDM সম্মতির জন্য আপনার নাম, মেডিকেল নিবন্ধন নম্বর এবং ডিজিটাল স্বাক্ষর থাকে।',
+      guide_ash_head: '🤝 আশা ও এএনএম ফ্রন্টলাইন ফিল্ড কর্মী নির্দেশিকা',
+      guide_ash_1: '<strong>রোগীদের নিবন্ধন ও রেফারেল</strong>: একটি আভা কার্ড তৈরি করতে এবং সরাসরি নিবন্ধিত ডাক্তারের কাছে রেফারেল পাঠাতে <em>"+ রোগী নিবন্ধন ও রেফার করুন"</em>-এ ক্লিক করুন।',
+      guide_ash_2: '<strong>মাতৃ এএনসি যত্ন</strong>: গর্ভবতী মায়েদের নিবন্ধন করুন, গর্ভকালীন সপ্তাহ, রক্তচাপ, হিমোগ্লোবিনের মাত্রা রেকর্ড করুন এবং উচ্চ-ঝুঁকিপূর্ণ গর্ভাবস্থা ট্র্যাক করুন।',
+      guide_ash_3: '<strong>শিশু ইউআইপি টিকাদান</strong>: ভ্যাকসিনের ডোজ (বিসিজি, পেন্টাভ্যালেন্ট, রোটাভাইরাস, এমআর) এবং আসন্ন তারিখগুলি ট্র্যাক করুন।',
+      guide_ash_4: '<strong>মাস্টার ফিল্ড রেজিস্ট্রি</strong>: একটি সমন্বিত মাস্টার টেবিলে সমস্ত রেফারেল, এএনসি রেকর্ড, ভ্যাকসিন এবং হোম ভিজিট লগ দেখুন।',
+      guide_adm_head: '👑 জেলা স্বাস্থ্য প্রশাসক নির্দেশিকা',
+      guide_adm_1: '<strong>কর্মী নিয়োগ</strong>: অস্থায়ী শংসাপত্র সহ ডাক্তার, আশা কর্মী বা অন্যান্য প্রশাসক তৈরি করতে <em>"+ নতুন কর্মী নিয়োগ করুন"</em>-এ ক্লিক করুন।',
+      guide_adm_2: '<strong>কর্মী অপসারণ</strong>: স্থানীয় মেমরি এবং ক্লাউড থেকে তাত্ক্ষণিকভাবে মুছে ফেলতে যেকোনো কর্মী সারিতে <em>"✕ সরান"</em>-এ ক্লিক করুন।',
+      guide_adm_3: '<strong>হাসপাতাল শয্যা বরাদ্দ</strong>: রিয়েল-টাইমে সাধারণ, আইসিইউ এবং অক্সিজেন শয্যা সংখ্যা সমন্বয় করুন।',
+      guide_adm_4: '<strong>ব্লাড ব্যাংক স্টক</strong>: সমস্ত ৮টি রক্তদলের রক্তের ইউনিট ইনভেন্টরি পরিচালনা করুন।',
+      faq_header: '❓ সাধারণ জিজ্ঞাসা ও উত্তর (FAQ)',
+      faq_q1: 'আমি কিভাবে আমার ১৪-সংখ্যার আভা কার্ড তৈরি বা খুঁজে পাব?',
+      faq_a1: 'আপনি যখন নাগরিক / রোগী হিসাবে নিবন্ধন করেন, তখন একটি অফিসিয়াল ১৪-সংখ্যার আয়ুষ্মান ভারত আভা কার্ড স্বয়ংক্রিয়ভাবে তৈরি হয়। আপনি পেশেন্ট হাব থেকে আপনার আভা কার্ড প্রিন্ট বা ডাউনলোড করতে পারেন।',
+      faq_q2: 'আমি কি আমার মোবাইল নম্বর ব্যবহার করে লগইন করতে পারি?',
+      faq_a2: 'হ্যাঁ! সমস্ত ভূমিকা (নাগরিক, ডাক্তার, আশা কর্মী এবং প্রশাসক) তাদের ১০-সংখ্যার নিবন্ধিত মোবাইল নম্বর এবং পাসওয়ার্ড ব্যবহার করে লগইন করতে পারেন। একাধিক ভূমিকা থাকলে ভূমিকা নির্বাচন মেনু প্রদর্শিত হবে।',
+      faq_q3: 'লাইভ ক্লাউড সিঙ্ক্রোনাইজেশন কিভাবে কাজ করে?',
+      faq_a3: 'স্বাস্থ্য সেতু রিয়েল-টাইম ওয়েবসকেটের সাথে সরাসরি সুপাবেস পোস্টগ্রেএসকিউএল-এর সাথে সংযুক্ত। যেকোনো প্রেসক্রিপশন, শয্যা আপডেট বা রেফারেল সমস্ত ডিভাইসে তাত্ক্ষণিকভাবে সিঙ্ক হয়।',
+      btn_close_guide: '✓ বুঝেছি, গাইড বন্ধ করুন',
+
       app_title: 'স্বাস্থ্য সেতু',
       app_tagline: 'গ্রামীণ স্বাস্থ্য ক্লাউড গ্রিড',
       portal_welcome: 'স্বাস্থ্য সেতুতে আপনাকে স্বাগতম',
@@ -8075,6 +8423,61 @@ body[data-theme="doom"] {
       btn_print_rx: 'প্রেসক্রিপশন প্রিন্ট করুন'
     },
     kn: {
+      role_asha: '🤝 ಆಶಾ',
+      hero_motto: 'ಸ್ವಾಸ್ಥ್ಯ • ಸುರಕ್ಷ • ಸೇವೆ',
+      btn_get_started: 'ಪ್ರಾರಂಭಿಸಿ',
+      lbl_full_name: 'ಪೂರ್ಣ ಹೆಸರು *',
+      lbl_mobile: 'ಮೊಬೈಲ್ ಸಂಖ್ಯೆ *',
+      gender_label: 'ಲಿಂಗ *',
+      gender_male: 'ಪುರುಷ',
+      gender_female: 'ಮಹಿಳೆ',
+      gender_other: 'ಇತರೆ',
+      lbl_village: 'ಗ್ರಾಮ / ಉಪ-ಕೇಂದ್ರ ವಾರ್ಡ್ *',
+      lbl_village_ward: 'ಗ್ರಾಮ / ವಾರ್ಡ್ *',
+      lbl_village_ward_addr: 'ಗ್ರಾಮ / ವಾರ್ಡ್ ವಿಳಾಸ *',
+      lbl_doc_refer_to: 'ಶಿಫಾರಸು ಮಾಡಲು ನೋಂದಾಯಿತ ವೈದ್ಯರನ್ನು ಆಯ್ಕೆಮಾಡಿ *',
+      rel_spouse: 'ಪತಿ / ಪತ್ನಿ',
+      rel_son: 'ಮಗ',
+      rel_daughter: 'ಮಗಳು',
+      rel_father: 'ತಂದೆ',
+      rel_mother: 'ತಾಯಿ',
+      rel_other: 'ಇತರೆ',
+
+      // UI & Form Labels
+
+      // Help Guide Modal Keys
+      help_guide_title: 'ಸ್ವಾಸ್ಥ್ಯ ಸೇತು ಬಳಕೆದಾರರ ಮಾರ್ಗದರ್ಶಿ ಮತ್ತು ಸಹಾಯ ಕೇಂದ್ರ',
+      help_guide_sub: 'ಪಾತ್ರಗಳ ತರಬೇತಿ, ಹಂತ-ಹಂತದ ಸೂಚನೆಗಳು ಮತ್ತು ಸಾಮಾನ್ಯ ಪ್ರಶ್ನೋತ್ತರಗಳು',
+      guide_pat_head: '🌾 ನಾಗರಿಕರು ಮತ್ತು ರೋಗಿಗಳ ತ್ವರಿತ ಮಾರ್ಗದರ್ಶಿ',
+      guide_pat_1: '<strong>ಸ್ವಯಂ-ನೋಂದಣಿ</strong>: ಲಾಗಿನ್ ಪರದೆಯಲ್ಲಿ <em>"ಹೊಸ ಬಳಕೆದಾರರೇ? ನೋಂದಾಯಿಸಿ"</em> ಕ್ಲಿಕ್ ಮಾಡಿ. ನಿಮ್ಮ 14-ಅಂಕಿಯ ಆಭಾ ಕಾರ್ಡ್ ಪಡೆಯಲು ವಿವರಗಳನ್ನು ಭರ್ತಿ ಮಾಡಿ.',
+      guide_pat_2: '<strong>ಟೆಲಿಸಮಾಲೋಚನೆ ವಿನಂತಿ</strong>: <em>"+ ವೈದ್ಯರ ಸಮಾಲೋಚನೆ ವಿನಂತಿಸಿ"</em> ಕ್ಲಿಕ್ ಮಾಡಿ, ನೋಂದಾಯಿತ ವೈದ್ಯರನ್ನು ಆಯ್ಕೆಮಾಡಿ, ನಿಮ್ಮ ರೋಗಲಕ್ಷಣಗಳನ್ನು ಬರೆದು ವಿನಂತಿ ಕಳುಹಿಸಿ.',
+      guide_pat_3: '<strong>ಇ-ಪ್ರಿಸ್ಕ್ರಿಪ್ಷನ್ ಡೌನ್‌ಲೋಡ್</strong>: ವೈದ್ಯರು ಔಷಧಿಗಳನ್ನು ಸೂಚಿಸಿದ ನಂತರ ನಿಮಗೆ ಅಧಿಸೂಚನೆ ಧ್ವನಿ ಕೇಳಿಸುತ್ತದೆ. ನಿಮ್ಮ ಅಧಿಕೃತ ABDM PDF ಡೌನ್‌ಲೋಡ್ ಮಾಡಲು ಪ್ರಿಸ್ಕ್ರಿಪ್ಷನ್ ಕಾರ್ಡ್‌ನಲ್ಲಿ <em>"📥 PDF ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ"</em> ಕ್ಲಿಕ್ ಮಾಡಿ.',
+      guide_pat_4: '<strong>ಪ್ರಿಸ್ಕ್ರಿಪ್ಷನ್ ಅಳಿಸಿ</strong>: ನಿಮ್ಮ ಆರೋಗ್ಯ ಲಾಕರ್ ಸ್ವಚ್ಛವಾಗಿಡಲು ಮತ್ತು ಸಂಗ್ರಹಣೆಯನ್ನು ಉಳಿಸಲು ಡೌನ್‌ಲೋಡ್ ಮಾಡಿದ ನಂತರ <em>"🗑️ ಅಳಿಸಿ"</em> ಕ್ಲಿಕ್ ಮಾಡಿ.',
+      guide_pat_5: '<strong>ತುರ್ತು 108 SOS</strong>: ತಕ್ಷಣದ ತುರ್ತು ಆಂಬ್ಯುಲೆನ್ಸ್ ರವಾನೆಗಾಗಿ <em>"🚨 108 SOS"</em> ಅಥವಾ <em>"📍 GPS SOS"</em> ಕ್ಲಿಕ್ ಮಾಡಿ.',
+      guide_doc_head: '🩺 ವೈದ್ಯಾಧಿಕಾರಿ / ವೈದ್ಯರ ತ್ವರಿತ ಮಾರ್ಗದರ್ಶಿ',
+      guide_doc_1: '<strong>OPD ಸರತಿ ನಿರ್ವಹಣೆ</strong>: ಸರತಿಯು ನೇರ ರೋಗಿಗಳು, ಸಮಾಲೋಚನಾ ವಿನಂತಿಗಳು ಮತ್ತು ಆಶಾ ಶಿಫಾರಸುಗಳನ್ನು ತುರ್ತು ಬ್ಯಾಡ್ಜ್‌ಗಳೊಂದಿಗೆ ಪ್ರದರ್ಶಿಸುತ್ತದೆ.',
+      guide_doc_2: '<strong>ಸಮಾಲೋಚನೆ ನಡೆಸಿ</strong>: ಸರತಿಯಲ್ಲಿರುವ ಯಾವುದೇ ರೋಗಿಯ ಮೇಲೆ <em>"ಸಮಾಲೋಚಿಸಿ ಮತ್ತು ಪ್ರಿಸ್ಕ್ರಿಪ್ಷನ್ ನೀಡಿ"</em> ಕ್ಲಿಕ್ ಮಾಡಿ. ಜನೌಷಧಿ ಜೆನೆರಿಕ್ ಔಷಧಿಗಳನ್ನು ಆಯ್ಕೆಮಾಡಿ, ಸಲಹೆ ನೀಡಿ ಸಲ್ಲಿಸಿ.',
+      guide_doc_3: '<strong>ಸರತಿಯಿಂದ ತಕ್ಷಣದ ತೆರವು</strong>: ಪ್ರಿಸ್ಕ್ರಿಪ್ಷನ್ ನೀಡಿದ ನಂತರ, ರೋಗಿಯು ಸಕ್ರಿಯ ಸರತಿಯಿಂದ ತೆಗೆದುಹಾಕಲ್ಪಡುತ್ತಾರೆ ಮತ್ತು ನಿಮ್ಮ ಇತಿಹಾಸದಲ್ಲಿ ಉಳಿಯುತ್ತಾರೆ.',
+      guide_doc_4: '<strong>ಡೈನಾಮಿಕ್ PDF ರಫ್ತು</strong>: ಪ್ರಿಸ್ಕ್ರಿಪ್ಷನ್‌ನಲ್ಲಿ ABDM ನಿಯಮಗಳ ಪ್ರಕಾರ ನಿಮ್ಮ ಹೆಸರು, ವೈದ್ಯಕೀಯ ನೋಂದಣಿ ಸಂಖ್ಯೆ ಮತ್ತು ಡಿಜಿಟಲ್ ಸಹಿ ಇರುತ್ತದೆ.',
+      guide_ash_head: '🤝 ಆಶಾ ಮತ್ತು ಎಎನ್‌ಎಂ ಮುಂಚೂಣಿ ಕಾರ್ಯಕರ್ತೆಯರ ಮಾರ್ಗದರ್ಶಿ',
+      guide_ash_1: '<strong>ರೋಗಿಗಳನ್ನು ನೋಂದಾಯಿಸಿ ಮತ್ತು ಶಿಫಾರಸು ಮಾಡಿ</strong>: ಆಭಾ ಕಾರ್ಡ್ ರಚಿಸಲು ಮತ್ತು ನೋಂದಾಯಿತ ವೈದ್ಯರಿಗೆ ಶಿಫಾರಸು ಕಳುಹಿಸಲು <em>"+ ರೋಗಿಯನ್ನು ನೋಂದಾಯಿಸಿ & ವೈದ್ಯರಿಗೆ ಶಿಫಾರಸು ಮಾಡಿ"</em> ಕ್ಲಿಕ್ ಮಾಡಿ.',
+      guide_ash_2: '<strong>ಗರ್ಭಿಣಿಯರ ANC ಆರೈಕೆ</strong>: ಗರ್ಭಿಣಿ ತಾಯಂದಿರನ್ನು ನೋಂದಾಯಿಸಿ, ವಾರಗಳು, ರಕ್ತದೊತ್ತಡ, ಹಿಮೋಗ್ಲೋಬಿನ್ ಮಟ್ಟವನ್ನು ದಾಖಲಿಸಿ ಮತ್ತು ಹೆಚ್ಚಿನ ಅಪಾಯದ ಗರ್ಭಧಾರಣೆಗಳನ್ನು ಟ್ರ್ಯಾಕ್ ಮಾಡಿ.',
+      guide_ash_3: '<strong>ಮಕ್ಕಳ UIP ಲಸಿಕೆ</strong>: ಲಸಿಕೆ ಪ್ರಮಾಣಗಳನ್ನು (BCG, ಪೆಂಟಾವಲೆಂಟ್, ರೋಟಾವೈರಸ್, MR) ಮತ್ತು ಮುಂಬರುವ ದಿನಾಂಕಗಳನ್ನು ಟ್ರ್ಯಾಕ್ ಮಾಡಿ.',
+      guide_ash_4: '<strong>ಮುಖ್ಯ ಕ್ಷೇತ್ರ ದಾಖಲಾತಿ</strong>: ಎಲ್ಲಾ ಶಿಫಾರಸುಗಳು, ANC ದಾಖಲೆಗಳು, ಲಸಿಕೆಗಳು ಮತ್ತು ಮನೆ ಭೇಟಿಗಳ ವಿವರಗಳನ್ನು ಒಂದೇ ಕೋಷ್ಟಕದಲ್ಲಿ ವೀಕ್ಷಿಸಿ.',
+      guide_adm_head: '👑 ಜಿಲ್ಲಾ ಆರೋಗ್ಯ ಆಡಳಿತಾಧಿಕಾರಿ ಮಾರ್ಗದರ್ಶಿ',
+      guide_adm_1: '<strong>ಸಿಬ್ಬಂದಿ ನಿಯೋಜನೆ</strong>: ತಾತ್ಕಾಲಿಕ ರುಜುವಾತುಗಳೊಂದಿಗೆ ವೈದ್ಯರು, ಆಶಾ ಕಾರ್ಯಕರ್ತೆಯರು ಅಥವಾ ಆಡಳಿತಾಧಿಕಾರಿಗಳನ್ನು ಸೇರಿಸಲು <em>"+ ಹೊಸ ಸಿಬ್ಬಂದಿ ನಿಯೋಜಿಸಿ"</em> ಕ್ಲಿಕ್ ಮಾಡಿ.',
+      guide_adm_2: '<strong>ಸಿಬ್ಬಂದಿ ತೆಗೆದುಹಾಕುವುದು</strong>: ಮೆಮೊರಿ ಮತ್ತು ಕ್ಲೌಡ್‌ನಿಂದ ತಕ್ಷಣವೇ ಅಳಿಸಲು ಯಾವುದೇ ಸಿಬ್ಬಂದಿ ಸಾಲಿನಲ್ಲಿ <em>"✕ ತೆಗೆದುಹಾಕಿ"</em> ಕ್ಲಿಕ್ ಮಾಡಿ.',
+      guide_adm_3: '<strong>ಆಸ್ಪತ್ರೆ ಬೆಡ್ ಹಂಚಿಕೆ</strong>: ಸಾಮಾನ್ಯ, ಐಸಿಯು ಮತ್ತು ಆಮ್ಲಜನಕ ಬೆಡ್‌ಗಳ ಸಂಖ್ಯೆಯನ್ನು ನೈಜ ಸಮಯದಲ್ಲಿ ಹೊಂದಿಸಿ.',
+      guide_adm_4: '<strong>ರಕ್ತನಿಧಿ ದಾಸ್ತಾನು</strong>: ಎಲ್ಲಾ 8 ರಕ್ತದ ಗುಂಪುಗಳಲ್ಲಿ ರಕ್ತದ ಯುನಿಟ್ ದಾಸ್ತಾನನ್ನು ನಿರ್ವಹಿಸಿ.',
+      faq_header: '❓ ಸಾಮಾನ್ಯ ಪ್ರಶ್ನೋತ್ತರಗಳು (FAQ)',
+      faq_q1: 'ನನ್ನ 14-ಅಂಕಿಯ ಆಭಾ ಕಾರ್ಡ್ ಅನ್ನು ಹೇಗೆ ರಚಿಸುವುದು ಅಥವಾ ಕಂಡುಹಿಡಿಯುವುದು?',
+      faq_a1: 'ನೀವು ನಾಗರಿಕ / ರೋಗಿಯಾಗಿ ನೋಂದಾಯಿಸಿದಾಗ, ಅಧಿಕೃತ 14-ಅಂಕಿಯ ಆಯುಷ್ಮಾನ್ ಭಾರತ್ ಆಭಾ ಕಾರ್ಡ್ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ರಚನೆಯಾಗುತ್ತದೆ. ನೀವು ಪೇಷೆಂಟ್ ಹಬ್‌ನಿಂದ ನಿಮ್ಮ ಆಭಾ ಕಾರ್ಡ್ ಪ್ರಿಂಟ್ ಅಥವಾ ಡೌನ್‌ಲೋಡ್ ಮಾಡಬಹುದು.',
+      faq_q2: 'ನನ್ನ ಮೊಬೈಲ್ ಸಂಖ್ಯೆಯನ್ನು ಬಳಸಿ ನಾನು ಲಾಗಿನ್ ಆಗಬಹುದೇ?',
+      faq_a2: 'ಹೌದು! ಎಲ್ಲಾ ಪಾತ್ರಗಳು (ನಾಗರಿಕರು, ವೈದ್ಯರು, ಆಶಾ ಕಾರ್ಯಕರ್ತೆಯರು ಮತ್ತು ಆಡಳಿತಾಧಿಕಾರಿಗಳು) ತಮ್ಮ 10-ಅಂಕಿಯ ನೋಂದಾಯಿತ ಮೊಬೈಲ್ ಸಂಖ್ಯೆ ಮತ್ತು ಪಾಸ್‌ವರ್ಡ್ ಬಳಸಿ ಲಾಗಿನ್ ಆಗಬಹುದು. ಬಹು ಪಾತ್ರಗಳಿದ್ದರೆ ಆಯ್ಕೆ ಮೆನು ಕಾಣಿಸುತ್ತದೆ.',
+      faq_q3: 'ಲೈವ್ ಕ್ಲೌಡ್ ಸಿಂಕ್ರೊನೈಸೇಶನ್ ಹೇಗೆ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತದೆ?',
+      faq_a3: 'ಸ್ವಾಸ್ಥ್ಯ ಸೇತು ನೈಜ-ಸಮಯದ ವೆಬ್‌ಸಾಕೆಟ್‌ಗಳೊಂದಿಗೆ ನೇರವಾಗಿ ಸುಪಬೇಸ್ ಪೋಸ್ಟ್‌ಗ್ರೆಸ್‌ಕ್ಯೂಎಲ್‌ಗೆ ಸಂಪರ್ಕ ಹೊಂದಿದೆ. ನೀಡಲಾದ ಯಾವುದೇ ಪ್ರಿಸ್ಕ್ರಿಪ್ಷನ್, ಬೆಡ್ ಅಪ್‌ಡೇಟ್ ಅಥವಾ ಶಿಫಾರಸು ಎಲ್ಲಾ ಸಾಧನಗಳಲ್ಲಿ ತಕ್ಷಣವೇ ಸಿಂಕ್ ಆಗುತ್ತದೆ.',
+      btn_close_guide: '✓ ಅರ್ಥವಾಯಿತು, ಗೈಡ್ ಮುಚ್ಚಿ',
+
       app_title: 'ಸ್ವಾಸ್ಥ್ಯ ಸೇತು',
       app_tagline: 'ಗ್ರಾಮೀಣ ಆರೋಗ್ಯ ಕ್ಲೌಡ್ ಗ್ರಿಡ್',
       portal_welcome: 'ಸ್ವಾಸ್ಥ್ಯ ಸೇತುವಿಗೆ ಸುಸ್ವಾಗತ',
@@ -8183,6 +8586,39 @@ body[data-theme="doom"] {
   // 2. EXHAUSTIVE DIRECT PHRASE TRANSLATION MAP (FOR ALL FULL SENTENCES & BUTTONS)
   // Maps normalized English strings directly to the target language translation
   const PHRASE_TRANSLATIONS = {
+    // User Guide Sentences & Titles
+    "Swasthya Setu User Guide & Help Center": {"en":"Swasthya Setu User Guide & Help Center","hi":"स्वास्थ्य सेतु उपयोगकर्ता मार्गदर्शिका एवं सहायता केंद्र","te":"స్వాస్థ్య సేతు వినియోగదారు మార్గదర్శి & సహాయ కేంద్రం","ta":"ஸ்வாஸ்த்ய சேது பயனர் வழிகாட்டி மற்றும் உதவி மையம்","mr":"स्वास्थ्य सेतू वापरकर्ता मार्गदर्शिका आणि मदत केंद्र","bn":"স্বাস্থ্য সেতু ব্যবহারকারী নির্দেশিকা ও সহায়তা কেন্দ্র","kn":"ಸ್ವಾಸ್ಥ್ಯ ಸೇತು ಬಳಕೆದಾರರ ಮಾರ್ಗದರ್ಶಿ ಮತ್ತು ಸಹಾಯ ಕೇಂದ್ರ"},
+    "Role Tutorials, Step-by-Step Instructions & FAQs": {"en":"Role Tutorials, Step-by-Step Instructions & FAQs","hi":"भूमिका ट्यूटोरियल, चरण-दर-चरण निर्देश एवं अक्सर पूछे जाने वाले प्रश्न","te":"పాత్రల శిక్షణ, దశలవారీ సూచనలు & సాధారణ ప్రశ్నలు","ta":"பணிகளுக்கான பயிற்சிகள், படிப்படியான வழிமுறைகள் & அடிக்கடி கேட்கப்படும் கேள்விகள்","mr":"भूमिका ट्युटोरियल, टप्प्याटप्प्याने सूचना आणि वारंवार विचारले जाणारे प्रश्न","bn":"ভূমিকা টিউটোরিয়াল, ধাপে ধাপে নির্দেশাবলী এবং সাধারণ প্রশ্নোত্তর","kn":"ಪಾತ್ರಗಳ ತರಬೇತಿ, ಹಂತ-ಹಂತದ ಸೂಚನೆಗಳು ಮತ್ತು ಸಾಮಾನ್ಯ ಪ್ರಶ್ನೋತ್ತರಗಳು"},
+    "🌾 Citizen & Patient Quickstart Guide": {"en":"🌾 Citizen & Patient Quickstart Guide","hi":"🌾 नागरिक एवं मरीज त्वरित मार्गदर्शिका","te":"🌾 పౌరులు & రోగుల త్వరిత మార్గదర్శి","ta":"🌾 குடிமக்கள் & நோயாளிகள் விரைவு வழிகாட்டி","mr":"🌾 नागरिक आणि रुग्ण द्रुत मार्गदर्शिका","bn":"🌾 নাগরিক ও রোগী দ্রুত নির্দেশিকা","kn":"🌾 ನಾಗರಿಕರು ಮತ್ತು ರೋಗಿಗಳ ತ್ವರಿತ ಮಾರ್ಗದರ್ಶಿ"},
+    "Self-Registration: Click \"New User? Register\" on the login screen. Fill in your details to automatically receive your 14-digit ABHA Card.": {"en":"<strong>Self-Registration</strong>: Click <em>\"New User? Register\"</em> on the login screen. Fill in your details to automatically receive your 14-digit ABHA Card.","hi":"<strong>स्वयं-पंजीकरण</strong>: लॉगिन स्क्रीन पर <em>\"नया उपयोगकर्ता? पंजीकरण करें\"</em> पर क्लिक करें। अपना 14-अंकीय आभा कार्ड स्वचालित रूप से प्राप्त करने के लिए अपना विवरण भरें।","te":"<strong>స్వీయ-నమోదు</strong>: లాగిన్ స్క్రీన్‌పై <em>\"కొత్త వినియోగదారుడా? నమోదు చేసుకోండి\"</em> పై క్లిక్ చేయండి. మీ 14-అంకెల ఆభా కార్డును పొందడానికి వివరాలను నమోదు చేయండి.","ta":"<strong>சுய பதிவு</strong>: உள்நுழைவுத் திரையில் <em>\"புதிய பயனரா? பதிவு செய்யவும்\"</em> என்பதைக் கிளிக் செய்யவும். உங்கள் 14-இலக்க ஆபா அட்டையை உடனடியாகப் பெற விவரங்களை நிரப்பவும்.","mr":"<strong>स्वयं-नोंदणी</strong>: लॉगिन स्क्रीनवर <em>\"नवीन वापरकर्ता? नोंदणी करा\"</em> वर क्लिक करा. तुमचे १४-अंकी आभा कार्ड मिळविण्यासाठी तुमचे तपशील भरा.","bn":"<strong>স্ব-নিবন্ধন</strong>: লগইন স্ক্রিনে <em>\"নতুন ব্যবহারকারী? নিবন্ধন করুন\"</em>-এ ক্লিক করুন। আপনার ১৪-সংখ্যার আভা কার্ড পেতে আপনার বিবরণ পূরণ করুন।","kn":"<strong>ಸ್ವಯಂ-ನೋಂದಣಿ</strong>: ಲಾಗಿನ್ ಪರದೆಯಲ್ಲಿ <em>\"ಹೊಸ ಬಳಕೆದಾರರೇ? ನೋಂದಾಯಿಸಿ\"</em> ಕ್ಲಿಕ್ ಮಾಡಿ. ನಿಮ್ಮ 14-ಅಂಕಿಯ ಆಭಾ ಕಾರ್ಡ್ ಪಡೆಯಲು ವಿವರಗಳನ್ನು ಭರ್ತಿ ಮಾಡಿ."},
+    "Request Teleconsultation: Click \"+ Request Doctor Consultation\", select your preferred registered doctor, type your symptoms, and send the request.": {"en":"<strong>Request Teleconsultation</strong>: Click <em>\"+ Request Doctor Consultation\"</em>, select your preferred registered doctor, type your symptoms, and send the request.","hi":"<strong>टेलीकंसल्टेशन का अनुरोध करें</strong>: <em>\"+ डॉक्टर परामर्श का अनुरोध करें\"</em> पर क्लिक करें, अपने पसंदीदा पंजीकृत डॉक्टर का चयन करें, अपने लक्षण लिखें और अनुरोध भेजें।","te":"<strong>టెలికన్సల్టేషన్ అభ్యర్థన</strong>: <em>\"+ డాక్టర్ సంప్రదింపులను అభ్యర్థించండి\"</em> పై క్లిక్ చేసి, వైద్యుడిని ఎంచుకుని, మీ లక్షణాలను రాసి అభ్యర్థన పంపండి.","ta":"<strong>தொலைமருத்துவ ஆலோசனை</strong>: <em>\"+ மருத்துவ ஆலோசனையைக் கோருங்கள்\"</em> என்பதைக் கிளிக் செய்து, பதிவுசெய்த மருத்துவரைத் தேர்ந்தெடுத்து, உங்கள் அறிகுறிகளைப் பதிவிட்டு கோரிக்கையை அனுப்பவும்.","mr":"<strong>टेलिकन्सल्टेशन विनंती</strong>: <em>\"+ डॉक्टर सल्लामसलत विनंती करा\"</em> वर क्लिक करा, पसंतीचे नोंदणीकृत डॉक्टर निवडा, लक्षणे लिहा आणि विनंती पाठवा.","bn":"<strong>টেলিকনসাল্টেশন অনুরোধ</strong>: <em>\"+ ডাক্তারের পরামর্শের অনুরোধ করুন\"</em>-এ ক্লিক করুন, পছন্দের ডাক্তার নির্বাচন করুন, আপনার লক্ষণ লিখুন এবং অনুরোধ পাঠান।","kn":"<strong>ಟೆಲಿಸಮಾಲೋಚನೆ ವಿನಂತಿ</strong>: <em>\"+ ವೈದ್ಯರ ಸಮಾಲೋಚನೆ ವಿನಂತಿಸಿ\"</em> ಕ್ಲಿಕ್ ಮಾಡಿ, ನೋಂದಾಯಿತ ವೈದ್ಯರನ್ನು ಆಯ್ಕೆಮಾಡಿ, ನಿಮ್ಮ ರೋಗಲಕ್ಷಣಗಳನ್ನು ಬರೆದು ವಿನಂತಿ ಕಳುಹಿಸಿ."},
+    "Download e-Prescriptions: Once the doctor prescribes medications, you will hear a notification chime. Click \"📥 Download PDF\" on your prescription card to download your official ABDM PDF.": {"en":"<strong>Download e-Prescriptions</strong>: Once the doctor prescribes medications, you will hear a notification chime. Click <em>\"📥 Download PDF\"</em> on your prescription card to download your official ABDM PDF.","hi":"<strong>ई-प्रिस्क्रिप्शन डाउनलोड करें</strong>: डॉक्टर द्वारा दवाएं लिखे जाने पर आपको एक अधिसूचना घंटी सुनाई देगी। अपना आधिकारिक एबीडीएम पीडीएफ डाउनलोड करने के लिए प्रिस्क्रिप्शन कार्ड पर <em>\"📥 डाउनलोड पीडीएफ\"</em> पर क्लिक करें।","te":"<strong>ఇ-ప్రిస్క్రిప్షన్ డౌన్‌లోడ్</strong>: డాక్టర్ మందులు రాసిన తర్వాత నోటిఫికేషన్ శబ్దం వస్తుంది. అధికారిక ABDM PDF డౌన్‌లోడ్ చేయడానికి ప్రిస్క్రిప్షన్ కార్డుపై <em>\"📥 PDF డౌన్‌లోడ్\"</em> క్లిక్ చేయండి.","ta":"<strong>மின்-மருந்துச்சீட்டு பதிவிறக்கம்</strong>: மருத்துவர் மருந்துகளைப் பரிந்துரைத்ததும் ஒலி அறிவிப்பு வரும். உங்கள் அதிகாரப்பூர்வ ABDM PDF-ஐ பதிவிறக்க மருந்துச்சீட்டு அட்டையில் <em>\"📥 PDF பதிவிறக்குக\"</em> என்பதைக் கிளிக் செய்யவும்.","mr":"<strong>ई-प्रिस्क्रिप्शन डाउनलोड करा</strong>: डॉक्टरांनी औषधे लिहून दिल्यावर तुम्हाला सूचना आवाज ऐकू येईल. अधिकृत ABDM PDF डाउनलोड करण्यासाठी प्रिस्क्रिप्शन कार्डवर <em>\"📥 पीडीएफ डाउनलोड करा\"</em> वर क्लिक करा.","bn":"<strong>ই-প্রেসক্রিপশন ডাউনলোড করুন</strong>: ডাক্তার ওষুধ লিখে দিলে আপনি একটি নোটিফিকেশন পাবেন। আপনার অফিসিয়াল ABDM PDF ডাউনলোড করতে প্রেসক্রিপশন কার্ডে <em>\"📥 পিডিএফ ডাউনলোড করুন\"</em>-এ ক্লিক করুন।","kn":"<strong>ಇ-ಪ್ರಿಸ್ಕ್ರಿಪ್ಷನ್ ಡೌನ್‌ಲೋಡ್</strong>: ವೈದ್ಯರು ಔಷಧಿಗಳನ್ನು ಸೂಚಿಸಿದ ನಂತರ ನಿಮಗೆ ಅಧಿಸೂಚನೆ ಧ್ವನಿ ಕೇಳಿಸುತ್ತದೆ. ನಿಮ್ಮ ಅಧಿಕೃತ ABDM PDF ಡೌನ್‌ಲೋಡ್ ಮಾಡಲು ಪ್ರಿಸ್ಕ್ರಿಪ್ಷನ್ ಕಾರ್ಡ್‌ನಲ್ಲಿ <em>\"📥 PDF ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ\"</em> ಕ್ಲಿಕ್ ಮಾಡಿ."},
+    "Delete Prescriptions: Click \"🗑️ Delete\" after downloading to keep your health locker clean and save storage.": {"en":"<strong>Delete Prescriptions</strong>: Click <em>\"🗑️ Delete\"</em> after downloading to keep your health locker clean and save storage.","hi":"<strong>प्रिस्क्रिप्शन हटाएं</strong>: अपने स्वास्थ्य लॉकर को व्यवस्थित रखने और संग्रहण बचाने के लिए डाउनलोड करने के बाद <em>\"🗑️ हटाएं\"</em> पर क्लिक करें।","te":"<strong>ప్రిస్క్రిప్షన్ తొలగించండి</strong>: మీ హెల్త్ లాకర్‌ను శుభ్రంగా ఉంచడానికి మరియు నిల్వను ఆదా చేయడానికి డౌన్‌లోడ్ చేసిన తర్వాత <em>\"🗑️ తొలగించండి\"</em> పై క్లిక్ చేయండి.","ta":"<strong>மருந்துச்சீட்டுகளை நீக்குதல்</strong>: உங்கள் சுகாதார சேமிப்பகத்தை தூய்மையாக வைத்திருக்க பதிவிறக்கிய பிறகு <em>\"🗑️ நீக்குக\"</em> என்பதைக் கிளிக் செய்யவும்.","mr":"<strong>प्रिस्क्रिप्शन हटवा</strong>: आरोग्य लॉकर व्यवस्थित ठेवण्यासाठी डाउनलोड केल्यानंतर <em>\"🗑️ हटवा\"</em> वर क्लिक करा.","bn":"<strong>প্রেসক্রিপশন মুছুন</strong>: আপনার স্বাস্থ্য লকার পরিষ্কার রাখতে এবং স্টোরেজ বাঁচাতে ডাউনলোড করার পরে <em>\"🗑️ মুছুন\"</em>-এ ক্লিক করুন।","kn":"<strong>ಪ್ರಿಸ್ಕ್ರಿಪ್ಷನ್ ಅಳಿಸಿ</strong>: ನಿಮ್ಮ ಆರೋಗ್ಯ ಲಾಕರ್ ಸ್ವಚ್ಛವಾಗಿಡಲು ಮತ್ತು ಸಂಗ್ರಹಣೆಯನ್ನು ಉಳಿಸಲು ಡೌನ್‌ಲೋಡ್ ಮಾಡಿದ ನಂತರ <em>\"🗑️ ಅಳಿಸಿ\"</em> ಕ್ಲಿಕ್ ಮಾಡಿ."},
+    "Emergency 108 SOS: Click \"🚨 108 SOS\" or \"📍 GPS SOS\" for instant emergency ambulance dispatch.": {"en":"<strong>Emergency 108 SOS</strong>: Click <em>\"🚨 108 SOS\"</em> or <em>\"📍 GPS SOS\"</em> for instant emergency ambulance dispatch.","hi":"<strong>आपातकालीन 108 एसओएस</strong>: तत्काल आपातकालीन एम्बुलेंस सेवा के लिए <em>\"🚨 108 एसओएस\"</em> या <em>\"📍 जीपीएस एसओएस\"</em> पर क्लिक करें।","te":"<strong>అత్యవసర 108 SOS</strong>: తక్షణ అంబులెన్స్ సేవ కోసం <em>\"🚨 108 SOS\"</em> లేదా <em>\"📍 GPS SOS\"</em> పై క్లిక్ చేయండి.","ta":"<strong>அவசரகால 108 SOS</strong>: உடனடி அவசர ஆம்புலன்ஸ் சேவைக்கு <em>\"🚨 108 SOS\"</em> அல்லது <em>\"📍 GPS SOS\"</em> என்பதைக் கிளிக் செய்யவும்.","mr":"<strong>आपत्कालीन १०८ एसओएस</strong>: तात्काळ रुग्णवाहिका सेवेसाठी <em>\"🚨 १०८ एसओएस\"</em> किंवा <em>\"📍 जीपीएस एसओएस\"</em> वर क्लिक करा.","bn":"<strong>জরুরি ১০৮ এসওএস</strong>: তাত্ক্ষণিক জরুরি অ্যাম্বুলেন্স পরিষেবার জন্য <em>\"🚨 ১০৮ এসওএস\"</em> বা <em>\"📍 জিপিএস এসওএস\"</em>-এ ক্লিক করুন।","kn":"<strong>ತುರ್ತು 108 SOS</strong>: ತಕ್ಷಣದ ತುರ್ತು ಆಂಬ್ಯುಲೆನ್ಸ್ ರವಾನೆಗಾಗಿ <em>\"🚨 108 SOS\"</em> ಅಥವಾ <em>\"📍 GPS SOS\"</em> ಕ್ಲಿಕ್ ಮಾಡಿ."},
+    "🩺 Medical Officer / Doctor Quickstart Guide": {"en":"🩺 Medical Officer / Doctor Quickstart Guide","hi":"🩺 चिकित्सा अधिकारी / डॉक्टर त्वरित मार्गदर्शिका","te":"🩺 వైద్యాధికారి / డాక్టర్ త్వరిత మార్గదర్శి","ta":"🩺 மருத்துவ அலுவலர் / மருத்துவர் விரைவு வழிகாட்டி","mr":"🩺 वैद्यकीय अधिकारी / डॉक्टर द्रुत मार्गदर्शिका","bn":"🩺 মেডিকেল অফিসার / ডাক্তার দ্রুত নির্দেশিকা","kn":"🩺 ವೈದ್ಯಾಧಿಕಾರಿ / ವೈದ್ಯರ ತ್ವರಿತ ಮಾರ್ಗದರ್ಶಿ"},
+    "Manage OPD Queue: The queue displays live walk-in patients, citizen consultation requests, and ASHA referrals with triage badges.": {"en":"<strong>Manage OPD Queue</strong>: The queue displays live walk-in patients, citizen consultation requests, and ASHA referrals with triage badges.","hi":"<strong>ओपीडी कतार प्रबंधन</strong>: कतार में लाइव वॉक-इन मरीज, नागरिक परामर्श अनुरोध और ट्राइएज बैज के साथ आशा रेफरल प्रदर्शित होते हैं।","te":"<strong>OPD క్యూ నిర్వహణ</strong>: క్యూలో నేరుగా వచ్చే రోగులు, పౌరుల సంప్రదింపు అభ్యర్థనలు మరియు ఆశా రిఫరల్స్ కనిపిస్తాయి.","ta":"<strong>OPD வரிசை மேலாண்மை</strong>: இந்த வரிசை நேரடி நோயாளிகள், ஆலோசனைக் கோரிக்கைகள் மற்றும் ஆஷா பரிந்துரைகளை முன்னுரிமை பேட்ஜ்களுடன் காட்டுகிறது.","mr":"<strong>ओपीडी रांग व्यवस्थापन</strong>: रांगेत थेट येणारे रुग्ण, नागरिक सल्लामसलत विनंत्या आणि आशा संदर्भ ट्राइएज बॅजसह प्रदर्शित होतात.","bn":"<strong>ওপিডি সারি ব্যবস্থাপনা</strong>: সারিতে সরাসরি আসা রোগী, নাগরিক পরামর্শ অনুরোধ এবং ট্রায়াজ ব্যাজ সহ আশা রেফারেল প্রদর্শিত হয়।","kn":"<strong>OPD ಸರತಿ ನಿರ್ವಹಣೆ</strong>: ಸರತಿಯು ನೇರ ರೋಗಿಗಳು, ಸಮಾಲೋಚನಾ ವಿನಂತಿಗಳು ಮತ್ತು ಆಶಾ ಶಿಫಾರಸುಗಳನ್ನು ತುರ್ತು ಬ್ಯಾಡ್ಜ್‌ಗಳೊಂದಿಗೆ ಪ್ರದರ್ಶಿಸುತ್ತದೆ."},
+    "Conduct Consultation: Click \"Consult & Prescribe\" on any patient in the queue. Select Jan Aushadhi generic medicines, enter advice, and submit.": {"en":"<strong>Conduct Consultation</strong>: Click <em>\"Consult & Prescribe\"</em> on any patient in the queue. Select Jan Aushadhi generic medicines, enter advice, and submit.","hi":"<strong>परामर्श संचालित करें</strong>: कतार में किसी भी मरीज पर <em>\"परामर्श एवं दवा लिखें\"</em> पर क्लिक करें। जन औषधि जेनेरिक दवाएं चुनें, सलाह दर्ज करें और जमा करें।","te":"<strong>సంప్రదింపులు జరపండి</strong>: క్యూలోని రోగిపై <em>\"సంప్రదించండి & మందులు రాయండి\"</em> క్లిక్ చేయండి. జన్ ఔషధి జనరిక్ మందులను ఎంచుకుని, సలహాలు నమోదు చేసి సమర్పించండి.","ta":"<strong>ஆலோசனை வழங்குதல்</strong>: வரிசையில் உள்ள எந்த நோயாளியையும் கிளிக் செய்து <em>\"ஆலோசனை & மருந்துச்சீட்டு\"</em> என்பதைத் தேர்ந்தெடுக்கவும். மக்கள் மருந்தக மருந்துகளைத் தேர்ந்தெடுத்து சமர்ப்பிக்கவும்.","mr":"<strong>सल्लामसलत करा</strong>: रांगेतील कोणत्याही रुग्णावर <em>\"सल्ला द्या आणि प्रिस्क्रिप्शन लिहा\"</em> वर क्लिक करा. जन औषधी जेनेरिक औषधे निवडा, सल्ला नोंदवा आणि सबमिट करा.","bn":"<strong>পরামর্শ পরিচালনা করুন</strong>: সারির যেকোনো রোগীর উপর <em>\"পরামর্শ ও প্রেসক্রিপশন\"</em>-এ ক্লিক করুন। জন ঔষধি জেনেরিক ওষুধ নির্বাচন করুন, পরামর্শ দিন এবং জমা দিন।","kn":"<strong>ಸಮಾಲೋಚನೆ ನಡೆಸಿ</strong>: ಸರತಿಯಲ್ಲಿರುವ ಯಾವುದೇ ರೋಗಿಯ ಮೇಲೆ <em>\"ಸಮಾಲೋಚಿಸಿ ಮತ್ತು ಪ್ರಿಸ್ಕ್ರಿಪ್ಷನ್ ನೀಡಿ\"</em> ಕ್ಲಿಕ್ ಮಾಡಿ. ಜನೌಷಧಿ ಜೆನೆರಿಕ್ ಔಷಧಿಗಳನ್ನು ಆಯ್ಕೆಮಾಡಿ, ಸಲಹೆ ನೀಡಿ ಸಲ್ಲಿಸಿ."},
+    "Instant Queue Removal: Upon prescription issuance, the patient is removed from the active queue and saved in your issued prescription history.": {"en":"<strong>Instant Queue Removal</strong>: Upon prescription issuance, the patient is removed from the active queue and saved in your issued prescription history.","hi":"<strong>कतार से तत्काल निष्कासन</strong>: प्रिस्क्रिप्शन जारी होने पर, मरीज सक्रिय कतार से हट जाता है और आपके जारी किए गए प्रिस्क्रिप्शन इतिहास में सहेजा जाता है।","te":"<strong>క్యూ నుండి తక్షణ తొలగింపు</strong>: ప్రిస్క్రిప్షన్ జారీ చేసిన తర్వాత, రోగి సక్రియ క్యూ నుండి తొలగించబడి మీ ప్రిస్క్రిప్షన్ చరిత్రలో భద్రపరచబడతారు.","ta":"<strong>வரிசையிலிருந்து உடனடி நீக்கம்</strong>: மருந்துச்சீட்டு வழங்கப்பட்டதும், நோயாளி செயலில் உள்ள வரிசையிலிருந்து நீக்கப்பட்டு உங்கள் வரலாறு பகுதியில் சேமிக்கப்படுவார்.","mr":"<strong>रांगेतून त्वरित काढणे</strong>: प्रिस्क्रिप्शन दिल्यानंतर रुग्ण सक्रिय रांगेतून निघून जातो आणि तुमच्या जारी केलेल्या प्रिस्क्रिप्शन इतिहासामध्ये जतन होतो.","bn":"<strong>সারি থেকে তাত্ক্ষণিক অপসারণ</strong>: প্রেসক্রিপশন জারির পর রোগী সক্রিয় সারি থেকে অপসারিত হয় এবং আপনার প্রেসক্রিপশন ইতিহাসে সংরক্ষিত হয়।","kn":"<strong>ಸರತಿಯಿಂದ ತಕ್ಷಣದ ತೆರವು</strong>: ಪ್ರಿಸ್ಕ್ರಿಪ್ಷನ್ ನೀಡಿದ ನಂತರ, ರೋಗಿಯು ಸಕ್ರಿಯ ಸರತಿಯಿಂದ ತೆಗೆದುಹಾಕಲ್ಪಡುತ್ತಾರೆ ಮತ್ತು ನಿಮ್ಮ ಇತಿಹಾಸದಲ್ಲಿ ಉಳಿಯುತ್ತಾರೆ."},
+    "Dynamic PDF Export: Prescriptions carry your name, medical registration number, and digital signature for ABDM compliance.": {"en":"<strong>Dynamic PDF Export</strong>: Prescriptions carry your name, medical registration number, and digital signature for ABDM compliance.","hi":"<strong>डायनामिक पीडीएफ निर्यात</strong>: प्रिस्क्रिप्शन में एबीडीएम अनुपालन के लिए आपका नाम, चिकित्सा पंजीकरण संख्या और डिजिटल हस्ताक्षर शामिल होते हैं।","te":"<strong>డైనమిక్ PDF ఎగుమతి</strong>: ABDM నిబంధనల ప్రకారం ప్రిస్క్రిప్షన్‌లో మీ పేరు, రిజిస్ట్రేషన్ సంఖ్య మరియు డిజిటల్ సంతకం ఉంటాయి.","ta":"<strong>டைனமிக் PDF ஏற்றுமதி</strong>: மருந்துச்சீட்டில் ABDM விதிகளின்படி உங்கள் பெயர், மருத்துவ பதிவு எண் மற்றும் டிஜிட்டல் கையொப்பம் இடம்பெறும்.","mr":"<strong>डायनॅमिक पीडीएफ निर्यात</strong>: प्रिस्क्रिप्शनवर ABDM नियमांनुसार तुमचे नाव, वैद्यकीय नोंदणी क्रमांक आणि डिजिटल स्वाक्षरी असते.","bn":"<strong>ডায়নামিক পিডিএফ রপ্তানি</strong>: প্রেসক্রিপশনে ABDM সম্মতির জন্য আপনার নাম, মেডিকেল নিবন্ধন নম্বর এবং ডিজিটাল স্বাক্ষর থাকে।","kn":"<strong>ಡೈನಾಮಿಕ್ PDF ರಫ್ತು</strong>: ಪ್ರಿಸ್ಕ್ರಿಪ್ಷನ್‌ನಲ್ಲಿ ABDM ನಿಯಮಗಳ ಪ್ರಕಾರ ನಿಮ್ಮ ಹೆಸರು, ವೈದ್ಯಕೀಯ ನೋಂದಣಿ ಸಂಖ್ಯೆ ಮತ್ತು ಡಿಜಿಟಲ್ ಸಹಿ ಇರುತ್ತದೆ."},
+    "🤝 ASHA & ANM Frontline Field Worker Guide": {"en":"🤝 ASHA & ANM Frontline Field Worker Guide","hi":"🤝 आशा एवं एएनएम अग्रिम पंक्ति कार्यकर्ता मार्गदर्शिका","te":"🤝 ఆశా & ANM ఫ్రంట్‌లైన్ ఫీల్డ్ వర్కర్ మార్గదర్శి","ta":"🤝 ஆஷா & ஏஎன்எம் களப்பணியாளர் வழிகாட்டி","mr":"🤝 आशा आणि एएनएम फ्रंटलाइन कार्यकर्त्या मार्गदर्शिका","bn":"🤝 আশা ও এএনএম ফ্রন্টলাইন ফিল্ড কর্মী নির্দেশিকা","kn":"🤝 ಆಶಾ ಮತ್ತು ಎಎನ್‌ಎಂ ಮುಂಚೂಣಿ ಕಾರ್ಯಕರ್ತೆಯರ ಮಾರ್ಗದರ್ಶಿ"},
+    "Register & Refer Patients: Click \"+ Register & Refer Patient to Doctor\" to create an ABHA card and dispatch a referral directly to a registered doctor.": {"en":"<strong>Register & Refer Patients</strong>: Click <em>\"+ Register & Refer Patient to Doctor\"</em> to create an ABHA card and dispatch a referral directly to a registered doctor.","hi":"<strong>मरीजों का पंजीकरण और रेफरल</strong>: आभा कार्ड बनाने और पंजीकृत डॉक्टर को सीधे रेफरल भेजने के लिए <em>\"+ मरीज को पंजीकृत और रेफर करें\"</em> पर क्लिक करें।","te":"<strong>రోగుల నమోదు & రిఫరల్</strong>: ఆభా కార్డును సృష్టించి నేరుగా వైద్యుడికి రిఫర్ చేయడానికి <em>\"+ రోగిని నమోదు చేసి రిఫర్ చేయండి\"</em> పై క్లిక్ చేయండి.","ta":"<strong>நோயாளிகளைப் பதிவுசெய்து பரிந்துரைத்தல்</strong>: ஆபா அட்டையை உருவாக்கி மருத்துவரிடம் பரிந்துரைக்க <em>\"+ நோயாளியைப் பதிவு செய்து பரிந்துரைக்கவும்\"</em> என்பதைக் கிளிக் செய்யவும்.","mr":"<strong>रुग्ण नोंदणी आणि संदर्भ</strong>: आभा कार्ड तयार करण्यासाठी आणि नोंदणीकृत डॉक्टरांकडे संदर्भ पाठवण्यासाठी <em>\"+ रुग्णाची नोंदणी करा आणि संदर्भ द्या\"</em> वर क्लिक करा.","bn":"<strong>রোগীদের নিবন্ধন ও রেফারেল</strong>: একটি আভা কার্ড তৈরি করতে এবং সরাসরি নিবন্ধিত ডাক্তারের কাছে রেফারেল পাঠাতে <em>\"+ রোগী নিবন্ধন ও রেফার করুন\"</em>-এ ক্লিক করুন।","kn":"<strong>ರೋಗಿಗಳನ್ನು ನೋಂದಾಯಿಸಿ ಮತ್ತು ಶಿಫಾರಸು ಮಾಡಿ</strong>: ಆಭಾ ಕಾರ್ಡ್ ರಚಿಸಲು ಮತ್ತು ನೋಂದಾಯಿತ ವೈದ್ಯರಿಗೆ ಶಿಫಾರಸು ಕಳುಹಿಸಲು <em>\"+ ರೋಗಿಯನ್ನು ನೋಂದಾಯಿಸಿ & ವೈದ್ಯರಿಗೆ ಶಿಫಾರಸು ಮಾಡಿ\"</em> ಕ್ಲಿಕ್ ಮಾಡಿ."},
+    "Maternal ANC Care: Register pregnant mothers, record gestational weeks, BP, Hb levels, and track high-risk pregnancies.": {"en":"<strong>Maternal ANC Care</strong>: Register pregnant mothers, record gestational weeks, BP, Hb levels, and track high-risk pregnancies.","hi":"<strong>मातृ एएनसी देखभाल</strong>: गर्भवती माताओं का पंजीकरण करें, गर्भकालीन सप्ताह, बीपी, हीमोग्लोबिन स्तर दर्ज करें और उच्च जोखिम वाली गर्भावस्था को ट्रैक करें।","te":"<strong>గర్భిణీల ANC సంరక్షణ</strong>: గర్భిణీ స్త్రీలను నమోదు చేయండి, గర్భధారణ వారాలు, రక్తపోటు, హిమోగ్లోబిన్ వివరాలు నమోదు చేసి హై-రిస్క్ కేసులను పర్యవేక్షించండి.","ta":"<strong>தாய்மை ANC பராமரிப்பு</strong>: கர்ப்பிணித் தாய்மார்களைப் பதிவுசெய்து, வாரங்கள், இரத்த அழுத்தம், ஹீமோகுளோபின் அளவுகளைப் பதிவுசெய்து அதிக ஆபத்துள்ள கர்ப்பங்களைக் கண்காணிக்கவும்.","mr":"<strong>माता एएनसी काळजी</strong>: गरोदर मातांची नोंदणी करा, गर्भावस्थेचे आठवडे, बीपी, हिमोग्लोबिन पातळी नोंदवा आणि उच्च जोखमीच्या गर्भधारणेचा मागोवा घ्या.","bn":"<strong>মাতৃ এএনসি যত্ন</strong>: গর্ভবতী মায়েদের নিবন্ধন করুন, গর্ভকালীন সপ্তাহ, রক্তচাপ, হিমোগ্লোবিনের মাত্রা রেকর্ড করুন এবং উচ্চ-ঝুঁকিপূর্ণ গর্ভাবস্থা ট্র্যাক করুন।","kn":"<strong>ಗರ್ಭಿಣಿಯರ ANC ಆರೈಕೆ</strong>: ಗರ್ಭಿಣಿ ತಾಯಂದಿರನ್ನು ನೋಂದಾಯಿಸಿ, ವಾರಗಳು, ರಕ್ತದೊತ್ತಡ, ಹಿಮೋಗ್ಲೋಬಿನ್ ಮಟ್ಟವನ್ನು ದಾಖಲಿಸಿ ಮತ್ತು ಹೆಚ್ಚಿನ ಅಪಾಯದ ಗರ್ಭಧಾರಣೆಗಳನ್ನು ಟ್ರ್ಯಾಕ್ ಮಾಡಿ."},
+    "Child UIP Immunization: Track vaccine doses (BCG, Pentavalent, Rotavirus, MR) and upcoming due dates.": {"en":"<strong>Child UIP Immunization</strong>: Track vaccine doses (BCG, Pentavalent, Rotavirus, MR) and upcoming due dates.","hi":"<strong>बाल यूआईपी टीकाकरण</strong>: टीके की खुराक (बीसीजी, पेंटावेलेंट, रोटावायरस, एमआर) और आगामी देय तिथियों को ट्रैक करें।","te":"<strong>పిల్లల UIP టీకాలు</strong>: వ్యాక్సిన్ మోతాదులు (BCG, పెంటావాలెంట్, రోటావైరస్, MR) మరియు రాబోయే గడువు తేదీలను ట్రాక్ చేయండి.","ta":"<strong>குழந்தைகளுக்கான UIP தடுப்பூசி</strong>: தடுப்பூசி அளவுகள் (BCG, பென்டாவேலண்ட், ரோட்டாவைரஸ், MR) மற்றும் வரவிருக்கும் தேதிகளைக் கண்காணிக்கவும்.","mr":"<strong>बाल यूआयपी लसीकरण</strong>: लसीचे डोस (बीसीजी, पेंटाव्हॅलेंट, रोटाव्हायरस, एमआर) आणि आगामी देय तारखांचा मागोवा घ्या.","bn":"<strong>শিশু ইউআইপি টিকাদান</strong>: ভ্যাকসিনের ডোজ (বিসিজি, পেন্টাভ্যালেন্ট, রোটাভাইরাস, এমআর) এবং আসন্ন তারিখগুলি ট্র্যাক করুন।","kn":"<strong>ಮಕ್ಕಳ UIP ಲಸಿಕೆ</strong>: ಲಸಿಕೆ ಪ್ರಮಾಣಗಳನ್ನು (BCG, ಪೆಂಟಾವಲೆಂಟ್, ರೋಟಾವೈರಸ್, MR) ಮತ್ತು ಮುಂಬರುವ ದಿನಾಂಕಗಳನ್ನು ಟ್ರ್ಯಾಕ್ ಮಾಡಿ."},
+    "Master Field Registry: View all referrals, ANC records, vaccines, and home visit logs in a consolidated master table.": {"en":"<strong>Master Field Registry</strong>: View all referrals, ANC records, vaccines, and home visit logs in a consolidated master table.","hi":"<strong>मास्टर फील्ड रजिस्ट्री</strong>: एक समेकित मास्टर तालिका में सभी रेफरल, एएनसी रिकॉर्ड, टीके और गृह भ्रमण लॉग देखें।","te":"<strong>మాస్టర్ ఫీల్డ్ రిజిస్ట్రీ</strong>: అన్ని రిఫరల్స్, ANC రికార్డులు, టీకాలు మరియు ఇంటి సందర్శనల వివరాలను ఒకే పట్టికలో వీక్షించండి.","ta":"<strong>முதன்மை களப் பதிவேடு</strong>: அனைத்து பரிந்துரைகள், ANC பதிவுகள், தடுப்பூசிகள் மற்றும் களப்பயண விவரங்களை ஒரே அட்டவணையில் காண்க.","mr":"<strong>मास्टर फील्ड नोंदवही</strong>: सर्व संदर्भ, एएनसी नोंदी, लस आणि घरभेटींची माहिती एका एकत्रित तक्त्यामध्ये पहा.","bn":"<strong>মাস্টার ফিল্ড রেজিস্ট্রি</strong>: একটি সমন্বিত মাস্টার টেবিলে সমস্ত রেফারেল, এএনসি রেকর্ড, ভ্যাকসিন এবং হোম ভিজিট লগ দেখুন।","kn":"<strong>ಮುಖ್ಯ ಕ್ಷೇತ್ರ ದಾಖಲಾತಿ</strong>: ಎಲ್ಲಾ ಶಿಫಾರಸುಗಳು, ANC ದಾಖಲೆಗಳು, ಲಸಿಕೆಗಳು ಮತ್ತು ಮನೆ ಭೇಟಿಗಳ ವಿವರಗಳನ್ನು ಒಂದೇ ಕೋಷ್ಟಕದಲ್ಲಿ ವೀಕ್ಷಿಸಿ."},
+    "👑 District Health Administrator Guide": {"en":"👑 District Health Administrator Guide","hi":"👑 जिला स्वास्थ्य प्रशासक मार्गदर्शिका","te":"👑 జిల్లా ఆరోగ్య నిర్వాహకుల మార్గదర్శి","ta":"👑 மாவட்ட சுகாதார நிர்வாகி வழிகாட்டி","mr":"👑 जिल्हा आरोग्य प्रशासक मार्गदर्शिका","bn":"👑 জেলা স্বাস্থ্য প্রশাসক নির্দেশিকা","kn":"👑 ಜಿಲ್ಲಾ ಆರೋಗ್ಯ ಆಡಳಿತಾಧಿಕಾರಿ ಮಾರ್ಗದರ್ಶಿ"},
+    "Provision Staff: Click \"+ Provision New Staff\" to create Doctors, ASHA workers, or other Admins with temporary credentials.": {"en":"<strong>Provision Staff</strong>: Click <em>\"+ Provision New Staff\"</em> to create Doctors, ASHA workers, or other Admins with temporary credentials.","hi":"<strong>कर्मचारी नियुक्ति</strong>: अस्थायी क्रेडेंशियल्स के साथ डॉक्टरों, आशा कार्यकर्ताओं या अन्य व्यवस्थापकों को जोड़ने के लिए <em>\"+ नए कर्मचारियों की नियुक्ति करें\"</em> पर क्लिक करें।","te":"<strong>సిబ్బంది నియామకం</strong>: తాత్కాలిక వివరాలతో వైద్యులు, ఆశా కార్యకర్తలు లేదా ఇతర నిర్వాహకులను చేర్చడానికి <em>\"+ కొత్త సిబ్బందిని నియమించండి\"</em> పై క్లిಕ್ చేయండి.","ta":"<strong>பணியாளர் நியமனம்</strong>: தற்காலிக உள்நுழைவு விவரங்களுடன் மருத்துவர்கள், ஆஷா பணியாளர்கள் அல்லது நிர்வாகிகளைச் சேர்க்க <em>\"+ புதிய பணியாளரை நியமிக்கவும்\"</em> என்பதைக் கிளிக் செய்யவும்.","mr":"<strong>कर्मचारी तरतूद</strong>: तात्पुरत्या ओळखपत्रांसह डॉक्टर, आशा कार्यकर्त्या किंवा इतर प्रशासक तयार करण्यासाठी <em>\"+ नवीन कर्मचारी नियुक्त करा\"</em> वर क्लिक करा.","bn":"<strong>কর্মী নিয়োগ</strong>: অস্থায়ী শংসাপত্র সহ ডাক্তার, আশা কর্মী বা অন্যান্য প্রশাসক তৈরি করতে <em>\"+ নতুন কর্মী নিয়োগ করুন\"</em>-এ ক্লিক করুন।","kn":"<strong>ಸಿಬ್ಬಂದಿ ನಿಯೋಜನೆ</strong>: ತಾತ್ಕಾಲಿಕ ರುಜುವಾತುಗಳೊಂದಿಗೆ ವೈದ್ಯರು, ಆಶಾ ಕಾರ್ಯಕರ್ತೆಯರು ಅಥವಾ ಆಡಳಿತಾಧಿಕಾರಿಗಳನ್ನು ಸೇರಿಸಲು <em>\"+ ಹೊಸ ಸಿಬ್ಬಂದಿ ನಿಯೋಜಿಸಿ\"</em> ಕ್ಲಿಕ್ ಮಾಡಿ."},
+    "Live Staff Removal: Click \"✕ Remove\" on any staff row to immediately delete from local memory and Supabase Cloud.": {"en":"<strong>Live Staff Removal</strong>: Click <em>\"✕ Remove\"</em> on any staff row to immediately delete from local memory and Supabase Cloud.","hi":"<strong>कर्मचारी निष्कासन</strong>: स्थानीय मेमोरी और सुपरबेस क्लाउड से तुरंत हटाने के लिए किसी भी कर्मचारी पंक्ति पर <em>\"✕ हटाएं\"</em> पर क्लिक करें।","te":"<strong>సిబ్బందిని తొలగించడం</strong>: స్థానిక మెమరీ మరియు సుపాబేస్ క్లౌడ్ నుండి తక్షణమే తొలగించడానికి సిబ్బంది వరుసపై <em>\"✕ తొలగించండి\"</em> క్లిక్ చేయండి.","ta":"<strong>பணியாளர் நீக்கம்</strong>: மெமரி மற்றும் கிளவுடிலிருந்து உடனடியாக நீக்க எந்தவொரு பணியாளர் வரிசையிலும் <em>\"✕ நீக்குக\"</em> என்பதைக் கிளிக் செய்யவும்.","mr":"<strong>कर्मचारी काढणे</strong>: स्थानिक मेमरी आणि क्लाउडवरून त्वरित हटवण्यासाठी कोणत्याही कर्मचाऱ्याच्या पंक्तीवर <em>\"✕ हटवा\"</em> वर क्लिक करा.","bn":"<strong>কর্মী অপসারণ</strong>: স্থানীয় মেমরি এবং ক্লাউড থেকে তাত্ক্ষণিকভাবে মুছে ফেলতে যেকোনো কর্মী সারিতে <em>\"✕ সরান\"</em>-এ ক্লিক করুন।","kn":"<strong>ಸಿಬ್ಬಂದಿ ತೆಗೆದುಹಾಕುವುದು</strong>: ಮೆಮೊರಿ ಮತ್ತು ಕ್ಲೌಡ್‌ನಿಂದ ತಕ್ಷಣವೇ ಅಳಿಸಲು ಯಾವುದೇ ಸಿಬ್ಬಂದಿ ಸಾಲಿನಲ್ಲಿ <em>\"✕ ತೆಗೆದುಹಾಕಿ\"</em> ಕ್ಲಿಕ್ ಮಾಡಿ."},
+    "Hospital Bed Allocation: Adjust general, ICU, and oxygen bed counts in real time.": {"en":"<strong>Hospital Bed Allocation</strong>: Adjust general, ICU, and oxygen bed counts in real time.","hi":"<strong>अस्पताल बिस्तर आवंटन</strong>: वास्तविक समय में सामान्य, आईसीयू और ऑक्सीजन बिस्तर संख्या समायोजित करें।","te":"<strong>ఆసుపత్రి బెడ్ కేటాయింపు</strong>: సాధారణ, ఐసియు మరియు ఆక్సిజన్ బెడ్ల సంఖ్యను రియల్ టైమ్‌లో సర్దుబాటు చేయండి.","ta":"<strong>மருத்துவமனை படுக்கை ஒதுக்கீடு</strong>: பொது, ஐசியூ மற்றும் ஆக்சிஜன் படுக்கை எண்ணிக்கையை நிகழ்நேரத்தில் மாற்றியமைக்கவும்.","mr":"<strong>रुग्णालय खाटा वाटप</strong>: सर्वसाधारण, आयसीयू आणि ऑक्सिजन खाटांची संख्या थेट वेळेत समायोजित करा.","bn":"<strong>হাসপাতাল শয্যা বরাদ্দ</strong>: রিয়েল-টাইমে সাধারণ, আইসিইউ এবং অক্সিজেন শয্যা সংখ্যা সমন্বয় করুন।","kn":"<strong>ಆಸ್ಪತ್ರೆ ಬೆಡ್ ಹಂಚಿಕೆ</strong>: ಸಾಮಾನ್ಯ, ಐಸಿಯು ಮತ್ತು ಆಮ್ಲಜನಕ ಬೆಡ್‌ಗಳ ಸಂಖ್ಯೆಯನ್ನು ನೈಜ ಸಮಯದಲ್ಲಿ ಹೊಂದಿಸಿ."},
+    "Blood Bank Stock: Manage blood unit inventory across all 8 blood groups.": {"en":"<strong>Blood Bank Stock</strong>: Manage blood unit inventory across all 8 blood groups.","hi":"<strong>रक्त बैंक स्टॉक</strong>: सभी 8 रक्त समूहों में रक्त इकाई सूची का प्रबंधन करें।","te":"<strong>బ్లడ్ బ్యాంక్ నిల్వ</strong>: మొత్తం 8 రక్త సమూహాలలో రక్తం యూనిట్ల నిల్వను నిర్వహించండి.","ta":"<strong>ரத்த வங்கி இருப்பு</strong>: அனைத்து 8 ரத்தப் பிரிவுகளிலும் ரத்த அலகுகளின் இருப்பை நிர்வகிக்கவும்.","mr":"<strong>रक्तपेढी साठा</strong>: सर्व ८ रक्तगटांमधील रक्त युनिट साठ्याचे व्यवस्थापन करा.","bn":"<strong>ব্লাড ব্যাংক স্টক</strong>: সমস্ত ৮টি রক্তদলের রক্তের ইউনিট ইনভেন্টরি পরিচালনা করুন।","kn":"<strong>ರಕ್ತನಿಧಿ ದಾಸ್ತಾನು</strong>: ಎಲ್ಲಾ 8 ರಕ್ತದ ಗುಂಪುಗಳಲ್ಲಿ ರಕ್ತದ ಯುನಿಟ್ ದಾಸ್ತಾನನ್ನು ನಿರ್ವಹಿಸಿ."},
+    "❓ Frequently Asked Questions (FAQ)": {"en":"❓ Frequently Asked Questions (FAQ)","hi":"❓ अक्सर पूछे जाने वाले प्रश्न (FAQ)","te":"❓ సాధారణ ప్రశ్నలు & సమాధానాలు (FAQ)","ta":"❓ அடிக்கடி கேட்கப்படும் கேள்விகள் (FAQ)","mr":"❓ वारंवार विचारले जाणारे प्रश्न (FAQ)","bn":"❓ সাধারণ জিজ্ঞাসা ও উত্তর (FAQ)","kn":"❓ ಸಾಮಾನ್ಯ ಪ್ರಶ್ನೋತ್ತರಗಳು (FAQ)"},
+    "How do I create or find my 14-digit ABHA Card?": {"en":"How do I create or find my 14-digit ABHA Card?","hi":"मैं अपना 14-अंकीय आभा कार्ड कैसे बनाऊं या प्राप्त करूं?","te":"నా 14-అంకెల ఆభా కార్డును ఎలా సృಷ್ಟించాలి లేదా కనుగొనాలి?","ta":"எனது 14-இலக்க ஆபா அட்டையை எவ்வாறு உருவாக்குவது அல்லது கண்டுபிடிப்பது?","mr":"मी माझे १४-अंकी आभा कार्ड कसे तयार करू किंवा शोधू?","bn":"আমি কিভাবে আমার ১৪-সংখ্যার আভা কার্ড তৈরি বা খুঁজে পাব?","kn":"ನನ್ನ 14-ಅಂಕಿಯ ಆಭಾ ಕಾರ್ಡ್ ಅನ್ನು ಹೇಗೆ ರಚಿಸುವುದು ಅಥವಾ ಕಂಡುಹಿಡಿಯುವುದು?"},
+    "When you register as a Citizen / Patient, an official 14-digit Ayushman Bharat ABHA card is generated automatically. You can print or download your ABHA card from the Patient Hub.": {"en":"When you register as a Citizen / Patient, an official 14-digit Ayushman Bharat ABHA card is generated automatically. You can print or download your ABHA card from the Patient Hub.","hi":"जब आप नागरिक / मरीज के रूप में पंजीकरण करते हैं, तो एक आधिकारिक 14-अंकीय आयुष्मान भारत आभा कार्ड स्वचालित रूप से उत्पन्न होता है। आप मरीज हब से अपना आभा कार्ड प्रिंट या डाउनलोड कर सकते हैं।","te":"మీరు పౌరుడు / రోగిగా నమోదు చేసుకున్నప్పుడు, అధికారిక 14-అంకెల ఆయుష్మాన్ భారత్ ఆభా కార్డ్ స్వయంచಾಲితంగా సృష్టించబడుతుంది. మీరు పేషెంట్ హబ్ నుండి మీ ఆభా కార్డును ప్రింట్ లేదా డౌన్‌లోడ్ చేసుకోవచ్చు.","ta":"நீங்கள் குடிமகன் / நோயாளியாகப் பதிவு செய்யும்போது, 14-இலக்க ஆயுஷ்மான் பாரத் ஆபா அட்டை தானாகவே உருவாக்கப்படும். நோயாளி மையத்திலிருந்து உங்கள் ஆபா அட்டையை அச்சிடலாம் அல்லது பதிவிறக்கலாம்.","mr":"जेव्हा तुम्ही नागरिक / रुग्ण म्हणून नोंदणी करता तेव्हा अधिकृत १४-अंकी आयुष्मान भारत आभा कार्ड आपोआप तयार होते. तुम्ही पेशंट हबमधून तुमचे आभा कार्ड प्रिंट किंवा डाउनलोड करू शकता.","bn":"আপনি যখন নাগরিক / রোগী হিসাবে নিবন্ধন করেন, তখন একটি অফিসিয়াল ১৪-সংখ্যার আয়ুষ্মান ভারত আভা কার্ড স্বয়ংক্রিয়ভাবে তৈরি হয়। আপনি পেশেন্ট হাব থেকে আপনার আভা কার্ড প্রিন্ট বা ডাউনলোড করতে পারেন।","kn":"ನೀವು ನಾಗರಿಕ / ರೋಗಿಯಾಗಿ ನೋಂದಾಯಿಸಿದಾಗ, ಅಧಿಕೃತ 14-ಅಂಕಿಯ ಆಯುಷ್ಮಾನ್ ಭಾರತ್ ಆಭಾ ಕಾರ್ಡ್ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ರಚನೆಯಾಗುತ್ತದೆ. ನೀವು ಪೇಷೆಂಟ್ ಹಬ್‌ನಿಂದ ನಿಮ್ಮ ಆಭಾ ಕಾರ್ಡ್ ಪ್ರಿಂಟ್ ಅಥವಾ ಡೌನ್‌ಲೋಡ್ ಮಾಡಬಹುದು."},
+    "Can I log in using my mobile number?": {"en":"Can I log in using my mobile number?","hi":"क्या मैं अपने मोबाइल नंबर का उपयोग करके लॉगिन कर सकता हूँ?","te":"నేను నా మొబైల్ నంబర్‌తో లాగిన్ అవ్వవచ్చా?","ta":"எனது கைபேசி எண்ணைப் பயன்படுத்தி உள்நுழைய முடியுமா?","mr":"मी माझ्या मोबाइल क्रमांकाने लॉग इन करू शकतो का?","bn":"আমি কি আমার মোবাইল নম্বর ব্যবহার করে লগইন করতে পারি?","kn":"ನನ್ನ ಮೊಬೈಲ್ ಸಂಖ್ಯೆಯನ್ನು ಬಳಸಿ ನಾನು ಲಾಗಿನ್ ಆಗಬಹುದೇ?"},
+    "Yes! All roles (Citizens, Doctors, ASHA workers, and Admins) can log in using their 10-digit registered mobile number along with their private password. If you have multiple roles, a role selection menu will appear.": {"en":"Yes! All roles (Citizens, Doctors, ASHA workers, and Admins) can log in using their 10-digit registered mobile number along with their private password. If you have multiple roles, a role selection menu will appear.","hi":"हाँ! सभी भूमिकाएं (नागरिक, डॉक्टर, आशा कार्यकर्ता और व्यवस्थापक) अपने 10-अंकीय पंजीकृत मोबाइल नंबर और पासवर्ड के साथ लॉगिन कर सकते हैं। यदि आपकी एक से अधिक भूमिकाएं हैं, तो भूमिका चयन मेनू दिखाई देगा।","te":"అవును! అన్ని పాత్రలు (పౌరులు, వైద్యులు, ఆశా కార్యకర్తలు మరియు నిర్వాహకులు) తమ 10-అంకెల నమోదిత మొబైల్ నంబర్ మరియు పాస్‌వర్డ్‌తో లాగిన్ అవ్వవచ్చు. బహుళ పాత్రలు ఉంటే ఎంపిక మెనూ కనిపిస్తుంది.","ta":"ஆம்! அனைத்து பொறுப்புகளும் (குடிமக்கள், மருத்துவர்கள், ஆஷா பணியாளர்கள் மற்றும் நிர்வாகிகள்) தங்கள் 10-இலக்க பதிவுசெய்யப்பட்ட கைபேசி எண் மற்றும் கடவுச்சொல் மூலம் உள்நுழையலாம். ஒன்றுக்கு மேற்பட்ட பொறுப்புகள் இருந்தால் தேர்வு மெனு தோன்றும்.","mr":"होय! सर्व भूमिका (नागरिक, डॉक्टर, आशा कार्यकर्त्या आणि प्रशासक) त्यांच्या १०-अंकी नोंदणीकृत मोबाइल क्रमांकाने आणि पासवर्डने लॉग इन करू शकतात. एकापेक्षा जास्त भूमिका असल्यास निवड मेनू दिसेल.","bn":"হ্যাঁ! সমস্ত ভূমিকা (নাগরিক, ডাক্তার, আশা কর্মী এবং প্রশাসক) তাদের ১০-সংখ্যার নিবন্ধিত মোবাইল নম্বর এবং পাসওয়ার্ড ব্যবহার করে লগইন করতে পারেন। একাধিক ভূমিকা থাকলে ভূমিকা নির্বাচন মেনু প্রদর্শিত হবে।","kn":"ಹೌದು! ಎಲ್ಲಾ ಪಾತ್ರಗಳು (ನಾಗರಿಕರು, ವೈದ್ಯರು, ಆಶಾ ಕಾರ್ಯಕರ್ತೆಯರು ಮತ್ತು ಆಡಳಿತಾಧಿಕಾರಿಗಳು) ತಮ್ಮ 10-ಅಂಕಿಯ ನೋಂದಾಯಿತ ಮೊಬೈಲ್ ಸಂಖ್ಯೆ ಮತ್ತು ಪಾಸ್‌ವರ್ಡ್ ಬಳಸಿ ಲಾಗಿನ್ ಆಗಬಹುದು. ಬಹು ಪಾತ್ರಗಳಿದ್ದರೆ ಆಯ್ಕೆ ಮೆನು ಕಾಣಿಸುತ್ತದೆ."},
+    "How does live cloud synchronization work?": {"en":"How does live cloud synchronization work?","hi":"लाइव क्लाउड सिंक्रोनाइज़ेशन कैसे काम करता है?","te":"లైవ్ క్లౌడ్ సింక్రొనైజేషన్ ఎలా పనిచేస్తుంది?","ta":"நேரலை கிளவுட் ஒத்திசைவு எவ்வாறு செயல்படுகிறது?","mr":"थेट क्लाउड सिंक्रोनाइझेशन कसे कार्य करते?","bn":"লাইভ ক্লাউড সিঙ্ক্রোনাইজেশন কিভাবে কাজ করে?","kn":"ಲೈವ್ ಕ್ಲೌಡ್ ಸಿಂಕ್ರೊನೈಸೇಶನ್ ಹೇಗೆ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತದೆ?"},
+    "Swasthya Setu is connected directly to Supabase PostgreSQL with real-time WebSockets. Any prescription issued, bed updated, or referral sent syncs instantly across all devices.": {"en":"Swasthya Setu is connected directly to Supabase PostgreSQL with real-time WebSockets. Any prescription issued, bed updated, or referral sent syncs instantly across all devices.","hi":"स्वास्थ्य सेतु रीयल-टाइम वेबसॉकेट्स के साथ सीधे सुपरबेस पोस्टग्रेएसक्यूएल से जुड़ा हुआ है। जारी किया गया कोई भी प्रिस्क्रिप्शन, अपडेट किया गया बिस्तर या भेजा गया रेफरल सभी उपकरणों पर तुरंत सिंक हो जाता है।","te":"స్వాస్థ್ಯ సేతు రియల్-టైమ్ వెబ్‌సాకెట్‌లతో నేరుగా సుపాబేస్ పోస్ట్‌గ్రేSQLకి అనుసంధానించబడింది. జారీ చేసిన ప్రిస్క్రిప్షన్, బెడ్ అప్‌డేట్ లేదా రిఫరల్ అన్ని పరికరాల్లో తక్షణమే సింక్ అవుతాయి.","ta":"ஸ்வாஸ்த்ய சேது நிகழ்நேர வெப்சாக்கெட்டுகளுடன் நேரடியாக சூபாபேஸ் போஸ்ட்கிரெஸ்கியூஎல்-உடன் இணைக்கப்பட்டுள்ளது. பரிந்துரைக்கப்பட்ட மருந்துச்சீட்டு, படுக்கை விவரங்கள் அல்லது பரிந்துரைகள் அனைத்து சாதனங்களிலும் உடனடியாக ஒத்திசைக்கப்படும்.","mr":"स्वास्थ्य सेतू थेट रीअल-टाइम वेबसॉकेट्सद्वारे सुपाबेसशी जोडलेला आहे. दिलेले कोणतेही प्रिस्क्रिप्शन, खाटांची माहिती किंवा पाठवलेला संदर्भ सर्व उपकरणांवर त्वरित सिंक होतो.","bn":"স্বাস্থ্য সেতু রিয়েল-টাইম ওয়েবসকেটের সাথে সরাসরি সুপাবেস পোস্টগ্রেএসকিউএল-এর সাথে সংযুক্ত। যেকোনো প্রেসক্রিপশন, শয্যা আপডেট বা রেফারেল সমস্ত ডিভাইসে তাত্ক্ষণিকভাবে সিঙ্ক হয়।","kn":"ಸ್ವಾಸ್ಥ್ಯ ಸೇತು ನೈಜ-ಸಮಯದ ವೆಬ್‌ಸಾಕೆಟ್‌ಗಳೊಂದಿಗೆ ನೇರವಾಗಿ ಸುಪಬೇಸ್ ಪೋಸ್ಟ್‌ಗ್ರೆಸ್‌ಕ್ಯೂಎಲ್‌ಗೆ ಸಂಪರ್ಕ ಹೊಂದಿದೆ. ನೀಡಲಾದ ಯಾವುದೇ ಪ್ರಿಸ್ಕ್ರಿಪ್ಷನ್, ಬೆಡ್ ಅಪ್‌ಡೇಟ್ ಅಥವಾ ಶಿಫಾರಸು ಎಲ್ಲಾ ಸಾಧನಗಳಲ್ಲಿ ತಕ್ಷಣವೇ ಸಿಂಕ್ ಆಗುತ್ತದೆ."},
+    "✓ Got It, Close Guide": {"en":"✓ Got It, Close Guide","hi":"✓ समझ गए, गाइड बंद करें","te":"✓ అర్థమైంది, గైడ్‌ను మూసివేయండి","ta":"✓ புரிந்தது, வழிகாட்டியை மூடவும்","mr":"✓ समजले, मार्गदर्शक बंद करा","bn":"✓ বুঝেছি, গাইড বন্ধ করুন","kn":"✓ ಅರ್ಥವಾಯಿತು, ಗೈಡ್ ಮುಚ್ಚಿ"},
+
     // --- SHORTHAND UI PHRASES ---
     "ASHA Field Tracker": {"hi":"आशा फील्ड ट्रैकर","te":"ఆశా ఫీల్డ్ ట్రాకర్","ta":"ஆஷா கள கண்காணிப்பாளர்","mr":"आशा फील्ड ट्रॅकर","bn":"আশা ফিল্ড ট্র্যাকার","kn":"ಆಶಾ ಕ್ಷೇತ್ರ ಟ್ರ್ಯಾಕರ್"},
     "Talk to Health AI": {"hi":"स्वास्थ्य एआई से बात करें","te":"హెల్త్ AI తో మాట్లాడండి","ta":"சுகாதார AI உடன் பேசுங்கள்","mr":"आरोग्य AI शी बोला","bn":"স্বাস্থ্য এআইয়ের সাথে কথা বলুন","kn":"ಆರೋಗ್ಯ AI ಜೊತೆ ಮಾತನಾಡಿ"},
@@ -8675,19 +9111,22 @@ body[data-theme="doom"] {
         }
       }
 
-      // 4. Vocabulary replacement for compound clinical phrases
-      let replaced = coreText;
-      let hasRepl = false;
-      for (const word in this.vocabMap) {
-        if (this.vocabMap[word][targetLang]) {
-          const reg = new RegExp('\\b' + word + '\\b', 'gi');
-          if (reg.test(replaced)) {
-            replaced = replaced.replace(reg, this.vocabMap[word][targetLang]);
-            hasRepl = true;
+      // 4. Vocabulary replacement for compound clinical phrases ONLY (never for sentences/paragraphs)
+      const wordCount = coreText.trim().split(/\s+/).length;
+      if (wordCount <= 3 && coreText.length <= 30) {
+        let replaced = coreText;
+        let hasRepl = false;
+        for (const word in this.vocabMap) {
+          if (this.vocabMap[word][targetLang]) {
+            const reg = new RegExp('\\b' + word + '\\b', 'gi');
+            if (reg.test(replaced)) {
+              replaced = replaced.replace(reg, this.vocabMap[word][targetLang]);
+              hasRepl = true;
+            }
           }
         }
+        if (hasRepl) return prefix + replaced;
       }
-      if (hasRepl) return prefix + replaced;
 
       return text;
     }
@@ -8751,7 +9190,11 @@ body[data-theme="doom"] {
       document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');
         if (dict[key]) {
-          el.textContent = dict[key];
+          if (dict[key].includes('<') && dict[key].includes('>')) {
+            el.innerHTML = dict[key];
+          } else {
+            el.textContent = dict[key];
+          }
         }
       });
 
@@ -8785,6 +9228,8 @@ body[data-theme="doom"] {
               if (node.parentElement.closest('#langSelect, .lang-select')) return NodeFilter.FILTER_REJECT;
               // Ignore user input fields
               if (node.parentElement.tagName === 'INPUT' || node.parentElement.isContentEditable) return NodeFilter.FILTER_REJECT;
+              // Ignore elements managed by data-i18n to prevent conflicting partial replacements
+              if (node.parentElement.closest('[data-i18n]')) return NodeFilter.FILTER_REJECT;
 
               const val = node.nodeValue.trim();
               if (!val || val.length <= 1) return NodeFilter.FILTER_REJECT;
@@ -8839,6 +9284,7 @@ body[data-theme="doom"] {
 
         // 3. Option elements inside Selects (excluding langSelect)
         document.querySelectorAll('select:not(#langSelect) option').forEach(opt => {
+          if (opt.closest('[data-i18n]') || opt.hasAttribute('data-i18n')) return;
           if (opt._origText === undefined) {
             opt._origText = opt.textContent;
           }
