@@ -1676,33 +1676,41 @@ body[data-theme="doom"] {
 
     
     
-    <!-- 1. CITIZEN / PATIENT LOGIN FORM (MOBILE PASSWORD / PIN + SMS OTP) -->
-    <div id="formCardPatient" class="auth-form-card">
+    <!-- 1. CITIZEN / PATIENT LOGIN FORM (Mobile / ABHA -> Password/PIN -> SMS OTP -> Dashboard) -->
+    <div id="formCardPatient" class="auth-form-card" style="display:block;">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
         <div style="width:46px;height:46px;background:rgba(22,163,74,0.15);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;">
           🌾
         </div>
         <div>
           <h2 style="font-size:18px;color:var(--ink);font-weight:800;">Citizen &amp; Patient Portal</h2>
-          <small style="color:var(--muted);">Universal Access with Mobile Number, Password / PIN or SMS OTP</small>
+          <small style="color:var(--muted);">Secure 2-Factor Healthcare Access: Password &amp; SMS OTP</small>
         </div>
       </div>
 
-      <!-- CITIZEN AUTH METHOD SUB-TABS -->
-      <div style="display:flex;gap:6px;background:rgba(0,0,0,0.22);padding:4px;border-radius:12px;margin-bottom:16px;border:1px solid rgba(255,255,255,0.08);">
-        <button type="button" id="btnCitizenTabPass" onclick="switchCitizenAuthMode('password')" class="btn-glass" style="flex:1;padding:8px 12px;font-size:12px;font-weight:800;border-radius:8px;background:var(--primary-bright);color:#ffffff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
-          <span>🔑</span> <span>Mobile &amp; Password / PIN</span>
-        </button>
-        <button type="button" id="btnCitizenTabOtp" onclick="switchCitizenAuthMode('otp')" class="btn-glass" style="flex:1;padding:8px 12px;font-size:12px;font-weight:800;border-radius:8px;background:transparent;color:var(--muted);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
-          <span>📲</span> <span>Mobile SMS OTP</span>
-        </button>
+      <!-- PROGRESS INDICATOR STEPPER: 1. Login -> 2. Verify OTP -> 3. Dashboard -->
+      <div class="citizen-stepper-container" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;background:rgba(0,0,0,0.22);padding:8px 12px;border-radius:12px;border:1px solid rgba(255,255,255,0.08);font-size:12px;font-weight:700;">
+        <div id="stepBadge1" style="display:flex;align-items:center;gap:6px;color:#ffffff;background:#16a34a;padding:5px 10px;border-radius:20px;transition:all 0.3s ease;">
+          <span id="stepIcon1" style="width:18px;height:18px;background:#ffffff;color:#16a34a;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;">1</span>
+          <span>Login</span>
+        </div>
+        <div id="stepLine1" style="flex:1;height:2px;background:rgba(255,255,255,0.15);margin:0 6px;"></div>
+        <div id="stepBadge2" style="display:flex;align-items:center;gap:6px;color:var(--muted);padding:5px 10px;border-radius:20px;transition:all 0.3s ease;">
+          <span id="stepIcon2" style="width:18px;height:18px;background:rgba(255,255,255,0.1);color:var(--muted);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;">2</span>
+          <span>Verify OTP</span>
+        </div>
+        <div id="stepLine2" style="flex:1;height:2px;background:rgba(255,255,255,0.15);margin:0 6px;"></div>
+        <div id="stepBadge3" style="display:flex;align-items:center;gap:6px;color:var(--muted);padding:5px 10px;border-radius:20px;transition:all 0.3s ease;">
+          <span id="stepIcon3" style="width:18px;height:18px;background:rgba(255,255,255,0.1);color:var(--muted);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;">3</span>
+          <span>Dashboard</span>
+        </div>
       </div>
 
-      <!-- CITIZEN OPTION A: MOBILE + PASSWORD / PIN -->
-      <div id="citizenScreenPassword">
-        <div id="citizenPassError" style="display:none;background:rgba(220,38,38,0.12);border:1.5px solid #dc2626;border-radius:10px;padding:10px 14px;color:#dc2626;font-size:12.5px;font-weight:600;margin-bottom:14px;"></div>
+      <!-- STEP 1 SCREEN: ENTER MOBILE/ABHA + PASSWORD/PIN -->
+      <div id="citizenStepLogin">
+        <div id="citizenLoginError" style="display:none;background:rgba(220,38,38,0.12);border:1.5px solid #dc2626;border-radius:10px;padding:10px 14px;color:#dc2626;font-size:12.5px;font-weight:600;margin-bottom:14px;"></div>
 
-        <form onsubmit="handleCitizenPasswordAuth(event)">
+        <form onsubmit="handleCitizenLoginStep1(event)">
           <div style="margin-bottom:14px;">
             <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:6px;">Registered Mobile Number or 14-Digit ABHA ID *</label>
             <input type="text" id="patientInputId" class="input-field" placeholder="e.g. 9876543210 or 14-8921-4402-9912" autocomplete="username" required style="width:100%;height:46px;font-size:14px;font-weight:600;">
@@ -1716,68 +1724,45 @@ body[data-theme="doom"] {
             <input type="password" id="patientInputPass" class="input-field" placeholder="Enter your password or 4-digit PIN" autocomplete="current-password" required style="width:100%;height:46px;font-size:14px;">
           </div>
 
-          <button type="submit" class="auth-btn-primary" style="width:100%;padding:13px;background:linear-gradient(135deg, #16a34a, #15803d);border:none;font-size:15px;font-weight:800;border-radius:10px;cursor:pointer;box-shadow:0 4px 14px rgba(22,163,74,0.35);display:flex;align-items:center;justify-content:center;gap:8px;color:#ffffff;">
-            <span>✓</span> <span>Verify &amp; Enter Citizen Portal</span>
-          </button>
-
-          <div style="margin-top:14px;text-align:center;">
-            <button type="button" onclick="switchCitizenAuthMode('otp')" style="background:none;border:none;color:var(--primary-bright);font-size:12px;font-weight:700;cursor:pointer;text-decoration:underline;">
-              📲 Prefer SMS OTP? Click to verify via Mobile OTP instead
-            </button>
-          </div>
-        </form>
-      </div>
-
-      <!-- CITIZEN OPTION B SCREEN 1: PHONE NUMBER INPUT FOR SMS OTP -->
-      <div id="citizenScreenPhone" style="display:none;">
-        <div id="citizenPhoneError" style="display:none;background:rgba(220,38,38,0.12);border:1.5px solid #dc2626;border-radius:10px;padding:10px 14px;color:#dc2626;font-size:12.5px;font-weight:600;margin-bottom:14px;"></div>
-
-        <form onsubmit="handleCitizenSendOtp(event)">
-          <div style="margin-bottom:16px;">
-            <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:6px;">Mobile Number (SMS OTP) *</label>
-            <div style="display:flex;gap:8px;">
-              <select id="citizenCountryCode" class="input-field" style="width:115px;height:46px;font-weight:700;font-size:13px;flex-shrink:0;">
-                <option value="+91" selected>🇮🇳 +91</option>
-                <option value="+1">🇺🇸 +1</option>
-                <option value="+44">🇬🇧 +44</option>
-                <option value="+971">🇦🇪 +971</option>
-                <option value="+65">🇸🇬 +65</option>
-                <option value="+61">🇦🇺 +61</option>
-              </select>
-              <input type="tel" id="citizenPhoneInput" class="input-field" placeholder="98765 43210" style="flex:1;height:46px;font-size:15px;letter-spacing:0.5px;font-weight:600;" maxlength="14" autocomplete="tel">
+          <!-- SUSPICIOUS ACTIVITY CAPTCHA (Appears only on 3+ failed attempts) -->
+          <div id="citizenCaptchaBox" style="display:none;background:rgba(234,179,8,0.1);border:1px dashed #eab308;border-radius:10px;padding:12px;margin-bottom:16px;">
+            <div style="font-size:12px;font-weight:700;color:#eab308;margin-bottom:6px;display:flex;align-items:center;gap:6px;">
+              <span>🛡️</span> <span>Security Check: Suspicious Activity Detected</span>
             </div>
-            <small style="display:block;color:var(--muted);font-size:11.5px;margin-top:5px;">We will send a 6-digit one-time PIN via SMS to verify your citizen profile.</small>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span id="citizenCaptchaQuestion" style="font-weight:800;font-size:14px;color:var(--ink);">What is 8 + 5?</span>
+              <input type="number" id="citizenCaptchaInput" class="input-field" placeholder="Answer" style="width:90px;height:38px;text-align:center;font-weight:700;">
+            </div>
           </div>
 
-          <button type="submit" id="btnCitizenSendOtp" class="auth-btn-primary" style="width:100%;padding:13px;background:linear-gradient(135deg, #16a34a, #15803d);border:none;font-size:15px;font-weight:800;border-radius:10px;cursor:pointer;box-shadow:0 4px 14px rgba(22,163,74,0.35);display:flex;align-items:center;justify-content:center;gap:8px;color:#ffffff;">
-            <span>📲</span> <span>Send OTP via SMS</span>
+          <button type="submit" id="btnCitizenLoginSubmit" class="auth-btn-primary" style="width:100%;padding:13px;background:linear-gradient(135deg, #16a34a, #15803d);border:none;font-size:15px;font-weight:800;border-radius:10px;cursor:pointer;box-shadow:0 4px 14px rgba(22,163,74,0.35);display:flex;align-items:center;justify-content:center;gap:8px;color:#ffffff;">
+            <span>🔐</span> <span>Login</span>
           </button>
-
-          <div style="margin-top:14px;text-align:center;">
-            <button type="button" onclick="switchCitizenAuthMode('password')" style="background:none;border:none;color:var(--primary-bright);font-size:12px;font-weight:700;cursor:pointer;text-decoration:underline;">
-              🔑 Know your password or PIN? Login with Password instead
-            </button>
-          </div>
         </form>
       </div>
 
-      <!-- CITIZEN OPTION B SCREEN 2: 6-DIGIT PIN INPUT -->
-      <div id="citizenScreenOtp" style="display:none;">
+      <!-- STEP 2 SCREEN: DEDICATED SMS OTP VERIFICATION -->
+      <div id="citizenStepOtp" style="display:none;">
         <div id="citizenOtpError" style="display:none;background:rgba(220,38,38,0.12);border:1.5px solid #dc2626;border-radius:10px;padding:10px 14px;color:#dc2626;font-size:12.5px;font-weight:600;margin-bottom:14px;"></div>
 
-        <div style="background:rgba(22,163,74,0.08);border:1px solid rgba(22,163,74,0.25);border-radius:12px;padding:12px 14px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:10px;">
+        <div style="text-align:center;margin-bottom:16px;">
+          <h3 style="font-size:17px;font-weight:800;color:var(--ink);margin:0 0 4px;">Verify your mobile number</h3>
+          <p style="font-size:13px;color:var(--muted);margin:0;">We sent a 6-digit OTP to your registered mobile number.</p>
+        </div>
+
+        <div style="background:rgba(22,163,74,0.08);border:1px solid rgba(22,163,74,0.25);border-radius:12px;padding:10px 14px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:10px;">
           <div>
-            <div style="font-size:11.5px;color:var(--muted);font-weight:600;">SMS OTP Sent To</div>
-            <div id="citizenSentPhoneDisplay" style="font-size:14px;font-weight:800;color:var(--ink);">+91 9876543210</div>
+            <div style="font-size:11px;color:var(--muted);font-weight:600;">SMS OTP Sent To</div>
+            <div id="citizenMaskedPhoneDisplay" style="font-size:14px;font-weight:800;color:var(--ink);letter-spacing:1px;">+91 ******3210</div>
           </div>
-          <button type="button" onclick="citizenBackToPhoneScreen()" class="btn-glass" style="padding:6px 12px;font-size:11.5px;font-weight:700;border-radius:8px;cursor:pointer;">
-            ✏️ Change Number
+          <button type="button" onclick="handleCitizenBackToLogin()" class="btn-glass" style="padding:6px 10px;font-size:11px;font-weight:700;border-radius:8px;cursor:pointer;">
+            ← Change
           </button>
         </div>
 
-        <form onsubmit="handleCitizenVerifyOtp(event)">
+        <form onsubmit="handleCitizenVerifyOtpStep2(event)">
           <div style="margin-bottom:18px;text-align:center;">
-            <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:10px;">Enter 6-Digit SMS Verification PIN *</label>
+            <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:10px;">Enter 6-Digit SMS Verification OTP *</label>
             <div class="otp-boxes-wrapper" onpaste="handleOtpPaste(event)">
               <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-box" id="otpBox1" data-index="1" autocomplete="one-time-code" oninput="handleOtpInput(this, 1)" onkeydown="handleOtpKeydown(event, 1)" required>
               <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-box" id="otpBox2" data-index="2" oninput="handleOtpInput(this, 2)" onkeydown="handleOtpKeydown(event, 2)">
@@ -1786,16 +1771,19 @@ body[data-theme="doom"] {
               <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-box" id="otpBox5" data-index="5" oninput="handleOtpInput(this, 5)" onkeydown="handleOtpKeydown(event, 5)">
               <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-box" id="otpBox6" data-index="6" oninput="handleOtpInput(this, 6)" onkeydown="handleOtpKeydown(event, 6)">
             </div>
-            <small style="display:block;color:var(--muted);font-size:11.5px;margin-top:8px;">Auto-advances as you type. Universal test PIN: <strong>123456</strong>.</small>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:11.5px;color:var(--muted);">
+              <span>⏱️ OTP expires in 5 minutes</span>
+              <span>Universal test PIN: <strong>123456</strong></span>
+            </div>
           </div>
 
           <button type="submit" id="btnCitizenVerifyOtp" class="auth-btn-primary" style="width:100%;padding:13px;background:linear-gradient(135deg, #16a34a, #15803d);border:none;font-size:15px;font-weight:800;border-radius:10px;cursor:pointer;box-shadow:0 4px 14px rgba(22,163,74,0.35);display:flex;align-items:center;justify-content:center;gap:8px;color:#ffffff;">
-            <span>✓</span> <span>Verify PIN &amp; Enter Citizen Portal</span>
+            <span>✓</span> <span>Verify OTP</span>
           </button>
 
           <div style="margin-top:14px;text-align:center;">
-            <button type="button" id="btnCitizenResendOtp" onclick="handleCitizenResendOtp()" class="btn-glass" style="border:none;background:none;color:var(--primary-bright);font-size:12.5px;font-weight:700;cursor:pointer;text-decoration:underline;padding:4px 8px;" disabled>
-              Resend OTP SMS in 30s
+            <button type="button" id="btnCitizenResendOtp" onclick="handleCitizenResendOtpStep2()" class="btn-glass" style="border:none;background:none;color:var(--primary-bright);font-size:12.5px;font-weight:700;cursor:pointer;text-decoration:underline;padding:4px 8px;" disabled>
+              Resend OTP in 00:30
             </button>
           </div>
         </form>
@@ -3342,22 +3330,58 @@ function submitPatientRegistration(e) {
 }
 
 // =========================================================
-// CITIZEN SMS OTP LOGIC & DYNAMIC ENTRY ROUTING
+// CITIZEN 2-STEP AUTHENTICATION FLOW: Mobile/ABHA -> Password -> SMS OTP -> Dashboard
 // =========================================================
-let citizenActivePhone = '';
-let citizenResendTimerInterval = null;
-let citizenResendSeconds = 30;
+let citizenTempToken = null;
+let citizenTargetPhone = '';
+let citizenCountdownInterval = null;
+let citizenCountdownRemaining = 30;
+let citizenFailedLoginCount = 0;
+let citizenCaptchaVal1 = 0;
+let citizenCaptchaVal2 = 0;
 
-function showCitizenPhoneError(msg) {
-  const el = document.getElementById('citizenPhoneError');
+function updateCitizenStepper(step) {
+  const b1 = document.getElementById('stepBadge1');
+  const b2 = document.getElementById('stepBadge2');
+  const b3 = document.getElementById('stepBadge3');
+  const i1 = document.getElementById('stepIcon1');
+  const i2 = document.getElementById('stepIcon2');
+  const i3 = document.getElementById('stepIcon3');
+
+  if (step === 1) {
+    if (b1) { b1.style.background = '#16a34a'; b1.style.color = '#ffffff'; }
+    if (i1) { i1.style.background = '#ffffff'; i1.style.color = '#16a34a'; i1.textContent = '1'; }
+    if (b2) { b2.style.background = 'transparent'; b2.style.color = 'var(--muted)'; }
+    if (i2) { i2.style.background = 'rgba(255,255,255,0.1)'; i2.style.color = 'var(--muted)'; i2.textContent = '2'; }
+    if (b3) { b3.style.background = 'transparent'; b3.style.color = 'var(--muted)'; }
+    if (i3) { i3.style.background = 'rgba(255,255,255,0.1)'; i3.style.color = 'var(--muted)'; i3.textContent = '3'; }
+  } else if (step === 2) {
+    if (b1) { b1.style.background = 'rgba(22,163,74,0.25)'; b1.style.color = '#16a34a'; }
+    if (i1) { i1.style.background = '#16a34a'; i1.style.color = '#ffffff'; i1.textContent = '✓'; }
+    if (b2) { b2.style.background = '#16a34a'; b2.style.color = '#ffffff'; }
+    if (i2) { i2.style.background = '#ffffff'; i2.style.color = '#16a34a'; i2.textContent = '2'; }
+    if (b3) { b3.style.background = 'transparent'; b3.style.color = 'var(--muted)'; }
+    if (i3) { i3.style.background = 'rgba(255,255,255,0.1)'; i3.style.color = 'var(--muted)'; i3.textContent = '3'; }
+  } else if (step === 3) {
+    if (b1) { b1.style.background = 'rgba(22,163,74,0.25)'; b1.style.color = '#16a34a'; }
+    if (i1) { i1.style.background = '#16a34a'; i1.style.color = '#ffffff'; i1.textContent = '✓'; }
+    if (b2) { b2.style.background = 'rgba(22,163,74,0.25)'; b2.style.color = '#16a34a'; }
+    if (i2) { i2.style.background = '#16a34a'; i2.style.color = '#ffffff'; i2.textContent = '✓'; }
+    if (b3) { b3.style.background = '#16a34a'; b3.style.color = '#ffffff'; }
+    if (i3) { i3.style.background = '#ffffff'; i3.style.color = '#16a34a'; i3.textContent = '✓'; }
+  }
+}
+
+function showCitizenLoginError(msg) {
+  const el = document.getElementById('citizenLoginError');
   if (el) {
     el.textContent = msg;
     el.style.display = 'block';
   }
 }
 
-function hideCitizenPhoneError() {
-  const el = document.getElementById('citizenPhoneError');
+function hideCitizenLoginError() {
+  const el = document.getElementById('citizenLoginError');
   if (el) el.style.display = 'none';
 }
 
@@ -3381,423 +3405,305 @@ function hideCitizenOtpError() {
   if (el) el.style.display = 'none';
 }
 
-function citizenBackToPhoneScreen() {
-  if (citizenResendTimerInterval) {
-    clearInterval(citizenResendTimerInterval);
-    citizenResendTimerInterval = null;
-  }
-  hideCitizenOtpError();
-  hideCitizenPhoneError();
-  const screenPhone = document.getElementById('citizenScreenPhone');
-  const screenOtp = document.getElementById('citizenScreenOtp');
-  if (screenOtp) screenOtp.style.display = 'none';
-  if (screenPhone) {
-    screenPhone.style.display = 'block';
-  }
-  const phoneInput = document.getElementById('citizenPhoneInput');
-  if (phoneInput) setTimeout(() => phoneInput.focus(), 100);
+function setupCitizenCaptcha() {
+  citizenCaptchaVal1 = Math.floor(3 + Math.random() * 8);
+  citizenCaptchaVal2 = Math.floor(2 + Math.random() * 9);
+  const qEl = document.getElementById('citizenCaptchaQuestion');
+  if (qEl) qEl.textContent = 'What is ' + citizenCaptchaVal1 + ' + ' + citizenCaptchaVal2 + '?';
+  const box = document.getElementById('citizenCaptchaBox');
+  if (box) box.style.display = 'block';
+  const inp = document.getElementById('citizenCaptchaInput');
+  if (inp) inp.value = '';
 }
 
-function startCitizenResendCountdown() {
-  if (citizenResendTimerInterval) clearInterval(citizenResendTimerInterval);
-  citizenResendSeconds = 30;
+function startOtpCountdown(seconds = 30) {
+  if (citizenCountdownInterval) clearInterval(citizenCountdownInterval);
+  citizenCountdownRemaining = seconds;
   const btn = document.getElementById('btnCitizenResendOtp');
   if (!btn) return;
-  btn.disabled = true;
-  btn.textContent = 'Resend OTP SMS in 30s';
 
-  citizenResendTimerInterval = setInterval(() => {
-    citizenResendSeconds--;
-    if (citizenResendSeconds <= 0) {
-      clearInterval(citizenResendTimerInterval);
-      citizenResendTimerInterval = null;
+  btn.disabled = true;
+  btn.style.color = 'var(--muted)';
+  btn.style.cursor = 'not-allowed';
+  btn.textContent = 'Resend OTP in 00:' + (citizenCountdownRemaining < 10 ? '0' : '') + citizenCountdownRemaining;
+
+  citizenCountdownInterval = setInterval(() => {
+    citizenCountdownRemaining--;
+    if (citizenCountdownRemaining <= 0) {
+      clearInterval(citizenCountdownInterval);
+      citizenCountdownInterval = null;
       btn.disabled = false;
-      btn.textContent = '↻ Resend OTP SMS';
+      btn.style.color = 'var(--primary-bright)';
+      btn.style.cursor = 'pointer';
+      btn.textContent = '↻ Resend OTP';
     } else {
-      btn.textContent = 'Resend OTP SMS in ' + citizenResendSeconds + 's';
+      btn.textContent = 'Resend OTP in 00:' + (citizenCountdownRemaining < 10 ? '0' : '') + citizenCountdownRemaining;
     }
   }, 1000);
 }
 
-function handleOtpInput(inputEl, index) {
-  hideCitizenOtpError();
-  const val = inputEl.value.replace(/\D/g, '');
-  inputEl.value = val ? val.slice(-1) : '';
+// STEP 1: VALIDATE CREDENTIALS & GENERATE OTP
+async function handleCitizenLoginStep1(e) {
+  if (e) e.preventDefault();
+  hideCitizenLoginError();
 
-  if (inputEl.value && index < 6) {
-    const nextEl = document.getElementById('otpBox' + (index + 1));
-    if (nextEl) nextEl.focus();
-  } else if (inputEl.value && index === 6) {
-    const code = getOtpCodeFromBoxes();
-    if (code.length === 6) {
-      handleCitizenVerifyOtp();
+  const idEl = document.getElementById('patientInputId');
+  const passEl = document.getElementById('patientInputPass');
+  const inputId = idEl ? idEl.value.trim() : '';
+  const inputPass = passEl ? passEl.value.trim() : '';
+
+  if (!inputId) {
+    showCitizenLoginError('Please enter your Mobile Number or 14-Digit ABHA ID.');
+    return;
+  }
+  if (!inputPass) {
+    showCitizenLoginError('Please enter your Password or Security PIN.');
+    return;
+  }
+
+  // CAPTCHA verification if suspicious attempts detected
+  if (citizenFailedLoginCount >= 3) {
+    const userAns = parseInt(document.getElementById('citizenCaptchaInput').value, 10);
+    if (userAns !== (citizenCaptchaVal1 + citizenCaptchaVal2)) {
+      showCitizenLoginError('⚠️ Incorrect security answer. Please solve the challenge.');
+      setupCitizenCaptcha();
+      return;
+    }
+  }
+
+  const btnLogin = document.getElementById('btnCitizenLoginSubmit');
+  if (btnLogin) {
+    btnLogin.disabled = true;
+    btnLogin.innerHTML = '<span>⏳</span> <span>Verifying Credentials...</span>';
+  }
+
+  try {
+    const res = window.appStore.validateCitizenCredentials({ id: inputId, password: inputPass });
+    if (!res || !res.success) {
+      citizenFailedLoginCount++;
+      if (citizenFailedLoginCount >= 3) {
+        setupCitizenCaptcha();
+      }
+      showCitizenLoginError((res && res.message) || 'Invalid Mobile/ABHA ID or Password/PIN.');
+      return;
+    }
+
+    // Credentials verified! Store temp token and proceed to OTP
+    citizenFailedLoginCount = 0;
+    citizenTempToken = res.tempToken;
+    citizenTargetPhone = res.phone;
+
+    // Trigger Supabase real SMS dispatch if online
+    try {
+      if (window.supabaseService && window.supabaseService.client && window.supabaseService.client.auth) {
+        const fullPhone = res.phone.startsWith('+') ? res.phone : ('+91' + res.phone.replace(/\D/g, '').slice(-10));
+        await window.supabaseService.client.auth.signInWithOtp({ phone: fullPhone }).catch(err => console.warn('[Supabase SMS OTP notice]:', err));
+      }
+    } catch (e) {}
+
+    // Navigate to OTP Screen
+    const screenLogin = document.getElementById('citizenStepLogin');
+    const screenOtp = document.getElementById('citizenStepOtp');
+    const phoneDisplay = document.getElementById('citizenMaskedPhoneDisplay');
+
+    if (phoneDisplay) phoneDisplay.textContent = res.maskedPhone;
+    if (screenLogin) screenLogin.style.display = 'none';
+    if (screenOtp) {
+      screenOtp.style.display = 'block';
+      screenOtp.classList.add('page-enter-smooth');
+    }
+
+    updateCitizenStepper(2);
+    startOtpCountdown(30);
+
+    // Clear and focus OTP inputs
+    for (let i = 1; i <= 6; i++) {
+      const b = document.getElementById('otpBox' + i);
+      if (b) b.value = '';
+    }
+    const box1 = document.getElementById('otpBox1');
+    if (box1) setTimeout(() => box1.focus(), 150);
+
+  } catch (err) {
+    console.error('[Citizen Login Step 1 error]:', err);
+    showCitizenLoginError('Authentication error: ' + (err.message || 'Please check credentials.'));
+  } finally {
+    if (btnLogin) {
+      btnLogin.disabled = false;
+      btnLogin.innerHTML = '<span>🔐</span> <span>Login</span>';
     }
   }
 }
 
-function handleOtpKeydown(e, index) {
-  if (e.key === 'Backspace') {
-    const current = document.getElementById('otpBox' + index);
-    if (current && !current.value && index > 1) {
-      const prev = document.getElementById('otpBox' + (index - 1));
-      if (prev) {
-        prev.focus();
-        prev.value = '';
+// STEP 2: VERIFY OTP
+async function handleCitizenVerifyOtpStep2(e) {
+  if (e) e.preventDefault();
+  hideCitizenOtpError();
+
+  const otpCode = getOtpCodeFromBoxes();
+  if (!otpCode || otpCode.length !== 6) {
+    showCitizenOtpError('Please enter all 6 digits of the SMS verification OTP.');
+    return;
+  }
+
+  const btnVerify = document.getElementById('btnCitizenVerifyOtp');
+  if (btnVerify) {
+    btnVerify.disabled = true;
+    btnVerify.innerHTML = '<span>⏳</span> <span>Verifying OTP...</span>';
+  }
+
+  try {
+    // 1. Try Supabase verification if available
+    try {
+      if (window.supabaseService && window.supabaseService.client && window.supabaseService.client.auth) {
+        const fullPhone = citizenTargetPhone.startsWith('+') ? citizenTargetPhone : ('+91' + citizenTargetPhone.replace(/\D/g, '').slice(-10));
+        await window.supabaseService.client.auth.verifyOtp({ phone: fullPhone, token: otpCode, type: 'sms' }).catch(err => console.warn('[Supabase OTP verify notice]:', err));
       }
+    } catch (e) {}
+
+    // 2. Validate against server/store session state
+    const res = window.appStore.verifyCitizenOtp(citizenTempToken, otpCode);
+    if (!res || !res.success) {
+      showCitizenOtpError((res && res.message) || 'Incorrect OTP. Please try again.');
+      if (res && (res.locked || res.expired)) {
+        if (btnVerify) btnVerify.disabled = true;
+      }
+      return;
     }
-  } else if (e.key === 'ArrowLeft' && index > 1) {
-    const prev = document.getElementById('otpBox' + (index - 1));
-    if (prev) prev.focus();
-  } else if (e.key === 'ArrowRight' && index < 6) {
-    const next = document.getElementById('otpBox' + (index + 1));
+
+    // SUCCESS: Mark as AUTHENTICATED and proceed to Dashboard!
+    updateCitizenStepper(3);
+    if (citizenCountdownInterval) {
+      clearInterval(citizenCountdownInterval);
+      citizenCountdownInterval = null;
+    }
+
+    // Link profile safely with Supabase if online
+    try {
+      if (typeof linkCitizenProfile === 'function') {
+        linkCitizenProfile(citizenTargetPhone, { authMethod: 'password_and_otp' });
+      }
+    } catch (e) {}
+
+    // Route safely to Patient Dashboard
+    window.location.hash = '#/citizen';
+    if (typeof showView === 'function') showView('Patient');
+    renderActivePortalView();
+    if (window.patientController && typeof window.patientController.renderAll === 'function') {
+      try { window.patientController.renderAll(); } catch (err) {}
+    }
+    if (typeof window.toast === 'function') {
+      window.toast('🌾 Welcome ' + (res.user ? res.user.name : 'Citizen') + '! Verified & Logged in.');
+    }
+
+  } catch (err) {
+    console.error('[Citizen Verify OTP error]:', err);
+    showCitizenOtpError('Verification error: ' + (err.message || 'Please try again.'));
+  } finally {
+    if (btnVerify) {
+      btnVerify.disabled = false;
+      btnVerify.innerHTML = '<span>✓</span> <span>Verify OTP</span>';
+    }
+  }
+}
+
+// RESEND OTP
+function handleCitizenResendOtpStep2() {
+  const btn = document.getElementById('btnCitizenResendOtp');
+  if (btn && btn.disabled) return;
+  hideCitizenOtpError();
+
+  const res = window.appStore.resendCitizenOtp(citizenTempToken);
+  if (res && res.success) {
+    startOtpCountdown(30);
+    if (typeof window.toast === 'function') {
+      window.toast('📲 New 6-digit OTP sent to ' + res.maskedPhone);
+    }
+    for (let i = 1; i <= 6; i++) {
+      const b = document.getElementById('otpBox' + i);
+      if (b) b.value = '';
+    }
+    const box1 = document.getElementById('otpBox1');
+    if (box1) box1.focus();
+  } else {
+    showCitizenOtpError((res && res.message) || 'Unable to resend OTP. Please wait.');
+  }
+}
+
+// BACK TO LOGIN SCREEN
+function handleCitizenBackToLogin() {
+  if (citizenCountdownInterval) {
+    clearInterval(citizenCountdownInterval);
+    citizenCountdownInterval = null;
+  }
+  hideCitizenOtpError();
+  hideCitizenLoginError();
+  const screenLogin = document.getElementById('citizenStepLogin');
+  const screenOtp = document.getElementById('citizenStepOtp');
+  if (screenOtp) screenOtp.style.display = 'none';
+  if (screenLogin) {
+    screenLogin.style.display = 'block';
+    screenLogin.classList.add('page-enter-smooth');
+  }
+  updateCitizenStepper(1);
+  const idEl = document.getElementById('patientInputId');
+  if (idEl) setTimeout(() => idEl.focus(), 100);
+}
+
+// Reset citizen login to Step 1 on logout or tab switch
+function resetCitizenAuthToStep1(msg = '') {
+  handleCitizenBackToLogin();
+  if (msg) showCitizenLoginError(msg);
+}
+
+// OTP box input navigation
+function handleOtpInput(el, idx) {
+  el.value = el.value.replace(/\D/g, '');
+  if (el.value.length === 1 && idx < 6) {
+    const next = document.getElementById('otpBox' + (idx + 1));
     if (next) next.focus();
+  }
+  if (idx === 6 && el.value.length === 1) {
+    const code = getOtpCodeFromBoxes();
+    if (code.length === 6) {
+      handleCitizenVerifyOtpStep2();
+    }
+  }
+}
+
+function handleOtpKeydown(e, idx) {
+  if (e.key === 'Backspace' && !e.target.value && idx > 1) {
+    const prev = document.getElementById('otpBox' + (idx - 1));
+    if (prev) {
+      prev.focus();
+      prev.value = '';
+    }
   }
 }
 
 function handleOtpPaste(e) {
   e.preventDefault();
-  const pastedData = (e.clipboardData || window.clipboardData).getData('text');
-  const digits = (pastedData || '').replace(/\D/g, '');
-  if (!digits) return;
-
-  for (let i = 1; i <= 6; i++) {
-    const box = document.getElementById('otpBox' + i);
-    if (box) {
-      box.value = digits[i - 1] || '';
-    }
+  const clip = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '').slice(0, 6);
+  if (!clip) return;
+  for (let i = 0; i < 6; i++) {
+    const box = document.getElementById('otpBox' + (i + 1));
+    if (box) box.value = clip[i] || '';
   }
-
-  const focusIdx = Math.min(digits.length, 6);
-  const targetBox = document.getElementById('otpBox' + focusIdx);
-  if (targetBox) targetBox.focus();
-
-  if (digits.length >= 6) {
-    handleCitizenVerifyOtp();
+  if (clip.length === 6) {
+    handleCitizenVerifyOtpStep2();
+  } else {
+    const next = document.getElementById('otpBox' + (clip.length + 1));
+    if (next) next.focus();
   }
 }
 
 function getOtpCodeFromBoxes() {
   let code = '';
   for (let i = 1; i <= 6; i++) {
-    const box = document.getElementById('otpBox' + i);
-    if (box) code += box.value.trim();
+    const b = document.getElementById('otpBox' + i);
+    if (b) code += b.value.trim();
   }
   return code;
-}
-
-// CITIZEN SCREEN 1: Submit Phone Number -> invokes supabase.auth.signInWithOtp({ phone: phoneNumber })
-async function handleCitizenSendOtp(e, isResend = false) {
-  if (e) e.preventDefault();
-  hideCitizenPhoneError();
-  hideCitizenOtpError();
-
-  const countryCode = (document.getElementById('citizenCountryCode') ? document.getElementById('citizenCountryCode').value.trim() : '+91') || '+91';
-  const phoneRaw = (document.getElementById('citizenPhoneInput') ? document.getElementById('citizenPhoneInput').value.trim().replace(/\D/g, '') : '');
-
-  if (!phoneRaw || phoneRaw.length < 7) {
-    showCitizenPhoneError('Please enter a valid mobile number (e.g. 9876543210).');
-    return;
-  }
-
-  const cleanPhone = (countryCode === '+91' && phoneRaw.length > 10) ? phoneRaw.slice(-10) : phoneRaw;
-  const phoneNumber = countryCode + cleanPhone;
-  citizenActivePhone = phoneNumber;
-
-  const btnSend = document.getElementById('btnCitizenSendOtp');
-  if (btnSend) {
-    btnSend.disabled = true;
-    btnSend.innerHTML = '<span>⏳</span> <span>Dispatching SMS OTP...</span>';
-  }
-
-  try {
-    const supabase = (window.supabaseService && window.supabaseService.client) ||
-                     (window.supabase && typeof window.supabase.createClient === 'function' && window.SUPABASE_CONFIG ?
-                      window.supabase.createClient(window.SUPABASE_CONFIG.url, window.SUPABASE_CONFIG.anonKey) : null);
-
-    if (supabase && supabase.auth && typeof supabase.auth.signInWithOtp === 'function') {
-      try {
-        const { data, error } = await supabase.auth.signInWithOtp({ phone: phoneNumber });
-        if (error) {
-          console.warn('[Supabase Auth] signInWithOtp notice:', error.message);
-        } else {
-          console.log('[Supabase Auth] signInWithOtp success:', data);
-        }
-      } catch (err) {
-        console.warn('[Supabase Auth] signInWithOtp exception:', err);
-      }
-    }
-  } catch (ex) {
-    console.warn('[Citizen Auth] Phone dispatch notice:', ex);
-  } finally {
-    if (btnSend) {
-      btnSend.disabled = false;
-      btnSend.innerHTML = '<span>📲</span> <span>Send OTP via SMS</span>';
-    }
-  }
-
-  // Smooth transition to Screen 2: 6-digit PIN layout
-  const screenPhone = document.getElementById('citizenScreenPhone');
-  const screenOtp = document.getElementById('citizenScreenOtp');
-  const phoneDisplay = document.getElementById('citizenSentPhoneDisplay');
-
-  if (phoneDisplay) phoneDisplay.textContent = countryCode + ' ' + cleanPhone;
-  if (screenPhone) screenPhone.style.display = 'none';
-  if (screenOtp) {
-    screenOtp.style.display = 'block';
-    screenOtp.classList.add('page-enter-smooth');
-  }
-
-  for (let i = 1; i <= 6; i++) {
-    const b = document.getElementById('otpBox' + i);
-    if (b) b.value = '';
-  }
-  const firstBox = document.getElementById('otpBox1');
-  if (firstBox) setTimeout(() => firstBox.focus(), 120);
-
-  startCitizenResendCountdown();
-
-  if (typeof window.toast === 'function') {
-    window.toast('📲 SMS OTP sent to ' + phoneNumber + ' (Universal PIN: 123456)');
-  }
-}
-
-function handleCitizenResendOtp() {
-  const btn = document.getElementById('btnCitizenResendOtp');
-  if (btn && btn.disabled) return;
-  handleCitizenSendOtp(null, true);
-}
-
-// CITIZEN SCREEN 2: Verify PIN -> invokes supabase.auth.verifyOtp({ phone: phoneNumber, token: otpCode, type: 'sms' })
-async function handleCitizenVerifyOtp(e) {
-  if (e) e.preventDefault();
-  hideCitizenOtpError();
-
-  const otpCode = getOtpCodeFromBoxes();
-  if (!otpCode || otpCode.length < 6) {
-    showCitizenOtpError('Please enter all 6 digits of the SMS verification PIN.');
-    return;
-  }
-
-  const phoneNumber = citizenActivePhone || ('+91' + (document.getElementById('citizenPhoneInput') ? document.getElementById('citizenPhoneInput').value.trim().replace(/\D/g, '') : '9876543210'));
-  const btnVerify = document.getElementById('btnCitizenVerifyOtp');
-  if (btnVerify) {
-    btnVerify.disabled = true;
-    btnVerify.innerHTML = '<span>⏳</span> <span>Verifying OTP PIN...</span>';
-  }
-
-  let verified = false;
-  const supabase = (window.supabaseService && window.supabaseService.client) ||
-                   (window.supabase && typeof window.supabase.createClient === 'function' && window.SUPABASE_CONFIG ?
-                    window.supabase.createClient(window.SUPABASE_CONFIG.url, window.SUPABASE_CONFIG.anonKey) : null);
-
-  try {
-    if (supabase && supabase.auth && typeof supabase.auth.verifyOtp === 'function') {
-      try {
-        const { data, error } = await supabase.auth.verifyOtp({
-          phone: phoneNumber,
-          token: otpCode,
-          type: 'sms'
-        });
-        if (!error && data && data.user) {
-          verified = true;
-          console.log('[Supabase Auth] verifyOtp verified successfully:', data.user);
-        } else if (error) {
-          console.warn('[Supabase Auth] verifyOtp notice:', error.message);
-        }
-      } catch (err) {
-        console.warn('[Supabase Auth] verifyOtp exception:', err);
-      }
-    }
-  } catch (ex) {
-    console.warn('[Citizen Auth] verifyOtp notice:', ex);
-  }
-
-  // Graceful test / sandbox PIN verification
-  if (!verified && (otpCode === '123456' || otpCode.length === 6)) {
-    verified = true;
-  }
-
-  if (btnVerify) {
-    btnVerify.disabled = false;
-    btnVerify.innerHTML = '<span>✓</span> <span>Verify PIN &amp; Enter Citizen Portal</span>';
-  }
-
-  if (!verified) {
-    showCitizenOtpError('⚠️ Invalid or expired OTP PIN. Please try again.');
-    return;
-  }
-
-  // CITIZEN ROLE MANAGEMENT (POST-LOGIN META):
-  // Link metadata or custom role field (role: 'citizen') into database and session
-  try {
-    if (supabase && supabase.auth && typeof supabase.auth.updateUser === 'function') {
-      await supabase.auth.updateUser({
-        data: { role: 'citizen', portal: 'citizen' }
-      }).catch(err => console.warn('[Supabase Auth] updateUser error:', err));
-    }
-
-    if (supabase && typeof supabase.from === 'function') {
-      await supabase.from('profiles').upsert({
-        phone: phoneNumber,
-        role: 'citizen',
-        updated_at: new Date().toISOString()
-      }, { onConflict: 'phone' }).catch(err => console.warn('[Supabase DB] profiles upsert error:', err));
-    }
-  } catch (err) {
-    console.warn('[Citizen Role Meta] DB link notice:', err);
-  }
-
-  // Guarantee local session is strictly bound as Citizen
-  const rawDigits = phoneNumber.replace(/\D/g, '');
-  const cleanLast10 = rawDigits.slice(-10);
-
-  let citizenUser = (window.appStore.state.patients || []).find(p => {
-    const pPhone = (p.phone || '').replace(/\D/g, '');
-    return pPhone.slice(-10) === cleanLast10;
-  });
-
-  if (!citizenUser) {
-    citizenUser = {
-      id: 'USR-PAT-' + (cleanLast10 ? cleanLast10.slice(-4) : '7891'),
-      name: 'Verified Citizen (' + (cleanLast10 ? cleanLast10.slice(-4) : 'User') + ')',
-      phone: cleanLast10 || '9876543210',
-      age: 32,
-      gender: 'Male',
-      village: 'Kondapalli Sub-Centre',
-      bloodGroup: 'B+',
-      password: '1234',
-      abhaId: '14-' + Math.floor(1000 + Math.random() * 9000) + '-' + Math.floor(1000 + Math.random() * 9000) + '-' + Math.floor(1000 + Math.random() * 9000),
-      role: 'patient',
-      customRole: 'citizen'
-    };
-    if (!window.appStore.state.patients) window.appStore.state.patients = [];
-    window.appStore.state.patients.unshift(citizenUser);
-  }
-
-  citizenUser.role = 'patient';
-  citizenUser.customRole = 'citizen';
-
-  window.appStore.state.session = {
-    isLoggedIn: true,
-    role: 'patient',
-    customRole: 'citizen',
-    metadata: { role: 'citizen', portal: 'citizen' },
-    user: citizenUser
-  };
-  window.appStore.state.currentUser = citizenUser;
-  window.appStore.saveState();
-
-  if (citizenResendTimerInterval) {
-    clearInterval(citizenResendTimerInterval);
-    citizenResendTimerInterval = null;
-  }
-
-  window.location.hash = '#/citizen';
-  if (typeof showView === 'function') showView('Patient');
-  renderActivePortalView();
-  if (typeof window.toast === 'function') {
-    window.toast('🌾 Welcome ' + (citizenUser.name || 'Citizen') + '! Verified via SMS OTP.');
-  }
-}
-
-// =========================================================
-// CITIZEN PROFILE SYNC HELPER
-function linkCitizenProfile(phoneNumber, meta = {}) {
-  try {
-    if (window.supabaseService && typeof window.supabaseService.linkCitizenProfile === 'function') {
-      window.supabaseService.linkCitizenProfile(phoneNumber, meta);
-    }
-  } catch (e) {
-    console.warn('[Supabase] linkCitizenProfile notice:', e);
-  }
-}
-window.linkCitizenProfile = linkCitizenProfile;
-
-// CITIZEN AUTH MODES (PASSWORD / PIN & SMS OTP)
-// =========================================================
-function switchCitizenAuthMode(mode) {
-  const btnPass = document.getElementById('btnCitizenTabPass');
-  const btnOtp = document.getElementById('btnCitizenTabOtp');
-  const screenPass = document.getElementById('citizenScreenPassword');
-  const screenPhone = document.getElementById('citizenScreenPhone');
-  const screenOtp = document.getElementById('citizenScreenOtp');
-
-  if (mode === 'password') {
-    if (btnPass) { btnPass.style.background = 'var(--primary-bright)'; btnPass.style.color = '#ffffff'; }
-    if (btnOtp) { btnOtp.style.background = 'transparent'; btnOtp.style.color = 'var(--muted)'; }
-    if (screenPass) screenPass.style.display = 'block';
-    if (screenPhone) screenPhone.style.display = 'none';
-    if (screenOtp) screenOtp.style.display = 'none';
-  } else {
-    if (btnPass) { btnPass.style.background = 'transparent'; btnPass.style.color = 'var(--muted)'; }
-    if (btnOtp) { btnOtp.style.background = 'var(--primary-bright)'; btnOtp.style.color = '#ffffff'; }
-    if (screenPass) screenPass.style.display = 'none';
-    if (screenPhone) screenPhone.style.display = 'block';
-    if (screenOtp) screenOtp.style.display = 'none';
-  }
-}
-
-// CITIZEN AUTH: MOBILE / ABHA + PASSWORD / PIN
-async function handleCitizenPasswordAuth(e) {
-  if (e) e.preventDefault();
-  hideLoginError();
-
-  const idEl = document.getElementById('patientInputId');
-  const passEl = document.getElementById('patientInputPass');
-  const errBanner = document.getElementById('citizenPassError');
-
-  const inputId = idEl ? idEl.value.trim() : '';
-  const inputPass = passEl ? passEl.value.trim() : '';
-
-  const showErr = (msg) => {
-    if (errBanner) {
-      errBanner.textContent = msg;
-      errBanner.style.display = 'block';
-    }
-    showLoginError(msg);
-  };
-
-  if (errBanner) errBanner.style.display = 'none';
-
-  if (!inputId) {
-    showErr('Please enter your Mobile Number or 14-Digit ABHA ID.');
-    return;
-  }
-  if (!inputPass) {
-    showErr('Please enter your Password or Security PIN.');
-    return;
-  }
-
-  try {
-    // Verify credentials in AppStore
-    const res = window.appStore.verifyAndLogin('patient', { id: inputId, phone: inputId, abhaId: inputId, password: inputPass });
-    if (res && res.success) {
-      if (errBanner) errBanner.style.display = 'none';
-      hideLoginError();
-
-      // Synchronize Supabase profile metadata safely if available
-      try {
-        linkCitizenProfile(inputId, { authMethod: 'password' });
-      } catch (linkErr) {
-        console.warn('[Citizen Auth] Profile sync notice:', linkErr);
-      }
-
-      window.location.hash = '#/citizen';
-      if (typeof showView === 'function') showView('Patient');
-      renderActivePortalView();
-      if (window.patientController && typeof window.patientController.renderAll === 'function') {
-        try { window.patientController.renderAll(); } catch (err) {}
-      }
-      if (typeof window.toast === 'function') {
-        window.toast('🌾 Welcome ' + (res.user ? res.user.name : 'Citizen') + '! Logged in with Password.');
-      }
-    } else {
-      showErr((res && res.message) || '⚠️ Access Denied: Incorrect Mobile Number, ABHA ID or Password.');
-    }
-  } catch (authErr) {
-    console.error('[Citizen Auth] Login error:', authErr);
-    showErr('⚠️ Login failed: ' + (authErr.message || 'Please check your credentials.'));
-  }
 }
 
 // STAFF AUTH (DOCTOR, ASHA WORKER, ADMIN): MOBILE / ID & PASSWORD (NO EMAIL)
@@ -4116,7 +4022,8 @@ function renderActivePortalView() {
   const session = window.appStore ? window.appStore.getState().session : { isLoggedIn: false };
   const views = ['Home', 'Login', 'Patient', 'Doctor', 'Worker', 'Admin'];
 
-  if (!session || !session.isLoggedIn) {
+  const isCitizenUnauth = session && session.role === 'patient' && session.authState !== 'AUTHENTICATED';
+  if (!session || !session.isLoggedIn || isCitizenUnauth) {
     views.forEach(v => {
       const el = document.getElementById('view' + v);
       if (el) {
