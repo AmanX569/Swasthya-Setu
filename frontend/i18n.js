@@ -155,7 +155,7 @@
       saved_text: 'saved',
       family_title: '👨‍👩‍👧 Family Health Circle',
       btn_add_family: '+ Add Member',
-      hospitals_title: '🏥 Nearby Hospitals, Beds & Blood Bank',
+      hospitals_title: '🏥 Nearby Hospitals & Bed Availability',
       blood_title: '🩸 Blood Bank Stock Availability (All Groups)',
       gen_beds: 'General Beds',
       icu_beds: 'ICU Beds',

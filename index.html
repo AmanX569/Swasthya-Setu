@@ -7751,7 +7751,7 @@ body[data-theme="doom"] {
       saved_text: 'saved',
       family_title: '👨‍👩‍👧 Family Health Circle',
       btn_add_family: '+ Add Member',
-      hospitals_title: '🏥 Nearby Hospitals, Beds & Blood Bank',
+      hospitals_title: '🏥 Nearby Hospitals & Bed Availability',
       blood_title: '🩸 Blood Bank Stock Availability (All Groups)',
       gen_beds: 'General Beds',
       icu_beds: 'ICU Beds',
@@ -12799,7 +12799,6 @@ The user's preferred language is ${SUPPORTED_LANGUAGES[this.currentLang]?.name |
         global.aiHealthBot.renderChat();
       }
       this.renderLiveHospitals();
-      this.renderLiveBloodBank();
       this.renderPrescriptions();
       if (global.gpsTrackingController) {
         global.gpsTrackingController.initMap('patientLiveGpsMap');
@@ -14131,22 +14130,7 @@ The user's preferred language is ${SUPPORTED_LANGUAGES[this.currentLang]?.name |
     }
 
     renderLiveBloodBank() {
-      const el = document.getElementById('bloodBankGrid');
-      if (!el || !this.store) return;
-      const bank = this.store.getState().bloodBank || {};
-
-      const inStockText = this.t('in_stock', '✓ In Stock');
-      const lowStockText = this.t('low_stock', '⚠️ Low');
-
-      el.innerHTML = Object.entries(bank).map(([grp, count]) => `
-        <div style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:12px;padding:10px;text-align:center;">
-          <strong style="color:#dc2626;font-size:16px;display:block;">${grp}</strong>
-          <span style="font-size:14px;color:var(--ink);font-weight:700;">${count} Units</span>
-          <small style="display:block;color:${count > 5 ? '#16a34a' : '#dc2626'};font-size:10px;font-weight:600;margin-top:2px;">
-            ${count > 5 ? inStockText : lowStockText}
-          </small>
-        </div>
-      `).join('');
+      // Blood bank section removed from citizen portal
     }
   }
 
@@ -16505,14 +16489,15 @@ window.toast = function(msg) {
 };
 
 
-// Register PWA Service Worker for 100% Offline Capability
+// Purge service workers and caches so users immediately get fresh live updates
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js').then((reg) => {
-      console.log('[PWA] ServiceWorker registered successfully for offline support:', reg.scope);
-    }).catch((err) => {
-      console.warn('[PWA] ServiceWorker registration warning:', err);
-    });
+  navigator.serviceWorker.getRegistrations().then((registrations) => {
+    registrations.forEach((r) => r.unregister());
+  });
+}
+if ('caches' in window) {
+  caches.keys().then((names) => {
+    names.forEach((name) => caches.delete(name));
   });
 }
 

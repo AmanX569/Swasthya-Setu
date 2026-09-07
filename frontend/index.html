@@ -4098,14 +4098,15 @@ window.toast = function(msg) {
 };
 
 
-// Register PWA Service Worker for 100% Offline Capability
+// Purge service workers and caches so users immediately get fresh live updates
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js').then((reg) => {
-      console.log('[PWA] ServiceWorker registered successfully for offline support:', reg.scope);
-    }).catch((err) => {
-      console.warn('[PWA] ServiceWorker registration warning:', err);
-    });
+  navigator.serviceWorker.getRegistrations().then((registrations) => {
+    registrations.forEach((r) => r.unregister());
+  });
+}
+if ('caches' in window) {
+  caches.keys().then((names) => {
+    names.forEach((name) => caches.delete(name));
   });
 }
 

@@ -40,7 +40,6 @@
         global.aiHealthBot.renderChat();
       }
       this.renderLiveHospitals();
-      this.renderLiveBloodBank();
       this.renderPrescriptions();
       if (global.gpsTrackingController) {
         global.gpsTrackingController.initMap('patientLiveGpsMap');
@@ -1372,22 +1371,7 @@
     }
 
     renderLiveBloodBank() {
-      const el = document.getElementById('bloodBankGrid');
-      if (!el || !this.store) return;
-      const bank = this.store.getState().bloodBank || {};
-
-      const inStockText = this.t('in_stock', '✓ In Stock');
-      const lowStockText = this.t('low_stock', '⚠️ Low');
-
-      el.innerHTML = Object.entries(bank).map(([grp, count]) => `
-        <div style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:12px;padding:10px;text-align:center;">
-          <strong style="color:#dc2626;font-size:16px;display:block;">${grp}</strong>
-          <span style="font-size:14px;color:var(--ink);font-weight:700;">${count} Units</span>
-          <small style="display:block;color:${count > 5 ? '#16a34a' : '#dc2626'};font-size:10px;font-weight:600;margin-top:2px;">
-            ${count > 5 ? inStockText : lowStockText}
-          </small>
-        </div>
-      `).join('');
+      // Blood bank section removed from citizen portal
     }
   }
 
