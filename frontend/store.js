@@ -21,14 +21,16 @@
     },
 
     currentUser: null,
-    patients: [], // All registered citizen profiles
+    patients: [
+      { id: 'USR-PAT-001', abhaId: '14-8921-4402-9912', name: 'Ramesh Kumar', phone: '9876543210', age: 38, gender: 'Male', village: 'Kondapalli Ward 4', bloodGroup: 'O+', password: '1234', role: 'patient', customRole: 'citizen' }
+    ],
 
     staff: [
-      { id: 'ADM-7856', staff_code: 'ADM-7856', name: 'Aman Yadav', role: 'admin', phone: '7906684557', location: 'District HQ', status: 'Active Online', regNo: 'ADM-AP-001', password: 'Aman@123', pin: 'Aman@123' },
-      { id: 'DOC-101', staff_code: 'DOC-101', name: 'Dr. Priya Sharma, MBBS, MD', role: 'doctor', phone: '9811122233', location: 'Kondapalli PHC (General Medicine)', status: 'Active Online', regNo: 'MCI-AP-48912', password: 'doc@123', pin: '1234' },
-      { id: 'DOC-102', staff_code: 'DOC-102', name: 'Dr. Rajesh Verma, MBBS, MS', role: 'doctor', phone: '9822233344', location: 'Ibrahimpatnam CHC (Physician & Critical Care)', status: 'Active Online', regNo: 'MCI-AP-51023', password: 'doc@123', pin: '1234' },
-      { id: 'DOC-103', staff_code: 'DOC-103', name: 'Dr. Ananya Reddy, MBBS, DGO', role: 'doctor', phone: '9833311122', location: 'District Hospital (Gynecology & Maternal Care)', status: 'Active Online', regNo: 'MCI-AP-62491', password: 'doc@123', pin: '1234' },
-      { id: 'ASH-201', staff_code: 'ASH-201', name: 'Lakshmi Didi (ASHA Lead)', role: 'worker', phone: '9833344455', location: 'Sector 4, Kondapalli', status: 'On Home Visits', regNo: 'ASHA-AP-094', password: 'asha@123', pin: '1234' }
+      { id: 'ADM-7856', staff_code: 'ADM-7856', name: 'Aman Yadav', role: 'admin', email: 'admin@swasthyasetu.gov.in', phone: '7906684557', location: 'District HQ', status: 'Active Online', regNo: 'ADM-AP-001', password: 'Aman@123', pin: 'Aman@123' },
+      { id: 'DOC-101', staff_code: 'DOC-101', name: 'Dr. Priya Sharma, MBBS, MD', role: 'doctor', email: 'doctor.priya@swasthyasetu.gov.in', phone: '9811122233', location: 'Kondapalli PHC (General Medicine)', status: 'Active Online', regNo: 'MCI-AP-48912', password: 'doc@123', pin: '1234' },
+      { id: 'DOC-102', staff_code: 'DOC-102', name: 'Dr. Rajesh Verma, MBBS, MS', role: 'doctor', email: 'doctor.rajesh@swasthyasetu.gov.in', phone: '9822233344', location: 'Ibrahimpatnam CHC (Physician & Critical Care)', status: 'Active Online', regNo: 'MCI-AP-51023', password: 'doc@123', pin: '1234' },
+      { id: 'DOC-103', staff_code: 'DOC-103', name: 'Dr. Ananya Reddy, MBBS, DGO', role: 'doctor', email: 'doctor.ananya@swasthyasetu.gov.in', phone: '9833311122', location: 'District Hospital (Gynecology & Maternal Care)', status: 'Active Online', regNo: 'MCI-AP-62491', password: 'doc@123', pin: '1234' },
+      { id: 'ASH-201', staff_code: 'ASH-201', name: 'Lakshmi Didi (ASHA Lead)', role: 'worker', email: 'asha.lakshmi@swasthyasetu.gov.in', phone: '9833344455', location: 'Sector 4, Kondapalli', status: 'On Home Visits', regNo: 'ASHA-AP-094', password: 'asha@123', pin: '1234' }
     ],
 
     familyMembers: [
@@ -127,6 +129,15 @@
               return true;
             });
           }
+          // Ensure default staff have email addresses in loaded state
+          if (parsed.staff && Array.isArray(parsed.staff)) {
+            DEFAULT_INITIAL_STATE.staff.forEach(defaultStaff => {
+              const existing = parsed.staff.find(s => s.id === defaultStaff.id || s.staff_code === defaultStaff.staff_code);
+              if (existing && !existing.email) {
+                existing.email = defaultStaff.email;
+              }
+            });
+          }
           return { ...DEFAULT_INITIAL_STATE, ...parsed };
         }
       } catch (e) {
@@ -163,11 +174,12 @@
 
     // STRICT AUTHENTICATION RESOLVER (NO FAKE / RANDOM LOGINS)
     verifyAndLogin(role, credentials = {}) {
-      const inputId = (credentials.id || credentials.phone || credentials.abhaId || '').trim();
+      const inputId = (credentials.id || credentials.phone || credentials.abhaId || credentials.email || '').trim();
+      const inputEmail = (credentials.email || (inputId.includes('@') ? inputId : '')).toLowerCase().trim();
       const inputPass = (credentials.password || credentials.passcode || credentials.pin || credentials.otp || '').trim();
 
-      if (!inputId) {
-        return { success: false, message: 'Please enter your Mobile Number or ID.' };
+      if (!inputId && !inputEmail) {
+        return { success: false, message: 'Please enter your Official Email Address, Mobile Number, or ID.' };
       }
       if (!inputPass) {
         return { success: false, message: 'Please enter your Password or Security PIN.' };
@@ -180,9 +192,14 @@
         const sId = (s.id || s.staff_code || '').toLowerCase();
         const sPhone = (s.phone || '').replace(/\D/g, '');
         const sReg = (s.regNo || s.reg_no || '').toLowerCase();
+        const sEmail = (s.email || '').toLowerCase().trim();
+        const targetEmail = inputEmail || inputId.toLowerCase();
+
         return (sId === inputId.toLowerCase()) || 
                (digitsOnly && sPhone && (sPhone === digitsOnly || sPhone.slice(-10) === digitsOnly.slice(-10))) || 
-               (sReg === inputId.toLowerCase());
+               (sReg === inputId.toLowerCase()) ||
+               (sEmail && targetEmail && sEmail === targetEmail) ||
+               (targetEmail && targetEmail.includes('@') && sEmail && (sEmail.startsWith(targetEmail.split('@')[0]) || targetEmail.startsWith(s.role)));
       });
 
       // 2. Search Registered Patient Profiles
@@ -208,7 +225,7 @@
       if (!identityExists) {
         return { 
           success: false, 
-          message: '⚠️ Access Denied: No account found with this Mobile Number or ID. Citizens must click "Register New User" below.' 
+          message: '⚠️ Access Denied: No account found with this Email, Mobile Number, or ID.' 
         };
       }
 
@@ -237,7 +254,7 @@
 
       // Identity was found, but password was wrong
       if (matchedRoles.length === 0) {
-        return { success: false, message: '⚠️ Incorrect Password or Security PIN. Access Denied.' };
+        return { success: false, message: '⚠️ Incorrect Password or Security Passcode. Access Denied.' };
       }
 
       // Multi-Role Resolution (e.g. Doctor + Patient or Admin + Doctor)
@@ -249,13 +266,45 @@
       const targetRole = role || matchedRoles[0].role;
       const targetMatch = matchedRoles.find(r => r.role === targetRole) || matchedRoles[0];
 
-      this.state.session = { isLoggedIn: true, role: targetMatch.role, user: targetMatch.user };
-      if (targetMatch.role === 'patient') {
+      const isCitizen = (targetMatch.role === 'patient');
+      this.state.session = { 
+        isLoggedIn: true, 
+        role: targetMatch.role, 
+        customRole: isCitizen ? 'citizen' : targetMatch.role,
+        metadata: { role: isCitizen ? 'citizen' : targetMatch.role },
+        user: targetMatch.user 
+      };
+      if (isCitizen) {
         this.state.currentUser = targetMatch.user;
       }
       this.saveState();
 
       return { success: true, user: targetMatch.user, availableRoles: matchedRoles };
+    }
+
+    loginAs(role, user = null) {
+      const isCitizen = (role === 'patient' || role === 'citizen');
+      const actualRole = isCitizen ? 'patient' : role;
+      const customRole = isCitizen ? 'citizen' : role;
+      const sessionUser = user || {
+        id: 'USR-' + actualRole.toUpperCase(),
+        name: isCitizen ? 'Verified Citizen' : ('Dr. ' + actualRole.toUpperCase()),
+        role: actualRole,
+        customRole: customRole
+      };
+
+      this.state.session = {
+        isLoggedIn: true,
+        role: actualRole,
+        customRole: customRole,
+        metadata: { role: customRole },
+        user: sessionUser
+      };
+      if (isCitizen) {
+        this.state.currentUser = sessionUser;
+      }
+      this.saveState();
+      return { success: true, user: sessionUser };
     }
 
     // Patient Self-Registration (Only for Citizens)

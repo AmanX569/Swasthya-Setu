@@ -993,8 +993,71 @@
         return this.enqueueOfflineAction('insert_profile', 'profiles', p);
       }
     }
+
+    // =========================================================================
+    // AUTHENTICATION & ROLE-BASED IDENTITY MANAGEMENT
+    // =========================================================================
+    async signInWithOtp(params) {
+      if (!this.client || !this.client.auth) {
+        console.warn('[Supabase Auth] Client not initialized for signInWithOtp');
+        return { data: null, error: new Error('Supabase client offline or not initialized') };
+      }
+      return await this.client.auth.signInWithOtp(params);
+    }
+
+    async verifyOtp(params) {
+      if (!this.client || !this.client.auth) {
+        console.warn('[Supabase Auth] Client not initialized for verifyOtp');
+        return { data: null, error: new Error('Supabase client offline or not initialized') };
+      }
+      return await this.client.auth.verifyOtp(params);
+    }
+
+    async signInWithPassword(params) {
+      if (!this.client || !this.client.auth) {
+        console.warn('[Supabase Auth] Client not initialized for signInWithPassword');
+        return { data: null, error: new Error('Supabase client offline or not initialized') };
+      }
+      return await this.client.auth.signInWithPassword(params);
+    }
+
+    async updateUser(params) {
+      if (!this.client || !this.client.auth) {
+        return { data: null, error: new Error('Supabase client offline or not initialized') };
+      }
+      return await this.client.auth.updateUser(params);
+    }
+
+    async linkCitizenProfile(phoneNumber, meta = {}) {
+      if (!this.client) return;
+      try {
+        if (this.client.auth && typeof this.client.auth.updateUser === 'function') {
+          await this.client.auth.updateUser({
+            data: { role: 'citizen', portal: 'citizen', ...meta }
+          });
+        }
+      } catch (e) {
+        console.warn('[Supabase Auth] updateUser notice:', e);
+      }
+
+      try {
+        if (typeof this.client.from === 'function') {
+          await this.client.from('profiles').upsert({
+            phone: phoneNumber,
+            role: 'citizen',
+            updated_at: new Date().toISOString()
+          }, { onConflict: 'phone' });
+        }
+      } catch (e) {
+        console.warn('[Supabase DB] profiles upsert notice:', e);
+      }
+    }
   }
 
-  global.supabaseService = new SupabaseService();
+  const sService = new SupabaseService();
+  global.supabaseService = sService;
+  if (sService.client) {
+    global.supabaseClient = sService.client;
+  }
 
 })(typeof window !== 'undefined' ? window : this);

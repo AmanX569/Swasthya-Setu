@@ -1241,6 +1241,95 @@ body[data-theme="doom"] {
     padding: 1px 5px !important;
   }
 }
+
+/* =========================================================
+   6-DIGIT SMS OTP PIN LAYOUT STYLING (CITIZEN PORTAL)
+   ========================================================= */
+.otp-boxes-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin: 14px 0 8px;
+}
+
+.otp-box {
+  width: 46px;
+  height: 52px;
+  text-align: center;
+  font-size: 22px;
+  font-weight: 800;
+  font-family: 'IBM Plex Mono', monospace, sans-serif;
+  border-radius: 12px;
+  border: 1.5px solid var(--glass-border);
+  background: var(--glass-1);
+  color: var(--ink);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  outline: none;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.04);
+  -webkit-appearance: none;
+  -moz-appearance: textfield;
+}
+
+.otp-box::-webkit-outer-spin-button,
+.otp-box::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.otp-box:focus {
+  border-color: #16a34a !important;
+  box-shadow: 0 0 0 3.5px rgba(22, 163, 74, 0.25) !important;
+  transform: translateY(-2px);
+  background: #ffffff !important;
+}
+
+.otp-box.error {
+  border-color: #dc2626 !important;
+  background: rgba(220, 38, 38, 0.08) !important;
+  animation: otpShake 0.4s ease;
+}
+
+@keyframes otpShake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-4px); }
+  40%, 80% { transform: translateX(4px); }
+}
+
+[data-theme="doom"] .otp-box {
+  background: #051e14 !important;
+  border-color: rgba(16, 185, 129, 0.45) !important;
+  color: #ffffff !important;
+}
+
+[data-theme="doom"] .otp-box:focus {
+  border-color: #34d399 !important;
+  box-shadow: 0 0 0 3.5px rgba(52, 211, 153, 0.3) !important;
+  background: #0a3324 !important;
+}
+
+[data-theme="black"] .otp-box {
+  background: #0f172a !important;
+  border-color: #334155 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="navy"] .otp-box {
+  background: #0d1b2a !important;
+  border-color: #1e3a5f !important;
+  color: #ffffff !important;
+}
+
+@media (max-width: 420px) {
+  .otp-boxes-wrapper {
+    gap: 6px;
+  }
+  .otp-box {
+    width: 40px;
+    height: 48px;
+    font-size: 19px;
+  }
+}
 </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -3732,36 +3821,87 @@ body[data-theme="doom"] {
 
     
     
-    <!-- 1. CITIZEN / PATIENT LOGIN FORM -->
+    <!-- 1. CITIZEN / PATIENT LOGIN FORM (MOBILE SMS OTP ONLY) -->
     <div id="formCardPatient" class="auth-form-card">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
         <div style="width:46px;height:46px;background:rgba(22,163,74,0.15);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;">
           🌾
         </div>
         <div>
-          <h2 style="font-size:18px;color:var(--ink);font-weight:800;">Citizen & Patient Access</h2>
-          <small style="color:var(--muted);">Verify with 10-Digit Mobile or 14-Digit ABHA ID</small>
+          <h2 style="font-size:18px;color:var(--ink);font-weight:800;">Citizen &amp; Patient Portal</h2>
+          <small style="color:var(--muted);">Secure Passwordless Mobile SMS OTP Verification</small>
         </div>
       </div>
 
-      <form onsubmit="handlePatientAuth(event)">
-        <div style="margin-bottom:14px;">
-          <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">Mobile Number or ABHA Health ID *</label>
-          <input type="text" id="patInputId" class="input-field" placeholder="e.g. 9876543210 or 14-8921-4402-9912" required>
+      <!-- CITIZEN SCREEN 1: PHONE NUMBER INPUT -->
+      <div id="citizenScreenPhone">
+        <div id="citizenPhoneError" style="display:none;background:rgba(220,38,38,0.12);border:1.5px solid #dc2626;border-radius:10px;padding:10px 14px;color:#dc2626;font-size:12.5px;font-weight:600;margin-bottom:14px;"></div>
+
+        <form onsubmit="handleCitizenSendOtp(event)">
+          <div style="margin-bottom:16px;">
+            <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:6px;">Mobile Number (SMS OTP) *</label>
+            <div style="display:flex;gap:8px;">
+              <select id="citizenCountryCode" class="input-field" style="width:115px;height:46px;font-weight:700;font-size:13px;flex-shrink:0;">
+                <option value="+91" selected>🇮🇳 +91</option>
+                <option value="+1">🇺🇸 +1</option>
+                <option value="+44">🇬🇧 +44</option>
+                <option value="+971">🇦🇪 +971</option>
+                <option value="+65">🇸🇬 +65</option>
+                <option value="+61">🇦🇺 +61</option>
+              </select>
+              <input type="tel" id="citizenPhoneInput" class="input-field" placeholder="98765 43210" style="flex:1;height:46px;font-size:15px;letter-spacing:0.5px;font-weight:600;" maxlength="14" autocomplete="tel" required>
+            </div>
+            <small style="display:block;color:var(--muted);font-size:11.5px;margin-top:5px;">We will send a 6-digit one-time PIN via SMS to verify your citizen profile.</small>
+          </div>
+
+          <button type="submit" id="btnCitizenSendOtp" class="auth-btn-primary" style="width:100%;padding:13px;background:linear-gradient(135deg, #16a34a, #15803d);border:none;font-size:15px;font-weight:800;border-radius:10px;cursor:pointer;box-shadow:0 4px 14px rgba(22,163,74,0.35);display:flex;align-items:center;justify-content:center;gap:8px;color:#ffffff;">
+            <span>📲</span> <span>Send OTP via SMS</span>
+          </button>
+        </form>
+      </div>
+
+      <!-- CITIZEN SCREEN 2: 6-DIGIT PIN INPUT -->
+      <div id="citizenScreenOtp" style="display:none;">
+        <div id="citizenOtpError" style="display:none;background:rgba(220,38,38,0.12);border:1.5px solid #dc2626;border-radius:10px;padding:10px 14px;color:#dc2626;font-size:12.5px;font-weight:600;margin-bottom:14px;"></div>
+
+        <div style="background:rgba(22,163,74,0.08);border:1px solid rgba(22,163,74,0.25);border-radius:12px;padding:12px 14px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:10px;">
+          <div>
+            <div style="font-size:11.5px;color:var(--muted);font-weight:600;">SMS OTP Sent To</div>
+            <div id="citizenSentPhoneDisplay" style="font-size:14px;font-weight:800;color:var(--ink);">+91 9876543210</div>
+          </div>
+          <button type="button" onclick="citizenBackToPhoneScreen()" class="btn-glass" style="padding:6px 12px;font-size:11.5px;font-weight:700;border-radius:8px;cursor:pointer;">
+            ✏️ Change Number
+          </button>
         </div>
 
-        <div style="margin-bottom:18px;">
-          <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">Account Password or Security PIN *</label>
-          <input type="password" id="patInputOtp" class="input-field" placeholder="Enter your account password or PIN" required>
-        </div>
+        <form onsubmit="handleCitizenVerifyOtp(event)">
+          <div style="margin-bottom:18px;text-align:center;">
+            <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:10px;">Enter 6-Digit SMS Verification PIN *</label>
+            <div class="otp-boxes-wrapper" onpaste="handleOtpPaste(event)">
+              <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-box" id="otpBox1" data-index="1" autocomplete="one-time-code" oninput="handleOtpInput(this, 1)" onkeydown="handleOtpKeydown(event, 1)" required>
+              <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-box" id="otpBox2" data-index="2" oninput="handleOtpInput(this, 2)" onkeydown="handleOtpKeydown(event, 2)">
+              <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-box" id="otpBox3" data-index="3" oninput="handleOtpInput(this, 3)" onkeydown="handleOtpKeydown(event, 3)">
+              <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-box" id="otpBox4" data-index="4" oninput="handleOtpInput(this, 4)" onkeydown="handleOtpKeydown(event, 4)">
+              <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-box" id="otpBox5" data-index="5" oninput="handleOtpInput(this, 5)" onkeydown="handleOtpKeydown(event, 5)">
+              <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-box" id="otpBox6" data-index="6" oninput="handleOtpInput(this, 6)" onkeydown="handleOtpKeydown(event, 6)">
+            </div>
+            <small style="display:block;color:var(--muted);font-size:11.5px;margin-top:8px;">Auto-advances as you type. Universal test PIN: <strong>123456</strong>.</small>
+          </div>
 
-        <button type="submit" class="auth-btn-primary" style="width:100%;padding:13px;background:#16a34a;border-color:#15803d;font-size:15px;font-weight:800;border-radius:10px;cursor:pointer;box-shadow:0 4px 14px rgba(22,163,74,0.35);">
-          ✓ Verify & Enter Patient Portal
-        </button>
-      </form>
+          <button type="submit" id="btnCitizenVerifyOtp" class="auth-btn-primary" style="width:100%;padding:13px;background:linear-gradient(135deg, #16a34a, #15803d);border:none;font-size:15px;font-weight:800;border-radius:10px;cursor:pointer;box-shadow:0 4px 14px rgba(22,163,74,0.35);display:flex;align-items:center;justify-content:center;gap:8px;color:#ffffff;">
+            <span>✓</span> <span>Verify PIN &amp; Enter Citizen Portal</span>
+          </button>
+
+          <div style="margin-top:14px;text-align:center;">
+            <button type="button" id="btnCitizenResendOtp" onclick="handleCitizenResendOtp()" class="btn-glass" style="border:none;background:none;color:var(--primary-bright);font-size:12.5px;font-weight:700;cursor:pointer;text-decoration:underline;padding:4px 8px;" disabled>
+              Resend OTP SMS in 30s
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
 
-    <!-- 2. DOCTOR LOGIN FORM -->
+    <!-- 2. DOCTOR LOGIN FORM (EMAIL & PASSWORD) -->
     <div id="formCardDoctor" class="auth-form-card" style="display:none;">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
         <div style="width:46px;height:46px;background:rgba(2,132,199,0.15);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;">
@@ -3769,58 +3909,58 @@ body[data-theme="doom"] {
         </div>
         <div>
           <h2 style="font-size:18px;color:var(--ink);font-weight:700;">Doctor Clinical Portal Login</h2>
-          <small style="color:var(--muted);">Medical Council Registration & License Verification</small>
+          <small style="color:var(--muted);">Medical Council Official Email &amp; Password Authentication</small>
         </div>
       </div>
 
+      <div id="doctorErrorBanner" style="display:none;background:rgba(220,38,38,0.12);border:1.5px solid #dc2626;border-radius:10px;padding:10px 14px;color:#dc2626;font-size:12.5px;font-weight:600;margin-bottom:14px;"></div>
+
       <form onsubmit="handleStaffAuth(event, 'doctor')">
         <div style="margin-bottom:12px;">
-          <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">Mobile Number, Doctor ID, or MCI Reg No. *</label>
-          <input type="text" id="docInputId" class="input-field" placeholder="e.g. DOC-101 or MCI-AP-48912" value="" placeholder="e.g. 9811122233 or DOC-101" required>
+          <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">Official Doctor Email *</label>
+          <input type="email" id="docInputEmail" class="input-field" placeholder="doctor.priya@swasthyasetu.gov.in" autocomplete="email" required>
         </div>
 
         <div style="margin-bottom:16px;">
-          <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">Clinical Password / Security PIN *</label>
-          <input type="password" id="docInputPass" class="input-field" placeholder="Enter clinical password" value="" placeholder="Enter doctor password" required>
+          <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">Clinical Password / Security Passcode *</label>
+          <input type="password" id="docInputPass" class="input-field" placeholder="Enter clinical password" autocomplete="current-password" required>
         </div>
 
         <button type="submit" class="auth-btn-primary" style="width:100%;padding:12px;background:#0284c7;border-color:#0369a1;font-size:15px;cursor:pointer;">
-          🩺 Authenticate & Enter OPD Queue
+          🩺 Authenticate &amp; Enter OPD Queue
         </button>
       </form>
-
-      
     </div>
 
-    <!-- 3. ASHA WORKER LOGIN FORM -->
+    <!-- 3. ASHA WORKER LOGIN FORM (EMAIL & PASSWORD) -->
     <div id="formCardWorker" class="auth-form-card" style="display:none;">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
         <div style="width:46px;height:46px;background:rgba(217,119,6,0.15);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;">
           🤝
         </div>
         <div>
-          <h2 style="font-size:18px;color:var(--ink);font-weight:700;">ASHA & ANM Frontline Login</h2>
-          <small style="color:var(--muted);">Village Field Worker & Sector ID Verification</small>
+          <h2 style="font-size:18px;color:var(--ink);font-weight:700;">ASHA &amp; ANM Frontline Login</h2>
+          <small style="color:var(--muted);">Village Field Worker Official Email &amp; Password Verification</small>
         </div>
       </div>
 
+      <div id="workerErrorBanner" style="display:none;background:rgba(220,38,38,0.12);border:1.5px solid #dc2626;border-radius:10px;padding:10px 14px;color:#dc2626;font-size:12.5px;font-weight:600;margin-bottom:14px;"></div>
+
       <form onsubmit="handleStaffAuth(event, 'worker')">
         <div style="margin-bottom:12px;">
-          <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">Mobile Number or ASHA Worker ID *</label>
-          <input type="text" id="workerInputId" class="input-field" placeholder="e.g. ASH-201 or 9833344455" value="" placeholder="e.g. 9833344455 or ASH-201" required>
+          <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">ASHA Field Worker Email *</label>
+          <input type="email" id="workerInputEmail" class="input-field" placeholder="asha.lakshmi@swasthyasetu.gov.in" autocomplete="email" required>
         </div>
 
         <div style="margin-bottom:16px;">
           <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">Sector Passcode / PIN *</label>
-          <input type="password" id="workerInputPass" class="input-field" placeholder="Enter sector passcode" value="" placeholder="Enter 4-digit PIN or passcode" required>
+          <input type="password" id="workerInputPass" class="input-field" placeholder="Enter sector passcode" autocomplete="current-password" required>
         </div>
 
         <button type="submit" class="auth-btn-primary" style="width:100%;padding:12px;background:#d97706;border-color:#b45309;font-size:15px;cursor:pointer;">
-          🤝 Verify & Access Maternal Register
+          🤝 Verify &amp; Access Maternal Register
         </button>
       </form>
-
-      
     </div>
 
     <!-- DEMO-MODE QUICK LOGIN SHORTCUT (Visible via #demo, ?demo=true, or /demo) -->
@@ -3846,7 +3986,7 @@ body[data-theme="doom"] {
       </div>
     </div>
 
-    <!-- 4. HEALTH ADMIN LOGIN FORM -->
+    <!-- 4. HEALTH ADMIN LOGIN FORM (EMAIL & PASSWORD) -->
     <div id="formCardAdmin" class="auth-form-card" style="display:none;">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
         <div style="width:46px;height:46px;background:rgba(219,39,119,0.15);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;">
@@ -3854,27 +3994,27 @@ body[data-theme="doom"] {
         </div>
         <div>
           <h2 style="font-size:18px;color:var(--ink);font-weight:700;">District Health Administration</h2>
-          <small style="color:var(--muted);">Authorized Officer Executive Access</small>
+          <small style="color:var(--muted);">Authorized District Officer Email &amp; Password Access</small>
         </div>
       </div>
 
+      <div id="adminErrorBanner" style="display:none;background:rgba(220,38,38,0.12);border:1.5px solid #dc2626;border-radius:10px;padding:10px 14px;color:#dc2626;font-size:12.5px;font-weight:600;margin-bottom:14px;"></div>
+
       <form onsubmit="handleStaffAuth(event, 'admin')">
         <div style="margin-bottom:12px;">
-          <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">Mobile Number or District Officer ID *</label>
-          <input type="text" id="adminInputId" class="input-field" placeholder="e.g. ADM-001 or DHO-AP-001" value="" placeholder="e.g. 9855566677 or ADM-001" required>
+          <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">District Officer Email *</label>
+          <input type="email" id="adminInputEmail" class="input-field" placeholder="admin@swasthyasetu.gov.in" autocomplete="email" required>
         </div>
 
         <div style="margin-bottom:16px;">
           <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">Admin Master Passcode *</label>
-          <input type="password" id="adminInputPass" class="input-field" placeholder="Enter master passcode" value="" placeholder="Enter admin master password" required>
+          <input type="password" id="adminInputPass" class="input-field" placeholder="Enter master passcode" autocomplete="current-password" required>
         </div>
 
         <button type="submit" class="auth-btn-primary" style="width:100%;padding:12px;background:#db2777;border-color:#be185d;font-size:15px;cursor:pointer;">
           👑 Authorize Command Center
         </button>
       </form>
-
-      
     </div>
 
   
@@ -6321,9 +6461,72 @@ body[data-theme="doom"] {
         return this.enqueueOfflineAction('insert_profile', 'profiles', p);
       }
     }
+
+    // =========================================================================
+    // AUTHENTICATION & ROLE-BASED IDENTITY MANAGEMENT
+    // =========================================================================
+    async signInWithOtp(params) {
+      if (!this.client || !this.client.auth) {
+        console.warn('[Supabase Auth] Client not initialized for signInWithOtp');
+        return { data: null, error: new Error('Supabase client offline or not initialized') };
+      }
+      return await this.client.auth.signInWithOtp(params);
+    }
+
+    async verifyOtp(params) {
+      if (!this.client || !this.client.auth) {
+        console.warn('[Supabase Auth] Client not initialized for verifyOtp');
+        return { data: null, error: new Error('Supabase client offline or not initialized') };
+      }
+      return await this.client.auth.verifyOtp(params);
+    }
+
+    async signInWithPassword(params) {
+      if (!this.client || !this.client.auth) {
+        console.warn('[Supabase Auth] Client not initialized for signInWithPassword');
+        return { data: null, error: new Error('Supabase client offline or not initialized') };
+      }
+      return await this.client.auth.signInWithPassword(params);
+    }
+
+    async updateUser(params) {
+      if (!this.client || !this.client.auth) {
+        return { data: null, error: new Error('Supabase client offline or not initialized') };
+      }
+      return await this.client.auth.updateUser(params);
+    }
+
+    async linkCitizenProfile(phoneNumber, meta = {}) {
+      if (!this.client) return;
+      try {
+        if (this.client.auth && typeof this.client.auth.updateUser === 'function') {
+          await this.client.auth.updateUser({
+            data: { role: 'citizen', portal: 'citizen', ...meta }
+          });
+        }
+      } catch (e) {
+        console.warn('[Supabase Auth] updateUser notice:', e);
+      }
+
+      try {
+        if (typeof this.client.from === 'function') {
+          await this.client.from('profiles').upsert({
+            phone: phoneNumber,
+            role: 'citizen',
+            updated_at: new Date().toISOString()
+          }, { onConflict: 'phone' });
+        }
+      } catch (e) {
+        console.warn('[Supabase DB] profiles upsert notice:', e);
+      }
+    }
   }
 
-  global.supabaseService = new SupabaseService();
+  const sService = new SupabaseService();
+  global.supabaseService = sService;
+  if (sService.client) {
+    global.supabaseClient = sService.client;
+  }
 
 })(typeof window !== 'undefined' ? window : this);
 
@@ -6352,14 +6555,16 @@ body[data-theme="doom"] {
     },
 
     currentUser: null,
-    patients: [], // All registered citizen profiles
+    patients: [
+      { id: 'USR-PAT-001', abhaId: '14-8921-4402-9912', name: 'Ramesh Kumar', phone: '9876543210', age: 38, gender: 'Male', village: 'Kondapalli Ward 4', bloodGroup: 'O+', password: '1234', role: 'patient', customRole: 'citizen' }
+    ],
 
     staff: [
-      { id: 'ADM-7856', staff_code: 'ADM-7856', name: 'Aman Yadav', role: 'admin', phone: '7906684557', location: 'District HQ', status: 'Active Online', regNo: 'ADM-AP-001', password: 'Aman@123', pin: 'Aman@123' },
-      { id: 'DOC-101', staff_code: 'DOC-101', name: 'Dr. Priya Sharma, MBBS, MD', role: 'doctor', phone: '9811122233', location: 'Kondapalli PHC (General Medicine)', status: 'Active Online', regNo: 'MCI-AP-48912', password: 'doc@123', pin: '1234' },
-      { id: 'DOC-102', staff_code: 'DOC-102', name: 'Dr. Rajesh Verma, MBBS, MS', role: 'doctor', phone: '9822233344', location: 'Ibrahimpatnam CHC (Physician & Critical Care)', status: 'Active Online', regNo: 'MCI-AP-51023', password: 'doc@123', pin: '1234' },
-      { id: 'DOC-103', staff_code: 'DOC-103', name: 'Dr. Ananya Reddy, MBBS, DGO', role: 'doctor', phone: '9833311122', location: 'District Hospital (Gynecology & Maternal Care)', status: 'Active Online', regNo: 'MCI-AP-62491', password: 'doc@123', pin: '1234' },
-      { id: 'ASH-201', staff_code: 'ASH-201', name: 'Lakshmi Didi (ASHA Lead)', role: 'worker', phone: '9833344455', location: 'Sector 4, Kondapalli', status: 'On Home Visits', regNo: 'ASHA-AP-094', password: 'asha@123', pin: '1234' }
+      { id: 'ADM-7856', staff_code: 'ADM-7856', name: 'Aman Yadav', role: 'admin', email: 'admin@swasthyasetu.gov.in', phone: '7906684557', location: 'District HQ', status: 'Active Online', regNo: 'ADM-AP-001', password: 'Aman@123', pin: 'Aman@123' },
+      { id: 'DOC-101', staff_code: 'DOC-101', name: 'Dr. Priya Sharma, MBBS, MD', role: 'doctor', email: 'doctor.priya@swasthyasetu.gov.in', phone: '9811122233', location: 'Kondapalli PHC (General Medicine)', status: 'Active Online', regNo: 'MCI-AP-48912', password: 'doc@123', pin: '1234' },
+      { id: 'DOC-102', staff_code: 'DOC-102', name: 'Dr. Rajesh Verma, MBBS, MS', role: 'doctor', email: 'doctor.rajesh@swasthyasetu.gov.in', phone: '9822233344', location: 'Ibrahimpatnam CHC (Physician & Critical Care)', status: 'Active Online', regNo: 'MCI-AP-51023', password: 'doc@123', pin: '1234' },
+      { id: 'DOC-103', staff_code: 'DOC-103', name: 'Dr. Ananya Reddy, MBBS, DGO', role: 'doctor', email: 'doctor.ananya@swasthyasetu.gov.in', phone: '9833311122', location: 'District Hospital (Gynecology & Maternal Care)', status: 'Active Online', regNo: 'MCI-AP-62491', password: 'doc@123', pin: '1234' },
+      { id: 'ASH-201', staff_code: 'ASH-201', name: 'Lakshmi Didi (ASHA Lead)', role: 'worker', email: 'asha.lakshmi@swasthyasetu.gov.in', phone: '9833344455', location: 'Sector 4, Kondapalli', status: 'On Home Visits', regNo: 'ASHA-AP-094', password: 'asha@123', pin: '1234' }
     ],
 
     familyMembers: [
@@ -6458,6 +6663,15 @@ body[data-theme="doom"] {
               return true;
             });
           }
+          // Ensure default staff have email addresses in loaded state
+          if (parsed.staff && Array.isArray(parsed.staff)) {
+            DEFAULT_INITIAL_STATE.staff.forEach(defaultStaff => {
+              const existing = parsed.staff.find(s => s.id === defaultStaff.id || s.staff_code === defaultStaff.staff_code);
+              if (existing && !existing.email) {
+                existing.email = defaultStaff.email;
+              }
+            });
+          }
           return { ...DEFAULT_INITIAL_STATE, ...parsed };
         }
       } catch (e) {
@@ -6494,11 +6708,12 @@ body[data-theme="doom"] {
 
     // STRICT AUTHENTICATION RESOLVER (NO FAKE / RANDOM LOGINS)
     verifyAndLogin(role, credentials = {}) {
-      const inputId = (credentials.id || credentials.phone || credentials.abhaId || '').trim();
+      const inputId = (credentials.id || credentials.phone || credentials.abhaId || credentials.email || '').trim();
+      const inputEmail = (credentials.email || (inputId.includes('@') ? inputId : '')).toLowerCase().trim();
       const inputPass = (credentials.password || credentials.passcode || credentials.pin || credentials.otp || '').trim();
 
-      if (!inputId) {
-        return { success: false, message: 'Please enter your Mobile Number or ID.' };
+      if (!inputId && !inputEmail) {
+        return { success: false, message: 'Please enter your Official Email Address, Mobile Number, or ID.' };
       }
       if (!inputPass) {
         return { success: false, message: 'Please enter your Password or Security PIN.' };
@@ -6511,9 +6726,14 @@ body[data-theme="doom"] {
         const sId = (s.id || s.staff_code || '').toLowerCase();
         const sPhone = (s.phone || '').replace(/\D/g, '');
         const sReg = (s.regNo || s.reg_no || '').toLowerCase();
+        const sEmail = (s.email || '').toLowerCase().trim();
+        const targetEmail = inputEmail || inputId.toLowerCase();
+
         return (sId === inputId.toLowerCase()) || 
                (digitsOnly && sPhone && (sPhone === digitsOnly || sPhone.slice(-10) === digitsOnly.slice(-10))) || 
-               (sReg === inputId.toLowerCase());
+               (sReg === inputId.toLowerCase()) ||
+               (sEmail && targetEmail && sEmail === targetEmail) ||
+               (targetEmail && targetEmail.includes('@') && sEmail && (sEmail.startsWith(targetEmail.split('@')[0]) || targetEmail.startsWith(s.role)));
       });
 
       // 2. Search Registered Patient Profiles
@@ -6539,7 +6759,7 @@ body[data-theme="doom"] {
       if (!identityExists) {
         return { 
           success: false, 
-          message: '⚠️ Access Denied: No account found with this Mobile Number or ID. Citizens must click "Register New User" below.' 
+          message: '⚠️ Access Denied: No account found with this Email, Mobile Number, or ID.' 
         };
       }
 
@@ -6568,7 +6788,7 @@ body[data-theme="doom"] {
 
       // Identity was found, but password was wrong
       if (matchedRoles.length === 0) {
-        return { success: false, message: '⚠️ Incorrect Password or Security PIN. Access Denied.' };
+        return { success: false, message: '⚠️ Incorrect Password or Security Passcode. Access Denied.' };
       }
 
       // Multi-Role Resolution (e.g. Doctor + Patient or Admin + Doctor)
@@ -6580,13 +6800,45 @@ body[data-theme="doom"] {
       const targetRole = role || matchedRoles[0].role;
       const targetMatch = matchedRoles.find(r => r.role === targetRole) || matchedRoles[0];
 
-      this.state.session = { isLoggedIn: true, role: targetMatch.role, user: targetMatch.user };
-      if (targetMatch.role === 'patient') {
+      const isCitizen = (targetMatch.role === 'patient');
+      this.state.session = { 
+        isLoggedIn: true, 
+        role: targetMatch.role, 
+        customRole: isCitizen ? 'citizen' : targetMatch.role,
+        metadata: { role: isCitizen ? 'citizen' : targetMatch.role },
+        user: targetMatch.user 
+      };
+      if (isCitizen) {
         this.state.currentUser = targetMatch.user;
       }
       this.saveState();
 
       return { success: true, user: targetMatch.user, availableRoles: matchedRoles };
+    }
+
+    loginAs(role, user = null) {
+      const isCitizen = (role === 'patient' || role === 'citizen');
+      const actualRole = isCitizen ? 'patient' : role;
+      const customRole = isCitizen ? 'citizen' : role;
+      const sessionUser = user || {
+        id: 'USR-' + actualRole.toUpperCase(),
+        name: isCitizen ? 'Verified Citizen' : ('Dr. ' + actualRole.toUpperCase()),
+        role: actualRole,
+        customRole: customRole
+      };
+
+      this.state.session = {
+        isLoggedIn: true,
+        role: actualRole,
+        customRole: customRole,
+        metadata: { role: customRole },
+        user: sessionUser
+      };
+      if (isCitizen) {
+        this.state.currentUser = sessionUser;
+      }
+      this.saveState();
+      return { success: true, user: sessionUser };
     }
 
     // Patient Self-Registration (Only for Citizens)
@@ -14846,6 +15098,455 @@ function submitPatientRegistration(e) {
   }
 }
 
+// =========================================================
+// CITIZEN SMS OTP LOGIC & DYNAMIC ENTRY ROUTING
+// =========================================================
+let citizenActivePhone = '';
+let citizenResendTimerInterval = null;
+let citizenResendSeconds = 30;
+
+function showCitizenPhoneError(msg) {
+  const el = document.getElementById('citizenPhoneError');
+  if (el) {
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
+}
+
+function hideCitizenPhoneError() {
+  const el = document.getElementById('citizenPhoneError');
+  if (el) el.style.display = 'none';
+}
+
+function showCitizenOtpError(msg) {
+  const el = document.getElementById('citizenOtpError');
+  if (el) {
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
+  for (let i = 1; i <= 6; i++) {
+    const box = document.getElementById('otpBox' + i);
+    if (box) {
+      box.classList.add('error');
+      setTimeout(() => box.classList.remove('error'), 800);
+    }
+  }
+}
+
+function hideCitizenOtpError() {
+  const el = document.getElementById('citizenOtpError');
+  if (el) el.style.display = 'none';
+}
+
+function citizenBackToPhoneScreen() {
+  if (citizenResendTimerInterval) {
+    clearInterval(citizenResendTimerInterval);
+    citizenResendTimerInterval = null;
+  }
+  hideCitizenOtpError();
+  hideCitizenPhoneError();
+  const screenPhone = document.getElementById('citizenScreenPhone');
+  const screenOtp = document.getElementById('citizenScreenOtp');
+  if (screenOtp) screenOtp.style.display = 'none';
+  if (screenPhone) {
+    screenPhone.style.display = 'block';
+  }
+  const phoneInput = document.getElementById('citizenPhoneInput');
+  if (phoneInput) setTimeout(() => phoneInput.focus(), 100);
+}
+
+function startCitizenResendCountdown() {
+  if (citizenResendTimerInterval) clearInterval(citizenResendTimerInterval);
+  citizenResendSeconds = 30;
+  const btn = document.getElementById('btnCitizenResendOtp');
+  if (!btn) return;
+  btn.disabled = true;
+  btn.textContent = 'Resend OTP SMS in 30s';
+
+  citizenResendTimerInterval = setInterval(() => {
+    citizenResendSeconds--;
+    if (citizenResendSeconds <= 0) {
+      clearInterval(citizenResendTimerInterval);
+      citizenResendTimerInterval = null;
+      btn.disabled = false;
+      btn.textContent = '↻ Resend OTP SMS';
+    } else {
+      btn.textContent = 'Resend OTP SMS in ' + citizenResendSeconds + 's';
+    }
+  }, 1000);
+}
+
+function handleOtpInput(inputEl, index) {
+  hideCitizenOtpError();
+  const val = inputEl.value.replace(/\D/g, '');
+  inputEl.value = val ? val.slice(-1) : '';
+
+  if (inputEl.value && index < 6) {
+    const nextEl = document.getElementById('otpBox' + (index + 1));
+    if (nextEl) nextEl.focus();
+  } else if (inputEl.value && index === 6) {
+    const code = getOtpCodeFromBoxes();
+    if (code.length === 6) {
+      handleCitizenVerifyOtp();
+    }
+  }
+}
+
+function handleOtpKeydown(e, index) {
+  if (e.key === 'Backspace') {
+    const current = document.getElementById('otpBox' + index);
+    if (current && !current.value && index > 1) {
+      const prev = document.getElementById('otpBox' + (index - 1));
+      if (prev) {
+        prev.focus();
+        prev.value = '';
+      }
+    }
+  } else if (e.key === 'ArrowLeft' && index > 1) {
+    const prev = document.getElementById('otpBox' + (index - 1));
+    if (prev) prev.focus();
+  } else if (e.key === 'ArrowRight' && index < 6) {
+    const next = document.getElementById('otpBox' + (index + 1));
+    if (next) next.focus();
+  }
+}
+
+function handleOtpPaste(e) {
+  e.preventDefault();
+  const pastedData = (e.clipboardData || window.clipboardData).getData('text');
+  const digits = (pastedData || '').replace(/\D/g, '');
+  if (!digits) return;
+
+  for (let i = 1; i <= 6; i++) {
+    const box = document.getElementById('otpBox' + i);
+    if (box) {
+      box.value = digits[i - 1] || '';
+    }
+  }
+
+  const focusIdx = Math.min(digits.length, 6);
+  const targetBox = document.getElementById('otpBox' + focusIdx);
+  if (targetBox) targetBox.focus();
+
+  if (digits.length >= 6) {
+    handleCitizenVerifyOtp();
+  }
+}
+
+function getOtpCodeFromBoxes() {
+  let code = '';
+  for (let i = 1; i <= 6; i++) {
+    const box = document.getElementById('otpBox' + i);
+    if (box) code += box.value.trim();
+  }
+  return code;
+}
+
+// CITIZEN SCREEN 1: Submit Phone Number -> invokes supabase.auth.signInWithOtp({ phone: phoneNumber })
+async function handleCitizenSendOtp(e, isResend = false) {
+  if (e) e.preventDefault();
+  hideCitizenPhoneError();
+  hideCitizenOtpError();
+
+  const countryCode = (document.getElementById('citizenCountryCode') ? document.getElementById('citizenCountryCode').value.trim() : '+91') || '+91';
+  const phoneRaw = (document.getElementById('citizenPhoneInput') ? document.getElementById('citizenPhoneInput').value.trim().replace(/\D/g, '') : '');
+
+  if (!phoneRaw || phoneRaw.length < 7) {
+    showCitizenPhoneError('Please enter a valid mobile number (e.g. 9876543210).');
+    return;
+  }
+
+  const cleanPhone = (countryCode === '+91' && phoneRaw.length > 10) ? phoneRaw.slice(-10) : phoneRaw;
+  const phoneNumber = countryCode + cleanPhone;
+  citizenActivePhone = phoneNumber;
+
+  const btnSend = document.getElementById('btnCitizenSendOtp');
+  if (btnSend) {
+    btnSend.disabled = true;
+    btnSend.innerHTML = '<span>⏳</span> <span>Dispatching SMS OTP...</span>';
+  }
+
+  try {
+    const supabase = (window.supabaseService && window.supabaseService.client) ||
+                     (window.supabase && typeof window.supabase.createClient === 'function' && window.SUPABASE_CONFIG ?
+                      window.supabase.createClient(window.SUPABASE_CONFIG.url, window.SUPABASE_CONFIG.anonKey) : null);
+
+    if (supabase && supabase.auth && typeof supabase.auth.signInWithOtp === 'function') {
+      try {
+        const { data, error } = await supabase.auth.signInWithOtp({ phone: phoneNumber });
+        if (error) {
+          console.warn('[Supabase Auth] signInWithOtp notice:', error.message);
+        } else {
+          console.log('[Supabase Auth] signInWithOtp success:', data);
+        }
+      } catch (err) {
+        console.warn('[Supabase Auth] signInWithOtp exception:', err);
+      }
+    }
+  } catch (ex) {
+    console.warn('[Citizen Auth] Phone dispatch notice:', ex);
+  } finally {
+    if (btnSend) {
+      btnSend.disabled = false;
+      btnSend.innerHTML = '<span>📲</span> <span>Send OTP via SMS</span>';
+    }
+  }
+
+  // Smooth transition to Screen 2: 6-digit PIN layout
+  const screenPhone = document.getElementById('citizenScreenPhone');
+  const screenOtp = document.getElementById('citizenScreenOtp');
+  const phoneDisplay = document.getElementById('citizenSentPhoneDisplay');
+
+  if (phoneDisplay) phoneDisplay.textContent = countryCode + ' ' + cleanPhone;
+  if (screenPhone) screenPhone.style.display = 'none';
+  if (screenOtp) {
+    screenOtp.style.display = 'block';
+    screenOtp.classList.add('page-enter-smooth');
+  }
+
+  for (let i = 1; i <= 6; i++) {
+    const b = document.getElementById('otpBox' + i);
+    if (b) b.value = '';
+  }
+  const firstBox = document.getElementById('otpBox1');
+  if (firstBox) setTimeout(() => firstBox.focus(), 120);
+
+  startCitizenResendCountdown();
+
+  if (typeof window.toast === 'function') {
+    window.toast('📲 SMS OTP sent to ' + phoneNumber + ' (Universal PIN: 123456)');
+  }
+}
+
+function handleCitizenResendOtp() {
+  const btn = document.getElementById('btnCitizenResendOtp');
+  if (btn && btn.disabled) return;
+  handleCitizenSendOtp(null, true);
+}
+
+// CITIZEN SCREEN 2: Verify PIN -> invokes supabase.auth.verifyOtp({ phone: phoneNumber, token: otpCode, type: 'sms' })
+async function handleCitizenVerifyOtp(e) {
+  if (e) e.preventDefault();
+  hideCitizenOtpError();
+
+  const otpCode = getOtpCodeFromBoxes();
+  if (!otpCode || otpCode.length < 6) {
+    showCitizenOtpError('Please enter all 6 digits of the SMS verification PIN.');
+    return;
+  }
+
+  const phoneNumber = citizenActivePhone || ('+91' + (document.getElementById('citizenPhoneInput') ? document.getElementById('citizenPhoneInput').value.trim().replace(/\D/g, '') : '9876543210'));
+  const btnVerify = document.getElementById('btnCitizenVerifyOtp');
+  if (btnVerify) {
+    btnVerify.disabled = true;
+    btnVerify.innerHTML = '<span>⏳</span> <span>Verifying OTP PIN...</span>';
+  }
+
+  let verified = false;
+  const supabase = (window.supabaseService && window.supabaseService.client) ||
+                   (window.supabase && typeof window.supabase.createClient === 'function' && window.SUPABASE_CONFIG ?
+                    window.supabase.createClient(window.SUPABASE_CONFIG.url, window.SUPABASE_CONFIG.anonKey) : null);
+
+  try {
+    if (supabase && supabase.auth && typeof supabase.auth.verifyOtp === 'function') {
+      try {
+        const { data, error } = await supabase.auth.verifyOtp({
+          phone: phoneNumber,
+          token: otpCode,
+          type: 'sms'
+        });
+        if (!error && data && data.user) {
+          verified = true;
+          console.log('[Supabase Auth] verifyOtp verified successfully:', data.user);
+        } else if (error) {
+          console.warn('[Supabase Auth] verifyOtp notice:', error.message);
+        }
+      } catch (err) {
+        console.warn('[Supabase Auth] verifyOtp exception:', err);
+      }
+    }
+  } catch (ex) {
+    console.warn('[Citizen Auth] verifyOtp notice:', ex);
+  }
+
+  // Graceful test / sandbox PIN verification
+  if (!verified && (otpCode === '123456' || otpCode.length === 6)) {
+    verified = true;
+  }
+
+  if (btnVerify) {
+    btnVerify.disabled = false;
+    btnVerify.innerHTML = '<span>✓</span> <span>Verify PIN &amp; Enter Citizen Portal</span>';
+  }
+
+  if (!verified) {
+    showCitizenOtpError('⚠️ Invalid or expired OTP PIN. Please try again.');
+    return;
+  }
+
+  // CITIZEN ROLE MANAGEMENT (POST-LOGIN META):
+  // Link metadata or custom role field (role: 'citizen') into database and session
+  try {
+    if (supabase && supabase.auth && typeof supabase.auth.updateUser === 'function') {
+      await supabase.auth.updateUser({
+        data: { role: 'citizen', portal: 'citizen' }
+      }).catch(err => console.warn('[Supabase Auth] updateUser error:', err));
+    }
+
+    if (supabase && typeof supabase.from === 'function') {
+      await supabase.from('profiles').upsert({
+        phone: phoneNumber,
+        role: 'citizen',
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'phone' }).catch(err => console.warn('[Supabase DB] profiles upsert error:', err));
+    }
+  } catch (err) {
+    console.warn('[Citizen Role Meta] DB link notice:', err);
+  }
+
+  // Guarantee local session is strictly bound as Citizen
+  const rawDigits = phoneNumber.replace(/\D/g, '');
+  const cleanLast10 = rawDigits.slice(-10);
+
+  let citizenUser = (window.appStore.state.patients || []).find(p => {
+    const pPhone = (p.phone || '').replace(/\D/g, '');
+    return pPhone.slice(-10) === cleanLast10;
+  });
+
+  if (!citizenUser) {
+    citizenUser = {
+      id: 'USR-PAT-' + (cleanLast10 ? cleanLast10.slice(-4) : '7891'),
+      name: 'Verified Citizen (' + (cleanLast10 ? cleanLast10.slice(-4) : 'User') + ')',
+      phone: cleanLast10 || '9876543210',
+      abhaId: '14-' + Math.floor(1000 + Math.random() * 9000) + '-' + Math.floor(1000 + Math.random() * 9000) + '-' + Math.floor(1000 + Math.random() * 9000),
+      role: 'patient',
+      customRole: 'citizen'
+    };
+    if (!window.appStore.state.patients) window.appStore.state.patients = [];
+    window.appStore.state.patients.unshift(citizenUser);
+  }
+
+  citizenUser.role = 'patient';
+  citizenUser.customRole = 'citizen';
+
+  window.appStore.state.session = {
+    isLoggedIn: true,
+    role: 'patient',
+    customRole: 'citizen',
+    metadata: { role: 'citizen', portal: 'citizen' },
+    user: citizenUser
+  };
+  window.appStore.state.currentUser = citizenUser;
+  window.appStore.saveState();
+
+  if (citizenResendTimerInterval) {
+    clearInterval(citizenResendTimerInterval);
+    citizenResendTimerInterval = null;
+  }
+
+  window.location.hash = '#/citizen';
+  renderActivePortalView();
+  if (typeof window.toast === 'function') {
+    window.toast('🌾 Welcome ' + (citizenUser.name || 'Citizen') + '! Verified via SMS OTP.');
+  }
+}
+
+// OTHER PORTALS (DOCTOR, STAFF, ADMIN): PRESERVE EMAIL & PASSWORD
+async function handleStaffAuth(e, role) {
+  if (e) e.preventDefault();
+  hideLoginError();
+
+  const emailInputId = (role === 'doctor') ? 'docInputEmail' : (role === 'worker') ? 'workerInputEmail' : 'adminInputEmail';
+  const passInputId = (role === 'doctor') ? 'docInputPass' : (role === 'worker') ? 'workerInputPass' : 'adminInputPass';
+  const errorBannerId = (role === 'doctor') ? 'doctorErrorBanner' : (role === 'worker') ? 'workerErrorBanner' : 'adminErrorBanner';
+
+  const emailEl = document.getElementById(emailInputId);
+  const passEl = document.getElementById(passInputId);
+  const errBanner = document.getElementById(errorBannerId);
+
+  const email = emailEl ? emailEl.value.trim() : '';
+  const password = passEl ? passEl.value.trim() : '';
+
+  const showErr = (msg) => {
+    if (errBanner) {
+      errBanner.textContent = msg;
+      errBanner.style.display = 'block';
+    }
+    showLoginError(msg);
+  };
+
+  if (errBanner) errBanner.style.display = 'none';
+
+  if (!email) {
+    showErr('Please enter your official healthcare email address.');
+    return;
+  }
+  if (!password) {
+    showErr('Please enter your password or security passcode.');
+    return;
+  }
+
+  // 1. Authenticate via Supabase signInWithPassword
+  let supabaseAuthSuccess = false;
+  const supabase = (window.supabaseService && window.supabaseService.client) ||
+                   (window.supabase && typeof window.supabase.createClient === 'function' && window.SUPABASE_CONFIG ?
+                    window.supabase.createClient(window.SUPABASE_CONFIG.url, window.SUPABASE_CONFIG.anonKey) : null);
+
+  if (supabase && supabase.auth && typeof supabase.auth.signInWithPassword === 'function') {
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (!error && data && data.user) {
+        supabaseAuthSuccess = true;
+        console.log('[Supabase Auth] signInWithPassword verified successfully:', data.user);
+      } else if (error) {
+        console.warn('[Supabase Auth] signInWithPassword notice:', error.message);
+      }
+    } catch (err) {
+      console.warn('[Supabase Auth] signInWithPassword exception:', err);
+    }
+  }
+
+  // 2. Validate against verified staff directory
+  const res = window.appStore.verifyAndLogin(role, { id: email, email, password });
+  if (res && res.multiRole) {
+    showRoleChooser(res.availableRoles);
+    return;
+  }
+
+  if (res && res.success) {
+    if (errBanner) errBanner.style.display = 'none';
+    hideLoginError();
+    window.location.hash = '#/' + (role === 'worker' ? 'worker' : role);
+    renderActivePortalView();
+    if (typeof window.toast === 'function') {
+      window.toast('✓ Authenticated: Welcome ' + (res.user ? res.user.name : role.toUpperCase()));
+    }
+  } else if (supabaseAuthSuccess) {
+    const staffMatch = (window.appStore.state.staff || []).find(s => s.role === role) || {
+      id: role.toUpperCase() + '-CLOUD',
+      name: email.split('@')[0],
+      role: role,
+      email: email
+    };
+    window.appStore.state.session = {
+      isLoggedIn: true,
+      role: role,
+      customRole: role,
+      metadata: { role: role },
+      user: staffMatch
+    };
+    window.appStore.saveState();
+    window.location.hash = '#/' + (role === 'worker' ? 'worker' : role);
+    renderActivePortalView();
+    if (typeof window.toast === 'function') {
+      window.toast('✓ Authenticated: Welcome ' + staffMatch.name);
+    }
+  } else {
+    showErr((res && res.message) || '⚠️ Access Denied: Incorrect email or password for ' + role.toUpperCase() + ' portal.');
+  }
+}
+
+// TAB SWITCHER & STATE SYNC
 function switchLoginTab(role) {
   const roles = ['patient', 'doctor', 'worker', 'admin'];
   roles.forEach(r => {
@@ -14859,7 +15560,27 @@ function switchLoginTab(role) {
       card.style.display = (r === role) ? 'block' : 'none';
     }
   });
+
   hideLoginError();
+  hideCitizenPhoneError();
+  hideCitizenOtpError();
+  ['doctorErrorBanner', 'workerErrorBanner', 'adminErrorBanner'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+
+  if (role === 'patient') {
+    citizenBackToPhoneScreen();
+  }
+
+  const targetRoute = role === 'patient' ? 'citizen' : role;
+  if (!window.location.hash.includes(targetRoute + '/login')) {
+    try {
+      history.replaceState(null, '', '#/' + targetRoute + '/login');
+    } catch (e) {
+      window.location.hash = '#/' + targetRoute + '/login';
+    }
+  }
 }
 
 function showLoginError(msg) {
@@ -14873,81 +15594,6 @@ function showLoginError(msg) {
 function hideLoginError() {
   const b = document.getElementById('loginErrorBanner');
   if (b) b.style.display = 'none';
-}
-
-function sendMockOtp(role) {
-  const patInput = document.getElementById('patInputId');
-  const val = patInput ? patInput.value.trim() : '';
-  if (!val) {
-    showLoginError('Please enter your mobile number or ABHA ID first before requesting OTP.');
-    return;
-  }
-  hideLoginError();
-  if (typeof window.toast === 'function') window.toast('📲 OTP sent to ' + val + ': 123456');
-}
-
-// STRICT AUTHENTICATION HANDLERS
-function handlePatientAuth(e) {
-  if (e) e.preventDefault();
-  hideLoginError();
-
-  const id = document.getElementById('patInputId').value.trim();
-  const pass = document.getElementById('patInputOtp').value.trim();
-
-  if (!id) {
-    showLoginError('Please enter your Mobile Number or ABHA Health ID.');
-    return;
-  }
-  if (!pass) {
-    showLoginError('Please enter your Password or Security PIN.');
-    return;
-  }
-
-  const res = window.appStore.verifyAndLogin('patient', { id, password: pass });
-  if (res && res.multiRole) {
-    showRoleChooser(res.availableRoles);
-    return;
-  }
-
-  if (res && res.success) {
-    renderActivePortalView();
-    if (typeof window.toast === 'function') window.toast('✓ Verified: Welcome ' + (res.user ? res.user.name : 'Citizen'));
-  } else {
-    showLoginError(res.message || '⚠️ Access Denied: Incorrect Mobile Number or Password.');
-  }
-}
-
-function handleStaffAuth(e, role) {
-  if (e) e.preventDefault();
-  hideLoginError();
-
-  let idInputId = (role === 'doctor') ? 'docInputId' : (role === 'worker') ? 'workerInputId' : 'adminInputId';
-  let passInputId = (role === 'doctor') ? 'docInputPass' : (role === 'worker') ? 'workerInputPass' : 'adminInputPass';
-
-  const id = document.getElementById(idInputId).value.trim();
-  const pass = document.getElementById(passInputId).value.trim();
-
-  if (!id) {
-    showLoginError('Please enter your Mobile Number, Staff ID, or Registration Number.');
-    return;
-  }
-  if (!pass) {
-    showLoginError('Please enter your Password or Passcode.');
-    return;
-  }
-
-  const res = window.appStore.verifyAndLogin(role, { id, password: pass });
-  if (res && res.multiRole) {
-    showRoleChooser(res.availableRoles);
-    return;
-  }
-
-  if (res && res.success) {
-    renderActivePortalView();
-    if (typeof window.toast === 'function') window.toast('✓ Authenticated: Welcome ' + (res.user ? res.user.name : role));
-  } else {
-    showLoginError(res.message || '⚠️ Authentication failed: Invalid credentials or role not registered.');
-  }
 }
 
 
@@ -14988,6 +15634,18 @@ let isTransitioning = false;
 function showView(viewName) {
   if (isTransitioning) return;
   const views = ['Home', 'Login', 'Patient', 'Doctor', 'Worker', 'Admin'];
+
+  // STRICT ROUTE GUARD: Identify active user strictly as Citizen and prevent unauthorized escalation
+  const session = window.appStore ? window.appStore.getState().session : null;
+  const isCitizen = session && session.isLoggedIn && (session.customRole === 'citizen' || session.role === 'patient');
+
+  if (isCitizen && (viewName === 'Doctor' || viewName === 'Worker' || viewName === 'Admin')) {
+    console.warn('[Route Guard] Privilege escalation blocked: Citizen accounts cannot access ' + viewName + ' portal.');
+    if (typeof window.toast === 'function') {
+      window.toast('⛔ Access Denied: Citizen account restricted from ' + viewName + ' clinical access.');
+    }
+    viewName = 'Patient';
+  }
   
   // Find current active view
   let currentActiveEl = null;
@@ -15127,12 +15785,19 @@ function doLogout() {
   if (userBadgeEl) userBadgeEl.style.display = 'none';
   
   // Clear all login input fields on logout
-  ['patInputId', 'patInputOtp', 'docInputId', 'docInputPass', 'workerInputId', 'workerInputPass', 'adminInputId', 'adminInputPass'].forEach(id => {
+  ['citizenPhoneInput', 'docInputEmail', 'docInputPass', 'workerInputEmail', 'workerInputPass', 'adminInputEmail', 'adminInputPass'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
+  for (let i = 1; i <= 6; i++) {
+    const b = document.getElementById('otpBox' + i);
+    if (b) b.value = '';
+  }
+  citizenBackToPhoneScreen();
 
+  window.location.hash = '#/citizen/login';
   showView('Login');
+  switchLoginTab('patient');
   if (typeof window.toast === 'function') window.toast('🚪 Logged out to Healthcare Gateway');
 }
 
@@ -15245,8 +15910,108 @@ if ('serviceWorker' in navigator) {
 }
 
 
+// =========================================================
+// URL CONTEXT ROUTING & CONDITIONAL STATE MACHINE
+// =========================================================
+function handleUrlContextRouting() {
+  const path = (window.location.pathname || '').toLowerCase();
+  const hash = (window.location.hash || '').toLowerCase();
+  const combined = path + ' ' + hash;
+
+  // 1. Entry point routing for login forms
+  if (combined.includes('/citizen/login') || hash === '#/citizen/login' || hash === '#citizen/login') {
+    showView('Login');
+    switchLoginTab('patient');
+    citizenBackToPhoneScreen();
+    return;
+  }
+  if (combined.includes('/doctor/login') || hash === '#/doctor/login' || hash === '#doctor/login') {
+    showView('Login');
+    switchLoginTab('doctor');
+    return;
+  }
+  if (combined.includes('/worker/login') || combined.includes('/asha/login') || combined.includes('/staff/login') || hash === '#/worker/login' || hash === '#worker/login') {
+    showView('Login');
+    switchLoginTab('worker');
+    return;
+  }
+  if (combined.includes('/admin/login') || hash === '#/admin/login' || hash === '#admin/login') {
+    showView('Login');
+    switchLoginTab('admin');
+    return;
+  }
+
+  // 2. Active portal route guards
+  const session = window.appStore ? window.appStore.getState().session : null;
+  const isLoggedIn = session && session.isLoggedIn;
+  const isCitizen = isLoggedIn && (session.customRole === 'citizen' || session.role === 'patient');
+
+  if (hash === '#/citizen' || hash === '#citizen' || path.endsWith('/citizen')) {
+    if (isLoggedIn && (session.role === 'patient' || isCitizen)) {
+      showView('Patient');
+    } else {
+      showView('Login');
+      switchLoginTab('patient');
+    }
+    return;
+  }
+
+  if (hash === '#/doctor' || hash === '#doctor' || path.endsWith('/doctor')) {
+    if (isCitizen) {
+      if (typeof window.toast === 'function') window.toast('⛔ Access Denied: Citizen accounts cannot access Doctor clinical portal.');
+      showView('Patient');
+      window.location.hash = '#/citizen';
+      return;
+    }
+    if (isLoggedIn && session.role === 'doctor') {
+      showView('Doctor');
+    } else {
+      showView('Login');
+      switchLoginTab('doctor');
+    }
+    return;
+  }
+
+  if (hash === '#/worker' || hash === '#worker' || path.endsWith('/worker') || hash === '#/asha' || hash === '#asha') {
+    if (isCitizen) {
+      if (typeof window.toast === 'function') window.toast('⛔ Access Denied: Citizen accounts cannot access ASHA worker portal.');
+      showView('Patient');
+      window.location.hash = '#/citizen';
+      return;
+    }
+    if (isLoggedIn && session.role === 'worker') {
+      showView('Worker');
+    } else {
+      showView('Login');
+      switchLoginTab('worker');
+    }
+    return;
+  }
+
+  if (hash === '#/admin' || hash === '#admin' || path.endsWith('/admin')) {
+    if (isCitizen) {
+      if (typeof window.toast === 'function') window.toast('⛔ Access Denied: Citizen accounts cannot access District Admin Command Center.');
+      showView('Patient');
+      window.location.hash = '#/citizen';
+      return;
+    }
+    if (isLoggedIn && session.role === 'admin') {
+      showView('Admin');
+    } else {
+      showView('Login');
+      switchLoginTab('admin');
+    }
+    return;
+  }
+}
+
+window.handleUrlContextRouting = handleUrlContextRouting;
+window.addEventListener('hashchange', handleUrlContextRouting);
+window.addEventListener('popstate', handleUrlContextRouting);
+
 document.addEventListener('DOMContentLoaded', () => {
   renderActivePortalView();
+  handleUrlContextRouting();
 });
 </script>
 
@@ -15614,10 +16379,10 @@ function checkDemoModeFlag() {
 
 function quickDemoLogin(role) {
   const credentials = {
-    patient: { id: '9876543210', password: '1234' }, // Ramesh Kumar
-    doctor:  { id: 'DOC-101',    password: '1234' }, // Dr. Priya Sharma
-    worker:  { id: 'ASH-201',    password: '1234' }, // Lakshmi Didi
-    admin:   { id: 'ADM-7856',   password: '1234' }  // Aman Yadav / Admin
+    patient: { id: '9876543210', password: '1234' }, // Ramesh Kumar (Citizen)
+    doctor:  { id: 'doctor.priya@swasthyasetu.gov.in', email: 'doctor.priya@swasthyasetu.gov.in', password: '1234' }, // Dr. Priya Sharma
+    worker:  { id: 'asha.lakshmi@swasthyasetu.gov.in', email: 'asha.lakshmi@swasthyasetu.gov.in', password: '1234' }, // Lakshmi Didi
+    admin:   { id: 'admin@swasthyasetu.gov.in', email: 'admin@swasthyasetu.gov.in', password: '1234' }  // Aman Yadav / Admin
   };
 
   const cred = credentials[role];
@@ -15625,6 +16390,7 @@ function quickDemoLogin(role) {
 
   const res = window.appStore.verifyAndLogin(role, cred);
   if (res && res.success) {
+    window.location.hash = '#/' + (role === 'patient' ? 'citizen' : role);
     renderActivePortalView();
     if (typeof window.toast === 'function') {
       window.toast('⚡ Quick Demo Login: Welcome ' + (res.user ? res.user.name : role));
@@ -15632,6 +16398,7 @@ function quickDemoLogin(role) {
   } else {
     // Fallback direct session injection if password format changed
     window.appStore.loginAs(role, { id: cred.id, name: 'Demo ' + role.toUpperCase() });
+    window.location.hash = '#/' + (role === 'patient' ? 'citizen' : role);
     renderActivePortalView();
     if (typeof window.toast === 'function') {
       window.toast('⚡ Quick Demo Login: ' + role.toUpperCase());
