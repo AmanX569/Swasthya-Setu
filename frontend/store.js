@@ -296,34 +296,12 @@
                (inputName && pName && (pName === inputName || (inputName.length >= 4 && pName.includes(inputName))));
       });
 
-      // Auto-provision citizen if logging into citizen/patient portal with a 10-digit mobile number or ABHA ID
-      if (role === 'patient' && (cleanLast10.length >= 10 || cleanInputAbha.length >= 6 || inputId.length >= 3)) {
-        if (matchingPatients.length === 0) {
-          const newPat = {
-            id: 'USR-PAT-' + (cleanLast10 ? cleanLast10.slice(-4) : Math.floor(1000 + Math.random() * 9000)),
-            name: 'Verified Citizen (' + (cleanLast10 ? cleanLast10.slice(-4) : 'User') + ')',
-            phone: cleanLast10 || '9876543210',
-            age: 32,
-            gender: 'Male',
-            village: 'Kondapalli Sub-Centre',
-            bloodGroup: 'B+',
-            abhaId: cleanInputAbha && cleanInputAbha.length >= 10 ? inputId : ('14-' + Math.floor(1000 + Math.random() * 9000) + '-' + Math.floor(1000 + Math.random() * 9000) + '-' + Math.floor(1000 + Math.random() * 9000)),
-            role: 'patient',
-            customRole: 'citizen',
-            password: inputPass || '1234'
-          };
-          if (!this.state.patients) this.state.patients = [];
-          this.state.patients.unshift(newPat);
-          matchingPatients.push(newPat);
-        }
-      }
-
-      // Check if identity exists in system
+      // Strict Identity lookup - No auto-provisioning of arbitrary credentials
       const identityExists = (matchingStaff.length > 0) || (matchingPatients.length > 0);
       if (!identityExists) {
         return { 
           success: false, 
-          message: '⚠️ Access Denied: No account found with this Email, Mobile Number, or ID.' 
+          message: '⚠️ Access Denied: No registered account found with this Mobile Number, ABHA ID, or Staff Code. Please register first.' 
         };
       }
 
@@ -343,9 +321,9 @@
 
       matchingPatients.forEach(p => {
         const patPass = (p.password || p.pin || '1234').trim();
-        // Allow user's registered password, universal mock OTP (123456), default 1234, or any 4+ char password
-        if (patPass === inputPass || patPass === '1234' || inputPass === '1234' || patPass === '123456' || inputPass === '123456' || inputPass.length >= 4) {
-          p.password = inputPass;
+        // Strict password check against registered password or PIN
+        const isMatch = (inputPass === patPass) || (p.pin && inputPass === p.pin.trim());
+        if (isMatch) {
           if (!matchedRoles.some(r => r.role === 'patient')) {
             matchedRoles.push({ role: 'patient', user: p, label: (p.name || 'Citizen') + ' (CITIZEN)' });
           }
@@ -644,32 +622,14 @@
                (inputName && pName && (pName === inputName || (inputName.length >= 4 && pName.includes(inputName))));
       });
 
-      // Auto-provision demo/new citizen if logging in with valid 10-digit mobile
-      if (!matchingPatient && (cleanLast10.length === 10 || cleanInputAbha.length >= 10)) {
-        matchingPatient = {
-          id: 'USR-PAT-' + (cleanLast10 ? cleanLast10.slice(-4) : Math.floor(1000 + Math.random() * 9000)),
-          name: 'Verified Citizen (' + (cleanLast10 ? cleanLast10.slice(-4) : 'User') + ')',
-          phone: cleanLast10 || '9876543210',
-          age: 32,
-          gender: 'Male',
-          village: 'Kondapalli Sub-Centre',
-          bloodGroup: 'B+',
-          abhaId: cleanInputAbha && cleanInputAbha.length >= 10 ? inputId : ('14-' + Math.floor(1000 + Math.random() * 9000) + '-' + Math.floor(1000 + Math.random() * 9000) + '-' + Math.floor(1000 + Math.random() * 9000)),
-          role: 'patient',
-          customRole: 'citizen',
-          password: inputPass || '1234'
-        };
-        if (!this.state.patients) this.state.patients = [];
-        this.state.patients.unshift(matchingPatient);
-      }
-
+      // Account must be registered - No silent creation of unverified accounts
       if (!matchingPatient) {
-        return { success: false, message: 'Invalid Mobile/ABHA ID or Password/PIN.' };
+        return { success: false, message: 'Invalid Mobile/ABHA ID or Password/PIN. New user? Please click Register below.' };
       }
 
-      // Check Password / PIN
+      // Check Password / PIN strictly
       const patPass = (matchingPatient.password || matchingPatient.pin || '1234').trim();
-      const isPasswordValid = (inputPass === patPass || inputPass === '1234' || (matchingPatient.pin && inputPass === matchingPatient.pin));
+      const isPasswordValid = (inputPass === patPass || (matchingPatient.pin && inputPass === matchingPatient.pin.trim()));
 
       if (!isPasswordValid) {
         return { success: false, message: 'Invalid Mobile/ABHA ID or Password/PIN.' };

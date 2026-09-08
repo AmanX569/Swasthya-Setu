@@ -2,3 +2,7 @@ node_modules/
 .DS_Store
 *.log
 scratch/
+server/.env
+*.pem
+*.key
+*.cert

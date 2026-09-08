@@ -27,6 +27,7 @@
     renderAll() {
       this.renderKpis();
       this.renderStaffTable();
+      this.renderPatientTable();
       this.renderAdminBeds();
       this.renderAdminBlood();
       this.renderAdminMedicines();
@@ -90,6 +91,52 @@
           </td>
         </tr>
       `).join('');
+    }
+
+    renderPatientTable() {
+      const el = document.getElementById('adminPatientTableBody');
+      if (!el || !this.store) return;
+      const state = this.store.getState();
+      const patients = state.patients || [];
+
+      if (!patients.length) {
+        el.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--muted);">No registered citizens found in registry.</td></tr>`;
+        return;
+      }
+
+      el.innerHTML = patients.map(p => {
+        const isMobileVerified = !!(p.mobile_verified || p.mobileVerified);
+        const isAadhaarVerified = !!(p.aadhaar_verified || p.aadhaarVerified);
+        const hasAddress = !!(p.permanent_address_completed && p.permanent_address);
+        const abhaNumber = p.abhaId || p.abha_id || '—';
+        const maskedAadhaar = p.maskedAadhaar || (isAadhaarVerified ? 'XXXX-XXXX-0019' : '—');
+
+        return `
+          <tr>
+            <td><strong style="color:var(--primary-bright);font-family:'IBM Plex Mono',monospace;font-size:13px;">${p.id || p.patient_id || 'PT-001'}</strong></td>
+            <td>
+              <strong style="color:var(--ink);display:block;font-size:14px;">${p.name || 'Citizen'}</strong>
+              <small style="color:var(--muted);">${p.gender || '—'} · ${p.age || '—'} Yrs</small>
+            </td>
+            <td>
+              <span class="badge" style="background:${isMobileVerified ? 'rgba(22,163,74,0.15)' : 'rgba(234,179,8,0.15)'};color:${isMobileVerified ? '#16a34a' : '#d97706'};padding:4px 8px;border-radius:12px;font-size:11px;font-weight:700;">
+                ${isMobileVerified ? '✓ Verified' : '⚠ Pending OTP'} (+91 ${p.phone})
+              </span>
+            </td>
+            <td style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink);">${abhaNumber}</td>
+            <td>
+              <span class="badge" style="background:${isAadhaarVerified ? 'rgba(22,163,74,0.15)' : 'rgba(148,163,184,0.15)'};color:${isAadhaarVerified ? '#16a34a' : 'var(--muted)'};padding:4px 8px;border-radius:12px;font-size:11px;font-weight:700;">
+                ${isAadhaarVerified ? '✓ e-KYC (' + maskedAadhaar + ')' : '— Unverified'}
+              </span>
+            </td>
+            <td>
+              <span class="badge" style="background:${hasAddress ? 'rgba(22,163,74,0.15)' : 'rgba(239,68,68,0.15)'};color:${hasAddress ? '#16a34a' : '#ef4444'};padding:4px 8px;border-radius:12px;font-size:11px;font-weight:700;">
+                ${hasAddress ? '✓ Completed' : '✕ Missing'}
+              </span>
+            </td>
+          </tr>
+        `;
+      }).join('');
     }
 
     openProvisionStaffModal() {

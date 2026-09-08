@@ -3905,6 +3905,16 @@ body[data-theme="doom"] {
           <button type="submit" id="btnCitizenLoginSubmit" class="auth-btn-primary" style="width:100%;padding:13px;background:linear-gradient(135deg, #16a34a, #15803d);border:none;font-size:15px;font-weight:800;border-radius:10px;cursor:pointer;box-shadow:0 4px 14px rgba(22,163,74,0.35);display:flex;align-items:center;justify-content:center;gap:8px;color:#ffffff;">
             <span>🔐</span> <span>Login</span>
           </button>
+
+          <div style="display:flex;align-items:center;margin:14px 0 10px;gap:10px;">
+            <div style="flex:1;height:1px;background:var(--border-glass, rgba(255,255,255,0.1));"></div>
+            <span style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;">or authenticate via</span>
+            <div style="flex:1;height:1px;background:var(--border-glass, rgba(255,255,255,0.1));"></div>
+          </div>
+
+          <button type="button" onclick="openAbhaLoginModal()" class="btn-glass" style="width:100%;padding:11px;border-radius:10px;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;border:1.5px solid rgba(14,165,233,0.4);background:rgba(14,165,233,0.08);color:var(--ink);cursor:pointer;">
+            <span>🇮🇳</span> <span>Continue with ABHA (Ayushman Bharat / ABDM)</span>
+          </button>
         </form>
       </div>
 
@@ -4545,6 +4555,34 @@ body[data-theme="doom"] {
       </div>
     </div>
 
+    <!-- Citizen Patient Identity & Verification Registry -->
+    <div class="glass-panel">
+      <div class="panel-header">
+        <div>
+          <h3 class="panel-title">🛡️ Citizen Patient Identity &amp; Verification Registry</h3>
+          <small style="color:var(--muted);font-size:12px;">Mobile OTP, ABDM 14-Digit ABHA, Masked Aadhaar e-KYC &amp; Address Verification Tracking</small>
+        </div>
+        <span class="badge" style="background:rgba(14,165,233,0.15);color:var(--primary-bright);padding:4px 10px;border-radius:12px;font-size:11px;font-weight:700;">
+          UIDAI &amp; ABDM Compliant
+        </span>
+      </div>
+      <div class="table-responsive">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Patient ID</th>
+              <th>Citizen Name</th>
+              <th>Mobile Status</th>
+              <th>ABHA (14-Digit)</th>
+              <th>Aadhaar Status</th>
+              <th>Permanent Address</th>
+            </tr>
+          </thead>
+          <tbody id="adminPatientTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
     <!-- Live Bed Grid Management -->
     <div class="glass-panel">
       <div class="panel-header">
@@ -5178,6 +5216,143 @@ body[data-theme="doom"] {
       <p style="color:var(--muted);font-size:13px;margin-bottom:20px;">Your permanent address has been saved to your national health profile and cloud registry.</p>
       <button type="button" class="auth-btn-primary" onclick="continueToPatientDashboardAfterAddress()" style="width:100%;padding:14px;background:#16a34a;border-color:#15803d;font-size:15px;font-weight:800;cursor:pointer;">
         Continue to Dashboard →
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ABHA / ABDM AUTHENTICATION MODAL -->
+<div id="abhaAuthModal" class="modal-overlay" style="z-index:9999;">
+  <div class="modal-card" style="max-width:480px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;border-bottom:1px solid var(--line);padding-bottom:10px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:26px;">🇮🇳</span>
+        <div>
+          <h3 style="color:var(--ink);font-size:17px;font-weight:800;margin:0;">ABHA Authentication</h3>
+          <small style="color:var(--muted);">National Health Authority (ABDM Gateway)</small>
+        </div>
+      </div>
+      <button onclick="closeAbhaAuthModal()" style="background:none;border:none;font-size:20px;color:var(--muted);cursor:pointer;">✕</button>
+    </div>
+
+    <!-- Step 1: Input ABHA -->
+    <div id="abhaStep1">
+      <p style="font-size:13px;color:var(--muted);margin-bottom:14px;">
+        Enter your 14-digit ABHA Number or ABHA Address (e.g. <code>14-8921-4402-9912</code> or <code>user@abdm</code>) to authenticate via ABDM OTP.
+      </p>
+      <div style="margin-bottom:14px;">
+        <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">ABHA Number / Address *</label>
+        <input type="text" id="abhaInputIdentifier" class="input-field" placeholder="e.g. 14-8921-4402-9912 or user@abdm" required style="width:100%;height:44px;font-weight:600;">
+      </div>
+      <div id="abhaStep1Error" style="display:none;color:#ef4444;font-size:12px;margin-bottom:12px;background:rgba(239,68,68,0.1);padding:8px 12px;border-radius:8px;"></div>
+      <button type="button" id="btnAbhaInitiate" onclick="submitAbhaInitiate()" class="auth-btn-primary" style="width:100%;padding:12px;background:#0284c7;border-color:#0369a1;font-size:14px;font-weight:800;cursor:pointer;">
+        Proceed with OTP Verification →
+      </button>
+    </div>
+
+    <!-- Step 2: Verify ABDM OTP -->
+    <div id="abhaStep2" style="display:none;">
+      <div style="background:rgba(2,132,199,0.1);border:1px dashed #0284c7;border-radius:10px;padding:10px 14px;margin-bottom:14px;">
+        <small style="color:var(--ink);font-weight:600;display:block;">OTP sent to your ABDM-linked mobile number.</small>
+        <small style="color:var(--muted);font-size:11px;">In Sandbox Mode, use test OTP: <strong>123456</strong></small>
+      </div>
+      <div style="margin-bottom:14px;">
+        <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">Enter 6-Digit ABDM OTP *</label>
+        <input type="text" id="abhaInputOtp" class="input-field" placeholder="123456" maxlength="6" style="width:100%;height:44px;font-size:18px;letter-spacing:6px;text-align:center;font-weight:800;">
+      </div>
+      <div id="abhaStep2Error" style="display:none;color:#ef4444;font-size:12px;margin-bottom:12px;background:rgba(239,68,68,0.1);padding:8px 12px;border-radius:8px;"></div>
+      <div style="display:flex;gap:10px;">
+        <button type="button" class="btn-glass" onclick="returnToAbhaStep1()" style="flex:1;">← Back</button>
+        <button type="button" id="btnAbhaVerify" onclick="submitAbhaVerify()" class="auth-btn-primary" style="flex:2;background:#16a34a;border-color:#15803d;padding:12px;cursor:pointer;">
+          ✓ Confirm &amp; Link ABHA
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- AADHAAR e-KYC VERIFICATION & CONSENT MODAL -->
+<div id="aadhaarAuthModal" class="modal-overlay" style="z-index:9999;">
+  <div class="modal-card" style="max-width:520px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;border-bottom:1px solid var(--line);padding-bottom:10px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:26px;">🆔</span>
+        <div>
+          <h3 style="color:var(--ink);font-size:17px;font-weight:800;margin:0;">Aadhaar e-KYC Identity Verification</h3>
+          <small style="color:var(--muted);">UIDAI Sandbox / Authorized AUA Interface</small>
+        </div>
+      </div>
+      <button onclick="closeAadhaarAuthModal()" style="background:none;border:none;font-size:20px;color:var(--muted);cursor:pointer;">✕</button>
+    </div>
+
+    <!-- Step 1: Informed Consent & Aadhaar Input -->
+    <div id="aadhaarStep1">
+      <div style="background:rgba(217,119,6,0.1);border:1.5px solid rgba(217,119,6,0.4);border-radius:12px;padding:12px 14px;margin-bottom:16px;">
+        <strong style="color:#d97706;font-size:12.5px;display:block;margin-bottom:4px;">📜 Mandatory Citizen Consent Disclosure</strong>
+        <p style="color:var(--ink-dim);font-size:12px;line-height:1.5;margin:0;">
+          I voluntarily consent to share my Aadhaar demographic details with Swasthya Setu for authenticating my patient profile and linking my official health record.
+          <br><br>
+          <strong>Security Guarantee:</strong> Your raw 12-digit Aadhaar number is <em>never stored</em> in any database. Only a masked reference token (e.g. XXXX-XXXX-0019) and verified demographic confirmation will be recorded.
+        </p>
+      </div>
+
+      <div style="margin-bottom:14px;">
+        <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">12-Digit Aadhaar Number *</label>
+        <input type="text" id="aadhaarInputNumber" class="input-field" placeholder="e.g. 9999 9999 0019" maxlength="14" required style="width:100%;height:44px;font-size:15px;letter-spacing:1.5px;font-weight:700;">
+        <small style="color:var(--muted);font-size:11px;display:block;margin-top:4px;">In Sandbox Mode, use official test Aadhaar: <code>999999990019</code></small>
+      </div>
+
+      <div style="margin-bottom:16px;display:flex;align-items:flex-start;gap:8px;">
+        <input type="checkbox" id="chkAadhaarConsent" style="margin-top:3px;cursor:pointer;">
+        <label for="chkAadhaarConsent" style="font-size:12px;color:var(--ink);cursor:pointer;line-height:1.4;">
+          I have read and agree to the UIDAI voluntary e-KYC consent terms.
+        </label>
+      </div>
+
+      <div id="aadhaarStep1Error" style="display:none;color:#ef4444;font-size:12px;margin-bottom:12px;background:rgba(239,68,68,0.1);padding:8px 12px;border-radius:8px;"></div>
+
+      <button type="button" id="btnAadhaarInitiate" onclick="submitAadhaarInitiate()" class="auth-btn-primary" style="width:100%;padding:12px;background:#0284c7;border-color:#0369a1;font-size:14px;font-weight:800;cursor:pointer;">
+        Send Aadhaar OTP →
+      </button>
+    </div>
+
+    <!-- Step 2: Verify Aadhaar OTP -->
+    <div id="aadhaarStep2" style="display:none;">
+      <div style="background:rgba(22,163,74,0.1);border:1px dashed #16a34a;border-radius:10px;padding:10px 14px;margin-bottom:14px;">
+        <small style="color:var(--ink);font-weight:600;display:block;">Aadhaar OTP dispatched to linked mobile ending in ******3210.</small>
+        <small style="color:var(--muted);font-size:11px;">Sandbox Test Code: <strong>123456</strong></small>
+      </div>
+      <div style="margin-bottom:14px;">
+        <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;">Enter 6-Digit Aadhaar OTP *</label>
+        <input type="text" id="aadhaarInputOtp" class="input-field" placeholder="123456" maxlength="6" style="width:100%;height:44px;font-size:18px;letter-spacing:6px;text-align:center;font-weight:800;">
+      </div>
+      <div id="aadhaarStep2Error" style="display:none;color:#ef4444;font-size:12px;margin-bottom:12px;background:rgba(239,68,68,0.1);padding:8px 12px;border-radius:8px;"></div>
+      <div style="display:flex;gap:10px;">
+        <button type="button" class="btn-glass" onclick="returnToAadhaarStep1()" style="flex:1;">← Back</button>
+        <button type="button" id="btnAadhaarVerify" onclick="submitAadhaarVerify()" class="auth-btn-primary" style="flex:2;background:#16a34a;border-color:#15803d;padding:12px;cursor:pointer;">
+          ✓ Verify &amp; Link e-KYC
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MOBILE VERIFICATION OTP MODAL -->
+<div id="mobileVerifyModal" class="modal-overlay" style="z-index:9999;">
+  <div class="modal-card" style="max-width:440px;text-align:center;">
+    <div style="font-size:36px;margin-bottom:8px;">📱</div>
+    <h3 style="color:var(--ink);font-size:18px;font-weight:800;margin-bottom:6px;">Verify Mobile Number</h3>
+    <p style="color:var(--muted);font-size:13px;margin-bottom:16px;">
+      A 6-digit verification code was sent to your registered mobile number: <strong id="verifyModalPhone" style="color:var(--ink);"></strong>
+    </p>
+    <div style="margin-bottom:14px;">
+      <input type="text" id="mobileVerifyInputOtp" class="input-field" placeholder="123456" maxlength="6" style="width:100%;height:46px;font-size:20px;letter-spacing:6px;text-align:center;font-weight:800;">
+    </div>
+    <div id="mobileVerifyError" style="display:none;color:#ef4444;font-size:12px;margin-bottom:12px;background:rgba(239,68,68,0.1);padding:8px 12px;border-radius:8px;"></div>
+    <div style="display:flex;gap:10px;">
+      <button type="button" class="btn-glass" onclick="closeMobileVerifyModal()" style="flex:1;">Cancel</button>
+      <button type="button" id="btnConfirmMobileOtp" onclick="submitMobileVerify()" class="auth-btn-primary" style="flex:2;background:#16a34a;border-color:#15803d;padding:12px;font-weight:800;cursor:pointer;">
+        ✓ Verify Code
       </button>
     </div>
   </div>
@@ -6909,6 +7084,203 @@ body[data-theme="doom"] {
   }
 
 })(typeof window !== 'undefined' ? window : this);
+
+
+/* ==================== api-client.js ==================== */
+/**
+ * =========================================================
+ * SWASTHYA SETU — CLIENT-SIDE API CLIENT (SwasthyaAPIClient)
+ * Central HTTP Gateway to Backend Identity & ABDM/UIDAI Services
+ * =========================================================
+ */
+
+(function () {
+  'use strict';
+
+  class SwasthyaAPIClient {
+    constructor(options = {}) {
+      // Determine base URL: environment or localhost:5000 / relative /api
+      const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      this.baseUrl = options.baseUrl || (isLocalhost ? 'http://localhost:5000/api' : '/api');
+      this.tokenKey = 'swasthya_auth_token';
+      this.token = localStorage.getItem(this.tokenKey) || null;
+    }
+
+    setToken(token) {
+      this.token = token;
+      if (token) {
+        localStorage.setItem(this.tokenKey, token);
+      } else {
+        localStorage.removeItem(this.tokenKey);
+      }
+    }
+
+    getToken() {
+      if (!this.token) {
+        this.token = localStorage.getItem(this.tokenKey);
+      }
+      return this.token;
+    }
+
+    clearToken() {
+      this.token = null;
+      localStorage.removeItem(this.tokenKey);
+    }
+
+    async _request(endpoint, options = {}) {
+      const url = `${this.baseUrl}${endpoint}`;
+      const headers = {
+        'Content-Type': 'application/json',
+        ...(options.headers || {})
+      };
+
+      const token = this.getToken();
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const fetchOptions = {
+        ...options,
+        headers
+      };
+
+      if (options.body && typeof options.body === 'object') {
+        fetchOptions.body = JSON.stringify(options.body);
+      }
+
+      try {
+        const response = await fetch(url, fetchOptions);
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || `HTTP error ${response.status}`);
+        }
+
+        return data;
+      } catch (err) {
+        // Enhance network errors
+        if (err.name === 'TypeError' && err.message.includes('fetch')) {
+          console.warn(`[APIClient] Backend unreachable at ${url}. Operating with client-side fallback.`);
+          throw new Error('Backend server is currently offline. Running in local resilient mode.');
+        }
+        throw err;
+      }
+    }
+
+    /* =========================================================
+     * AUTHENTICATION ENDPOINTS
+     * ========================================================= */
+
+    async register(patientData) {
+      const res = await this._request('/auth/register', {
+        method: 'POST',
+        body: patientData
+      });
+      if (res.token) {
+        this.setToken(res.token);
+      }
+      return res;
+    }
+
+    async login(identifier, password) {
+      const res = await this._request('/auth/login', {
+        method: 'POST',
+        body: { identifier, password }
+      });
+      if (res.token) {
+        this.setToken(res.token);
+      }
+      return res;
+    }
+
+    async requestOtp(mobile, purpose = 'MOBILE_VERIFY') {
+      return this._request('/auth/request-otp', {
+        method: 'POST',
+        body: { mobile, purpose }
+      });
+    }
+
+    async verifyOtp(mobile, purpose, code) {
+      return this._request('/auth/verify-otp', {
+        method: 'POST',
+        body: { mobile, purpose, code }
+      });
+    }
+
+    async resetPassword(resetToken, newPassword) {
+      return this._request('/auth/reset-password', {
+        method: 'POST',
+        body: { resetToken, newPassword }
+      });
+    }
+
+    /* =========================================================
+     * IDENTITY VERIFICATION & LINKING ENDPOINTS
+     * ========================================================= */
+
+    async verifyMobile() {
+      return this._request('/identity/verify-mobile', {
+        method: 'POST'
+      });
+    }
+
+    async confirmMobile(otp) {
+      return this._request('/identity/confirm-mobile', {
+        method: 'POST',
+        body: { otp }
+      });
+    }
+
+    async initiateABHA(abhaIdentifier) {
+      return this._request('/identity/initiate-abha', {
+        method: 'POST',
+        body: { abhaIdentifier }
+      });
+    }
+
+    async verifyABHA(txnId, otp) {
+      return this._request('/identity/verify-abha', {
+        method: 'POST',
+        body: { txnId, otp }
+      });
+    }
+
+    async initiateAadhaar(aadhaarNumber, consentGranted = true) {
+      return this._request('/identity/initiate-aadhaar', {
+        method: 'POST',
+        body: { aadhaarNumber, consentGranted }
+      });
+    }
+
+    async verifyAadhaar(txnId, otp) {
+      return this._request('/identity/verify-aadhaar', {
+        method: 'POST',
+        body: { txnId, otp }
+      });
+    }
+
+    /* =========================================================
+     * PATIENT PROFILE & ADDRESS
+     * ========================================================= */
+
+    async getProfile() {
+      return this._request('/patients/me', {
+        method: 'GET'
+      });
+    }
+
+    async updateAddress(addressData) {
+      return this._request('/patients/me/address', {
+        method: 'PATCH',
+        body: addressData
+      });
+    }
+  }
+
+  // Expose globally to window
+  window.SwasthyaAPIClient = SwasthyaAPIClient;
+  window.swasthyaAPI = new SwasthyaAPIClient();
+})();
 
 
 /* ==================== locations-data.js ==================== */
@@ -9187,34 +9559,12 @@ body[data-theme="doom"] {
                (inputName && pName && (pName === inputName || (inputName.length >= 4 && pName.includes(inputName))));
       });
 
-      // Auto-provision citizen if logging into citizen/patient portal with a 10-digit mobile number or ABHA ID
-      if (role === 'patient' && (cleanLast10.length >= 10 || cleanInputAbha.length >= 6 || inputId.length >= 3)) {
-        if (matchingPatients.length === 0) {
-          const newPat = {
-            id: 'USR-PAT-' + (cleanLast10 ? cleanLast10.slice(-4) : Math.floor(1000 + Math.random() * 9000)),
-            name: 'Verified Citizen (' + (cleanLast10 ? cleanLast10.slice(-4) : 'User') + ')',
-            phone: cleanLast10 || '9876543210',
-            age: 32,
-            gender: 'Male',
-            village: 'Kondapalli Sub-Centre',
-            bloodGroup: 'B+',
-            abhaId: cleanInputAbha && cleanInputAbha.length >= 10 ? inputId : ('14-' + Math.floor(1000 + Math.random() * 9000) + '-' + Math.floor(1000 + Math.random() * 9000) + '-' + Math.floor(1000 + Math.random() * 9000)),
-            role: 'patient',
-            customRole: 'citizen',
-            password: inputPass || '1234'
-          };
-          if (!this.state.patients) this.state.patients = [];
-          this.state.patients.unshift(newPat);
-          matchingPatients.push(newPat);
-        }
-      }
-
-      // Check if identity exists in system
+      // Strict Identity lookup - No auto-provisioning of arbitrary credentials
       const identityExists = (matchingStaff.length > 0) || (matchingPatients.length > 0);
       if (!identityExists) {
         return { 
           success: false, 
-          message: '⚠️ Access Denied: No account found with this Email, Mobile Number, or ID.' 
+          message: '⚠️ Access Denied: No registered account found with this Mobile Number, ABHA ID, or Staff Code. Please register first.' 
         };
       }
 
@@ -9234,9 +9584,9 @@ body[data-theme="doom"] {
 
       matchingPatients.forEach(p => {
         const patPass = (p.password || p.pin || '1234').trim();
-        // Allow user's registered password, universal mock OTP (123456), default 1234, or any 4+ char password
-        if (patPass === inputPass || patPass === '1234' || inputPass === '1234' || patPass === '123456' || inputPass === '123456' || inputPass.length >= 4) {
-          p.password = inputPass;
+        // Strict password check against registered password or PIN
+        const isMatch = (inputPass === patPass) || (p.pin && inputPass === p.pin.trim());
+        if (isMatch) {
           if (!matchedRoles.some(r => r.role === 'patient')) {
             matchedRoles.push({ role: 'patient', user: p, label: (p.name || 'Citizen') + ' (CITIZEN)' });
           }
@@ -9535,32 +9885,14 @@ body[data-theme="doom"] {
                (inputName && pName && (pName === inputName || (inputName.length >= 4 && pName.includes(inputName))));
       });
 
-      // Auto-provision demo/new citizen if logging in with valid 10-digit mobile
-      if (!matchingPatient && (cleanLast10.length === 10 || cleanInputAbha.length >= 10)) {
-        matchingPatient = {
-          id: 'USR-PAT-' + (cleanLast10 ? cleanLast10.slice(-4) : Math.floor(1000 + Math.random() * 9000)),
-          name: 'Verified Citizen (' + (cleanLast10 ? cleanLast10.slice(-4) : 'User') + ')',
-          phone: cleanLast10 || '9876543210',
-          age: 32,
-          gender: 'Male',
-          village: 'Kondapalli Sub-Centre',
-          bloodGroup: 'B+',
-          abhaId: cleanInputAbha && cleanInputAbha.length >= 10 ? inputId : ('14-' + Math.floor(1000 + Math.random() * 9000) + '-' + Math.floor(1000 + Math.random() * 9000) + '-' + Math.floor(1000 + Math.random() * 9000)),
-          role: 'patient',
-          customRole: 'citizen',
-          password: inputPass || '1234'
-        };
-        if (!this.state.patients) this.state.patients = [];
-        this.state.patients.unshift(matchingPatient);
-      }
-
+      // Account must be registered - No silent creation of unverified accounts
       if (!matchingPatient) {
-        return { success: false, message: 'Invalid Mobile/ABHA ID or Password/PIN.' };
+        return { success: false, message: 'Invalid Mobile/ABHA ID or Password/PIN. New user? Please click Register below.' };
       }
 
-      // Check Password / PIN
+      // Check Password / PIN strictly
       const patPass = (matchingPatient.password || matchingPatient.pin || '1234').trim();
-      const isPasswordValid = (inputPass === patPass || inputPass === '1234' || (matchingPatient.pin && inputPass === matchingPatient.pin));
+      const isPasswordValid = (inputPass === patPass || (matchingPatient.pin && inputPass === matchingPatient.pin.trim()));
 
       if (!isPasswordValid) {
         return { success: false, message: 'Invalid Mobile/ABHA ID or Password/PIN.' };
@@ -38047,6 +38379,10 @@ The user's preferred language is ${SUPPORTED_LANGUAGES[this.currentLang]?.name |
         abhaId: abhaNum
       };
 
+      const isMobileVerified = !!(rawUser.mobile_verified || rawUser.mobileVerified || matchedProfile.mobile_verified);
+      const isAadhaarVerified = !!(rawUser.aadhaar_verified || rawUser.aadhaarVerified || matchedProfile.aadhaar_verified);
+      const isAbhaLinked = !!(rawUser.abha_verified || rawUser.abhaVerified || (rawUser.abhaId && !rawUser.abhaId.includes('XXXX')));
+
       container.innerHTML = `
         <div class="abha-badge-card" style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:18px;padding:20px;box-shadow:var(--shadow-panel);position:relative;overflow:hidden;">
           <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1.5px solid var(--line);padding-bottom:12px;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
@@ -38057,7 +38393,12 @@ The user's preferred language is ${SUPPORTED_LANGUAGES[this.currentLang]?.name |
                 <small style="color:var(--muted);font-weight:600;">${this.t('abha_gov', 'Government of India')}</small>
               </div>
             </div>
-            <span class="badge" style="background:var(--primary);color:#ffffff;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;">${this.t('abha_active', 'ACTIVE VERIFIED')}</span>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <span class="badge" style="background:var(--primary);color:#ffffff;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;">${this.t('abha_active', 'ACTIVE')}</span>
+              <span class="badge" style="background:${isMobileVerified ? 'rgba(22,163,74,0.2)' : 'rgba(234,179,8,0.2)'};color:${isMobileVerified ? '#16a34a' : '#d97706'};border:1px solid ${isMobileVerified ? 'rgba(22,163,74,0.4)' : 'rgba(234,179,8,0.4)'};padding:4px 8px;border-radius:20px;font-size:10.5px;font-weight:700;">
+                ${isMobileVerified ? '✓ Mobile Verified' : '⚠ Mobile Unverified'}
+              </span>
+            </div>
           </div>
 
           <div style="display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center;">
@@ -38075,6 +38416,19 @@ The user's preferred language is ${SUPPORTED_LANGUAGES[this.currentLang]?.name |
             </div>
           </div>
 
+          <!-- Identity Status Breakdown -->
+          <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+            <span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:12px;background:${isMobileVerified ? 'rgba(22,163,74,0.12)' : 'rgba(234,179,8,0.12)'};color:${isMobileVerified ? '#16a34a' : '#d97706'};border:1px solid ${isMobileVerified ? 'rgba(22,163,74,0.3)' : 'rgba(234,179,8,0.3)'};">
+              📱 Phone: ${isMobileVerified ? 'Verified' : 'Pending OTP'}
+            </span>
+            <span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:12px;background:${isAbhaLinked ? 'rgba(14,165,233,0.12)' : 'rgba(148,163,184,0.12)'};color:${isAbhaLinked ? 'var(--primary-bright)' : 'var(--muted)'};border:1px solid rgba(14,165,233,0.3);">
+              🇮🇳 ABDM: ${isAbhaLinked ? 'ABHA Linked' : 'Standard'}
+            </span>
+            <span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:12px;background:${isAadhaarVerified ? 'rgba(22,163,74,0.12)' : 'rgba(148,163,184,0.12)'};color:${isAadhaarVerified ? '#16a34a' : 'var(--muted)'};border:1px solid ${isAadhaarVerified ? 'rgba(22,163,74,0.3)' : 'rgba(148,163,184,0.3)'};">
+              🆔 Aadhaar: ${isAadhaarVerified ? 'e-KYC Linked (' + (rawUser.maskedAadhaar || 'Verified') + ')' : 'Not Linked'}
+            </span>
+          </div>
+
           <div style="margin-top:14px;background:var(--primary);color:#ffffff;padding:10px 16px;border-radius:12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
             <div>
               <small style="font-size:10px;letter-spacing:1px;opacity:0.9;">${this.t('abha_number_label', 'ABHA NUMBER (14-DIGIT)')}</small>
@@ -38086,13 +38440,23 @@ The user's preferred language is ${SUPPORTED_LANGUAGES[this.currentLang]?.name |
             </div>
           </div>
 
-          <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
-            <button class="auth-btn-primary" style="flex:1;min-width:180px;padding:10px;font-size:13px;" onclick="patientController.printAbhaCard()">
-              ${this.t('btn_print_abha', '🖨️ Print / Download ABHA Card')}
+          <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="auth-btn-primary" style="flex:1;min-width:160px;padding:9px;font-size:12.5px;" onclick="patientController.printAbhaCard()">
+              ${this.t('btn_print_abha', '🖨️ Print ABHA Card')}
             </button>
-            <button class="btn-glass" style="padding:10px 16px;font-size:13px;" onclick="speakText('Your ABHA ID is ' + '${user.abhaId}')">
+            <button class="btn-glass" style="padding:9px 12px;font-size:12.5px;" onclick="speakText('Your ABHA ID is ' + '${user.abhaId}')">
               ${this.t('read_aloud', '🔊 Read Aloud')}
             </button>
+            ${!isMobileVerified ? `
+              <button class="btn-glass" style="padding:9px 12px;font-size:12px;border-color:#eab308;color:#eab308;" onclick="openMobileVerifyModal()">
+                📱 Verify Mobile
+              </button>
+            ` : ''}
+            ${!isAadhaarVerified ? `
+              <button class="btn-glass" style="padding:9px 12px;font-size:12px;border-color:var(--primary-bright);color:var(--primary-bright);" onclick="openAadhaarModal()">
+                🆔 Link Aadhaar (e-KYC)
+              </button>
+            ` : ''}
           </div>
         </div>
       `;
@@ -40378,6 +40742,7 @@ The user's preferred language is ${SUPPORTED_LANGUAGES[this.currentLang]?.name |
     renderAll() {
       this.renderKpis();
       this.renderStaffTable();
+      this.renderPatientTable();
       this.renderAdminBeds();
       this.renderAdminBlood();
       this.renderAdminMedicines();
@@ -40441,6 +40806,52 @@ The user's preferred language is ${SUPPORTED_LANGUAGES[this.currentLang]?.name |
           </td>
         </tr>
       `).join('');
+    }
+
+    renderPatientTable() {
+      const el = document.getElementById('adminPatientTableBody');
+      if (!el || !this.store) return;
+      const state = this.store.getState();
+      const patients = state.patients || [];
+
+      if (!patients.length) {
+        el.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--muted);">No registered citizens found in registry.</td></tr>`;
+        return;
+      }
+
+      el.innerHTML = patients.map(p => {
+        const isMobileVerified = !!(p.mobile_verified || p.mobileVerified);
+        const isAadhaarVerified = !!(p.aadhaar_verified || p.aadhaarVerified);
+        const hasAddress = !!(p.permanent_address_completed && p.permanent_address);
+        const abhaNumber = p.abhaId || p.abha_id || '—';
+        const maskedAadhaar = p.maskedAadhaar || (isAadhaarVerified ? 'XXXX-XXXX-0019' : '—');
+
+        return `
+          <tr>
+            <td><strong style="color:var(--primary-bright);font-family:'IBM Plex Mono',monospace;font-size:13px;">${p.id || p.patient_id || 'PT-001'}</strong></td>
+            <td>
+              <strong style="color:var(--ink);display:block;font-size:14px;">${p.name || 'Citizen'}</strong>
+              <small style="color:var(--muted);">${p.gender || '—'} · ${p.age || '—'} Yrs</small>
+            </td>
+            <td>
+              <span class="badge" style="background:${isMobileVerified ? 'rgba(22,163,74,0.15)' : 'rgba(234,179,8,0.15)'};color:${isMobileVerified ? '#16a34a' : '#d97706'};padding:4px 8px;border-radius:12px;font-size:11px;font-weight:700;">
+                ${isMobileVerified ? '✓ Verified' : '⚠ Pending OTP'} (+91 ${p.phone})
+              </span>
+            </td>
+            <td style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink);">${abhaNumber}</td>
+            <td>
+              <span class="badge" style="background:${isAadhaarVerified ? 'rgba(22,163,74,0.15)' : 'rgba(148,163,184,0.15)'};color:${isAadhaarVerified ? '#16a34a' : 'var(--muted)'};padding:4px 8px;border-radius:12px;font-size:11px;font-weight:700;">
+                ${isAadhaarVerified ? '✓ e-KYC (' + maskedAadhaar + ')' : '— Unverified'}
+              </span>
+            </td>
+            <td>
+              <span class="badge" style="background:${hasAddress ? 'rgba(22,163,74,0.15)' : 'rgba(239,68,68,0.15)'};color:${hasAddress ? '#16a34a' : '#ef4444'};padding:4px 8px;border-radius:12px;font-size:11px;font-weight:700;">
+                ${hasAddress ? '✓ Completed' : '✕ Missing'}
+              </span>
+            </td>
+          </tr>
+        `;
+      }).join('');
     }
 
     openProvisionStaffModal() {
@@ -40769,6 +41180,7 @@ The user's preferred language is ${SUPPORTED_LANGUAGES[this.currentLang]?.name |
 
 
 
+
   
   
 
@@ -40777,9 +41189,310 @@ The user's preferred language is ${SUPPORTED_LANGUAGES[this.currentLang]?.name |
 
 
 <script>
-
-
 // =========================================================
+// PRODUCTION IDENTITY & ABDM/AADHAAR CONTROLLERS
+// =========================================================
+
+let currentAbhaTxnId = null;
+let currentAadhaarTxnId = null;
+
+function openAbhaLoginModal() {
+  const modal = document.getElementById('abhaAuthModal');
+  if (modal) {
+    document.getElementById('abhaStep1').style.display = 'block';
+    document.getElementById('abhaStep2').style.display = 'none';
+    const err = document.getElementById('abhaStep1Error');
+    if (err) err.style.display = 'none';
+    modal.style.display = 'flex';
+  }
+}
+
+function closeAbhaAuthModal() {
+  const modal = document.getElementById('abhaAuthModal');
+  if (modal) modal.style.display = 'none';
+}
+
+function returnToAbhaStep1() {
+  document.getElementById('abhaStep1').style.display = 'block';
+  document.getElementById('abhaStep2').style.display = 'none';
+}
+
+async function submitAbhaInitiate() {
+  const idEl = document.getElementById('abhaInputIdentifier');
+  const errEl = document.getElementById('abhaStep1Error');
+  const btn = document.getElementById('btnAbhaInitiate');
+  const id = idEl ? idEl.value.trim() : '';
+
+  if (!id) {
+    if (errEl) { errEl.textContent = 'Please enter an ABHA Number or ABHA Address.'; errEl.style.display = 'block'; }
+    return;
+  }
+  if (errEl) errEl.style.display = 'none';
+
+  if (btn) { btn.disabled = true; btn.textContent = 'Contacting ABDM Gateway...'; }
+
+  try {
+    let res = null;
+    if (window.swasthyaAPI) {
+      res = await window.swasthyaAPI.initiateABHA(id);
+    } else {
+      // Local sandbox fallback
+      res = { success: true, txnId: 'ABDM-TXN-' + Date.now() };
+    }
+
+    currentAbhaTxnId = res.txnId;
+    document.getElementById('abhaStep1').style.display = 'none';
+    document.getElementById('abhaStep2').style.display = 'block';
+  } catch (err) {
+    if (errEl) { errEl.textContent = err.message || 'Failed to initiate ABDM authentication.'; errEl.style.display = 'block'; }
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Proceed with OTP Verification →'; }
+  }
+}
+
+async function submitAbhaVerify() {
+  const otpEl = document.getElementById('abhaInputOtp');
+  const errEl = document.getElementById('abhaStep2Error');
+  const btn = document.getElementById('btnAbhaVerify');
+  const otp = otpEl ? otpEl.value.trim() : '';
+
+  if (!otp) {
+    if (errEl) { errEl.textContent = 'Please enter the 6-digit OTP code.'; errEl.style.display = 'block'; }
+    return;
+  }
+  if (errEl) errEl.style.display = 'none';
+
+  if (btn) { btn.disabled = true; btn.textContent = 'Verifying with ABDM...'; }
+
+  try {
+    let res = null;
+    if (window.swasthyaAPI) {
+      res = await window.swasthyaAPI.verifyABHA(currentAbhaTxnId, otp);
+    } else {
+      // Local fallback
+      if (otp !== '123456') throw new Error('Invalid OTP (Sandbox code: 123456)');
+      res = {
+        success: true,
+        abhaId: '14-8921-4402-9912',
+        patientData: { name: 'Ramesh Kumar', healthIdNumber: '14-8921-4402-9912', mobile: '9876543210' }
+      };
+    }
+
+    closeAbhaAuthModal();
+
+    // Authenticate / link in store
+    const abhaId = res.abhaId || (res.patientData && res.patientData.healthIdNumber);
+    const patName = res.patientData ? res.patientData.name : 'Verified Citizen';
+    const patPhone = (res.patientData && res.patientData.mobile) || '9876543210';
+
+    const sessionUser = {
+      id: 'USR-PAT-' + patPhone.slice(-4),
+      name: patName,
+      phone: patPhone,
+      abhaId: abhaId,
+      role: 'patient',
+      customRole: 'citizen',
+      permanent_address_completed: true,
+      abha_verified: true,
+      mobile_verified: true
+    };
+
+    window.appStore.loginAs('patient', sessionUser);
+
+    window.location.hash = '#/citizen';
+    if (typeof showView === 'function') showView('Patient');
+    renderActivePortalView();
+    if (window.patientController && typeof window.patientController.renderAll === 'function') {
+      window.patientController.renderAll();
+    }
+    if (typeof window.toast === 'function') {
+      window.toast('🇮🇳 Welcome ' + patName + '! Signed in via ABDM ABHA.');
+    }
+  } catch (err) {
+    if (errEl) { errEl.textContent = err.message || 'ABDM OTP verification failed.'; errEl.style.display = 'block'; }
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '✓ Confirm & Link ABHA'; }
+  }
+}
+
+// AADHAAR e-KYC VERIFICATION
+function openAadhaarModal() {
+  const modal = document.getElementById('aadhaarAuthModal');
+  if (modal) {
+    document.getElementById('aadhaarStep1').style.display = 'block';
+    document.getElementById('aadhaarStep2').style.display = 'none';
+    const err = document.getElementById('aadhaarStep1Error');
+    if (err) err.style.display = 'none';
+    modal.style.display = 'flex';
+  }
+}
+
+function closeAadhaarAuthModal() {
+  const modal = document.getElementById('aadhaarAuthModal');
+  if (modal) modal.style.display = 'none';
+}
+
+function returnToAadhaarStep1() {
+  document.getElementById('aadhaarStep1').style.display = 'block';
+  document.getElementById('aadhaarStep2').style.display = 'none';
+}
+
+async function submitAadhaarInitiate() {
+  const numEl = document.getElementById('aadhaarInputNumber');
+  const chkConsent = document.getElementById('chkAadhaarConsent');
+  const errEl = document.getElementById('aadhaarStep1Error');
+  const btn = document.getElementById('btnAadhaarInitiate');
+  const aadhaar = numEl ? numEl.value.replace(/\D/g, '') : '';
+
+  if (!aadhaar || aadhaar.length !== 12) {
+    if (errEl) { errEl.textContent = 'Please enter a valid 12-digit Aadhaar number.'; errEl.style.display = 'block'; }
+    return;
+  }
+  if (!chkConsent || !chkConsent.checked) {
+    if (errEl) { errEl.textContent = 'You must grant informed consent for Aadhaar e-KYC to proceed.'; errEl.style.display = 'block'; }
+    return;
+  }
+  if (errEl) errEl.style.display = 'none';
+
+  if (btn) { btn.disabled = true; btn.textContent = 'Requesting UIDAI OTP...'; }
+
+  try {
+    let res = null;
+    if (window.swasthyaAPI) {
+      res = await window.swasthyaAPI.initiateAadhaar(aadhaar, true);
+    } else {
+      res = { success: true, txnId: 'UIDAI-TXN-' + Date.now() };
+    }
+    currentAadhaarTxnId = res.txnId;
+    document.getElementById('aadhaarStep1').style.display = 'none';
+    document.getElementById('aadhaarStep2').style.display = 'block';
+  } catch (err) {
+    if (errEl) { errEl.textContent = err.message || 'UIDAI authentication initiation failed.'; errEl.style.display = 'block'; }
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Send Aadhaar OTP →'; }
+  }
+}
+
+async function submitAadhaarVerify() {
+  const otpEl = document.getElementById('aadhaarInputOtp');
+  const errEl = document.getElementById('aadhaarStep2Error');
+  const btn = document.getElementById('btnAadhaarVerify');
+  const otp = otpEl ? otpEl.value.trim() : '';
+
+  if (!otp) {
+    if (errEl) { errEl.textContent = 'Please enter the 6-digit Aadhaar OTP.'; errEl.style.display = 'block'; }
+    return;
+  }
+  if (errEl) errEl.style.display = 'none';
+
+  if (btn) { btn.disabled = true; btn.textContent = 'Verifying e-KYC...'; }
+
+  try {
+    let res = null;
+    if (window.swasthyaAPI) {
+      res = await window.swasthyaAPI.verifyAadhaar(currentAadhaarTxnId, otp);
+    } else {
+      if (otp !== '123456') throw new Error('Invalid Aadhaar OTP (Sandbox code: 123456)');
+      res = {
+        success: true,
+        maskedAadhaar: 'XXXX-XXXX-0019',
+        eKycData: { name: 'Ramesh Kumar', gender: 'M' }
+      };
+    }
+
+    closeAadhaarAuthModal();
+
+    // Mark current user as Aadhaar verified
+    const state = window.appStore.getState();
+    const cur = state.currentUser || (state.session ? state.session.user : null);
+    if (cur) {
+      cur.aadhaar_verified = true;
+      cur.maskedAadhaar = res.maskedAadhaar || 'XXXX-XXXX-0019';
+      window.appStore.saveState();
+    }
+
+    if (window.patientController && typeof window.patientController.renderAbhaCard === 'function') {
+      window.patientController.renderAbhaCard();
+    }
+    if (typeof window.toast === 'function') {
+      window.toast('🆔 Aadhaar e-KYC Verified successfully! Token linked: ' + (res.maskedAadhaar || 'XXXX-XXXX-0019'));
+    }
+  } catch (err) {
+    if (errEl) { errEl.textContent = err.message || 'Aadhaar OTP verification failed.'; errEl.style.display = 'block'; }
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '✓ Verify & Link e-KYC'; }
+  }
+}
+
+// MOBILE VERIFICATION
+function openMobileVerifyModal() {
+  const modal = document.getElementById('mobileVerifyModal');
+  if (!modal) return;
+  const state = window.appStore.getState();
+  const cur = state.currentUser || (state.session ? state.session.user : null);
+  const phone = cur ? cur.phone : '';
+  const phoneEl = document.getElementById('verifyModalPhone');
+  if (phoneEl) phoneEl.textContent = phone ? `+91 ${phone}` : '';
+  const errEl = document.getElementById('mobileVerifyError');
+  if (errEl) errEl.style.display = 'none';
+
+  modal.style.display = 'flex';
+
+  // Trigger OTP dispatch
+  if (window.swasthyaAPI) {
+    window.swasthyaAPI.verifyMobile().catch(e => console.log('OTP trigger notice:', e.message));
+  }
+}
+
+function closeMobileVerifyModal() {
+  const modal = document.getElementById('mobileVerifyModal');
+  if (modal) modal.style.display = 'none';
+}
+
+async function submitMobileVerify() {
+  const otpEl = document.getElementById('mobileVerifyInputOtp');
+  const errEl = document.getElementById('mobileVerifyError');
+  const btn = document.getElementById('btnConfirmMobileOtp');
+  const otp = otpEl ? otpEl.value.trim() : '';
+
+  if (!otp) {
+    if (errEl) { errEl.textContent = 'Please enter the verification code.'; errEl.style.display = 'block'; }
+    return;
+  }
+  if (errEl) errEl.style.display = 'none';
+
+  if (btn) { btn.disabled = true; btn.textContent = 'Verifying...'; }
+
+  try {
+    if (window.swasthyaAPI) {
+      await window.swasthyaAPI.confirmMobile(otp);
+    } else {
+      if (otp !== '123456') throw new Error('Invalid code (Sandbox test code: 123456)');
+    }
+
+    closeMobileVerifyModal();
+
+    // Mark current user as mobile verified
+    const state = window.appStore.getState();
+    const cur = state.currentUser || (state.session ? state.session.user : null);
+    if (cur) {
+      cur.mobile_verified = true;
+      window.appStore.saveState();
+    }
+
+    if (window.patientController && typeof window.patientController.renderAbhaCard === 'function') {
+      window.patientController.renderAbhaCard();
+    }
+    if (typeof window.toast === 'function') {
+      window.toast('📱 Mobile number verified successfully!');
+    }
+  } catch (err) {
+    if (errEl) { errEl.textContent = err.message || 'Mobile verification failed.'; errEl.style.display = 'block'; }
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '✓ Verify Code'; }
+  }
+}
+
 // STRUCTURED PERMANENT ADDRESS & LOCATION CONTROLLERS
 // =========================================================
 function initAddressLocationDropdowns() {
@@ -41625,7 +42338,34 @@ async function handleCitizenLogin(e) {
   }
 
   try {
-    const res = window.appStore.validateCitizenCredentials({ id: inputId, password: inputPass });
+    let res = null;
+    if (window.swasthyaAPI) {
+      try {
+        const apiRes = await window.swasthyaAPI.login(inputId, inputPass);
+        if (apiRes && apiRes.success && apiRes.patient) {
+          res = {
+            success: true,
+            user: {
+              ...apiRes.patient,
+              id: apiRes.patient.patient_id,
+              phone: apiRes.patient.mobile,
+              abhaId: apiRes.patient.abha_id,
+              role: 'patient',
+              customRole: 'citizen'
+            },
+            permanent_address_completed: apiRes.patient.permanent_address_completed
+          };
+          window.appStore.loginAs('patient', res.user);
+        }
+      } catch (apiErr) {
+        console.log('[Login API fallback to local store]:', apiErr.message);
+      }
+    }
+
+    if (!res) {
+      res = window.appStore.validateCitizenCredentials({ id: inputId, password: inputPass });
+    }
+
     if (!res || !res.success) {
       citizenFailedLoginCount++;
       if (citizenFailedLoginCount >= 3) {

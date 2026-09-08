@@ -298,6 +298,10 @@
         abhaId: abhaNum
       };
 
+      const isMobileVerified = !!(rawUser.mobile_verified || rawUser.mobileVerified || matchedProfile.mobile_verified);
+      const isAadhaarVerified = !!(rawUser.aadhaar_verified || rawUser.aadhaarVerified || matchedProfile.aadhaar_verified);
+      const isAbhaLinked = !!(rawUser.abha_verified || rawUser.abhaVerified || (rawUser.abhaId && !rawUser.abhaId.includes('XXXX')));
+
       container.innerHTML = `
         <div class="abha-badge-card" style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:18px;padding:20px;box-shadow:var(--shadow-panel);position:relative;overflow:hidden;">
           <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1.5px solid var(--line);padding-bottom:12px;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
@@ -308,7 +312,12 @@
                 <small style="color:var(--muted);font-weight:600;">${this.t('abha_gov', 'Government of India')}</small>
               </div>
             </div>
-            <span class="badge" style="background:var(--primary);color:#ffffff;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;">${this.t('abha_active', 'ACTIVE VERIFIED')}</span>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <span class="badge" style="background:var(--primary);color:#ffffff;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;">${this.t('abha_active', 'ACTIVE')}</span>
+              <span class="badge" style="background:${isMobileVerified ? 'rgba(22,163,74,0.2)' : 'rgba(234,179,8,0.2)'};color:${isMobileVerified ? '#16a34a' : '#d97706'};border:1px solid ${isMobileVerified ? 'rgba(22,163,74,0.4)' : 'rgba(234,179,8,0.4)'};padding:4px 8px;border-radius:20px;font-size:10.5px;font-weight:700;">
+                ${isMobileVerified ? '✓ Mobile Verified' : '⚠ Mobile Unverified'}
+              </span>
+            </div>
           </div>
 
           <div style="display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center;">
@@ -326,6 +335,19 @@
             </div>
           </div>
 
+          <!-- Identity Status Breakdown -->
+          <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+            <span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:12px;background:${isMobileVerified ? 'rgba(22,163,74,0.12)' : 'rgba(234,179,8,0.12)'};color:${isMobileVerified ? '#16a34a' : '#d97706'};border:1px solid ${isMobileVerified ? 'rgba(22,163,74,0.3)' : 'rgba(234,179,8,0.3)'};">
+              📱 Phone: ${isMobileVerified ? 'Verified' : 'Pending OTP'}
+            </span>
+            <span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:12px;background:${isAbhaLinked ? 'rgba(14,165,233,0.12)' : 'rgba(148,163,184,0.12)'};color:${isAbhaLinked ? 'var(--primary-bright)' : 'var(--muted)'};border:1px solid rgba(14,165,233,0.3);">
+              🇮🇳 ABDM: ${isAbhaLinked ? 'ABHA Linked' : 'Standard'}
+            </span>
+            <span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:12px;background:${isAadhaarVerified ? 'rgba(22,163,74,0.12)' : 'rgba(148,163,184,0.12)'};color:${isAadhaarVerified ? '#16a34a' : 'var(--muted)'};border:1px solid ${isAadhaarVerified ? 'rgba(22,163,74,0.3)' : 'rgba(148,163,184,0.3)'};">
+              🆔 Aadhaar: ${isAadhaarVerified ? 'e-KYC Linked (' + (rawUser.maskedAadhaar || 'Verified') + ')' : 'Not Linked'}
+            </span>
+          </div>
+
           <div style="margin-top:14px;background:var(--primary);color:#ffffff;padding:10px 16px;border-radius:12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
             <div>
               <small style="font-size:10px;letter-spacing:1px;opacity:0.9;">${this.t('abha_number_label', 'ABHA NUMBER (14-DIGIT)')}</small>
@@ -337,13 +359,23 @@
             </div>
           </div>
 
-          <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
-            <button class="auth-btn-primary" style="flex:1;min-width:180px;padding:10px;font-size:13px;" onclick="patientController.printAbhaCard()">
-              ${this.t('btn_print_abha', '🖨️ Print / Download ABHA Card')}
+          <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="auth-btn-primary" style="flex:1;min-width:160px;padding:9px;font-size:12.5px;" onclick="patientController.printAbhaCard()">
+              ${this.t('btn_print_abha', '🖨️ Print ABHA Card')}
             </button>
-            <button class="btn-glass" style="padding:10px 16px;font-size:13px;" onclick="speakText('Your ABHA ID is ' + '${user.abhaId}')">
+            <button class="btn-glass" style="padding:9px 12px;font-size:12.5px;" onclick="speakText('Your ABHA ID is ' + '${user.abhaId}')">
               ${this.t('read_aloud', '🔊 Read Aloud')}
             </button>
+            ${!isMobileVerified ? `
+              <button class="btn-glass" style="padding:9px 12px;font-size:12px;border-color:#eab308;color:#eab308;" onclick="openMobileVerifyModal()">
+                📱 Verify Mobile
+              </button>
+            ` : ''}
+            ${!isAadhaarVerified ? `
+              <button class="btn-glass" style="padding:9px 12px;font-size:12px;border-color:var(--primary-bright);color:var(--primary-bright);" onclick="openAadhaarModal()">
+                🆔 Link Aadhaar (e-KYC)
+              </button>
+            ` : ''}
           </div>
         </div>
       `;
