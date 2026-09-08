@@ -22,7 +22,7 @@
 
     currentUser: null,
     patients: [
-      { id: 'USR-PAT-001', abhaId: '14-8921-4402-9912', name: 'Ramesh Kumar', phone: '9876543210', age: 38, gender: 'Male', village: 'Kondapalli Ward 4', bloodGroup: 'O+', password: '1234', role: 'patient', customRole: 'citizen' }
+      { id: 'USR-PAT-001', abhaId: '14-8921-4402-9912', name: 'Ramesh Kumar', phone: '9876543210', age: 38, gender: 'Male', village: 'Kondapalli Ward 4', bloodGroup: 'O+', password: '1234', role: 'patient', customRole: 'citizen', permanent_address: null, permanent_address_completed: false }
     ],
 
     staff: [
@@ -137,6 +137,33 @@
                 existing.email = defaultStaff.email;
               }
             });
+          }
+          // Safeguard permanent address flags for existing patients
+          if (parsed.patients && Array.isArray(parsed.patients)) {
+            parsed.patients.forEach(p => {
+              if (p && !p.permanent_address) {
+                p.permanent_address = null;
+                p.permanent_address_completed = false;
+              } else if (p && p.permanent_address) {
+                p.permanent_address_completed = true;
+              }
+            });
+          }
+          if (parsed.currentUser && parsed.currentUser.role === 'patient') {
+            if (!parsed.currentUser.permanent_address) {
+              parsed.currentUser.permanent_address = null;
+              parsed.currentUser.permanent_address_completed = false;
+            } else {
+              parsed.currentUser.permanent_address_completed = true;
+            }
+          }
+          if (parsed.session && parsed.session.user && (parsed.session.role === 'patient' || parsed.session.customRole === 'citizen')) {
+            if (!parsed.session.user.permanent_address) {
+              parsed.session.user.permanent_address = null;
+              parsed.session.user.permanent_address_completed = false;
+            } else {
+              parsed.session.user.permanent_address_completed = true;
+            }
           }
           return { ...DEFAULT_INITIAL_STATE, ...parsed };
         }
@@ -332,20 +359,174 @@
       return { success: true, user: sessionUser };
     }
 
+    // Save or Update Patient Permanent Address
+    savePatientAddress(patientId, addressData) {
+      if (!patientId || !addressData) {
+        return { success: false, message: 'Invalid patient ID or address data.' };
+      }
+
+      // Validate 6-digit Pincode
+      const pincode = String(addressData.pincode || '').trim();
+      if (!/^[1-9][0-9]{5}$/.test(pincode)) {
+        return { success: false, message: 'Pincode must contain exactly 6 digits (e.g. 521228).' };
+      }
+      const address_line_1 = (addressData.address_line1 || addressData.address_line_1 || '').trim();
+      const address_line_2 = (addressData.address_line2 || addressData.address_line_2 || '').trim();
+      const state = (addressData.state || '').trim();
+      const district = (addressData.district || '').trim();
+      const mandal = (addressData.mandal_taluk_tehsil || addressData.mandal || '').trim();
+      const village_city = (addressData.village_town_city || addressData.village_city || addressData.village || '').trim();
+
+      if (!address_line_1) {
+        return { success: false, message: 'Please enter Address Line 1 (House/Building/Street).' };
+      }
+      if (!state) {
+        return { success: false, message: 'Please select your State.' };
+      }
+      if (!district) {
+        return { success: false, message: 'Please select your District.' };
+      }
+      if (!mandal) {
+        return { success: false, message: 'Please select your Mandal / Taluk / Tehsil.' };
+      }
+      if (!village_city) {
+        return { success: false, message: 'Please select or enter your Village / Town / City.' };
+      }
+
+      const patients = this.state.patients || [];
+      const cleanId = String(patientId).trim();
+      const cleanPhone = cleanId.replace(/\D/g, '').slice(-10);
+
+      let patient = patients.find(p => p.id === cleanId || (p.phone && p.phone.replace(/\D/g, '').slice(-10) === cleanPhone));
+      if (!patient && this.state.currentUser && (this.state.currentUser.id === cleanId || (this.state.currentUser.phone && this.state.currentUser.phone.replace(/\D/g, '').slice(-10) === cleanPhone))) {
+        patient = this.state.currentUser;
+        patients.unshift(patient);
+      }
+
+      if (!patient) {
+        return { success: false, message: 'Patient record not found in system.' };
+      }
+
+      const existingAddr = patient.permanent_address;
+      const addressRecord = {
+        id: existingAddr && existingAddr.id ? existingAddr.id : ('ADDR-' + Date.now()),
+        patient_id: patient.id,
+        address_type: 'PERMANENT',
+        address_line1: address_line_1,
+        address_line_1: address_line_1,
+        address_line2: address_line_2,
+        address_line_2: address_line_2,
+        landmark: (addressData.landmark || '').trim(),
+        country: addressData.country || 'India',
+        state: state,
+        district: district,
+        mandal: mandal,
+        mandal_taluk_tehsil: mandal,
+        village_city: village_city,
+        village_town_city: village_city,
+        pincode: pincode,
+        is_verified: true,
+        created_at: existingAddr && existingAddr.created_at ? existingAddr.created_at : new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+
+      patient.permanent_address = addressRecord;
+      patient.permanent_address_completed = true;
+      patient.village = addressRecord.village_city + (addressRecord.mandal ? (', ' + addressRecord.mandal) : '');
+
+      if (this.state.currentUser && (this.state.currentUser.id === patient.id || this.state.currentUser.phone === patient.phone)) {
+        this.state.currentUser.permanent_address = addressRecord;
+        this.state.currentUser.permanent_address_completed = true;
+        this.state.currentUser.village = patient.village;
+      }
+      if (this.state.session && this.state.session.user && (this.state.session.user.id === patient.id || this.state.session.user.phone === patient.phone)) {
+        this.state.session.user.permanent_address = addressRecord;
+        this.state.session.user.permanent_address_completed = true;
+        this.state.session.user.village = patient.village;
+      }
+
+      this.saveState();
+
+      // Cloud synchronization with Supabase
+      if (global.supabaseService && typeof global.supabaseService.savePatientAddress === 'function') {
+        try {
+          global.supabaseService.savePatientAddress(patient.id, addressRecord);
+        } catch (e) {
+          console.warn('[Store] Cloud address sync notice:', e);
+        }
+      }
+
+      return { success: true, patient: patient, user: patient, address: addressRecord };
+    }
+
     // Patient Self-Registration (Only for Citizens)
     registerPatientUser(data) {
+      const pincode = String(data.pincode || '').trim();
+      if (!/^[1-9][0-9]{5}$/.test(pincode)) {
+        throw new Error('Pincode must contain exactly 6 digits (e.g. 521228).');
+      }
+      const address_line_1 = (data.address_line1 || data.address_line_1 || '').trim();
+      const address_line_2 = (data.address_line2 || data.address_line_2 || '').trim();
+      const state = (data.state || '').trim();
+      const district = (data.district || '').trim();
+      const mandal = (data.mandal_taluk_tehsil || data.mandal || '').trim();
+      const village_city = (data.village_town_city || data.village_city || data.village || '').trim();
+
+      if (!address_line_1) {
+        throw new Error('Address Line 1 is required.');
+      }
+      if (!state) {
+        throw new Error('Please select your State.');
+      }
+      if (!district) {
+        throw new Error('Please select your District.');
+      }
+      if (!mandal) {
+        throw new Error('Please select your Mandal / Taluk / Tehsil.');
+      }
+      if (!village_city) {
+        throw new Error('Please select your Village / Town / City.');
+      }
+
       const abhaId = `14-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}`;
+      const patientId = 'USR-PAT-' + String(Date.now()).slice(-4);
+      
+      const addressRecord = {
+        id: 'ADDR-' + Date.now(),
+        patient_id: patientId,
+        address_type: 'PERMANENT',
+        address_line1: address_line_1,
+        address_line_1: address_line_1,
+        address_line2: address_line_2,
+        address_line_2: address_line_2,
+        landmark: (data.landmark || '').trim(),
+        country: data.country || 'India',
+        state: state,
+        district: district,
+        mandal: mandal,
+        mandal_taluk_tehsil: mandal,
+        village_city: village_city,
+        village_town_city: village_city,
+        pincode: pincode,
+        is_verified: true,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+
       const newPatient = {
-        id: 'USR-PAT-' + String(Date.now()).slice(-4),
+        id: patientId,
         abhaId: abhaId,
         name: data.name || 'Citizen',
         phone: data.phone || '9876543210',
         age: parseInt(data.age, 10) || 30,
         gender: data.gender || 'Male',
-        village: data.village || 'Kondapalli Ward',
+        village: addressRecord.village_city + ', ' + addressRecord.mandal,
         bloodGroup: data.bloodGroup || 'O+',
         password: data.password || '123456',
-        role: 'patient'
+        role: 'patient',
+        customRole: 'citizen',
+        permanent_address: addressRecord,
+        permanent_address_completed: true
       };
 
       if (!this.state.patients) this.state.patients = [];
@@ -355,9 +536,14 @@
       this.saveState();
 
       if (global.supabaseService) {
-        global.supabaseService.insertProfile(newPatient);
+        if (typeof global.supabaseService.insertProfile === 'function') {
+          global.supabaseService.insertProfile(newPatient);
+        }
+        if (typeof global.supabaseService.savePatientAddress === 'function') {
+          global.supabaseService.savePatientAddress(newPatient.id, addressRecord);
+        }
       }
-      return { success: true, user: newPatient };
+      return { success: true, patient: newPatient, user: newPatient, address: addressRecord };
     }
 
 
@@ -446,12 +632,16 @@
       patientUser.role = 'patient';
       patientUser.customRole = 'citizen';
 
+      // Check if structured permanent address exists
+      const hasPermanentAddress = !!(patientUser.permanent_address_completed && patientUser.permanent_address && patientUser.permanent_address.pincode && patientUser.permanent_address.address_line_1);
+      patientUser.permanent_address_completed = hasPermanentAddress;
+
       this.state.session = {
         isLoggedIn: true,
         authState: 'AUTHENTICATED',
         role: 'patient',
         customRole: 'citizen',
-        metadata: { role: 'citizen', portal: 'citizen', authMethod: 'mobile_password' },
+        metadata: { role: 'citizen', portal: 'citizen', authMethod: 'mobile_password', permanent_address_completed: hasPermanentAddress },
         token: 'SS-PAT-JWT-' + Date.now() + '-' + Math.random().toString(36).substring(2, 10),
         expiresAt: Date.now() + (24 * 60 * 60 * 1000), // 24 hours
         user: patientUser
@@ -464,6 +654,7 @@
         success: true,
         user: patientUser,
         authState: 'AUTHENTICATED',
+        permanent_address_completed: hasPermanentAddress,
         message: 'Authentication successful.'
       };
     }

@@ -4172,6 +4172,7 @@ body[data-theme="doom"] {
         Your government health identity card. Keep it handy for free consultations and hospital visits.
       </p>
       <div id="abhaCardContainer"></div>
+      <div id="patientPermanentAddressContainer" style="margin-top:16px;"></div>
     </div>
 
     <!-- 1. DIRECT DOCTOR CONSULTATION REQUEST ACTION BANNER (TOP POSITION) -->
@@ -4920,10 +4921,10 @@ body[data-theme="doom"] {
   </div>
 </div>
 
-<!-- PATIENT EXCLUSIVE REGISTRATION MODAL -->
+<!-- PATIENT EXCLUSIVE REGISTRATION MODAL WITH STRUCTURED PERMANENT ADDRESS -->
 <div id="registrationModal" class="modal-overlay">
-  <div class="modal-card" style="max-width:520px;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+  <div class="modal-card" style="max-width:620px;max-height:90vh;overflow-y:auto;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;border-bottom:1px solid var(--line);padding-bottom:10px;">
       <div style="display:flex;align-items:center;gap:10px;">
         <span style="font-size:28px;">🌾</span>
         <div>
@@ -4934,7 +4935,11 @@ body[data-theme="doom"] {
       <button onclick="closeRegistrationModal()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;">✕</button>
     </div>
     <form id="regFormPatient" onsubmit="submitPatientRegistration(event)">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+      <!-- 1. BASIC INFORMATION -->
+      <div style="font-size:12px;font-weight:800;color:var(--primary-bright);letter-spacing:0.5px;margin-bottom:8px;text-transform:uppercase;">
+        1. Basic Patient Information
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
         <div>
           <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;" data-i18n="lbl_full_name">Full Name *</label>
           <input type="text" id="regPatName" class="input-field" placeholder="e.g. Ramesh Kumar" required>
@@ -4944,7 +4949,7 @@ body[data-theme="doom"] {
           <input type="tel" id="regPatPhone" class="input-field" placeholder="e.g. 9876543210" maxlength="10" required>
         </div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px;">
         <div>
           <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;" data-i18n="age_label">Age *</label>
           <input type="number" id="regPatAge" class="input-field" placeholder="35" min="1" max="120" required>
@@ -4971,9 +4976,65 @@ body[data-theme="doom"] {
           </select>
         </div>
       </div>
-      <div style="margin-bottom:12px;">
-        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;" data-i18n="lbl_village">Village / Sub-Centre Ward *</label>
-        <input type="text" id="regPatVillage" class="input-field" placeholder="e.g. Kondapalli Sub-Centre, Ward 4" required>
+
+      <!-- 2. PERMANENT ADDRESS SECTION -->
+      <div style="font-size:12px;font-weight:800;color:var(--primary-bright);letter-spacing:0.5px;margin-bottom:8px;text-transform:uppercase;border-top:1px dashed var(--line);padding-top:10px;">
+        2. Permanent Address
+      </div>
+      <div style="margin-bottom:10px;">
+        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Address Line 1 (House No, Building, Street) *</label>
+        <input type="text" id="regPatAddrLine1" class="input-field" placeholder="e.g. House #42, Main Road" required>
+      </div>
+      <div style="margin-bottom:10px;">
+        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Address Line 2 (Area, Locality, Landmark)</label>
+        <input type="text" id="regPatAddrLine2" class="input-field" placeholder="e.g. Kondapalli Gramam, Ward 4">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Country *</label>
+          <input type="text" id="regPatCountry" class="input-field" value="India" readonly style="background:rgba(255,255,255,0.05);cursor:not-allowed;">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">State *</label>
+          <select id="regPatState" class="input-field" style="height:44px;" onchange="onRegStateChange()" required>
+            <option value="">Select State</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">District *</label>
+          <select id="regPatDistrict" class="input-field" style="height:44px;" onchange="onRegDistrictChange()" required>
+            <option value="">Select District</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Mandal / Taluk / Tehsil *</label>
+          <select id="regPatMandal" class="input-field" style="height:44px;" onchange="onRegMandalChange()" required>
+            <option value="">Select Mandal</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Village / Town / City *</label>
+          <select id="regPatVillageCity" class="input-field" style="height:44px;" required>
+            <option value="">Select Village/Town</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Pincode (6 digits) *</label>
+          <input type="text" id="regPatPincode" class="input-field" placeholder="e.g. 521228" maxlength="6" pattern="[1-9][0-9]{5}" required>
+        </div>
+      </div>
+      <div style="margin-bottom:14px;">
+        <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Landmark (Optional)</label>
+        <input type="text" id="regPatLandmark" class="input-field" placeholder="e.g. Near Bus Stand / Panchayat Office">
+      </div>
+
+      <!-- 3. SECURITY CREDENTIALS -->
+      <div style="font-size:12px;font-weight:800;color:var(--primary-bright);letter-spacing:0.5px;margin-bottom:8px;text-transform:uppercase;border-top:1px dashed var(--line);padding-top:10px;">
+        3. Security Credentials
       </div>
       <div style="margin-bottom:14px;">
         <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Create Account Password or Security PIN *</label>
@@ -4982,10 +5043,139 @@ body[data-theme="doom"] {
       <div style="background:rgba(22,163,74,0.1);border:1px dashed #16a34a;border-radius:10px;padding:10px;margin-bottom:16px;font-size:12px;color:var(--ink);">
         ✨ An official <strong>14-digit Ayushman Bharat ABHA Health Card</strong> will be generated automatically and saved to your cloud profile.
       </div>
+      <div id="regPatError" style="display:none;color:#ef4444;font-size:12px;margin-bottom:12px;background:rgba(239,68,68,0.1);padding:8px 12px;border-radius:8px;border:1px solid rgba(239,68,68,0.3);"></div>
       <button type="submit" class="auth-btn-primary" style="width:100%;padding:12px;background:#16a34a;border-color:#15803d;font-size:15px;cursor:pointer;">
-        ✓ Register & Generate ABHA Card
+        ✓ Register &amp; Generate ABHA Card
       </button>
     </form>
+  </div>
+</div>
+
+<!-- EXISTING PATIENT ADDRESS PROMPT MODAL (COMPLETE YOUR PROFILE) -->
+<div id="patientAddressPromptModal" class="modal-overlay" style="z-index:9999;">
+  <div class="modal-card" style="max-width:480px;text-align:center;padding:26px 20px;">
+    <div style="width:64px;height:64px;background:rgba(2,132,199,0.15);border:2px solid var(--primary-bright);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 14px;">
+      🏠
+    </div>
+    <span class="badge" style="background:rgba(245,158,11,0.2);color:#f59e0b;font-size:11px;font-weight:800;padding:4px 12px;border-radius:12px;border:1px solid rgba(245,158,11,0.4);display:inline-block;margin-bottom:10px;">
+      ⚠️ ACTION REQUIRED
+    </span>
+    <h3 style="color:var(--ink);font-size:20px;font-weight:800;margin-bottom:8px;">Complete Your Profile</h3>
+    <p style="color:var(--muted);font-size:14px;line-height:1.5;margin-bottom:20px;">
+      Your permanent address is missing from your patient profile. Please add your permanent address to continue.
+    </p>
+    <button type="button" class="auth-btn-primary" onclick="openExistingPatientAddressForm()" style="width:100%;padding:14px;background:#0284c7;border-color:#0369a1;font-size:15px;font-weight:800;cursor:pointer;border-radius:12px;">
+      + Add Permanent Address
+    </button>
+  </div>
+</div>
+
+<!-- PATIENT STRUCTURED PERMANENT ADDRESS FORM & CONFIRMATION MODAL -->
+<div id="patientAddressFormModal" class="modal-overlay" style="z-index:10000;">
+  <div class="modal-card" style="max-width:580px;max-height:90vh;overflow-y:auto;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;border-bottom:1.5px solid var(--line);padding-bottom:10px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:26px;">📍</span>
+        <div>
+          <h3 id="addrModalTitle" style="color:var(--ink);font-size:18px;font-weight:800;">Permanent Address</h3>
+          <small style="color:var(--muted);">National Digital Health Mission (ABDM) Profile Record</small>
+        </div>
+      </div>
+      <button id="btnCloseAddrModal" type="button" onclick="closePatientAddressFormModal()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;display:none;">✕</button>
+    </div>
+
+    <!-- STEP 1: ADDRESS ENTRY FORM -->
+    <div id="addrStepForm">
+      <form id="formPatientAddress" onsubmit="handleAddressFormPreview(event)">
+        <div style="margin-bottom:10px;">
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Address Line 1 (House No, Building, Street) *</label>
+          <input type="text" id="inpAddrLine1" class="input-field" placeholder="e.g. House #42, Main Road" required>
+        </div>
+        <div style="margin-bottom:10px;">
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Address Line 2 (Area, Locality, Landmark)</label>
+          <input type="text" id="inpAddrLine2" class="input-field" placeholder="e.g. Kondapalli Gramam, Ward 4">
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+          <div>
+            <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Country *</label>
+            <input type="text" id="inpAddrCountry" class="input-field" value="India" readonly style="background:rgba(255,255,255,0.05);cursor:not-allowed;">
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">State *</label>
+            <select id="inpAddrState" class="input-field" style="height:44px;" onchange="onAddressModalStateChange()" required>
+              <option value="">Select State</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+          <div>
+            <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">District *</label>
+            <select id="inpAddrDistrict" class="input-field" style="height:44px;" onchange="onAddressModalDistrictChange()" required>
+              <option value="">Select District</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Mandal / Taluk / Tehsil *</label>
+            <select id="inpAddrMandal" class="input-field" style="height:44px;" onchange="onAddressModalMandalChange()" required>
+              <option value="">Select Mandal</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+          <div>
+            <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Village / Town / City *</label>
+            <select id="inpAddrVillage" class="input-field" style="height:44px;" required>
+              <option value="">Select Village/Town</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Pincode (6 digits) *</label>
+            <input type="text" id="inpAddrPincode" class="input-field" placeholder="e.g. 521228" maxlength="6" pattern="[1-9][0-9]{5}" required>
+          </div>
+        </div>
+        <div style="margin-bottom:14px;">
+          <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Landmark (Optional)</label>
+          <input type="text" id="inpAddrLandmark" class="input-field" placeholder="e.g. Opp. Panchayat Office / Near Bus Stand">
+        </div>
+        <div id="addrFormError" style="display:none;color:#ef4444;font-size:12px;margin-bottom:12px;background:rgba(239,68,68,0.1);padding:8px 12px;border-radius:8px;border:1px solid rgba(239,68,68,0.3);"></div>
+        <button type="submit" class="auth-btn-primary" style="width:100%;padding:12px;background:#0284c7;border-color:#0369a1;font-size:15px;cursor:pointer;">
+          Preview &amp; Confirm Address →
+        </button>
+      </form>
+    </div>
+
+    <!-- STEP 2: CONFIRMATION VIEW -->
+    <div id="addrStepConfirm" style="display:none;">
+      <h4 style="color:var(--ink);font-size:15px;font-weight:800;margin-bottom:12px;">Please confirm your permanent address</h4>
+      <div style="background:var(--glass-2);border:1.5px solid var(--primary-bright);border-radius:12px;padding:16px;margin-bottom:16px;font-size:13px;line-height:1.6;">
+        <div style="margin-bottom:6px;"><span style="color:var(--muted);font-weight:600;">Address Line 1:</span> <strong id="confAddrLine1" style="color:var(--ink);"></strong></div>
+        <div id="confAddrLine2Row" style="margin-bottom:6px;"><span style="color:var(--muted);font-weight:600;">Address Line 2:</span> <span id="confAddrLine2" style="color:var(--ink);"></span></div>
+        <div id="confAddrLandmarkRow" style="margin-bottom:6px;"><span style="color:var(--muted);font-weight:600;">Landmark:</span> <span id="confAddrLandmark" style="color:var(--ink);"></span></div>
+        <div style="margin-bottom:6px;"><span style="color:var(--muted);font-weight:600;">Village / Town / City:</span> <strong id="confAddrVillage" style="color:var(--ink);"></strong></div>
+        <div style="margin-bottom:6px;"><span style="color:var(--muted);font-weight:600;">Mandal / Taluk / Tehsil:</span> <strong id="confAddrMandal" style="color:var(--ink);"></strong></div>
+        <div style="margin-bottom:6px;"><span style="color:var(--muted);font-weight:600;">District:</span> <strong id="confAddrDistrict" style="color:var(--ink);"></strong></div>
+        <div style="margin-bottom:6px;"><span style="color:var(--muted);font-weight:600;">State &amp; Pincode:</span> <strong id="confAddrStatePin" style="color:var(--primary-bright);"></strong></div>
+        <div><span style="color:var(--muted);font-weight:600;">Country:</span> <span id="confAddrCountry" style="color:var(--ink);">India</span></div>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button type="button" class="btn-glass" onclick="returnToAddressFormStep()" style="flex:1;padding:12px;font-size:14px;cursor:pointer;">
+          ✏️ Edit Details
+        </button>
+        <button type="button" id="btnSavePermanentAddress" class="auth-btn-primary" onclick="submitFinalPermanentAddress()" style="flex:1.5;padding:12px;background:#16a34a;border-color:#15803d;font-size:14px;cursor:pointer;">
+          ✓ Save Permanent Address
+        </button>
+      </div>
+    </div>
+
+    <!-- STEP 3: SUCCESS VIEW -->
+    <div id="addrStepSuccess" style="display:none;text-align:center;padding:20px 10px;">
+      <div style="font-size:48px;margin-bottom:10px;">🎉</div>
+      <h3 style="color:#16a34a;font-size:18px;font-weight:800;margin-bottom:8px;">Permanent address added successfully.</h3>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:20px;">Your permanent address has been saved to your national health profile and cloud registry.</p>
+      <button type="button" class="auth-btn-primary" onclick="continueToPatientDashboardAfterAddress()" style="width:100%;padding:14px;background:#16a34a;border-color:#15803d;font-size:15px;font-weight:800;cursor:pointer;">
+        Continue to Dashboard →
+      </button>
+    </div>
   </div>
 </div>
 
@@ -6505,6 +6695,45 @@ body[data-theme="doom"] {
       }
     }
 
+    async savePatientAddress(patientId, addr) {
+      if (!addr) return null;
+      if (!this.client || !this.isOnline) {
+        return this.enqueueOfflineAction('save_patient_address', 'patient_addresses', { patient_id: patientId, ...addr });
+      }
+      try {
+        if (typeof this.client.from === 'function') {
+          // Upsert structured address record
+          await this.client.from('patient_addresses').upsert([{
+            id: addr.id,
+            patient_id: patientId,
+            address_type: addr.address_type || 'PERMANENT',
+            address_line_1: addr.address_line_1,
+            address_line_2: addr.address_line_2 || '',
+            landmark: addr.landmark || '',
+            country: addr.country || 'India',
+            state: addr.state,
+            district: addr.district,
+            mandal: addr.mandal,
+            village_city: addr.village_city,
+            pincode: addr.pincode,
+            is_verified: true,
+            created_at: addr.created_at || new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          }], { onConflict: 'id' });
+
+          // Also update profiles table with permanent address status
+          await this.client.from('profiles').update({
+            village: addr.village_city + ', ' + addr.mandal,
+            permanent_address_completed: true,
+            updated_at: new Date().toISOString()
+          }).eq('phone', (addr.phone || patientId));
+        }
+      } catch (e) {
+        console.warn('[Supabase Service] savePatientAddress error, enqueuing offline:', e);
+        return this.enqueueOfflineAction('save_patient_address', 'patient_addresses', { patient_id: patientId, ...addr });
+      }
+    }
+
     // =========================================================================
     // AUTHENTICATION & ROLE-BASED IDENTITY MANAGEMENT
     // =========================================================================
@@ -6574,6 +6803,231 @@ body[data-theme="doom"] {
 })(typeof window !== 'undefined' ? window : this);
 
 
+/* ==================== locations-data.js ==================== */
+/**
+ * Swasthya Setu (स्वास्थ्य सेतु) - Indian Administrative Locations & Hierarchy Engine
+ * Provides structured States, Districts, Mandals/Tehsils, and Villages with cascading selection.
+ */
+
+(function(global) {
+  'use strict';
+
+  const ADMINISTRATIVE_DATA = {
+    "Andhra Pradesh": {
+      "NTR District": {
+        "Ibrahimpatnam": ["Kondapalli", "Ibrahimpatnam", "Guntupalli", "Kotikalapudi", "Damuluru", "Trilochanapuram", "Tummalapalem", "Zeedimogu", "Ward 1", "Ward 2", "Ward 3", "Ward 4", "Ward 5", "Ward 6"],
+        "Vijayawada Urban": ["Governorpet", "Suryaraopet", "Gandhinagar", "Benz Circle", "Satyanarayanapuram", "Bhavanipuram", "Patamata", "Moghalrajpuram"],
+        "Vijayawada Rural": ["Nunna", "Enikepadu", "Prasadampadu", "Gollapudi", "Jakkampudi", "Ambapuram", "Kandrika", "Payakapuram"],
+        "Mylavaram": ["Mylavaram", "Chandrala", "Pulluru", "Velvadam", "Sabjapadu", "Ponnavaram", "Keerthirayanigudem"],
+        "G. Konduru": ["G. Konduru", "Chegireddypadu", "Kuntamukkala", "Atukur", "Chevuru", "Koduru", "Munagapadu"],
+        "Tiruvuru": ["Tiruvuru", "Arugolanu", "Kokilampadu", "Rolupadi", "Vavilala", "Lakshmipuram", "Maddulaparva"],
+        "Jaggayyapeta": ["Jaggayyapeta", "Chillakallu", "Torraguntapalem", "Muktyala", "Vedadri", "Ravirala"]
+      },
+      "Krishna": {
+        "Machilipatnam": ["Machilipatnam Town", "Chilakalapudi", "Bandar Kota", "Potlapadu", "Gokavaram", "Tallapalem"],
+        "Gudivada": ["Gudivada Town", "Valivartipadu", "Billapadu", "Chilakamarri", "Mandapadu", "Bommuluru"],
+        "Pamarru": ["Pamarru", "Kurumaddali", "Zillellamudi", "Komaravolu", "Pasumarru", "Addada"]
+      },
+      "Guntur": {
+        "Guntur Urban": ["Arundelpet", "Brodipet", "Kothapet", "Pattabhipuram", "Nallapadu", "Old Guntur"],
+        "Mangalagiri": ["Mangalagiri Town", "Navuluru", "Atmakuru", "Chinna Kakani", "Yerrabalem", "Nowluru"],
+        "Tenali": ["Tenali Town", "Angalakuduru", "Burripalem", "Pinapadu", "Chenchupet", "Chinaravuru"]
+      },
+      "Visakhapatnam": {
+        "Visakhapatnam Urban": ["MVP Colony", "Gajuwaka", "Madhurawada", "Dwaraka Nagar", "Siripuram", "Pendurthi"],
+        "Anakapalle": ["Anakapalle Town", "Kasimkota", "Munagapaka", "Sankaram", "Thummapala"],
+        "Bheemunipatnam": ["Bheemili Town", "Tagarapuvalasa", "Nidigattu", "Kothavalasa", "Nainampudi"]
+      }
+    },
+    "Telangana": {
+      "Hyderabad": {
+        "Secunderabad": ["Secunderabad", "Marredpally", "Begumpet", "Trimulgherry", "Tarnaka", "Bowenpally"],
+        "Khairatabad": ["Khairatabad", "Somajiguda", "Banjara Hills", "Jubilee Hills", "Panjagutta", "Ameerpet"],
+        "Charminar": ["Charminar", "Faluknuma", "Chandrayangutta", "Bahadurpura", "Moghalpura", "Yakutpura"]
+      },
+      "Rangareddy": {
+        "Serilingampally": ["Gachibowli", "Madhapur", "Kondapur", "Hitec City", "Hafeezpet", "Miyapur"],
+        "Rajendranagar": ["Rajendranagar", "Attapur", "Bandlaguda Jagir", "Mailardevpally", "Shamshabad", "Gaganpahad"],
+        "Ibrahimpatnam (TS)": ["Ibrahimpatnam", "Adibatla", "Bongloor", "Mangalpalle", "Kongara Kalan", "Pocharam"]
+      },
+      "Warangal": {
+        "Warangal Urban": ["Hanamkonda", "Kazipet", "Warangal City", "Subedari", "Nayeemnagar"],
+        "Narsampet": ["Narsampet", "Chennaraopet", "Duggondi", "Khanapur", "Nekkonda"]
+      }
+    },
+    "Karnataka": {
+      "Bengaluru Urban": {
+        "Bengaluru North": ["Malleshwaram", "Hebbal", "Yelahanka", "Peenya", "Jalahalli", "Yeshwanthpur"],
+        "Bengaluru South": ["Jayanagar", "JP Nagar", "BTM Layout", "Banashankari", "Basavanagudi", "Padmanabhanagar"],
+        "Bengaluru East": ["Indiranagar", "Whitefield", "Marathahalli", "Kalyan Nagar", "KR Puram", "Bellandur"]
+      },
+      "Mysuru": {
+        "Mysuru City": ["Gokulam", "Kuvempunagar", "Saraswathipuram", "Jayalakshmipuram", "Chamundipuram"],
+        "Hunsur": ["Hunsur Town", "Bilikere", "Gavadagere", "Katte Malalavadi"]
+      }
+    },
+    "Tamil Nadu": {
+      "Chennai": {
+        "Egmore": ["Egmore", "Chetpet", "Kilpauk", "Nungambakkam"],
+        "Mylapore": ["Mylapore", "Alwarpet", "Mandaveli", "Santhome", "R.A. Puram"],
+        "Guindy": ["Guindy", "Alandur", "Saidapet", "Ekkatuthangal"]
+      },
+      "Coimbatore": {
+        "Coimbatore North": ["RS Puram", "Gandhipuram", "Saibaba Colony", "Ganapathy", "Koundampalayam"],
+        "Coimbatore South": ["Ukkadam", "Singanallur", "Ramanathapuram", "Podanur", "Sundarapuram"]
+      }
+    },
+    "Maharashtra": {
+      "Mumbai City": {
+        "Colaba": ["Colaba", "Cuffe Parade", "Fort", "Nariman Point", "Churchgate"],
+        "Byculla": ["Byculla", "Mazgaon", "Chinchpokli", "Parel", "Lalbaug"]
+      },
+      "Pune": {
+        "Pune City": ["Shivajinagar", "Kothrud", "Deccan Gymkhana", "Camp", "Kalyani Nagar", "Viman Nagar"],
+        "Haveli": ["Hadapsar", "Kondhwa", "Wagholi", "Manjari", "Khopoli"]
+      }
+    },
+    "Delhi (NCT)": {
+      "Central Delhi": {
+        "Daryaganj": ["Daryaganj", "Chandni Chowk", "Kashmere Gate", "Ajmeri Gate"],
+        "Civil Lines": ["Civil Lines", "Tis Hazari", "Timarpur", "Mukherjee Nagar"]
+      },
+      "South Delhi": {
+        "Hauz Khas": ["Hauz Khas", "Green Park", "SDA", "Safdarjung Enclave"],
+        "Saket": ["Saket", "Malviya Nagar", "Pushp Vihar", "Sainik Farm"]
+      }
+    },
+    "Uttar Pradesh": {
+      "Lucknow": {
+        "Lucknow City": ["Hazratganj", "Alambagh", "Gomti Nagar", "Indira Nagar", "Aliganj", "Chowk"],
+        "Bakshi Ka Talab": ["BKT Town", "Itaunja", "Kathwara", "Rampur Bhawanipur"]
+      },
+      "Varanasi": {
+        "Varanasi City": ["Cantonment", "Sigra", "Godowlia", "Assi", "Lanka", "Bhelupur"],
+        "Pindra": ["Pindra Town", "Phulpur", "Mangari", "Babupur"]
+      }
+    },
+    "Bihar": {
+      "Patna": {
+        "Patna Sadar": ["Kankarbagh", "Boring Road", "Rajendra Nagar", "Bailey Road", "Patliputra"],
+        "Danapur": ["Danapur Cantt", "Khagaul", "Saguna More", "Shahpur"]
+      }
+    },
+    "West Bengal": {
+      "Kolkata": {
+        "Kolkata Central": ["Park Street", "Esplanade", "Bhowanipore", "Sealdah", "College Street"],
+        "Kolkata South": ["Ballygunge", "Gariahat", "Alipore", "Tollygunge", "Jadavpur"]
+      }
+    },
+    "Rajasthan": {
+      "Jaipur": {
+        "Jaipur City": ["C-Scheme", "Malviya Nagar", "Vaishali Nagar", "Mansarovar", "Raja Park"],
+        "Sanganer": ["Sanganer Town", "Sitapura", "Pratap Nagar", "Jagatpura"]
+      }
+    },
+    "Gujarat": {
+      "Ahmedabad": {
+        "Ahmedabad City": ["Navrangpura", "Satellite", "Vastrapur", "Bodakdev", "Maninagar"],
+        "Daskroi": ["Ghatlodia", "Chandkheda", "Bopal", "Sanand Road"]
+      }
+    },
+    "Kerala": {
+      "Thiruvananthapuram": {
+        "Thiruvananthapuram": ["Pattom", "Kowdiar", "Vellayambalam", "Palayam", "Sasthamangalam", "Kazhakkoottam"]
+      },
+      "Ernakulam": {
+        "Kochi": ["Kadavanthra", "Panampilly Nagar", "Edappally", "Kaloor", "Marine Drive", "Fort Kochi"]
+      }
+    }
+  };
+
+  const ALL_INDIAN_STATES = [
+    "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh",
+    "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand",
+    "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur",
+    "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab",
+    "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura",
+    "Uttar Pradesh", "Uttarakhand", "West Bengal",
+    "Andaman and Nicobar Islands", "Chandigarh", "Dadra and Nagar Haveli and Daman and Diu",
+    "Delhi (NCT)", "Jammu and Kashmir", "Ladakh", "Lakshadweep", "Puducherry"
+  ];
+
+  const LocationService = {
+    getStates() {
+      return [...ALL_INDIAN_STATES];
+    },
+
+    getDistricts(state) {
+      if (!state) return [];
+      if (ADMINISTRATIVE_DATA[state]) {
+        return Object.keys(ADMINISTRATIVE_DATA[state]);
+      }
+      return [
+        state + " District HQ",
+        "Central " + state,
+        "North " + state,
+        "South " + state,
+        "East " + state,
+        "West " + state
+      ];
+    },
+
+    getMandals(state, district) {
+      if (!state || !district) return [];
+      if (ADMINISTRATIVE_DATA[state] && ADMINISTRATIVE_DATA[state][district]) {
+        return Object.keys(ADMINISTRATIVE_DATA[state][district]);
+      }
+      return [
+        district + " Sadar / Taluk 1",
+        district + " Rural / Mandal 2",
+        district + " Central Tehsil"
+      ];
+    },
+
+    getVillages(state, district, mandal) {
+      if (!state || !district || !mandal) return [];
+      if (ADMINISTRATIVE_DATA[state] && ADMINISTRATIVE_DATA[state][district] && ADMINISTRATIVE_DATA[state][district][mandal]) {
+        return [...ADMINISTRATIVE_DATA[state][district][mandal]];
+      }
+      return [
+        mandal + " Gramam / Ward 1",
+        mandal + " Sector Ward 2",
+        mandal + " Main Village",
+        mandal + " Sub-Centre Ward 4"
+      ];
+    },
+
+    validatePincode(pincode) {
+      if (!pincode) return false;
+      const clean = String(pincode).trim();
+      return /^[1-9][0-9]{5}$/.test(clean);
+    },
+
+    formatAddressString(addr) {
+      if (!addr) return '';
+      const parts = [];
+      if (addr.address_line_1) parts.push(addr.address_line_1);
+      if (addr.address_line_2) parts.push(addr.address_line_2);
+      if (addr.landmark) parts.push('Near ' + addr.landmark);
+      if (addr.village_city) parts.push(addr.village_city);
+      if (addr.mandal) parts.push(addr.mandal);
+      if (addr.district) parts.push(addr.district);
+      if (addr.state) {
+        if (addr.pincode) {
+          parts.push(addr.state + ' - ' + addr.pincode);
+        } else {
+          parts.push(addr.state);
+        }
+      }
+      if (addr.country && addr.country !== 'India') parts.push(addr.country);
+      return parts.join(', ');
+    }
+  };
+
+  global.locationService = LocationService;
+})(typeof window !== 'undefined' ? window : global);
+
+
 /* ==================== store.js ==================== */
 /**
  * =========================================================
@@ -6599,7 +7053,7 @@ body[data-theme="doom"] {
 
     currentUser: null,
     patients: [
-      { id: 'USR-PAT-001', abhaId: '14-8921-4402-9912', name: 'Ramesh Kumar', phone: '9876543210', age: 38, gender: 'Male', village: 'Kondapalli Ward 4', bloodGroup: 'O+', password: '1234', role: 'patient', customRole: 'citizen' }
+      { id: 'USR-PAT-001', abhaId: '14-8921-4402-9912', name: 'Ramesh Kumar', phone: '9876543210', age: 38, gender: 'Male', village: 'Kondapalli Ward 4', bloodGroup: 'O+', password: '1234', role: 'patient', customRole: 'citizen', permanent_address: null, permanent_address_completed: false }
     ],
 
     staff: [
@@ -6714,6 +7168,33 @@ body[data-theme="doom"] {
                 existing.email = defaultStaff.email;
               }
             });
+          }
+          // Safeguard permanent address flags for existing patients
+          if (parsed.patients && Array.isArray(parsed.patients)) {
+            parsed.patients.forEach(p => {
+              if (p && !p.permanent_address) {
+                p.permanent_address = null;
+                p.permanent_address_completed = false;
+              } else if (p && p.permanent_address) {
+                p.permanent_address_completed = true;
+              }
+            });
+          }
+          if (parsed.currentUser && parsed.currentUser.role === 'patient') {
+            if (!parsed.currentUser.permanent_address) {
+              parsed.currentUser.permanent_address = null;
+              parsed.currentUser.permanent_address_completed = false;
+            } else {
+              parsed.currentUser.permanent_address_completed = true;
+            }
+          }
+          if (parsed.session && parsed.session.user && (parsed.session.role === 'patient' || parsed.session.customRole === 'citizen')) {
+            if (!parsed.session.user.permanent_address) {
+              parsed.session.user.permanent_address = null;
+              parsed.session.user.permanent_address_completed = false;
+            } else {
+              parsed.session.user.permanent_address_completed = true;
+            }
           }
           return { ...DEFAULT_INITIAL_STATE, ...parsed };
         }
@@ -6909,20 +7390,174 @@ body[data-theme="doom"] {
       return { success: true, user: sessionUser };
     }
 
+    // Save or Update Patient Permanent Address
+    savePatientAddress(patientId, addressData) {
+      if (!patientId || !addressData) {
+        return { success: false, message: 'Invalid patient ID or address data.' };
+      }
+
+      // Validate 6-digit Pincode
+      const pincode = String(addressData.pincode || '').trim();
+      if (!/^[1-9][0-9]{5}$/.test(pincode)) {
+        return { success: false, message: 'Pincode must contain exactly 6 digits (e.g. 521228).' };
+      }
+      const address_line_1 = (addressData.address_line1 || addressData.address_line_1 || '').trim();
+      const address_line_2 = (addressData.address_line2 || addressData.address_line_2 || '').trim();
+      const state = (addressData.state || '').trim();
+      const district = (addressData.district || '').trim();
+      const mandal = (addressData.mandal_taluk_tehsil || addressData.mandal || '').trim();
+      const village_city = (addressData.village_town_city || addressData.village_city || addressData.village || '').trim();
+
+      if (!address_line_1) {
+        return { success: false, message: 'Please enter Address Line 1 (House/Building/Street).' };
+      }
+      if (!state) {
+        return { success: false, message: 'Please select your State.' };
+      }
+      if (!district) {
+        return { success: false, message: 'Please select your District.' };
+      }
+      if (!mandal) {
+        return { success: false, message: 'Please select your Mandal / Taluk / Tehsil.' };
+      }
+      if (!village_city) {
+        return { success: false, message: 'Please select or enter your Village / Town / City.' };
+      }
+
+      const patients = this.state.patients || [];
+      const cleanId = String(patientId).trim();
+      const cleanPhone = cleanId.replace(/\D/g, '').slice(-10);
+
+      let patient = patients.find(p => p.id === cleanId || (p.phone && p.phone.replace(/\D/g, '').slice(-10) === cleanPhone));
+      if (!patient && this.state.currentUser && (this.state.currentUser.id === cleanId || (this.state.currentUser.phone && this.state.currentUser.phone.replace(/\D/g, '').slice(-10) === cleanPhone))) {
+        patient = this.state.currentUser;
+        patients.unshift(patient);
+      }
+
+      if (!patient) {
+        return { success: false, message: 'Patient record not found in system.' };
+      }
+
+      const existingAddr = patient.permanent_address;
+      const addressRecord = {
+        id: existingAddr && existingAddr.id ? existingAddr.id : ('ADDR-' + Date.now()),
+        patient_id: patient.id,
+        address_type: 'PERMANENT',
+        address_line1: address_line_1,
+        address_line_1: address_line_1,
+        address_line2: address_line_2,
+        address_line_2: address_line_2,
+        landmark: (addressData.landmark || '').trim(),
+        country: addressData.country || 'India',
+        state: state,
+        district: district,
+        mandal: mandal,
+        mandal_taluk_tehsil: mandal,
+        village_city: village_city,
+        village_town_city: village_city,
+        pincode: pincode,
+        is_verified: true,
+        created_at: existingAddr && existingAddr.created_at ? existingAddr.created_at : new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+
+      patient.permanent_address = addressRecord;
+      patient.permanent_address_completed = true;
+      patient.village = addressRecord.village_city + (addressRecord.mandal ? (', ' + addressRecord.mandal) : '');
+
+      if (this.state.currentUser && (this.state.currentUser.id === patient.id || this.state.currentUser.phone === patient.phone)) {
+        this.state.currentUser.permanent_address = addressRecord;
+        this.state.currentUser.permanent_address_completed = true;
+        this.state.currentUser.village = patient.village;
+      }
+      if (this.state.session && this.state.session.user && (this.state.session.user.id === patient.id || this.state.session.user.phone === patient.phone)) {
+        this.state.session.user.permanent_address = addressRecord;
+        this.state.session.user.permanent_address_completed = true;
+        this.state.session.user.village = patient.village;
+      }
+
+      this.saveState();
+
+      // Cloud synchronization with Supabase
+      if (global.supabaseService && typeof global.supabaseService.savePatientAddress === 'function') {
+        try {
+          global.supabaseService.savePatientAddress(patient.id, addressRecord);
+        } catch (e) {
+          console.warn('[Store] Cloud address sync notice:', e);
+        }
+      }
+
+      return { success: true, patient: patient, user: patient, address: addressRecord };
+    }
+
     // Patient Self-Registration (Only for Citizens)
     registerPatientUser(data) {
+      const pincode = String(data.pincode || '').trim();
+      if (!/^[1-9][0-9]{5}$/.test(pincode)) {
+        throw new Error('Pincode must contain exactly 6 digits (e.g. 521228).');
+      }
+      const address_line_1 = (data.address_line1 || data.address_line_1 || '').trim();
+      const address_line_2 = (data.address_line2 || data.address_line_2 || '').trim();
+      const state = (data.state || '').trim();
+      const district = (data.district || '').trim();
+      const mandal = (data.mandal_taluk_tehsil || data.mandal || '').trim();
+      const village_city = (data.village_town_city || data.village_city || data.village || '').trim();
+
+      if (!address_line_1) {
+        throw new Error('Address Line 1 is required.');
+      }
+      if (!state) {
+        throw new Error('Please select your State.');
+      }
+      if (!district) {
+        throw new Error('Please select your District.');
+      }
+      if (!mandal) {
+        throw new Error('Please select your Mandal / Taluk / Tehsil.');
+      }
+      if (!village_city) {
+        throw new Error('Please select your Village / Town / City.');
+      }
+
       const abhaId = `14-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}`;
+      const patientId = 'USR-PAT-' + String(Date.now()).slice(-4);
+      
+      const addressRecord = {
+        id: 'ADDR-' + Date.now(),
+        patient_id: patientId,
+        address_type: 'PERMANENT',
+        address_line1: address_line_1,
+        address_line_1: address_line_1,
+        address_line2: address_line_2,
+        address_line_2: address_line_2,
+        landmark: (data.landmark || '').trim(),
+        country: data.country || 'India',
+        state: state,
+        district: district,
+        mandal: mandal,
+        mandal_taluk_tehsil: mandal,
+        village_city: village_city,
+        village_town_city: village_city,
+        pincode: pincode,
+        is_verified: true,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+
       const newPatient = {
-        id: 'USR-PAT-' + String(Date.now()).slice(-4),
+        id: patientId,
         abhaId: abhaId,
         name: data.name || 'Citizen',
         phone: data.phone || '9876543210',
         age: parseInt(data.age, 10) || 30,
         gender: data.gender || 'Male',
-        village: data.village || 'Kondapalli Ward',
+        village: addressRecord.village_city + ', ' + addressRecord.mandal,
         bloodGroup: data.bloodGroup || 'O+',
         password: data.password || '123456',
-        role: 'patient'
+        role: 'patient',
+        customRole: 'citizen',
+        permanent_address: addressRecord,
+        permanent_address_completed: true
       };
 
       if (!this.state.patients) this.state.patients = [];
@@ -6932,9 +7567,14 @@ body[data-theme="doom"] {
       this.saveState();
 
       if (global.supabaseService) {
-        global.supabaseService.insertProfile(newPatient);
+        if (typeof global.supabaseService.insertProfile === 'function') {
+          global.supabaseService.insertProfile(newPatient);
+        }
+        if (typeof global.supabaseService.savePatientAddress === 'function') {
+          global.supabaseService.savePatientAddress(newPatient.id, addressRecord);
+        }
       }
-      return { success: true, user: newPatient };
+      return { success: true, patient: newPatient, user: newPatient, address: addressRecord };
     }
 
 
@@ -7023,12 +7663,16 @@ body[data-theme="doom"] {
       patientUser.role = 'patient';
       patientUser.customRole = 'citizen';
 
+      // Check if structured permanent address exists
+      const hasPermanentAddress = !!(patientUser.permanent_address_completed && patientUser.permanent_address && patientUser.permanent_address.pincode && patientUser.permanent_address.address_line_1);
+      patientUser.permanent_address_completed = hasPermanentAddress;
+
       this.state.session = {
         isLoggedIn: true,
         authState: 'AUTHENTICATED',
         role: 'patient',
         customRole: 'citizen',
-        metadata: { role: 'citizen', portal: 'citizen', authMethod: 'mobile_password' },
+        metadata: { role: 'citizen', portal: 'citizen', authMethod: 'mobile_password', permanent_address_completed: hasPermanentAddress },
         token: 'SS-PAT-JWT-' + Date.now() + '-' + Math.random().toString(36).substring(2, 10),
         expiresAt: Date.now() + (24 * 60 * 60 * 1000), // 24 hours
         user: patientUser
@@ -7041,6 +7685,7 @@ body[data-theme="doom"] {
         success: true,
         user: patientUser,
         authState: 'AUTHENTICATED',
+        permanent_address_completed: hasPermanentAddress,
         message: 'Authentication successful.'
       };
     }
@@ -35144,6 +35789,7 @@ The user's preferred language is ${SUPPORTED_LANGUAGES[this.currentLang]?.name |
 
     renderAll() {
       this.renderAbhaCard();
+      this.renderPermanentAddress();
       this.renderFamilyCircle();
       this.renderDailyMedications();
       this.renderVideoCallHistory();
@@ -35458,6 +36104,110 @@ The user's preferred language is ${SUPPORTED_LANGUAGES[this.currentLang]?.name |
           </div>
         </div>
       `;
+    }
+
+    renderPermanentAddress() {
+      const container = document.getElementById('patientPermanentAddressContainer');
+      if (!container || !this.store) return;
+
+      const state = this.store.getState();
+      const rawUser = state.currentUser || (state.session ? state.session.user : null);
+      if (!rawUser) {
+        container.innerHTML = '';
+        return;
+      }
+
+      const cleanPhone = (rawUser.phone || '').replace(/\D/g, '').slice(-10);
+      const matchedProfile = (state.patients || []).find(p => {
+        const pPhone = (p.phone || '').replace(/\D/g, '').slice(-10);
+        return cleanPhone && pPhone && pPhone === cleanPhone;
+      }) || {};
+
+      const addr = rawUser.permanent_address || matchedProfile.permanent_address || null;
+      const isCompleted = (rawUser.permanent_address_completed !== false && !!addr);
+
+      if (!addr || !isCompleted) {
+        container.innerHTML = `
+          <div style="background:rgba(245,158,11,0.08);border:1.5px dashed #f59e0b;border-radius:14px;padding:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="font-size:24px;">⚠️</span>
+              <div>
+                <strong style="color:var(--ink);font-size:14px;display:block;">Permanent Address Incomplete</strong>
+                <small style="color:var(--muted);">Add your official residential address to comply with ABDM registration standards.</small>
+              </div>
+            </div>
+            <button class="auth-btn-primary" style="background:#f59e0b;border-color:#d97706;padding:8px 16px;font-size:13px;cursor:pointer;" onclick="if(window.patientController) window.patientController.openEditAddressModal(); else if(typeof openExistingPatientAddressForm === 'function') openExistingPatientAddressForm(true);">
+              + Add Permanent Address
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      const formattedDate = addr.updated_at ? new Date(addr.updated_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Verified';
+      const fullText = (window.locationService && typeof window.locationService.formatAddressString === 'function')
+        ? window.locationService.formatAddressString(addr)
+        : `${addr.address_line1}, ${addr.address_line2 ? addr.address_line2 + ', ' : ''}${addr.village_town_city}, ${addr.mandal_taluk_tehsil}, ${addr.district}, ${addr.state} - ${addr.pincode}, India`;
+
+      container.innerHTML = `
+        <div class="patient-address-card" style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:16px;padding:18px;position:relative;box-shadow:var(--shadow-panel);">
+          <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1.5px solid var(--line);padding-bottom:10px;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="font-size:20px;">🏠</span>
+              <div>
+                <strong style="font-size:14px;color:var(--ink);display:block;">Permanent Residential Address</strong>
+                <small style="color:var(--muted);font-size:11px;">ABDM Profile Residence · Verified Record</small>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span class="badge" style="background:rgba(22,163,74,0.15);color:#16a34a;border:1px solid rgba(22,163,74,0.3);padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;">
+                ✓ VERIFIED RESIDENCE
+              </span>
+              <button class="btn-glass" style="padding:6px 12px;font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;" onclick="if(window.patientController) window.patientController.openEditAddressModal(); else if(typeof openExistingPatientAddressForm === 'function') openExistingPatientAddressForm(true);">
+                <span>✏️</span> <span>Edit</span>
+              </button>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:12px;font-size:13px;line-height:1.5;margin-bottom:12px;">
+            <div style="background:rgba(255,255,255,0.03);padding:10px;border-radius:10px;border:1px solid var(--line);">
+              <small style="color:var(--muted);display:block;font-size:11px;font-weight:600;margin-bottom:2px;">Street Address (Line 1 &amp; 2)</small>
+              <strong style="color:var(--ink);">${addr.address_line1 || 'N/A'}</strong>
+              ${addr.address_line2 ? `<div style="color:var(--ink-dim);">${addr.address_line2}</div>` : ''}
+              ${addr.landmark ? `<div style="color:var(--muted);font-size:11px;margin-top:2px;">Landmark: ${addr.landmark}</div>` : ''}
+            </div>
+
+            <div style="background:rgba(255,255,255,0.03);padding:10px;border-radius:10px;border:1px solid var(--line);">
+              <small style="color:var(--muted);display:block;font-size:11px;font-weight:600;margin-bottom:2px;">Village / Town / City &amp; Mandal</small>
+              <strong style="color:var(--ink);">${addr.village_town_city || 'N/A'}</strong>
+              <div style="color:var(--ink-dim);">Mandal: ${addr.mandal_taluk_tehsil || 'N/A'}</div>
+            </div>
+
+            <div style="background:rgba(255,255,255,0.03);padding:10px;border-radius:10px;border:1px solid var(--line);">
+              <small style="color:var(--muted);display:block;font-size:11px;font-weight:600;margin-bottom:2px;">District, State &amp; Pincode</small>
+              <strong style="color:var(--ink);">${addr.district || 'N/A'}, ${addr.state || 'N/A'}</strong>
+              <div style="color:var(--primary-bright);font-weight:700;">PIN: ${addr.pincode || 'N/A'} · ${addr.country || 'India'}</div>
+            </div>
+          </div>
+
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;padding-top:8px;border-top:1px dashed var(--line);font-size:11px;color:var(--muted);">
+            <div>
+              <span>🕒 Last Updated: </span> <strong style="color:var(--ink-dim);">${formattedDate}</strong>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <button class="btn-glass" style="padding:4px 10px;font-size:11px;" onclick="if(typeof speakText === 'function') speakText('Permanent Address: ' + ${JSON.stringify(fullText)})">
+                🔊 Read Address
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    openEditAddressModal() {
+      if (typeof window.openExistingPatientAddressForm === 'function') {
+        window.openExistingPatientAddressForm(true);
+      }
     }
 
     
@@ -37936,6 +38686,7 @@ The user's preferred language is ${SUPPORTED_LANGUAGES[this.currentLang]?.name |
 
 
 
+
   
   
 
@@ -37946,8 +38697,113 @@ The user's preferred language is ${SUPPORTED_LANGUAGES[this.currentLang]?.name |
 <script>
 
 
+// =========================================================
+// STRUCTURED PERMANENT ADDRESS & LOCATION CONTROLLERS
+// =========================================================
+function initAddressLocationDropdowns() {
+  if (!window.locationService) return;
+  const states = window.locationService.getStates();
+  const stateOptions = '<option value="">Select State</option>' + states.map(s => `<option value="${s}">${s}</option>`).join('');
+
+  const regState = document.getElementById('regPatState');
+  if (regState && regState.options.length <= 1) {
+    regState.innerHTML = stateOptions;
+  }
+  const addrState = document.getElementById('inpAddrState');
+  if (addrState && addrState.options.length <= 1) {
+    addrState.innerHTML = stateOptions;
+  }
+}
+
+function onRegStateChange() {
+  const stateSel = document.getElementById('regPatState');
+  const distSel = document.getElementById('regPatDistrict');
+  const mandalSel = document.getElementById('regPatMandal');
+  const villageSel = document.getElementById('regPatVillageCity');
+  if (!stateSel || !distSel || !window.locationService) return;
+
+  const state = stateSel.value;
+  const districts = window.locationService.getDistricts(state);
+  distSel.innerHTML = '<option value="">Select District</option>' + districts.map(d => `<option value="${d}">${d}</option>`).join('');
+  if (mandalSel) mandalSel.innerHTML = '<option value="">Select Mandal</option>';
+  if (villageSel) villageSel.innerHTML = '<option value="">Select Village/Town</option>';
+}
+
+function onRegDistrictChange() {
+  const stateSel = document.getElementById('regPatState');
+  const distSel = document.getElementById('regPatDistrict');
+  const mandalSel = document.getElementById('regPatMandal');
+  const villageSel = document.getElementById('regPatVillageCity');
+  if (!stateSel || !distSel || !mandalSel || !window.locationService) return;
+
+  const state = stateSel.value;
+  const district = distSel.value;
+  const mandals = window.locationService.getMandals(state, district);
+  mandalSel.innerHTML = '<option value="">Select Mandal</option>' + mandals.map(m => `<option value="${m}">${m}</option>`).join('');
+  if (villageSel) villageSel.innerHTML = '<option value="">Select Village/Town</option>';
+}
+
+function onRegMandalChange() {
+  const stateSel = document.getElementById('regPatState');
+  const distSel = document.getElementById('regPatDistrict');
+  const mandalSel = document.getElementById('regPatMandal');
+  const villageSel = document.getElementById('regPatVillageCity');
+  if (!stateSel || !distSel || !mandalSel || !villageSel || !window.locationService) return;
+
+  const state = stateSel.value;
+  const district = distSel.value;
+  const mandal = mandalSel.value;
+  const villages = window.locationService.getVillages(state, district, mandal);
+  villageSel.innerHTML = '<option value="">Select Village/Town</option>' + villages.map(v => `<option value="${v}">${v}</option>`).join('');
+}
+
+function onAddressModalStateChange() {
+  const stateSel = document.getElementById('inpAddrState');
+  const distSel = document.getElementById('inpAddrDistrict');
+  const mandalSel = document.getElementById('inpAddrMandal');
+  const villageSel = document.getElementById('inpAddrVillage');
+  if (!stateSel || !distSel || !window.locationService) return;
+
+  const state = stateSel.value;
+  const districts = window.locationService.getDistricts(state);
+  distSel.innerHTML = '<option value="">Select District</option>' + districts.map(d => `<option value="${d}">${d}</option>`).join('');
+  if (mandalSel) mandalSel.innerHTML = '<option value="">Select Mandal</option>';
+  if (villageSel) villageSel.innerHTML = '<option value="">Select Village/Town</option>';
+}
+
+function onAddressModalDistrictChange() {
+  const stateSel = document.getElementById('inpAddrState');
+  const distSel = document.getElementById('inpAddrDistrict');
+  const mandalSel = document.getElementById('inpAddrMandal');
+  const villageSel = document.getElementById('inpAddrVillage');
+  if (!stateSel || !distSel || !mandalSel || !window.locationService) return;
+
+  const state = stateSel.value;
+  const district = distSel.value;
+  const mandals = window.locationService.getMandals(state, district);
+  mandalSel.innerHTML = '<option value="">Select Mandal</option>' + mandals.map(m => `<option value="${m}">${m}</option>`).join('');
+  if (villageSel) villageSel.innerHTML = '<option value="">Select Village/Town</option>';
+}
+
+function onAddressModalMandalChange() {
+  const stateSel = document.getElementById('inpAddrState');
+  const distSel = document.getElementById('inpAddrDistrict');
+  const mandalSel = document.getElementById('inpAddrMandal');
+  const villageSel = document.getElementById('inpAddrVillage');
+  if (!stateSel || !distSel || !mandalSel || !villageSel || !window.locationService) return;
+
+  const state = stateSel.value;
+  const district = distSel.value;
+  const mandal = mandalSel.value;
+  const villages = window.locationService.getVillages(state, district, mandal);
+  villageSel.innerHTML = '<option value="">Select Village/Town</option>' + villages.map(v => `<option value="${v}">${v}</option>`).join('');
+}
+
 function openRegistrationModal() {
+  initAddressLocationDropdowns();
   const m = document.getElementById('registrationModal');
+  const errEl = document.getElementById('regPatError');
+  if (errEl) errEl.style.display = 'none';
   if (m) m.style.display = 'flex';
 }
 
@@ -38029,29 +38885,358 @@ function selectPortalRole(role) {
 
 function submitPatientRegistration(e) {
   if (e) e.preventDefault();
+  const errEl = document.getElementById('regPatError');
+  if (errEl) errEl.style.display = 'none';
+
   const name = document.getElementById('regPatName').value.trim();
   const phone = document.getElementById('regPatPhone').value.trim();
   const age = parseInt(document.getElementById('regPatAge').value, 10) || 30;
   const gender = document.getElementById('regPatGender').value;
   const bloodGroup = document.getElementById('regPatBlood').value;
-  const village = document.getElementById('regPatVillage').value.trim();
   const password = document.getElementById('regPatPassword').value.trim();
 
-  if (!name || !phone || !village || !password) {
-    alert('Please fill in all required fields and set your password');
+  // Mandatory structured address fields
+  const address_line1 = document.getElementById('regPatAddrLine1') ? document.getElementById('regPatAddrLine1').value.trim() : '';
+  const address_line2 = document.getElementById('regPatAddrLine2') ? document.getElementById('regPatAddrLine2').value.trim() : '';
+  const country = 'India';
+  const state = document.getElementById('regPatState') ? document.getElementById('regPatState').value.trim() : '';
+  const district = document.getElementById('regPatDistrict') ? document.getElementById('regPatDistrict').value.trim() : '';
+  const mandal_taluk_tehsil = document.getElementById('regPatMandal') ? document.getElementById('regPatMandal').value.trim() : '';
+  const village_town_city = document.getElementById('regPatVillageCity') ? document.getElementById('regPatVillageCity').value.trim() : '';
+  const pincode = document.getElementById('regPatPincode') ? document.getElementById('regPatPincode').value.trim() : '';
+  const landmark = document.getElementById('regPatLandmark') ? document.getElementById('regPatLandmark').value.trim() : '';
+
+  const showError = (msg) => {
+    if (errEl) {
+      errEl.textContent = msg;
+      errEl.style.display = 'block';
+    } else {
+      alert(msg);
+    }
+  };
+
+  if (!name || !phone || !password) {
+    showError('Please fill in your name, mobile number, and account password.');
+    return;
+  }
+  if (!address_line1) {
+    showError('Please enter Address Line 1 (House No, Building, Street).');
+    return;
+  }
+  if (!state) {
+    showError('Please select your State.');
+    return;
+  }
+  if (!district) {
+    showError('Please select your District.');
+    return;
+  }
+  if (!mandal_taluk_tehsil) {
+    showError('Please select your Mandal / Taluk / Tehsil.');
+    return;
+  }
+  if (!village_town_city) {
+    showError('Please select your Village / Town / City.');
+    return;
+  }
+  if (!window.locationService || !window.locationService.validatePincode(pincode)) {
+    showError('Please enter a valid 6-digit Indian postal Pincode (e.g. 521228).');
     return;
   }
 
   if (window.appStore) {
-    const res = window.appStore.registerPatientUser({ name, phone, age, gender, bloodGroup, village, password });
-    closeRegistrationModal();
-    window.location.hash = '#/citizen';
-    if (typeof showView === 'function') showView('Patient');
-    renderActivePortalView();
-    if (window.patientController && typeof window.patientController.renderAll === 'function') {
-      try { window.patientController.renderAll(); } catch (err) {}
+    try {
+      const res = window.appStore.registerPatientUser({
+        name,
+        phone,
+        age,
+        gender,
+        bloodGroup,
+        village: village_town_city,
+        password,
+        address_line1,
+        address_line2,
+        country,
+        state,
+        district,
+        mandal_taluk_tehsil,
+        village_town_city,
+        pincode,
+        landmark
+      });
+
+      closeRegistrationModal();
+      window.location.hash = '#/citizen';
+      if (typeof showView === 'function') showView('Patient');
+      renderActivePortalView();
+      if (window.patientController && typeof window.patientController.renderAll === 'function') {
+        try { window.patientController.renderAll(); } catch (err) {}
+      }
+      if (typeof window.toast === 'function') {
+        window.toast('🎉 Welcome ' + res.user.name + '! ABHA Card: ' + res.user.abhaId);
+      }
+    } catch (err) {
+      showError(err.message || 'Registration failed. Please check your information.');
     }
-    if (typeof window.toast === 'function') window.toast('🎉 Welcome ' + res.user.name + '! ABHA Card: ' + res.user.abhaId);
+  }
+}
+
+// =========================================================
+// EXISTING PATIENT ADDRESS PROMPT & CONFIRMATION CONTROLLERS
+// =========================================================
+let pendingAddressPatientUser = null;
+let pendingAddressData = null;
+let isAddressModalInEditMode = false;
+
+function openExistingPatientAddressPrompt(patientUser) {
+  pendingAddressPatientUser = patientUser || (window.appStore && window.appStore.getState().session.user);
+  const promptModal = document.getElementById('patientAddressPromptModal');
+  if (promptModal) {
+    promptModal.style.display = 'flex';
+  }
+}
+
+function closeExistingPatientAddressPrompt() {
+  const promptModal = document.getElementById('patientAddressPromptModal');
+  if (promptModal) promptModal.style.display = 'none';
+}
+
+function openExistingPatientAddressForm(isEdit = false) {
+  closeExistingPatientAddressPrompt();
+  isAddressModalInEditMode = !!isEdit;
+  initAddressLocationDropdowns();
+
+  const stepForm = document.getElementById('addrStepForm');
+  const stepConfirm = document.getElementById('addrStepConfirm');
+  const stepSuccess = document.getElementById('addrStepSuccess');
+  const titleEl = document.getElementById('addrModalTitle');
+  const btnClose = document.getElementById('btnCloseAddrModal');
+  const errEl = document.getElementById('addrFormError');
+
+  if (errEl) errEl.style.display = 'none';
+  if (stepForm) stepForm.style.display = 'block';
+  if (stepConfirm) stepConfirm.style.display = 'none';
+  if (stepSuccess) stepSuccess.style.display = 'none';
+
+  if (titleEl) {
+    titleEl.textContent = isEdit ? 'Edit Permanent Address' : 'Permanent Address';
+  }
+  if (btnClose) {
+    btnClose.style.display = isEdit ? 'block' : 'none';
+  }
+
+  // Pre-fill if editing or existing address available
+  const user = pendingAddressPatientUser || (window.appStore && window.appStore.getState().session.user);
+  const existingAddr = (user && (user.permanent_address || user.address)) || null;
+
+  if (existingAddr) {
+    const f1 = document.getElementById('inpAddrLine1');
+    const f2 = document.getElementById('inpAddrLine2');
+    const fLm = document.getElementById('inpAddrLandmark');
+    const fSt = document.getElementById('inpAddrState');
+    const fPin = document.getElementById('inpAddrPincode');
+
+    if (f1) f1.value = existingAddr.address_line1 || '';
+    if (f2) f2.value = existingAddr.address_line2 || '';
+    if (fLm) fLm.value = existingAddr.landmark || '';
+    if (fPin) fPin.value = existingAddr.pincode || '';
+
+    if (fSt && existingAddr.state) {
+      fSt.value = existingAddr.state;
+      onAddressModalStateChange();
+      const fDist = document.getElementById('inpAddrDistrict');
+      if (fDist && existingAddr.district) {
+        fDist.value = existingAddr.district;
+        onAddressModalDistrictChange();
+        const fMan = document.getElementById('inpAddrMandal');
+        if (fMan && existingAddr.mandal_taluk_tehsil) {
+          fMan.value = existingAddr.mandal_taluk_tehsil;
+          onAddressModalMandalChange();
+          const fVil = document.getElementById('inpAddrVillage');
+          if (fVil && existingAddr.village_town_city) {
+            fVil.value = existingAddr.village_town_city;
+          }
+        }
+      }
+    }
+  }
+
+  const modal = document.getElementById('patientAddressFormModal');
+  if (modal) modal.style.display = 'flex';
+}
+
+function closePatientAddressFormModal() {
+  const modal = document.getElementById('patientAddressFormModal');
+  if (modal) modal.style.display = 'none';
+  isAddressModalInEditMode = false;
+}
+
+function handleAddressFormPreview(e) {
+  if (e) e.preventDefault();
+  const errEl = document.getElementById('addrFormError');
+  if (errEl) errEl.style.display = 'none';
+
+  const line1 = document.getElementById('inpAddrLine1').value.trim();
+  const line2 = document.getElementById('inpAddrLine2') ? document.getElementById('inpAddrLine2').value.trim() : '';
+  const country = 'India';
+  const state = document.getElementById('inpAddrState').value.trim();
+  const district = document.getElementById('inpAddrDistrict').value.trim();
+  const mandal = document.getElementById('inpAddrMandal').value.trim();
+  const village = document.getElementById('inpAddrVillage').value.trim();
+  const pincode = document.getElementById('inpAddrPincode').value.trim();
+  const landmark = document.getElementById('inpAddrLandmark') ? document.getElementById('inpAddrLandmark').value.trim() : '';
+
+  const showError = (msg) => {
+    if (errEl) {
+      errEl.textContent = msg;
+      errEl.style.display = 'block';
+    } else {
+      alert(msg);
+    }
+  };
+
+  if (!line1) {
+    showError('Please enter Address Line 1.');
+    return;
+  }
+  if (!state) {
+    showError('Please select State.');
+    return;
+  }
+  if (!district) {
+    showError('Please select District.');
+    return;
+  }
+  if (!mandal) {
+    showError('Please select Mandal / Taluk / Tehsil.');
+    return;
+  }
+  if (!village) {
+    showError('Please select Village / Town / City.');
+    return;
+  }
+  if (!window.locationService || !window.locationService.validatePincode(pincode)) {
+    showError('Please enter a valid 6-digit Indian postal Pincode (e.g. 521228).');
+    return;
+  }
+
+  pendingAddressData = {
+    address_line1: line1,
+    address_line2: line2,
+    country,
+    state,
+    district,
+    mandal_taluk_tehsil: mandal,
+    village_town_city: village,
+    pincode,
+    landmark
+  };
+
+  // Populate Confirmation Card (Step 2)
+  const elLine1 = document.getElementById('confAddrLine1');
+  const elLine2Row = document.getElementById('confAddrLine2Row');
+  const elLine2 = document.getElementById('confAddrLine2');
+  const elLmRow = document.getElementById('confAddrLandmarkRow');
+  const elLm = document.getElementById('confAddrLandmark');
+  const elVil = document.getElementById('confAddrVillage');
+  const elMan = document.getElementById('confAddrMandal');
+  const elDist = document.getElementById('confAddrDistrict');
+  const elStatePin = document.getElementById('confAddrStatePin');
+  const elCountry = document.getElementById('confAddrCountry');
+
+  if (elLine1) elLine1.textContent = line1;
+  if (elLine2Row && elLine2) {
+    if (line2) {
+      elLine2.textContent = line2;
+      elLine2Row.style.display = 'block';
+    } else {
+      elLine2Row.style.display = 'none';
+    }
+  }
+  if (elLmRow && elLm) {
+    if (landmark) {
+      elLm.textContent = landmark;
+      elLmRow.style.display = 'block';
+    } else {
+      elLmRow.style.display = 'none';
+    }
+  }
+  if (elVil) elVil.textContent = village;
+  if (elMan) elMan.textContent = mandal;
+  if (elDist) elDist.textContent = district;
+  if (elStatePin) elStatePin.textContent = state + ' - ' + pincode;
+  if (elCountry) elCountry.textContent = country;
+
+  // Transition from Step 1 to Step 2
+  const stepForm = document.getElementById('addrStepForm');
+  const stepConfirm = document.getElementById('addrStepConfirm');
+  if (stepForm) stepForm.style.display = 'none';
+  if (stepConfirm) stepConfirm.style.display = 'block';
+}
+
+function returnToAddressFormStep() {
+  const stepForm = document.getElementById('addrStepForm');
+  const stepConfirm = document.getElementById('addrStepConfirm');
+  if (stepConfirm) stepConfirm.style.display = 'none';
+  if (stepForm) stepForm.style.display = 'block';
+}
+
+function submitFinalPermanentAddress() {
+  if (!pendingAddressData || !window.appStore) return;
+  const user = pendingAddressPatientUser || (window.appStore.getState().session.user);
+  const patientId = user ? (user.id || user.phone || user.abhaId) : null;
+
+  if (!patientId) {
+    alert('Unable to identify patient profile. Please sign in again.');
+    return;
+  }
+
+  const btnSave = document.getElementById('btnSavePermanentAddress');
+  if (btnSave) {
+    btnSave.disabled = true;
+    btnSave.innerHTML = '⏳ Saving Address...';
+  }
+
+  try {
+    const res = window.appStore.savePatientAddress(patientId, pendingAddressData);
+    if (!res || !res.success) {
+      alert((res && res.message) || 'Failed to save address.');
+      if (btnSave) {
+        btnSave.disabled = false;
+        btnSave.innerHTML = '✓ Save Permanent Address';
+      }
+      return;
+    }
+
+    // Success! Transition to Step 3
+    const stepConfirm = document.getElementById('addrStepConfirm');
+    const stepSuccess = document.getElementById('addrStepSuccess');
+    if (stepConfirm) stepConfirm.style.display = 'none';
+    if (stepSuccess) stepSuccess.style.display = 'block';
+
+  } catch (err) {
+    console.error('[Save Address Error]', err);
+    alert('Failed to save address: ' + (err.message || 'Please try again.'));
+  } finally {
+    if (btnSave) {
+      btnSave.disabled = false;
+      btnSave.innerHTML = '✓ Save Permanent Address';
+    }
+  }
+}
+
+function continueToPatientDashboardAfterAddress() {
+  closePatientAddressFormModal();
+  closeExistingPatientAddressPrompt();
+
+  window.location.hash = '#/citizen';
+  if (typeof showView === 'function') showView('Patient');
+  renderActivePortalView();
+  if (window.patientController && typeof window.patientController.renderAll === 'function') {
+    try { window.patientController.renderAll(); } catch (err) {}
+  }
+  if (typeof window.toast === 'function') {
+    window.toast('✓ Permanent address saved & linked to ABDM health profile.');
   }
 }
 
@@ -38294,6 +39479,12 @@ async function handleCitizenLogin(e) {
         linkCitizenProfile(res.user.phone || inputId, { authMethod: 'mobile_password' });
       }
     } catch (e) {}
+
+    // Check if permanent address is missing for existing patient!
+    if (!res.permanent_address_completed) {
+      openExistingPatientAddressPrompt(res.user);
+      return;
+    }
 
     // Route directly to Patient Dashboard (NO OTP required!)
     window.location.hash = '#/citizen';
@@ -38769,6 +39960,16 @@ function showView(viewName) {
     }
     viewName = 'Patient';
   }
+
+  // Address completion route guard for citizen
+  if (isCitizen && viewName === 'Patient') {
+    const patientUser = session.user;
+    if (patientUser && !patientUser.permanent_address_completed) {
+      console.warn('[Route Guard] Citizen permanent address missing. Prompting to complete profile.');
+      openExistingPatientAddressPrompt(patientUser);
+      return;
+    }
+  }
   
   // Find current active view
   let currentActiveEl = null;
@@ -38929,7 +40130,9 @@ function renderActivePortalView() {
   const views = ['Home', 'Login', 'Patient', 'Doctor', 'Worker', 'Admin'];
 
   const isCitizenUnauth = session && session.role === 'patient' && session.authState !== 'AUTHENTICATED';
-  if (!session || !session.isLoggedIn || isCitizenUnauth) {
+  const isCitizenMissingAddr = session && (session.role === 'patient' || session.customRole === 'citizen') && session.user && !session.user.permanent_address_completed;
+
+  if (!session || !session.isLoggedIn || isCitizenUnauth || isCitizenMissingAddr) {
     views.forEach(v => {
       const el = document.getElementById('view' + v);
       if (el) {
@@ -38941,6 +40144,9 @@ function renderActivePortalView() {
     if (headerControls) headerControls.style.display = 'none';
     const userBadgeEl = document.getElementById('activeUserBadge');
     if (userBadgeEl) userBadgeEl.style.display = 'none';
+    if (isCitizenMissingAddr) {
+      openExistingPatientAddressPrompt(session.user);
+    }
     return;
   }
 
@@ -39073,6 +40279,12 @@ function handleUrlContextRouting() {
 
   if (hash === '#/citizen' || hash === '#citizen' || path.endsWith('/citizen')) {
     if (isLoggedIn && (session.role === 'patient' || isCitizen)) {
+      if (session.user && !session.user.permanent_address_completed) {
+        showView('Login');
+        switchLoginTab('patient');
+        openExistingPatientAddressPrompt(session.user);
+        return;
+      }
       showView('Patient');
     } else {
       showView('Login');
@@ -39135,6 +40347,7 @@ window.addEventListener('hashchange', handleUrlContextRouting);
 window.addEventListener('popstate', handleUrlContextRouting);
 
 document.addEventListener('DOMContentLoaded', () => {
+  if (typeof initAddressLocationDropdowns === 'function') initAddressLocationDropdowns();
   renderActivePortalView();
   handleUrlContextRouting();
 });

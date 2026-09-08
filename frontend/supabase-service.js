@@ -994,6 +994,45 @@
       }
     }
 
+    async savePatientAddress(patientId, addr) {
+      if (!addr) return null;
+      if (!this.client || !this.isOnline) {
+        return this.enqueueOfflineAction('save_patient_address', 'patient_addresses', { patient_id: patientId, ...addr });
+      }
+      try {
+        if (typeof this.client.from === 'function') {
+          // Upsert structured address record
+          await this.client.from('patient_addresses').upsert([{
+            id: addr.id,
+            patient_id: patientId,
+            address_type: addr.address_type || 'PERMANENT',
+            address_line_1: addr.address_line_1,
+            address_line_2: addr.address_line_2 || '',
+            landmark: addr.landmark || '',
+            country: addr.country || 'India',
+            state: addr.state,
+            district: addr.district,
+            mandal: addr.mandal,
+            village_city: addr.village_city,
+            pincode: addr.pincode,
+            is_verified: true,
+            created_at: addr.created_at || new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          }], { onConflict: 'id' });
+
+          // Also update profiles table with permanent address status
+          await this.client.from('profiles').update({
+            village: addr.village_city + ', ' + addr.mandal,
+            permanent_address_completed: true,
+            updated_at: new Date().toISOString()
+          }).eq('phone', (addr.phone || patientId));
+        }
+      } catch (e) {
+        console.warn('[Supabase Service] savePatientAddress error, enqueuing offline:', e);
+        return this.enqueueOfflineAction('save_patient_address', 'patient_addresses', { patient_id: patientId, ...addr });
+      }
+    }
+
     // =========================================================================
     // AUTHENTICATION & ROLE-BASED IDENTITY MANAGEMENT
     // =========================================================================

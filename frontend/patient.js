@@ -32,6 +32,7 @@
 
     renderAll() {
       this.renderAbhaCard();
+      this.renderPermanentAddress();
       this.renderFamilyCircle();
       this.renderDailyMedications();
       this.renderVideoCallHistory();
@@ -346,6 +347,110 @@
           </div>
         </div>
       `;
+    }
+
+    renderPermanentAddress() {
+      const container = document.getElementById('patientPermanentAddressContainer');
+      if (!container || !this.store) return;
+
+      const state = this.store.getState();
+      const rawUser = state.currentUser || (state.session ? state.session.user : null);
+      if (!rawUser) {
+        container.innerHTML = '';
+        return;
+      }
+
+      const cleanPhone = (rawUser.phone || '').replace(/\D/g, '').slice(-10);
+      const matchedProfile = (state.patients || []).find(p => {
+        const pPhone = (p.phone || '').replace(/\D/g, '').slice(-10);
+        return cleanPhone && pPhone && pPhone === cleanPhone;
+      }) || {};
+
+      const addr = rawUser.permanent_address || matchedProfile.permanent_address || null;
+      const isCompleted = (rawUser.permanent_address_completed !== false && !!addr);
+
+      if (!addr || !isCompleted) {
+        container.innerHTML = `
+          <div style="background:rgba(245,158,11,0.08);border:1.5px dashed #f59e0b;border-radius:14px;padding:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="font-size:24px;">⚠️</span>
+              <div>
+                <strong style="color:var(--ink);font-size:14px;display:block;">Permanent Address Incomplete</strong>
+                <small style="color:var(--muted);">Add your official residential address to comply with ABDM registration standards.</small>
+              </div>
+            </div>
+            <button class="auth-btn-primary" style="background:#f59e0b;border-color:#d97706;padding:8px 16px;font-size:13px;cursor:pointer;" onclick="if(window.patientController) window.patientController.openEditAddressModal(); else if(typeof openExistingPatientAddressForm === 'function') openExistingPatientAddressForm(true);">
+              + Add Permanent Address
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      const formattedDate = addr.updated_at ? new Date(addr.updated_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Verified';
+      const fullText = (window.locationService && typeof window.locationService.formatAddressString === 'function')
+        ? window.locationService.formatAddressString(addr)
+        : `${addr.address_line1}, ${addr.address_line2 ? addr.address_line2 + ', ' : ''}${addr.village_town_city}, ${addr.mandal_taluk_tehsil}, ${addr.district}, ${addr.state} - ${addr.pincode}, India`;
+
+      container.innerHTML = `
+        <div class="patient-address-card" style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:16px;padding:18px;position:relative;box-shadow:var(--shadow-panel);">
+          <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1.5px solid var(--line);padding-bottom:10px;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="font-size:20px;">🏠</span>
+              <div>
+                <strong style="font-size:14px;color:var(--ink);display:block;">Permanent Residential Address</strong>
+                <small style="color:var(--muted);font-size:11px;">ABDM Profile Residence · Verified Record</small>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span class="badge" style="background:rgba(22,163,74,0.15);color:#16a34a;border:1px solid rgba(22,163,74,0.3);padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;">
+                ✓ VERIFIED RESIDENCE
+              </span>
+              <button class="btn-glass" style="padding:6px 12px;font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;" onclick="if(window.patientController) window.patientController.openEditAddressModal(); else if(typeof openExistingPatientAddressForm === 'function') openExistingPatientAddressForm(true);">
+                <span>✏️</span> <span>Edit</span>
+              </button>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:12px;font-size:13px;line-height:1.5;margin-bottom:12px;">
+            <div style="background:rgba(255,255,255,0.03);padding:10px;border-radius:10px;border:1px solid var(--line);">
+              <small style="color:var(--muted);display:block;font-size:11px;font-weight:600;margin-bottom:2px;">Street Address (Line 1 &amp; 2)</small>
+              <strong style="color:var(--ink);">${addr.address_line1 || 'N/A'}</strong>
+              ${addr.address_line2 ? `<div style="color:var(--ink-dim);">${addr.address_line2}</div>` : ''}
+              ${addr.landmark ? `<div style="color:var(--muted);font-size:11px;margin-top:2px;">Landmark: ${addr.landmark}</div>` : ''}
+            </div>
+
+            <div style="background:rgba(255,255,255,0.03);padding:10px;border-radius:10px;border:1px solid var(--line);">
+              <small style="color:var(--muted);display:block;font-size:11px;font-weight:600;margin-bottom:2px;">Village / Town / City &amp; Mandal</small>
+              <strong style="color:var(--ink);">${addr.village_town_city || 'N/A'}</strong>
+              <div style="color:var(--ink-dim);">Mandal: ${addr.mandal_taluk_tehsil || 'N/A'}</div>
+            </div>
+
+            <div style="background:rgba(255,255,255,0.03);padding:10px;border-radius:10px;border:1px solid var(--line);">
+              <small style="color:var(--muted);display:block;font-size:11px;font-weight:600;margin-bottom:2px;">District, State &amp; Pincode</small>
+              <strong style="color:var(--ink);">${addr.district || 'N/A'}, ${addr.state || 'N/A'}</strong>
+              <div style="color:var(--primary-bright);font-weight:700;">PIN: ${addr.pincode || 'N/A'} · ${addr.country || 'India'}</div>
+            </div>
+          </div>
+
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;padding-top:8px;border-top:1px dashed var(--line);font-size:11px;color:var(--muted);">
+            <div>
+              <span>🕒 Last Updated: </span> <strong style="color:var(--ink-dim);">${formattedDate}</strong>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <button class="btn-glass" style="padding:4px 10px;font-size:11px;" onclick="if(typeof speakText === 'function') speakText('Permanent Address: ' + ${JSON.stringify(fullText)})">
+                🔊 Read Address
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    openEditAddressModal() {
+      if (typeof window.openExistingPatientAddressForm === 'function') {
+        window.openExistingPatientAddressForm(true);
+      }
     }
 
     
