@@ -3837,7 +3837,7 @@ body[data-theme="doom"] {
 
     
     
-    <!-- 1. CITIZEN / PATIENT LOGIN FORM (Mobile / ABHA -> Password/PIN -> SMS OTP -> Dashboard) -->
+    <!-- 1. CITIZEN / PATIENT LOGIN FORM & RECOVERY -->
     <div id="formCardPatient" class="auth-form-card" style="display:block;">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
         <div style="width:46px;height:46px;background:rgba(22,163,74,0.15);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;">
@@ -3845,44 +3845,30 @@ body[data-theme="doom"] {
         </div>
         <div>
           <h2 style="font-size:18px;color:var(--ink);font-weight:800;">Citizen &amp; Patient Portal</h2>
-          <small style="color:var(--muted);">Secure 2-Factor Healthcare Access: Password &amp; SMS OTP</small>
+          <small style="color:var(--muted);">Secure Healthcare Access with Mobile / ABHA ID &amp; Password</small>
         </div>
       </div>
 
-      <!-- PROGRESS INDICATOR STEPPER: 1. Login -> 2. Verify OTP -> 3. Dashboard -->
-      <div class="citizen-stepper-container" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;background:rgba(0,0,0,0.22);padding:8px 12px;border-radius:12px;border:1px solid rgba(255,255,255,0.08);font-size:12px;font-weight:700;">
-        <div id="stepBadge1" style="display:flex;align-items:center;gap:6px;color:#ffffff;background:#16a34a;padding:5px 10px;border-radius:20px;transition:all 0.3s ease;">
-          <span id="stepIcon1" style="width:18px;height:18px;background:#ffffff;color:#16a34a;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;">1</span>
-          <span>Login</span>
-        </div>
-        <div id="stepLine1" style="flex:1;height:2px;background:rgba(255,255,255,0.15);margin:0 6px;"></div>
-        <div id="stepBadge2" style="display:flex;align-items:center;gap:6px;color:var(--muted);padding:5px 10px;border-radius:20px;transition:all 0.3s ease;">
-          <span id="stepIcon2" style="width:18px;height:18px;background:rgba(255,255,255,0.1);color:var(--muted);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;">2</span>
-          <span>Verify OTP</span>
-        </div>
-        <div id="stepLine2" style="flex:1;height:2px;background:rgba(255,255,255,0.15);margin:0 6px;"></div>
-        <div id="stepBadge3" style="display:flex;align-items:center;gap:6px;color:var(--muted);padding:5px 10px;border-radius:20px;transition:all 0.3s ease;">
-          <span id="stepIcon3" style="width:18px;height:18px;background:rgba(255,255,255,0.1);color:var(--muted);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;">3</span>
-          <span>Dashboard</span>
-        </div>
-      </div>
-
-      <!-- STEP 1 SCREEN: ENTER MOBILE/ABHA + PASSWORD/PIN -->
+      <!-- VIEW A: NORMAL LOGIN (NO OTP) -->
       <div id="citizenStepLogin">
         <div id="citizenLoginError" style="display:none;background:rgba(220,38,38,0.12);border:1.5px solid #dc2626;border-radius:10px;padding:10px 14px;color:#dc2626;font-size:12.5px;font-weight:600;margin-bottom:14px;"></div>
 
-        <form onsubmit="handleCitizenLoginStep1(event)">
+        <form onsubmit="handleCitizenLogin(event)">
           <div style="margin-bottom:14px;">
             <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:6px;">Registered Mobile Number or 14-Digit ABHA ID *</label>
             <input type="text" id="patientInputId" class="input-field" placeholder="e.g. 9876543210 or 14-8921-4402-9912" autocomplete="username" required style="width:100%;height:46px;font-size:14px;font-weight:600;">
           </div>
 
-          <div style="margin-bottom:18px;">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-              <label style="font-size:12px;font-weight:700;color:var(--ink-dim);">Account Password or Security PIN *</label>
-              <small style="color:var(--muted);font-size:11px;">Default test PIN: <strong>1234</strong></small>
-            </div>
-            <input type="password" id="patientInputPass" class="input-field" placeholder="Enter your password or 4-digit PIN" autocomplete="current-password" required style="width:100%;height:46px;font-size:14px;">
+          <div style="margin-bottom:10px;">
+            <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:6px;">Password / Security PIN *</label>
+            <input type="password" id="patientInputPass" class="input-field" placeholder="Enter your password or PIN" autocomplete="current-password" required style="width:100%;height:46px;font-size:14px;">
+          </div>
+
+          <!-- FORGOT PASSWORD LINK -->
+          <div style="display:flex;justify-content:flex-end;margin-bottom:16px;">
+            <button type="button" onclick="showCitizenForgotPasswordScreen()" style="background:none;border:none;color:var(--primary-bright);font-size:12.5px;font-weight:700;cursor:pointer;padding:0;text-decoration:underline;">
+              Forgot Password?
+            </button>
           </div>
 
           <!-- SUSPICIOUS ACTIVITY CAPTCHA (Appears only on 3+ failed attempts) -->
@@ -3902,26 +3888,53 @@ body[data-theme="doom"] {
         </form>
       </div>
 
-      <!-- STEP 2 SCREEN: DEDICATED SMS OTP VERIFICATION -->
-      <div id="citizenStepOtp" style="display:none;">
-        <div id="citizenOtpError" style="display:none;background:rgba(220,38,38,0.12);border:1.5px solid #dc2626;border-radius:10px;padding:10px 14px;color:#dc2626;font-size:12.5px;font-weight:600;margin-bottom:14px;"></div>
-
+      <!-- VIEW B: FORGOT PASSWORD - STEP 1 (IDENTIFIER REQUEST) -->
+      <div id="citizenForgotStep1" style="display:none;">
         <div style="text-align:center;margin-bottom:16px;">
-          <h3 style="font-size:17px;font-weight:800;color:var(--ink);margin:0 0 4px;">Verify your mobile number</h3>
-          <p style="font-size:13px;color:var(--muted);margin:0;">We sent a 6-digit OTP to your registered mobile number.</p>
+          <h3 style="font-size:17px;font-weight:800;color:var(--ink);margin:0 0 4px;">Account Recovery</h3>
+          <p style="font-size:13px;color:var(--muted);margin:0;">Enter your Mobile Number or ABHA ID to receive an SMS verification code.</p>
         </div>
+
+        <div id="citizenForgotError1" style="display:none;background:rgba(220,38,38,0.12);border:1.5px solid #dc2626;border-radius:10px;padding:10px 14px;color:#dc2626;font-size:12.5px;font-weight:600;margin-bottom:14px;"></div>
+
+        <form onsubmit="handleCitizenForgotRequest(event)">
+          <div style="margin-bottom:18px;">
+            <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:6px;">Registered Mobile Number or 14-Digit ABHA ID *</label>
+            <input type="text" id="citizenForgotInputId" class="input-field" placeholder="e.g. 9876543210 or 14-8921-4402-9912" required style="width:100%;height:46px;font-size:14px;font-weight:600;">
+          </div>
+
+          <button type="submit" id="btnCitizenForgotSubmit1" class="auth-btn-primary" style="width:100%;padding:13px;background:linear-gradient(135deg, #16a34a, #15803d);border:none;font-size:15px;font-weight:800;border-radius:10px;cursor:pointer;box-shadow:0 4px 14px rgba(22,163,74,0.35);display:flex;align-items:center;justify-content:center;gap:8px;color:#ffffff;margin-bottom:12px;">
+            <span>📩</span> <span>Send Recovery OTP</span>
+          </button>
+
+          <div style="text-align:center;">
+            <button type="button" onclick="returnToCitizenLogin()" class="btn-glass" style="border:none;background:none;color:var(--muted);font-size:12.5px;font-weight:700;cursor:pointer;padding:6px 12px;">
+              ← Back to Login
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- VIEW C: FORGOT PASSWORD - STEP 2 (SMS OTP VERIFICATION) -->
+      <div id="citizenForgotStep2Otp" style="display:none;">
+        <div style="text-align:center;margin-bottom:16px;">
+          <h3 style="font-size:17px;font-weight:800;color:var(--ink);margin:0 0 4px;">Verify Recovery Code</h3>
+          <p style="font-size:13px;color:var(--muted);margin:0;">Enter the 6-digit code sent to your registered mobile number.</p>
+        </div>
+
+        <div id="citizenForgotOtpError" style="display:none;background:rgba(220,38,38,0.12);border:1.5px solid #dc2626;border-radius:10px;padding:10px 14px;color:#dc2626;font-size:12.5px;font-weight:600;margin-bottom:14px;"></div>
 
         <div style="background:rgba(22,163,74,0.08);border:1px solid rgba(22,163,74,0.25);border-radius:12px;padding:10px 14px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:10px;">
           <div>
-            <div style="font-size:11px;color:var(--muted);font-weight:600;">SMS OTP Sent To</div>
-            <div id="citizenMaskedPhoneDisplay" style="font-size:14px;font-weight:800;color:var(--ink);letter-spacing:1px;">+91 ******3210</div>
+            <div style="font-size:11px;color:var(--muted);font-weight:600;">Recovery OTP Sent To</div>
+            <div id="citizenRecoveryMaskedPhone" style="font-size:14px;font-weight:800;color:var(--ink);letter-spacing:1px;">+91 ******3210</div>
           </div>
-          <button type="button" onclick="handleCitizenBackToLogin()" class="btn-glass" style="padding:6px 10px;font-size:11px;font-weight:700;border-radius:8px;cursor:pointer;">
+          <button type="button" onclick="showCitizenForgotPasswordScreen()" class="btn-glass" style="padding:6px 10px;font-size:11px;font-weight:700;border-radius:8px;cursor:pointer;">
             ← Change
           </button>
         </div>
 
-        <form onsubmit="handleCitizenVerifyOtpStep2(event)">
+        <form onsubmit="handleCitizenVerifyRecoveryOtp(event)">
           <div style="margin-bottom:18px;text-align:center;">
             <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:10px;">Enter 6-Digit SMS Verification OTP *</label>
             <div class="otp-boxes-wrapper" onpaste="handleOtpPaste(event)">
@@ -3932,22 +3945,71 @@ body[data-theme="doom"] {
               <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-box" id="otpBox5" data-index="5" oninput="handleOtpInput(this, 5)" onkeydown="handleOtpKeydown(event, 5)">
               <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-box" id="otpBox6" data-index="6" oninput="handleOtpInput(this, 6)" onkeydown="handleOtpKeydown(event, 6)">
             </div>
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:11.5px;color:var(--muted);">
+            <div style="display:flex;justify-content:center;margin-top:10px;font-size:11.5px;color:var(--muted);">
               <span>⏱️ OTP expires in 5 minutes</span>
-              <span>Universal test PIN: <strong>123456</strong></span>
             </div>
           </div>
 
-          <button type="submit" id="btnCitizenVerifyOtp" class="auth-btn-primary" style="width:100%;padding:13px;background:linear-gradient(135deg, #16a34a, #15803d);border:none;font-size:15px;font-weight:800;border-radius:10px;cursor:pointer;box-shadow:0 4px 14px rgba(22,163,74,0.35);display:flex;align-items:center;justify-content:center;gap:8px;color:#ffffff;">
-            <span>✓</span> <span>Verify OTP</span>
+          <button type="submit" id="btnCitizenVerifyRecoveryOtp" class="auth-btn-primary" style="width:100%;padding:13px;background:linear-gradient(135deg, #16a34a, #15803d);border:none;font-size:15px;font-weight:800;border-radius:10px;cursor:pointer;box-shadow:0 4px 14px rgba(22,163,74,0.35);display:flex;align-items:center;justify-content:center;gap:8px;color:#ffffff;margin-bottom:12px;">
+            <span>✓</span> <span>Verify Code</span>
           </button>
 
-          <div style="margin-top:14px;text-align:center;">
-            <button type="button" id="btnCitizenResendOtp" onclick="handleCitizenResendOtpStep2()" class="btn-glass" style="border:none;background:none;color:var(--primary-bright);font-size:12.5px;font-weight:700;cursor:pointer;text-decoration:underline;padding:4px 8px;" disabled>
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <button type="button" onclick="returnToCitizenLogin()" class="btn-glass" style="border:none;background:none;color:var(--muted);font-size:12px;font-weight:700;cursor:pointer;padding:4px 8px;">
+              ← Back to Login
+            </button>
+            <button type="button" id="btnCitizenResendRecoveryOtp" onclick="handleCitizenResendRecoveryOtp()" class="btn-glass" style="border:none;background:none;color:var(--primary-bright);font-size:12px;font-weight:700;cursor:pointer;text-decoration:underline;padding:4px 8px;" disabled>
               Resend OTP in 00:30
             </button>
           </div>
         </form>
+      </div>
+
+      <!-- VIEW D: FORGOT PASSWORD - STEP 3 (CREATE NEW PASSWORD/PIN) -->
+      <div id="citizenForgotStep3Reset" style="display:none;">
+        <div style="text-align:center;margin-bottom:16px;">
+          <h3 style="font-size:17px;font-weight:800;color:var(--ink);margin:0 0 4px;">Create New Password / PIN</h3>
+          <p style="font-size:13px;color:var(--muted);margin:0;">Choose a secure password or 4-digit PIN for future sign-ins.</p>
+        </div>
+
+        <div id="citizenForgotResetError" style="display:none;background:rgba(220,38,38,0.12);border:1.5px solid #dc2626;border-radius:10px;padding:10px 14px;color:#dc2626;font-size:12.5px;font-weight:600;margin-bottom:14px;"></div>
+
+        <form onsubmit="handleCitizenSubmitNewPassword(event)">
+          <div style="margin-bottom:14px;">
+            <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:6px;">New Password or Security PIN *</label>
+            <input type="password" id="citizenNewPasswordInput" class="input-field" placeholder="At least 4 characters or digits" required style="width:100%;height:46px;font-size:14px;">
+          </div>
+
+          <div style="margin-bottom:18px;">
+            <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:6px;">Confirm New Password or PIN *</label>
+            <input type="password" id="citizenConfirmPasswordInput" class="input-field" placeholder="Re-enter your new password or PIN" required style="width:100%;height:46px;font-size:14px;">
+          </div>
+
+          <button type="submit" id="btnCitizenSaveNewPassword" class="auth-btn-primary" style="width:100%;padding:13px;background:linear-gradient(135deg, #16a34a, #15803d);border:none;font-size:15px;font-weight:800;border-radius:10px;cursor:pointer;box-shadow:0 4px 14px rgba(22,163,74,0.35);display:flex;align-items:center;justify-content:center;gap:8px;color:#ffffff;margin-bottom:12px;">
+            <span>💾</span> <span>Save New Password &amp; Continue</span>
+          </button>
+
+          <div style="text-align:center;">
+            <button type="button" onclick="returnToCitizenLogin()" class="btn-glass" style="border:none;background:none;color:var(--muted);font-size:12.5px;font-weight:700;cursor:pointer;padding:6px 12px;">
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- VIEW E: FORGOT PASSWORD - STEP 4 (RESET SUCCESS CONFIRMATION) -->
+      <div id="citizenForgotSuccess" style="display:none;text-align:center;padding:12px 6px;">
+        <div style="width:58px;height:58px;margin:0 auto 14px;background:rgba(22,163,74,0.15);border:2px solid #16a34a;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;color:#16a34a;">
+          ✓
+        </div>
+        <h3 style="font-size:18px;font-weight:800;color:var(--ink);margin:0 0 6px;">Password Reset Successful</h3>
+        <p style="font-size:13.5px;color:var(--muted);margin:0 0 20px;line-height:1.5;">
+          Your password/PIN has been updated. Please sign in with your new credentials to access your dashboard.
+        </p>
+
+        <button type="button" onclick="returnToCitizenLogin()" class="auth-btn-primary" style="width:100%;padding:13px;background:linear-gradient(135deg, #16a34a, #15803d);border:none;font-size:15px;font-weight:800;border-radius:10px;cursor:pointer;box-shadow:0 4px 14px rgba(22,163,74,0.35);display:flex;align-items:center;justify-content:center;gap:8px;color:#ffffff;">
+          <span>🔐</span> <span>Proceed to Login</span>
+        </button>
       </div>
     </div>
 
@@ -6936,13 +6998,79 @@ body[data-theme="doom"] {
         return { success: false, message: 'Invalid Mobile/ABHA ID or Password/PIN.' };
       }
 
-      // Generate secure 6-digit OTP
-      const randomOtp = String(Math.floor(100000 + Math.random() * 900000));
-      const tempToken = 'AUTH-TEMP-' + Date.now() + '-' + Math.random().toString(36).substring(2, 9);
+      // NORMAL LOGIN: Direct Authentication without OTP!
+      const patientUser = matchingPatient;
+      patientUser.role = 'patient';
+      patientUser.customRole = 'citizen';
 
-      // Save temporary server-side verification state with 5-minute expiry
-      this.tempCitizenAuth = {
-        tempToken: tempToken,
+      this.state.session = {
+        isLoggedIn: true,
+        authState: 'AUTHENTICATED',
+        role: 'patient',
+        customRole: 'citizen',
+        metadata: { role: 'citizen', portal: 'citizen', authMethod: 'mobile_password' },
+        token: 'SS-PAT-JWT-' + Date.now() + '-' + Math.random().toString(36).substring(2, 10),
+        expiresAt: Date.now() + (24 * 60 * 60 * 1000), // 24 hours
+        user: patientUser
+      };
+      this.state.currentUser = patientUser;
+      this.tempCitizenAuth = null;
+      this.saveState();
+
+      return {
+        success: true,
+        user: patientUser,
+        authState: 'AUTHENTICATED',
+        message: 'Authentication successful.'
+      };
+    }
+
+    // =========================================================
+    // FORGOT PASSWORD RECOVERY FLOW (Mobile/ABHA -> SMS OTP -> New Password/PIN -> Login)
+    // =========================================================
+
+    // 1. Request Password Reset with Account Enumeration Protection
+    requestCitizenPasswordReset(identifier = '') {
+      const inputId = String(identifier || '').trim();
+      if (!inputId) {
+        return { success: false, message: 'Please enter your registered Mobile Number or 14-Digit ABHA ID.' };
+      }
+
+      const digitsOnly = inputId.replace(/\D/g, '');
+      const cleanLast10 = digitsOnly ? digitsOnly.slice(-10) : '';
+      const cleanInputAbha = inputId.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+      // Format validation
+      if (cleanLast10.length !== 10 && cleanInputAbha.length < 10) {
+        return { success: false, message: 'Please enter a valid 10-digit mobile number or 14-digit ABHA ID.' };
+      }
+
+      // Look up patient in store
+      const registeredPatients = this.state.patients || [];
+      const matchingPatient = registeredPatients.find(p => {
+        const pPhone = (p.phone || '').replace(/\D/g, '').slice(-10);
+        const pAbha = (p.abhaId || p.abha_id || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+        return (cleanLast10 && pPhone && pPhone === cleanLast10) || 
+               (cleanInputAbha && pAbha && pAbha === cleanInputAbha);
+      });
+
+      // Account Enumeration Defense: If no patient found, return generic success message
+      if (!matchingPatient) {
+        const masked = cleanLast10 ? ('+91 ******' + cleanLast10.slice(-4)) : '******1234';
+        return {
+          success: true,
+          generic: true,
+          maskedPhone: masked,
+          message: 'If an account is associated with the information provided, an OTP will be sent to the registered mobile number.'
+        };
+      }
+
+      // Generate secure 6-digit OTP and recovery token (server-side only)
+      const randomOtp = String(Math.floor(100000 + Math.random() * 900000));
+      const recoveryToken = 'RECOVERY-TOKEN-' + Date.now() + '-' + Math.random().toString(36).substring(2, 10);
+
+      this.citizenRecoveryState = {
+        recoveryToken: recoveryToken,
         phone: matchingPatient.phone,
         maskedPhone: this.maskPhoneNumber(matchingPatient.phone),
         patient: matchingPatient,
@@ -6953,33 +7081,34 @@ body[data-theme="doom"] {
         resendCount: 0,
         lastSentAt: Date.now(),
         createdAt: Date.now(),
-        authState: 'OTP_SENT'
+        status: 'OTP_SENT'
       };
 
       return {
         success: true,
-        tempToken: tempToken,
-        maskedPhone: this.tempCitizenAuth.maskedPhone,
+        recoveryToken: recoveryToken,
+        maskedPhone: this.citizenRecoveryState.maskedPhone,
         phone: matchingPatient.phone,
-        authState: 'OTP_SENT'
+        authState: 'OTP_SENT',
+        message: 'A 6-digit recovery OTP has been sent to your registered mobile number.'
       };
     }
 
-    // STEP 2: Verify SMS OTP
-    verifyCitizenOtp(tempToken, submittedOtp) {
-      if (!this.tempCitizenAuth || this.tempCitizenAuth.tempToken !== tempToken) {
-        return { success: false, expired: true, message: 'Authentication session expired. Please login again.' };
+    // 2. Verify Recovery OTP (Does NOT auto-authenticate to dashboard)
+    verifyCitizenRecoveryOtp(recoveryToken, submittedOtp) {
+      if (!this.citizenRecoveryState || this.citizenRecoveryState.recoveryToken !== recoveryToken) {
+        return { success: false, expired: true, message: 'Password reset session expired. Please start over.' };
       }
 
-      // Check 5-minute expiry
-      if (Date.now() > this.tempCitizenAuth.expiresAt) {
-        this.tempCitizenAuth = null;
-        return { success: false, expired: true, message: 'OTP has expired (5-minute limit). Please request a new OTP.' };
+      // 5-minute expiry check
+      if (Date.now() > this.citizenRecoveryState.expiresAt) {
+        this.citizenRecoveryState = null;
+        return { success: false, expired: true, message: 'This OTP has expired. Please request a new OTP.' };
       }
 
-      // Check max incorrect attempts
-      if (this.tempCitizenAuth.attempts >= this.tempCitizenAuth.maxAttempts) {
-        return { success: false, locked: true, message: 'Maximum OTP attempts exceeded. Please wait or request a new OTP.' };
+      // Limit incorrect attempts
+      if (this.citizenRecoveryState.attempts >= this.citizenRecoveryState.maxAttempts) {
+        return { success: false, locked: true, message: 'Maximum OTP attempts exceeded. Please request a new OTP.' };
       }
 
       const inputCode = String(submittedOtp || '').trim();
@@ -6987,73 +7116,119 @@ body[data-theme="doom"] {
         return { success: false, message: 'Please enter a valid 6-digit OTP.' };
       }
 
-      // Universal demo PIN fallback (123456) or exact generated OTP
-      const isMatch = (inputCode === '123456' || inputCode === this.tempCitizenAuth.otp);
+      // Verification check (universal test PIN 123456 or generated OTP)
+      const isMatch = (inputCode === '123456' || inputCode === this.citizenRecoveryState.otp);
 
       if (!isMatch) {
-        this.tempCitizenAuth.attempts++;
-        const remaining = this.tempCitizenAuth.maxAttempts - this.tempCitizenAuth.attempts;
+        this.citizenRecoveryState.attempts++;
+        const remaining = this.citizenRecoveryState.maxAttempts - this.citizenRecoveryState.attempts;
         if (remaining <= 0) {
           return { success: false, locked: true, message: 'Maximum OTP attempts exceeded. Please request a new OTP.' };
         }
         return { success: false, message: 'Incorrect OTP. Please try again. (' + remaining + ' attempt' + (remaining > 1 ? 's' : '') + ' remaining)' };
       }
 
-      // SUCCESS: Mark as AUTHENTICATED and create secure patient session
-      const patientUser = this.tempCitizenAuth.patient;
-      patientUser.role = 'patient';
-      patientUser.customRole = 'citizen';
-
-      this.state.session = {
-        isLoggedIn: true,
-        authState: 'AUTHENTICATED',
-        authState: 'AUTHENTICATED',
-        role: 'patient',
-        customRole: 'citizen',
-        metadata: { role: 'citizen', portal: 'citizen', authMethod: 'mobile_password_otp' },
-        token: 'SS-PAT-JWT-' + Date.now() + '-' + Math.random().toString(36).substring(2, 10),
-        expiresAt: Date.now() + (24 * 60 * 60 * 1000), // 24 hours
-        user: patientUser
-      };
-      this.state.currentUser = patientUser;
-      this.saveState();
-
-      // Invalidate temporary OTP state immediately
-      this.tempCitizenAuth = null;
+      // Transition to PASSWORD_RESET_ALLOWED with a single-use token
+      const resetAuthToken = 'RESET-AUTH-' + Date.now() + '-' + Math.random().toString(36).substring(2, 10);
+      this.citizenRecoveryState.resetAuthToken = resetAuthToken;
+      this.citizenRecoveryState.status = 'PASSWORD_RESET_ALLOWED';
+      this.citizenRecoveryState.resetAllowedUntil = Date.now() + (10 * 60 * 1000); // 10 minutes window
+      this.citizenRecoveryState.otp = null; // Invalidate OTP immediately
 
       return {
         success: true,
-        user: patientUser,
-        authState: 'AUTHENTICATED'
+        resetAuthToken: resetAuthToken,
+        authState: 'PASSWORD_RESET_ALLOWED',
+        message: 'OTP verified successfully. Please create your new Password/PIN.'
       };
     }
 
-    // RESEND OTP
-    resendCitizenOtp(tempToken) {
-      if (!this.tempCitizenAuth || this.tempCitizenAuth.tempToken !== tempToken) {
-        return { success: false, message: 'Session expired. Please log in again.' };
+    // 3. Resend Recovery OTP (30s cooldown rate limiting)
+    resendCitizenRecoveryOtp(recoveryToken) {
+      if (!this.citizenRecoveryState || this.citizenRecoveryState.recoveryToken !== recoveryToken) {
+        return { success: false, message: 'Session expired. Please request password reset again.' };
       }
 
-      // Rate limiting: 30-second cooldown
       const now = Date.now();
-      if (now - this.tempCitizenAuth.lastSentAt < 25000) {
+      if (now - this.citizenRecoveryState.lastSentAt < 25000) {
         return { success: false, message: 'Please wait for the cooldown timer before requesting another OTP.' };
       }
 
-      // Invalidate previous OTP and generate a new secure 6-digit OTP
       const newOtp = String(Math.floor(100000 + Math.random() * 900000));
-      this.tempCitizenAuth.otp = newOtp;
-      this.tempCitizenAuth.attempts = 0;
-      this.tempCitizenAuth.expiresAt = now + (5 * 60 * 1000);
-      this.tempCitizenAuth.lastSentAt = now;
-      this.tempCitizenAuth.resendCount++;
+      this.citizenRecoveryState.otp = newOtp;
+      this.citizenRecoveryState.attempts = 0;
+      this.citizenRecoveryState.expiresAt = now + (5 * 60 * 1000);
+      this.citizenRecoveryState.lastSentAt = now;
+      this.citizenRecoveryState.resendCount++;
 
       return {
         success: true,
-        maskedPhone: this.tempCitizenAuth.maskedPhone,
-        requireCaptcha: this.tempCitizenAuth.resendCount >= 3,
-        message: 'A new 6-digit OTP has been sent.'
+        maskedPhone: this.citizenRecoveryState.maskedPhone,
+        message: 'A new 6-digit recovery OTP has been sent.'
       };
+    }
+
+    // 4. Create New Password/PIN & Invalidate Old Credentials
+    resetCitizenPasswordWithToken(resetAuthToken, newPassword, confirmPassword) {
+      if (!this.citizenRecoveryState || this.citizenRecoveryState.resetAuthToken !== resetAuthToken) {
+        return { success: false, message: 'Invalid or expired password reset session. Please start over.' };
+      }
+
+      if (Date.now() > this.citizenRecoveryState.resetAllowedUntil) {
+        this.citizenRecoveryState = null;
+        return { success: false, message: 'Password reset session has expired. Please request a new recovery OTP.' };
+      }
+
+      const cleanNew = String(newPassword || '').trim();
+      const cleanConfirm = String(confirmPassword || '').trim();
+
+      if (!cleanNew || cleanNew.length < 4) {
+        return { success: false, message: 'Password/PIN must be at least 4 characters/digits.' };
+      }
+
+      if (cleanNew !== cleanConfirm) {
+        return { success: false, message: 'New Password/PIN does not match the confirmation.' };
+      }
+
+      // Update patient credentials in store
+      const patient = this.citizenRecoveryState.patient;
+      patient.password = cleanNew;
+      patient.pin = cleanNew;
+
+      const registeredPatients = this.state.patients || [];
+      const match = registeredPatients.find(p => p.phone === patient.phone || p.id === patient.id);
+      if (match) {
+        match.password = cleanNew;
+        match.pin = cleanNew;
+      }
+
+      if (this.state.currentUser && (this.state.currentUser.phone === patient.phone || this.state.currentUser.id === patient.id)) {
+        this.state.currentUser.password = cleanNew;
+        this.state.currentUser.pin = cleanNew;
+      }
+
+      this.saveState();
+
+      // Cloud Supabase update
+      if (global.supabaseService && typeof global.supabaseService.updateProfilePassword === 'function') {
+        global.supabaseService.updateProfilePassword(patient.phone || patient.abhaId, cleanNew);
+      }
+
+      // Invalidate recovery state completely
+      this.citizenRecoveryState = null;
+
+      return {
+        success: true,
+        message: 'Your password has been reset successfully.'
+      };
+    }
+
+    // Compatibility wrappers for existing code
+    verifyCitizenOtp(tempToken, submittedOtp) {
+      return this.verifyCitizenRecoveryOtp(tempToken, submittedOtp);
+    }
+    resendCitizenOtp(tempToken) {
+      return this.resendCitizenRecoveryOtp(tempToken);
     }
 
     // Change Password (Updates Store & Supabase Cloud)
@@ -15720,47 +15895,16 @@ function submitPatientRegistration(e) {
 }
 
 // =========================================================
-// CITIZEN 2-STEP AUTHENTICATION FLOW: Mobile/ABHA -> Password -> SMS OTP -> Dashboard
+// CITIZEN AUTHENTICATION: NORMAL LOGIN (NO OTP) & FORGOT PASSWORD RECOVERY
 // =========================================================
-let citizenTempToken = null;
-let citizenTargetPhone = '';
+let citizenRecoveryToken = null;
+let citizenRecoveryResetToken = null;
+let citizenRecoveryTargetPhone = '';
 let citizenCountdownInterval = null;
 let citizenCountdownRemaining = 30;
 let citizenFailedLoginCount = 0;
 let citizenCaptchaVal1 = 0;
 let citizenCaptchaVal2 = 0;
-
-function updateCitizenStepper(step) {
-  const b1 = document.getElementById('stepBadge1');
-  const b2 = document.getElementById('stepBadge2');
-  const b3 = document.getElementById('stepBadge3');
-  const i1 = document.getElementById('stepIcon1');
-  const i2 = document.getElementById('stepIcon2');
-  const i3 = document.getElementById('stepIcon3');
-
-  if (step === 1) {
-    if (b1) { b1.style.background = '#16a34a'; b1.style.color = '#ffffff'; }
-    if (i1) { i1.style.background = '#ffffff'; i1.style.color = '#16a34a'; i1.textContent = '1'; }
-    if (b2) { b2.style.background = 'transparent'; b2.style.color = 'var(--muted)'; }
-    if (i2) { i2.style.background = 'rgba(255,255,255,0.1)'; i2.style.color = 'var(--muted)'; i2.textContent = '2'; }
-    if (b3) { b3.style.background = 'transparent'; b3.style.color = 'var(--muted)'; }
-    if (i3) { i3.style.background = 'rgba(255,255,255,0.1)'; i3.style.color = 'var(--muted)'; i3.textContent = '3'; }
-  } else if (step === 2) {
-    if (b1) { b1.style.background = 'rgba(22,163,74,0.25)'; b1.style.color = '#16a34a'; }
-    if (i1) { i1.style.background = '#16a34a'; i1.style.color = '#ffffff'; i1.textContent = '✓'; }
-    if (b2) { b2.style.background = '#16a34a'; b2.style.color = '#ffffff'; }
-    if (i2) { i2.style.background = '#ffffff'; i2.style.color = '#16a34a'; i2.textContent = '2'; }
-    if (b3) { b3.style.background = 'transparent'; b3.style.color = 'var(--muted)'; }
-    if (i3) { i3.style.background = 'rgba(255,255,255,0.1)'; i3.style.color = 'var(--muted)'; i3.textContent = '3'; }
-  } else if (step === 3) {
-    if (b1) { b1.style.background = 'rgba(22,163,74,0.25)'; b1.style.color = '#16a34a'; }
-    if (i1) { i1.style.background = '#16a34a'; i1.style.color = '#ffffff'; i1.textContent = '✓'; }
-    if (b2) { b2.style.background = 'rgba(22,163,74,0.25)'; b2.style.color = '#16a34a'; }
-    if (i2) { i2.style.background = '#16a34a'; i2.style.color = '#ffffff'; i2.textContent = '✓'; }
-    if (b3) { b3.style.background = '#16a34a'; b3.style.color = '#ffffff'; }
-    if (i3) { i3.style.background = '#ffffff'; i3.style.color = '#16a34a'; i3.textContent = '✓'; }
-  }
-}
 
 function showCitizenLoginError(msg) {
   const el = document.getElementById('citizenLoginError');
@@ -15775,8 +15919,21 @@ function hideCitizenLoginError() {
   if (el) el.style.display = 'none';
 }
 
-function showCitizenOtpError(msg) {
-  const el = document.getElementById('citizenOtpError');
+function showCitizenForgotError1(msg) {
+  const el = document.getElementById('citizenForgotError1');
+  if (el) {
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
+}
+
+function hideCitizenForgotError1() {
+  const el = document.getElementById('citizenForgotError1');
+  if (el) el.style.display = 'none';
+}
+
+function showCitizenForgotOtpError(msg) {
+  const el = document.getElementById('citizenForgotOtpError');
   if (el) {
     el.textContent = msg;
     el.style.display = 'block';
@@ -15790,8 +15947,21 @@ function showCitizenOtpError(msg) {
   }
 }
 
-function hideCitizenOtpError() {
-  const el = document.getElementById('citizenOtpError');
+function hideCitizenForgotOtpError() {
+  const el = document.getElementById('citizenForgotOtpError');
+  if (el) el.style.display = 'none';
+}
+
+function showCitizenForgotResetError(msg) {
+  const el = document.getElementById('citizenForgotResetError');
+  if (el) {
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
+}
+
+function hideCitizenForgotResetError() {
+  const el = document.getElementById('citizenForgotResetError');
   if (el) el.style.display = 'none';
 }
 
@@ -15806,10 +15976,83 @@ function setupCitizenCaptcha() {
   if (inp) inp.value = '';
 }
 
-function startOtpCountdown(seconds = 30) {
+function showCitizenForgotPasswordScreen() {
+  hideCitizenLoginError();
+  hideCitizenForgotError1();
+  hideCitizenForgotOtpError();
+  hideCitizenForgotResetError();
+
+  const screenLogin = document.getElementById('citizenStepLogin');
+  const screenF1 = document.getElementById('citizenForgotStep1');
+  const screenF2 = document.getElementById('citizenForgotStep2Otp');
+  const screenF3 = document.getElementById('citizenForgotStep3Reset');
+  const screenF4 = document.getElementById('citizenForgotSuccess');
+
+  if (screenLogin) screenLogin.style.display = 'none';
+  if (screenF2) screenF2.style.display = 'none';
+  if (screenF3) screenF3.style.display = 'none';
+  if (screenF4) screenF4.style.display = 'none';
+  if (screenF1) {
+    screenF1.style.display = 'block';
+    screenF1.classList.add('page-enter-smooth');
+  }
+
+  // Pre-fill forgot identifier with login identifier if already typed
+  const loginId = document.getElementById('patientInputId');
+  const forgotId = document.getElementById('citizenForgotInputId');
+  if (loginId && forgotId && loginId.value.trim() && !forgotId.value.trim()) {
+    forgotId.value = loginId.value.trim();
+  }
+  if (forgotId) setTimeout(() => forgotId.focus(), 150);
+}
+
+function returnToCitizenLogin() {
+  if (citizenCountdownInterval) {
+    clearInterval(citizenCountdownInterval);
+    citizenCountdownInterval = null;
+  }
+  citizenRecoveryToken = null;
+  citizenRecoveryResetToken = null;
+
+  hideCitizenLoginError();
+  hideCitizenForgotError1();
+  hideCitizenForgotOtpError();
+  hideCitizenForgotResetError();
+
+  const screenLogin = document.getElementById('citizenStepLogin');
+  const screenF1 = document.getElementById('citizenForgotStep1');
+  const screenF2 = document.getElementById('citizenForgotStep2Otp');
+  const screenF3 = document.getElementById('citizenForgotStep3Reset');
+  const screenF4 = document.getElementById('citizenForgotSuccess');
+
+  if (screenF1) screenF1.style.display = 'none';
+  if (screenF2) screenF2.style.display = 'none';
+  if (screenF3) screenF3.style.display = 'none';
+  if (screenF4) screenF4.style.display = 'none';
+  if (screenLogin) {
+    screenLogin.style.display = 'block';
+    screenLogin.classList.add('page-enter-smooth');
+  }
+
+  const idEl = document.getElementById('patientInputId');
+  if (idEl) setTimeout(() => idEl.focus(), 100);
+}
+
+// Aliases for compatibility
+function citizenBackToPhoneScreen() {
+  returnToCitizenLogin();
+}
+function hideCitizenPhoneError() {
+  hideCitizenLoginError();
+}
+function hideCitizenOtpError() {
+  hideCitizenForgotOtpError();
+}
+
+function startRecoveryOtpCountdown(seconds = 30) {
   if (citizenCountdownInterval) clearInterval(citizenCountdownInterval);
   citizenCountdownRemaining = seconds;
-  const btn = document.getElementById('btnCitizenResendOtp');
+  const btn = document.getElementById('btnCitizenResendRecoveryOtp');
   if (!btn) return;
 
   btn.disabled = true;
@@ -15832,8 +16075,11 @@ function startOtpCountdown(seconds = 30) {
   }, 1000);
 }
 
-// STEP 1: VALIDATE CREDENTIALS & GENERATE OTP
-async function handleCitizenLoginStep1(e) {
+// =========================================================
+// 1. NORMAL CITIZEN LOGIN (NO OTP)
+// Mobile / ABHA ID -> Password/PIN -> Patient Dashboard
+// =========================================================
+async function handleCitizenLogin(e) {
   if (e) e.preventDefault();
   hideCitizenLoginError();
 
@@ -15864,7 +16110,7 @@ async function handleCitizenLoginStep1(e) {
   const btnLogin = document.getElementById('btnCitizenLoginSubmit');
   if (btnLogin) {
     btnLogin.disabled = true;
-    btnLogin.innerHTML = '<span>⏳</span> <span>Verifying Credentials...</span>';
+    btnLogin.innerHTML = '<span>⏳</span> <span>Logging in...</span>';
   }
 
   try {
@@ -15878,33 +16124,96 @@ async function handleCitizenLoginStep1(e) {
       return;
     }
 
-    // Credentials verified! Store temp token and proceed to OTP
+    // Credentials verified! Reset security count
     citizenFailedLoginCount = 0;
-    citizenTempToken = res.tempToken;
-    citizenTargetPhone = res.phone;
 
-    // Trigger Supabase real SMS dispatch if online
+    // Link profile safely with Supabase if online
     try {
-      if (window.supabaseService && window.supabaseService.client && window.supabaseService.client.auth) {
+      if (typeof linkCitizenProfile === 'function') {
+        linkCitizenProfile(res.user.phone || inputId, { authMethod: 'mobile_password' });
+      }
+    } catch (e) {}
+
+    // Route directly to Patient Dashboard (NO OTP required!)
+    window.location.hash = '#/citizen';
+    if (typeof showView === 'function') showView('Patient');
+    renderActivePortalView();
+    if (window.patientController && typeof window.patientController.renderAll === 'function') {
+      try { window.patientController.renderAll(); } catch (err) {}
+    }
+    if (typeof window.toast === 'function') {
+      window.toast('🌾 Welcome ' + (res.user ? res.user.name : 'Citizen') + '! Signed in successfully.');
+    }
+
+  } catch (err) {
+    console.error('[Citizen Login error]:', err);
+    showCitizenLoginError('Authentication error: ' + (err.message || 'Please check credentials.'));
+  } finally {
+    if (btnLogin) {
+      btnLogin.disabled = false;
+      btnLogin.innerHTML = '<span>🔐</span> <span>Login</span>';
+    }
+  }
+}
+
+// Alias for old form onsubmit handler if any remains
+const handleCitizenLoginStep1 = handleCitizenLogin;
+
+// =========================================================
+// 2. FORGOT PASSWORD RECOVERY FLOW
+// Forgot Password -> Mobile/ABHA -> SMS OTP -> New Password -> Login
+// =========================================================
+
+// STEP 1: Request SMS OTP for password recovery
+async function handleCitizenForgotRequest(e) {
+  if (e) e.preventDefault();
+  hideCitizenForgotError1();
+
+  const idEl = document.getElementById('citizenForgotInputId');
+  const inputId = idEl ? idEl.value.trim() : '';
+
+  if (!inputId) {
+    showCitizenForgotError1('Please enter your Mobile Number or 14-Digit ABHA ID.');
+    return;
+  }
+
+  const btn = document.getElementById('btnCitizenForgotSubmit1');
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<span>⏳</span> <span>Sending Recovery Code...</span>';
+  }
+
+  try {
+    const res = window.appStore.requestCitizenPasswordReset(inputId);
+    if (!res || !res.success) {
+      showCitizenForgotError1((res && res.message) || 'Unable to request password recovery. Please check input.');
+      return;
+    }
+
+    citizenRecoveryToken = res.recoveryToken;
+    citizenRecoveryTargetPhone = res.phone || '';
+
+    // Trigger Supabase SMS dispatch if online
+    try {
+      if (window.supabaseService && window.supabaseService.client && window.supabaseService.client.auth && res.phone) {
         const fullPhone = res.phone.startsWith('+') ? res.phone : ('+91' + res.phone.replace(/\D/g, '').slice(-10));
         await window.supabaseService.client.auth.signInWithOtp({ phone: fullPhone }).catch(err => console.warn('[Supabase SMS OTP notice]:', err));
       }
     } catch (e) {}
 
-    // Navigate to OTP Screen
-    const screenLogin = document.getElementById('citizenStepLogin');
-    const screenOtp = document.getElementById('citizenStepOtp');
-    const phoneDisplay = document.getElementById('citizenMaskedPhoneDisplay');
+    // Navigate to Recovery OTP Screen
+    const screenF1 = document.getElementById('citizenForgotStep1');
+    const screenF2 = document.getElementById('citizenForgotStep2Otp');
+    const phoneDisplay = document.getElementById('citizenRecoveryMaskedPhone');
 
-    if (phoneDisplay) phoneDisplay.textContent = res.maskedPhone;
-    if (screenLogin) screenLogin.style.display = 'none';
-    if (screenOtp) {
-      screenOtp.style.display = 'block';
-      screenOtp.classList.add('page-enter-smooth');
+    if (phoneDisplay) phoneDisplay.textContent = res.maskedPhone || '+91 ******0000';
+    if (screenF1) screenF1.style.display = 'none';
+    if (screenF2) {
+      screenF2.style.display = 'block';
+      screenF2.classList.add('page-enter-smooth');
     }
 
-    updateCitizenStepper(2);
-    startOtpCountdown(30);
+    startRecoveryOtpCountdown(30);
 
     // Clear and focus OTP inputs
     for (let i = 1; i <= 6; i++) {
@@ -15915,99 +16224,110 @@ async function handleCitizenLoginStep1(e) {
     if (box1) setTimeout(() => box1.focus(), 150);
 
   } catch (err) {
-    console.error('[Citizen Login Step 1 error]:', err);
-    showCitizenLoginError('Authentication error: ' + (err.message || 'Please check credentials.'));
+    console.error('[Citizen Forgot Request error]:', err);
+    showCitizenForgotError1('Error requesting password recovery: ' + (err.message || 'Please try again.'));
   } finally {
-    if (btnLogin) {
-      btnLogin.disabled = false;
-      btnLogin.innerHTML = '<span>🔐</span> <span>Login</span>';
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '<span>📩</span> <span>Send Recovery OTP</span>';
     }
   }
 }
 
-// STEP 2: VERIFY OTP
-async function handleCitizenVerifyOtpStep2(e) {
+// STEP 2: Verify Recovery SMS OTP
+async function handleCitizenVerifyRecoveryOtp(e) {
   if (e) e.preventDefault();
-  hideCitizenOtpError();
+  hideCitizenForgotOtpError();
 
   const otpCode = getOtpCodeFromBoxes();
   if (!otpCode || otpCode.length !== 6) {
-    showCitizenOtpError('Please enter all 6 digits of the SMS verification OTP.');
+    showCitizenForgotOtpError('Please enter all 6 digits of the SMS verification OTP.');
     return;
   }
 
-  const btnVerify = document.getElementById('btnCitizenVerifyOtp');
+  const btnVerify = document.getElementById('btnCitizenVerifyRecoveryOtp');
   if (btnVerify) {
     btnVerify.disabled = true;
-    btnVerify.innerHTML = '<span>⏳</span> <span>Verifying OTP...</span>';
+    btnVerify.innerHTML = '<span>⏳</span> <span>Verifying Code...</span>';
   }
 
   try {
-    // 1. Try Supabase verification if available
+    // If account was non-existent (enumeration defense), give standard error
+    if (!citizenRecoveryToken) {
+      showCitizenForgotOtpError('Incorrect OTP. Please try again.');
+      return;
+    }
+
+    // Try Supabase verification if online
     try {
-      if (window.supabaseService && window.supabaseService.client && window.supabaseService.client.auth) {
-        const fullPhone = citizenTargetPhone.startsWith('+') ? citizenTargetPhone : ('+91' + citizenTargetPhone.replace(/\D/g, '').slice(-10));
+      if (window.supabaseService && window.supabaseService.client && window.supabaseService.client.auth && citizenRecoveryTargetPhone) {
+        const fullPhone = citizenRecoveryTargetPhone.startsWith('+') ? citizenRecoveryTargetPhone : ('+91' + citizenRecoveryTargetPhone.replace(/\D/g, '').slice(-10));
         await window.supabaseService.client.auth.verifyOtp({ phone: fullPhone, token: otpCode, type: 'sms' }).catch(err => console.warn('[Supabase OTP verify notice]:', err));
       }
     } catch (e) {}
 
-    // 2. Validate against server/store session state
-    const res = window.appStore.verifyCitizenOtp(citizenTempToken, otpCode);
+    // Verify recovery OTP in store (Does NOT log into dashboard!)
+    const res = window.appStore.verifyCitizenRecoveryOtp(citizenRecoveryToken, otpCode);
     if (!res || !res.success) {
-      showCitizenOtpError((res && res.message) || 'Incorrect OTP. Please try again.');
+      showCitizenForgotOtpError((res && res.message) || 'Incorrect OTP. Please try again.');
       if (res && (res.locked || res.expired)) {
         if (btnVerify) btnVerify.disabled = true;
       }
       return;
     }
 
-    // SUCCESS: Mark as AUTHENTICATED and proceed to Dashboard!
-    updateCitizenStepper(3);
+    citizenRecoveryResetToken = res.resetAuthToken;
+
     if (citizenCountdownInterval) {
       clearInterval(citizenCountdownInterval);
       citizenCountdownInterval = null;
     }
 
-    // Link profile safely with Supabase if online
-    try {
-      if (typeof linkCitizenProfile === 'function') {
-        linkCitizenProfile(citizenTargetPhone, { authMethod: 'password_and_otp' });
-      }
-    } catch (e) {}
+    // Navigate to Step 3: Create New Password/PIN
+    const screenF2 = document.getElementById('citizenForgotStep2Otp');
+    const screenF3 = document.getElementById('citizenForgotStep3Reset');
+    if (screenF2) screenF2.style.display = 'none';
+    if (screenF3) {
+      screenF3.style.display = 'block';
+      screenF3.classList.add('page-enter-smooth');
+    }
 
-    // Route safely to Patient Dashboard
-    window.location.hash = '#/citizen';
-    if (typeof showView === 'function') showView('Patient');
-    renderActivePortalView();
-    if (window.patientController && typeof window.patientController.renderAll === 'function') {
-      try { window.patientController.renderAll(); } catch (err) {}
-    }
-    if (typeof window.toast === 'function') {
-      window.toast('🌾 Welcome ' + (res.user ? res.user.name : 'Citizen') + '! Verified & Logged in.');
-    }
+    const pass1 = document.getElementById('citizenNewPasswordInput');
+    const pass2 = document.getElementById('citizenConfirmPasswordInput');
+    if (pass1) pass1.value = '';
+    if (pass2) pass2.value = '';
+    if (pass1) setTimeout(() => pass1.focus(), 150);
 
   } catch (err) {
-    console.error('[Citizen Verify OTP error]:', err);
-    showCitizenOtpError('Verification error: ' + (err.message || 'Please try again.'));
+    console.error('[Citizen Verify Recovery OTP error]:', err);
+    showCitizenForgotOtpError('Verification error: ' + (err.message || 'Please try again.'));
   } finally {
     if (btnVerify) {
       btnVerify.disabled = false;
-      btnVerify.innerHTML = '<span>✓</span> <span>Verify OTP</span>';
+      btnVerify.innerHTML = '<span>✓</span> <span>Verify Code</span>';
     }
   }
 }
 
-// RESEND OTP
-function handleCitizenResendOtpStep2() {
-  const btn = document.getElementById('btnCitizenResendOtp');
+// Resend Recovery OTP
+function handleCitizenResendRecoveryOtp() {
+  const btn = document.getElementById('btnCitizenResendRecoveryOtp');
   if (btn && btn.disabled) return;
-  hideCitizenOtpError();
+  hideCitizenForgotOtpError();
 
-  const res = window.appStore.resendCitizenOtp(citizenTempToken);
-  if (res && res.success) {
-    startOtpCountdown(30);
+  if (!citizenRecoveryToken) {
+    startRecoveryOtpCountdown(30);
     if (typeof window.toast === 'function') {
-      window.toast('📲 New 6-digit OTP sent to ' + res.maskedPhone);
+      window.toast('📲 If an account exists, a new recovery code has been sent.');
+    }
+    return;
+  }
+
+  const res = window.appStore.resendCitizenRecoveryOtp(citizenRecoveryToken);
+  if (res && res.success) {
+    startRecoveryOtpCountdown(30);
+    if (typeof window.toast === 'function') {
+      window.toast('📲 New 6-digit recovery OTP sent.');
     }
     for (let i = 1; i <= 6; i++) {
       const b = document.getElementById('otpBox' + i);
@@ -16016,34 +16336,69 @@ function handleCitizenResendOtpStep2() {
     const box1 = document.getElementById('otpBox1');
     if (box1) box1.focus();
   } else {
-    showCitizenOtpError((res && res.message) || 'Unable to resend OTP. Please wait.');
+    showCitizenForgotOtpError((res && res.message) || 'Unable to resend OTP. Please wait.');
   }
 }
 
-// BACK TO LOGIN SCREEN
-function handleCitizenBackToLogin() {
-  if (citizenCountdownInterval) {
-    clearInterval(citizenCountdownInterval);
-    citizenCountdownInterval = null;
-  }
-  hideCitizenOtpError();
-  hideCitizenLoginError();
-  const screenLogin = document.getElementById('citizenStepLogin');
-  const screenOtp = document.getElementById('citizenStepOtp');
-  if (screenOtp) screenOtp.style.display = 'none';
-  if (screenLogin) {
-    screenLogin.style.display = 'block';
-    screenLogin.classList.add('page-enter-smooth');
-  }
-  updateCitizenStepper(1);
-  const idEl = document.getElementById('patientInputId');
-  if (idEl) setTimeout(() => idEl.focus(), 100);
-}
+// STEP 3: Submit New Password/PIN
+async function handleCitizenSubmitNewPassword(e) {
+  if (e) e.preventDefault();
+  hideCitizenForgotResetError();
 
-// Reset citizen login to Step 1 on logout or tab switch
-function resetCitizenAuthToStep1(msg = '') {
-  handleCitizenBackToLogin();
-  if (msg) showCitizenLoginError(msg);
+  const p1 = document.getElementById('citizenNewPasswordInput');
+  const p2 = document.getElementById('citizenConfirmPasswordInput');
+  const pass1 = p1 ? p1.value.trim() : '';
+  const pass2 = p2 ? p2.value.trim() : '';
+
+  if (!pass1 || pass1.length < 4) {
+    showCitizenForgotResetError('Password/PIN must be at least 4 characters or digits.');
+    return;
+  }
+
+  if (pass1 !== pass2) {
+    showCitizenForgotResetError('New Password/PIN does not match the confirmation.');
+    return;
+  }
+
+  const btn = document.getElementById('btnCitizenSaveNewPassword');
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<span>⏳</span> <span>Updating Password...</span>';
+  }
+
+  try {
+    const res = window.appStore.resetCitizenPasswordWithToken(citizenRecoveryResetToken, pass1, pass2);
+    if (!res || !res.success) {
+      showCitizenForgotResetError((res && res.message) || 'Failed to update password. Please try again.');
+      return;
+    }
+
+    // Success! Show confirmation step
+    const screenF3 = document.getElementById('citizenForgotStep3Reset');
+    const screenF4 = document.getElementById('citizenForgotSuccess');
+    if (screenF3) screenF3.style.display = 'none';
+    if (screenF4) {
+      screenF4.style.display = 'block';
+      screenF4.classList.add('page-enter-smooth');
+    }
+
+    // Clear login inputs and prepare them with new credentials
+    const loginPass = document.getElementById('patientInputPass');
+    if (loginPass) loginPass.value = '';
+
+    if (typeof window.toast === 'function') {
+      window.toast('🔒 Password updated successfully! Please log in.');
+    }
+
+  } catch (err) {
+    console.error('[Citizen Reset Password error]:', err);
+    showCitizenForgotResetError('Error saving password: ' + (err.message || 'Please try again.'));
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '<span>💾</span> <span>Save New Password &amp; Continue</span>';
+    }
+  }
 }
 
 // OTP box input navigation
@@ -16056,7 +16411,7 @@ function handleOtpInput(el, idx) {
   if (idx === 6 && el.value.length === 1) {
     const code = getOtpCodeFromBoxes();
     if (code.length === 6) {
-      handleCitizenVerifyOtpStep2();
+      handleCitizenVerifyRecoveryOtp();
     }
   }
 }
@@ -16080,7 +16435,7 @@ function handleOtpPaste(e) {
     if (box) box.value = clip[i] || '';
   }
   if (clip.length === 6) {
-    handleCitizenVerifyOtpStep2();
+    handleCitizenVerifyRecoveryOtp();
   } else {
     const next = document.getElementById('otpBox' + (clip.length + 1));
     if (next) next.focus();

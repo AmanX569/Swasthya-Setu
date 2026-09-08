@@ -441,13 +441,79 @@
         return { success: false, message: 'Invalid Mobile/ABHA ID or Password/PIN.' };
       }
 
-      // Generate secure 6-digit OTP
-      const randomOtp = String(Math.floor(100000 + Math.random() * 900000));
-      const tempToken = 'AUTH-TEMP-' + Date.now() + '-' + Math.random().toString(36).substring(2, 9);
+      // NORMAL LOGIN: Direct Authentication without OTP!
+      const patientUser = matchingPatient;
+      patientUser.role = 'patient';
+      patientUser.customRole = 'citizen';
 
-      // Save temporary server-side verification state with 5-minute expiry
-      this.tempCitizenAuth = {
-        tempToken: tempToken,
+      this.state.session = {
+        isLoggedIn: true,
+        authState: 'AUTHENTICATED',
+        role: 'patient',
+        customRole: 'citizen',
+        metadata: { role: 'citizen', portal: 'citizen', authMethod: 'mobile_password' },
+        token: 'SS-PAT-JWT-' + Date.now() + '-' + Math.random().toString(36).substring(2, 10),
+        expiresAt: Date.now() + (24 * 60 * 60 * 1000), // 24 hours
+        user: patientUser
+      };
+      this.state.currentUser = patientUser;
+      this.tempCitizenAuth = null;
+      this.saveState();
+
+      return {
+        success: true,
+        user: patientUser,
+        authState: 'AUTHENTICATED',
+        message: 'Authentication successful.'
+      };
+    }
+
+    // =========================================================
+    // FORGOT PASSWORD RECOVERY FLOW (Mobile/ABHA -> SMS OTP -> New Password/PIN -> Login)
+    // =========================================================
+
+    // 1. Request Password Reset with Account Enumeration Protection
+    requestCitizenPasswordReset(identifier = '') {
+      const inputId = String(identifier || '').trim();
+      if (!inputId) {
+        return { success: false, message: 'Please enter your registered Mobile Number or 14-Digit ABHA ID.' };
+      }
+
+      const digitsOnly = inputId.replace(/\D/g, '');
+      const cleanLast10 = digitsOnly ? digitsOnly.slice(-10) : '';
+      const cleanInputAbha = inputId.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+      // Format validation
+      if (cleanLast10.length !== 10 && cleanInputAbha.length < 10) {
+        return { success: false, message: 'Please enter a valid 10-digit mobile number or 14-digit ABHA ID.' };
+      }
+
+      // Look up patient in store
+      const registeredPatients = this.state.patients || [];
+      const matchingPatient = registeredPatients.find(p => {
+        const pPhone = (p.phone || '').replace(/\D/g, '').slice(-10);
+        const pAbha = (p.abhaId || p.abha_id || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+        return (cleanLast10 && pPhone && pPhone === cleanLast10) || 
+               (cleanInputAbha && pAbha && pAbha === cleanInputAbha);
+      });
+
+      // Account Enumeration Defense: If no patient found, return generic success message
+      if (!matchingPatient) {
+        const masked = cleanLast10 ? ('+91 ******' + cleanLast10.slice(-4)) : '******1234';
+        return {
+          success: true,
+          generic: true,
+          maskedPhone: masked,
+          message: 'If an account is associated with the information provided, an OTP will be sent to the registered mobile number.'
+        };
+      }
+
+      // Generate secure 6-digit OTP and recovery token (server-side only)
+      const randomOtp = String(Math.floor(100000 + Math.random() * 900000));
+      const recoveryToken = 'RECOVERY-TOKEN-' + Date.now() + '-' + Math.random().toString(36).substring(2, 10);
+
+      this.citizenRecoveryState = {
+        recoveryToken: recoveryToken,
         phone: matchingPatient.phone,
         maskedPhone: this.maskPhoneNumber(matchingPatient.phone),
         patient: matchingPatient,
@@ -458,33 +524,34 @@
         resendCount: 0,
         lastSentAt: Date.now(),
         createdAt: Date.now(),
-        authState: 'OTP_SENT'
+        status: 'OTP_SENT'
       };
 
       return {
         success: true,
-        tempToken: tempToken,
-        maskedPhone: this.tempCitizenAuth.maskedPhone,
+        recoveryToken: recoveryToken,
+        maskedPhone: this.citizenRecoveryState.maskedPhone,
         phone: matchingPatient.phone,
-        authState: 'OTP_SENT'
+        authState: 'OTP_SENT',
+        message: 'A 6-digit recovery OTP has been sent to your registered mobile number.'
       };
     }
 
-    // STEP 2: Verify SMS OTP
-    verifyCitizenOtp(tempToken, submittedOtp) {
-      if (!this.tempCitizenAuth || this.tempCitizenAuth.tempToken !== tempToken) {
-        return { success: false, expired: true, message: 'Authentication session expired. Please login again.' };
+    // 2. Verify Recovery OTP (Does NOT auto-authenticate to dashboard)
+    verifyCitizenRecoveryOtp(recoveryToken, submittedOtp) {
+      if (!this.citizenRecoveryState || this.citizenRecoveryState.recoveryToken !== recoveryToken) {
+        return { success: false, expired: true, message: 'Password reset session expired. Please start over.' };
       }
 
-      // Check 5-minute expiry
-      if (Date.now() > this.tempCitizenAuth.expiresAt) {
-        this.tempCitizenAuth = null;
-        return { success: false, expired: true, message: 'OTP has expired (5-minute limit). Please request a new OTP.' };
+      // 5-minute expiry check
+      if (Date.now() > this.citizenRecoveryState.expiresAt) {
+        this.citizenRecoveryState = null;
+        return { success: false, expired: true, message: 'This OTP has expired. Please request a new OTP.' };
       }
 
-      // Check max incorrect attempts
-      if (this.tempCitizenAuth.attempts >= this.tempCitizenAuth.maxAttempts) {
-        return { success: false, locked: true, message: 'Maximum OTP attempts exceeded. Please wait or request a new OTP.' };
+      // Limit incorrect attempts
+      if (this.citizenRecoveryState.attempts >= this.citizenRecoveryState.maxAttempts) {
+        return { success: false, locked: true, message: 'Maximum OTP attempts exceeded. Please request a new OTP.' };
       }
 
       const inputCode = String(submittedOtp || '').trim();
@@ -492,73 +559,119 @@
         return { success: false, message: 'Please enter a valid 6-digit OTP.' };
       }
 
-      // Universal demo PIN fallback (123456) or exact generated OTP
-      const isMatch = (inputCode === '123456' || inputCode === this.tempCitizenAuth.otp);
+      // Verification check (universal test PIN 123456 or generated OTP)
+      const isMatch = (inputCode === '123456' || inputCode === this.citizenRecoveryState.otp);
 
       if (!isMatch) {
-        this.tempCitizenAuth.attempts++;
-        const remaining = this.tempCitizenAuth.maxAttempts - this.tempCitizenAuth.attempts;
+        this.citizenRecoveryState.attempts++;
+        const remaining = this.citizenRecoveryState.maxAttempts - this.citizenRecoveryState.attempts;
         if (remaining <= 0) {
           return { success: false, locked: true, message: 'Maximum OTP attempts exceeded. Please request a new OTP.' };
         }
         return { success: false, message: 'Incorrect OTP. Please try again. (' + remaining + ' attempt' + (remaining > 1 ? 's' : '') + ' remaining)' };
       }
 
-      // SUCCESS: Mark as AUTHENTICATED and create secure patient session
-      const patientUser = this.tempCitizenAuth.patient;
-      patientUser.role = 'patient';
-      patientUser.customRole = 'citizen';
-
-      this.state.session = {
-        isLoggedIn: true,
-        authState: 'AUTHENTICATED',
-        authState: 'AUTHENTICATED',
-        role: 'patient',
-        customRole: 'citizen',
-        metadata: { role: 'citizen', portal: 'citizen', authMethod: 'mobile_password_otp' },
-        token: 'SS-PAT-JWT-' + Date.now() + '-' + Math.random().toString(36).substring(2, 10),
-        expiresAt: Date.now() + (24 * 60 * 60 * 1000), // 24 hours
-        user: patientUser
-      };
-      this.state.currentUser = patientUser;
-      this.saveState();
-
-      // Invalidate temporary OTP state immediately
-      this.tempCitizenAuth = null;
+      // Transition to PASSWORD_RESET_ALLOWED with a single-use token
+      const resetAuthToken = 'RESET-AUTH-' + Date.now() + '-' + Math.random().toString(36).substring(2, 10);
+      this.citizenRecoveryState.resetAuthToken = resetAuthToken;
+      this.citizenRecoveryState.status = 'PASSWORD_RESET_ALLOWED';
+      this.citizenRecoveryState.resetAllowedUntil = Date.now() + (10 * 60 * 1000); // 10 minutes window
+      this.citizenRecoveryState.otp = null; // Invalidate OTP immediately
 
       return {
         success: true,
-        user: patientUser,
-        authState: 'AUTHENTICATED'
+        resetAuthToken: resetAuthToken,
+        authState: 'PASSWORD_RESET_ALLOWED',
+        message: 'OTP verified successfully. Please create your new Password/PIN.'
       };
     }
 
-    // RESEND OTP
-    resendCitizenOtp(tempToken) {
-      if (!this.tempCitizenAuth || this.tempCitizenAuth.tempToken !== tempToken) {
-        return { success: false, message: 'Session expired. Please log in again.' };
+    // 3. Resend Recovery OTP (30s cooldown rate limiting)
+    resendCitizenRecoveryOtp(recoveryToken) {
+      if (!this.citizenRecoveryState || this.citizenRecoveryState.recoveryToken !== recoveryToken) {
+        return { success: false, message: 'Session expired. Please request password reset again.' };
       }
 
-      // Rate limiting: 30-second cooldown
       const now = Date.now();
-      if (now - this.tempCitizenAuth.lastSentAt < 25000) {
+      if (now - this.citizenRecoveryState.lastSentAt < 25000) {
         return { success: false, message: 'Please wait for the cooldown timer before requesting another OTP.' };
       }
 
-      // Invalidate previous OTP and generate a new secure 6-digit OTP
       const newOtp = String(Math.floor(100000 + Math.random() * 900000));
-      this.tempCitizenAuth.otp = newOtp;
-      this.tempCitizenAuth.attempts = 0;
-      this.tempCitizenAuth.expiresAt = now + (5 * 60 * 1000);
-      this.tempCitizenAuth.lastSentAt = now;
-      this.tempCitizenAuth.resendCount++;
+      this.citizenRecoveryState.otp = newOtp;
+      this.citizenRecoveryState.attempts = 0;
+      this.citizenRecoveryState.expiresAt = now + (5 * 60 * 1000);
+      this.citizenRecoveryState.lastSentAt = now;
+      this.citizenRecoveryState.resendCount++;
 
       return {
         success: true,
-        maskedPhone: this.tempCitizenAuth.maskedPhone,
-        requireCaptcha: this.tempCitizenAuth.resendCount >= 3,
-        message: 'A new 6-digit OTP has been sent.'
+        maskedPhone: this.citizenRecoveryState.maskedPhone,
+        message: 'A new 6-digit recovery OTP has been sent.'
       };
+    }
+
+    // 4. Create New Password/PIN & Invalidate Old Credentials
+    resetCitizenPasswordWithToken(resetAuthToken, newPassword, confirmPassword) {
+      if (!this.citizenRecoveryState || this.citizenRecoveryState.resetAuthToken !== resetAuthToken) {
+        return { success: false, message: 'Invalid or expired password reset session. Please start over.' };
+      }
+
+      if (Date.now() > this.citizenRecoveryState.resetAllowedUntil) {
+        this.citizenRecoveryState = null;
+        return { success: false, message: 'Password reset session has expired. Please request a new recovery OTP.' };
+      }
+
+      const cleanNew = String(newPassword || '').trim();
+      const cleanConfirm = String(confirmPassword || '').trim();
+
+      if (!cleanNew || cleanNew.length < 4) {
+        return { success: false, message: 'Password/PIN must be at least 4 characters/digits.' };
+      }
+
+      if (cleanNew !== cleanConfirm) {
+        return { success: false, message: 'New Password/PIN does not match the confirmation.' };
+      }
+
+      // Update patient credentials in store
+      const patient = this.citizenRecoveryState.patient;
+      patient.password = cleanNew;
+      patient.pin = cleanNew;
+
+      const registeredPatients = this.state.patients || [];
+      const match = registeredPatients.find(p => p.phone === patient.phone || p.id === patient.id);
+      if (match) {
+        match.password = cleanNew;
+        match.pin = cleanNew;
+      }
+
+      if (this.state.currentUser && (this.state.currentUser.phone === patient.phone || this.state.currentUser.id === patient.id)) {
+        this.state.currentUser.password = cleanNew;
+        this.state.currentUser.pin = cleanNew;
+      }
+
+      this.saveState();
+
+      // Cloud Supabase update
+      if (global.supabaseService && typeof global.supabaseService.updateProfilePassword === 'function') {
+        global.supabaseService.updateProfilePassword(patient.phone || patient.abhaId, cleanNew);
+      }
+
+      // Invalidate recovery state completely
+      this.citizenRecoveryState = null;
+
+      return {
+        success: true,
+        message: 'Your password has been reset successfully.'
+      };
+    }
+
+    // Compatibility wrappers for existing code
+    verifyCitizenOtp(tempToken, submittedOtp) {
+      return this.verifyCitizenRecoveryOtp(tempToken, submittedOtp);
+    }
+    resendCitizenOtp(tempToken) {
+      return this.resendCitizenRecoveryOtp(tempToken);
     }
 
     // Change Password (Updates Store & Supabase Cloud)
