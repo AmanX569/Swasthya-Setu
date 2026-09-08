@@ -2852,14 +2852,16 @@ body[data-theme="doom"] {
           <select id="regPatMandal" class="input-field" style="height:44px;" onchange="onRegMandalChange()" required>
             <option value="">Select Mandal</option>
           </select>
+          <input type="text" id="regPatMandalCustom" class="input-field" placeholder="Type Mandal / Tehsil name" style="display:none;margin-top:6px;">
         </div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
         <div>
           <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Village / Town / City *</label>
-          <select id="regPatVillageCity" class="input-field" style="height:44px;" required>
+          <select id="regPatVillageCity" class="input-field" style="height:44px;" onchange="onRegVillageChange()" required>
             <option value="">Select Village/Town</option>
           </select>
+          <input type="text" id="regPatVillageCustom" class="input-field" placeholder="Type Village / Town name" style="display:none;margin-top:6px;">
         </div>
         <div>
           <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Pincode (6 digits) *</label>
@@ -2958,14 +2960,16 @@ body[data-theme="doom"] {
             <select id="inpAddrMandal" class="input-field" style="height:44px;" onchange="onAddressModalMandalChange()" required>
               <option value="">Select Mandal</option>
             </select>
+            <input type="text" id="inpAddrMandalCustom" class="input-field" placeholder="Type Mandal / Tehsil name" style="display:none;margin-top:6px;">
           </div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
           <div>
             <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Village / Town / City *</label>
-            <select id="inpAddrVillage" class="input-field" style="height:44px;" required>
+            <select id="inpAddrVillage" class="input-field" style="height:44px;" onchange="onAddressModalVillageChange()" required>
               <option value="">Select Village/Town</option>
             </select>
+            <input type="text" id="inpAddrVillageCustom" class="input-field" placeholder="Type Village / Town name" style="display:none;margin-top:6px;">
           </div>
           <div>
             <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Pincode (6 digits) *</label>
@@ -3515,13 +3519,17 @@ function onRegStateChange() {
   const distSel = document.getElementById('regPatDistrict');
   const mandalSel = document.getElementById('regPatMandal');
   const villageSel = document.getElementById('regPatVillageCity');
+  const mandalCustom = document.getElementById('regPatMandalCustom');
+  const villageCustom = document.getElementById('regPatVillageCustom');
   if (!stateSel || !distSel || !window.locationService) return;
 
   const state = stateSel.value;
   const districts = window.locationService.getDistricts(state);
-  distSel.innerHTML = '<option value="">Select District</option>' + districts.map(d => `<option value="${d}">${d}</option>`).join('');
+  distSel.innerHTML = '<option value="">Select District' + (districts.length > 0 ? ' (' + districts.length + ' Available)' : '') + '</option>' + districts.map(d => `<option value="${d}">${d}</option>`).join('');
   if (mandalSel) mandalSel.innerHTML = '<option value="">Select Mandal</option>';
   if (villageSel) villageSel.innerHTML = '<option value="">Select Village/Town</option>';
+  if (mandalCustom) mandalCustom.style.display = 'none';
+  if (villageCustom) villageCustom.style.display = 'none';
 }
 
 function onRegDistrictChange() {
@@ -3529,13 +3537,17 @@ function onRegDistrictChange() {
   const distSel = document.getElementById('regPatDistrict');
   const mandalSel = document.getElementById('regPatMandal');
   const villageSel = document.getElementById('regPatVillageCity');
+  const mandalCustom = document.getElementById('regPatMandalCustom');
+  const villageCustom = document.getElementById('regPatVillageCustom');
   if (!stateSel || !distSel || !mandalSel || !window.locationService) return;
 
   const state = stateSel.value;
   const district = distSel.value;
   const mandals = window.locationService.getMandals(state, district);
-  mandalSel.innerHTML = '<option value="">Select Mandal</option>' + mandals.map(m => `<option value="${m}">${m}</option>`).join('');
+  mandalSel.innerHTML = '<option value="">Select Mandal / Tehsil' + (mandals.length > 0 ? ' (' + mandals.length + ' Available)' : '') + '</option>' + mandals.map(m => `<option value="${m}">${m}</option>`).join('');
   if (villageSel) villageSel.innerHTML = '<option value="">Select Village/Town</option>';
+  if (mandalCustom) mandalCustom.style.display = 'none';
+  if (villageCustom) villageCustom.style.display = 'none';
 }
 
 function onRegMandalChange() {
@@ -3543,13 +3555,28 @@ function onRegMandalChange() {
   const distSel = document.getElementById('regPatDistrict');
   const mandalSel = document.getElementById('regPatMandal');
   const villageSel = document.getElementById('regPatVillageCity');
+  const mandalCustom = document.getElementById('regPatMandalCustom');
   if (!stateSel || !distSel || !mandalSel || !villageSel || !window.locationService) return;
+
+  if (mandalCustom) {
+    mandalCustom.style.display = (mandalSel.value && mandalSel.value.startsWith('Other')) ? 'block' : 'none';
+    if (mandalSel.value && mandalSel.value.startsWith('Other')) mandalCustom.focus();
+  }
 
   const state = stateSel.value;
   const district = distSel.value;
   const mandal = mandalSel.value;
   const villages = window.locationService.getVillages(state, district, mandal);
-  villageSel.innerHTML = '<option value="">Select Village/Town</option>' + villages.map(v => `<option value="${v}">${v}</option>`).join('');
+  villageSel.innerHTML = '<option value="">Select Village / Town / Ward</option>' + villages.map(v => `<option value="${v}">${v}</option>`).join('');
+}
+
+function onRegVillageChange() {
+  const villageSel = document.getElementById('regPatVillageCity');
+  const villageCustom = document.getElementById('regPatVillageCustom');
+  if (villageSel && villageCustom) {
+    villageCustom.style.display = (villageSel.value && villageSel.value.startsWith('Other')) ? 'block' : 'none';
+    if (villageSel.value && villageSel.value.startsWith('Other')) villageCustom.focus();
+  }
 }
 
 function onAddressModalStateChange() {
@@ -3557,13 +3584,17 @@ function onAddressModalStateChange() {
   const distSel = document.getElementById('inpAddrDistrict');
   const mandalSel = document.getElementById('inpAddrMandal');
   const villageSel = document.getElementById('inpAddrVillage');
+  const mandalCustom = document.getElementById('inpAddrMandalCustom');
+  const villageCustom = document.getElementById('inpAddrVillageCustom');
   if (!stateSel || !distSel || !window.locationService) return;
 
   const state = stateSel.value;
   const districts = window.locationService.getDistricts(state);
-  distSel.innerHTML = '<option value="">Select District</option>' + districts.map(d => `<option value="${d}">${d}</option>`).join('');
+  distSel.innerHTML = '<option value="">Select District' + (districts.length > 0 ? ' (' + districts.length + ' Available)' : '') + '</option>' + districts.map(d => `<option value="${d}">${d}</option>`).join('');
   if (mandalSel) mandalSel.innerHTML = '<option value="">Select Mandal</option>';
   if (villageSel) villageSel.innerHTML = '<option value="">Select Village/Town</option>';
+  if (mandalCustom) mandalCustom.style.display = 'none';
+  if (villageCustom) villageCustom.style.display = 'none';
 }
 
 function onAddressModalDistrictChange() {
@@ -3571,13 +3602,17 @@ function onAddressModalDistrictChange() {
   const distSel = document.getElementById('inpAddrDistrict');
   const mandalSel = document.getElementById('inpAddrMandal');
   const villageSel = document.getElementById('inpAddrVillage');
+  const mandalCustom = document.getElementById('inpAddrMandalCustom');
+  const villageCustom = document.getElementById('inpAddrVillageCustom');
   if (!stateSel || !distSel || !mandalSel || !window.locationService) return;
 
   const state = stateSel.value;
   const district = distSel.value;
   const mandals = window.locationService.getMandals(state, district);
-  mandalSel.innerHTML = '<option value="">Select Mandal</option>' + mandals.map(m => `<option value="${m}">${m}</option>`).join('');
+  mandalSel.innerHTML = '<option value="">Select Mandal / Tehsil' + (mandals.length > 0 ? ' (' + mandals.length + ' Available)' : '') + '</option>' + mandals.map(m => `<option value="${m}">${m}</option>`).join('');
   if (villageSel) villageSel.innerHTML = '<option value="">Select Village/Town</option>';
+  if (mandalCustom) mandalCustom.style.display = 'none';
+  if (villageCustom) villageCustom.style.display = 'none';
 }
 
 function onAddressModalMandalChange() {
@@ -3585,13 +3620,28 @@ function onAddressModalMandalChange() {
   const distSel = document.getElementById('inpAddrDistrict');
   const mandalSel = document.getElementById('inpAddrMandal');
   const villageSel = document.getElementById('inpAddrVillage');
+  const mandalCustom = document.getElementById('inpAddrMandalCustom');
   if (!stateSel || !distSel || !mandalSel || !villageSel || !window.locationService) return;
+
+  if (mandalCustom) {
+    mandalCustom.style.display = (mandalSel.value && mandalSel.value.startsWith('Other')) ? 'block' : 'none';
+    if (mandalSel.value && mandalSel.value.startsWith('Other')) mandalCustom.focus();
+  }
 
   const state = stateSel.value;
   const district = distSel.value;
   const mandal = mandalSel.value;
   const villages = window.locationService.getVillages(state, district, mandal);
-  villageSel.innerHTML = '<option value="">Select Village/Town</option>' + villages.map(v => `<option value="${v}">${v}</option>`).join('');
+  villageSel.innerHTML = '<option value="">Select Village / Town / Ward</option>' + villages.map(v => `<option value="${v}">${v}</option>`).join('');
+}
+
+function onAddressModalVillageChange() {
+  const villageSel = document.getElementById('inpAddrVillage');
+  const villageCustom = document.getElementById('inpAddrVillageCustom');
+  if (villageSel && villageCustom) {
+    villageCustom.style.display = (villageSel.value && villageSel.value.startsWith('Other')) ? 'block' : 'none';
+    if (villageSel.value && villageSel.value.startsWith('Other')) villageCustom.focus();
+  }
 }
 
 function openRegistrationModal() {
@@ -3696,8 +3746,17 @@ function submitPatientRegistration(e) {
   const country = 'India';
   const state = document.getElementById('regPatState') ? document.getElementById('regPatState').value.trim() : '';
   const district = document.getElementById('regPatDistrict') ? document.getElementById('regPatDistrict').value.trim() : '';
-  const mandal_taluk_tehsil = document.getElementById('regPatMandal') ? document.getElementById('regPatMandal').value.trim() : '';
-  const village_town_city = document.getElementById('regPatVillageCity') ? document.getElementById('regPatVillageCity').value.trim() : '';
+  let mandal_taluk_tehsil = document.getElementById('regPatMandal') ? document.getElementById('regPatMandal').value.trim() : '';
+  const mandalCustom = document.getElementById('regPatMandalCustom') ? document.getElementById('regPatMandalCustom').value.trim() : '';
+  if (mandal_taluk_tehsil.startsWith('Other') && mandalCustom) {
+    mandal_taluk_tehsil = mandalCustom;
+  }
+
+  let village_town_city = document.getElementById('regPatVillageCity') ? document.getElementById('regPatVillageCity').value.trim() : '';
+  const villageCustom = document.getElementById('regPatVillageCustom') ? document.getElementById('regPatVillageCustom').value.trim() : '';
+  if (village_town_city.startsWith('Other') && villageCustom) {
+    village_town_city = villageCustom;
+  }
   const pincode = document.getElementById('regPatPincode') ? document.getElementById('regPatPincode').value.trim() : '';
   const landmark = document.getElementById('regPatLandmark') ? document.getElementById('regPatLandmark').value.trim() : '';
 
@@ -3841,15 +3900,35 @@ function openExistingPatientAddressForm(isEdit = false) {
       onAddressModalStateChange();
       const fDist = document.getElementById('inpAddrDistrict');
       if (fDist && existingAddr.district) {
+        if (!Array.from(fDist.options).some(o => o.value === existingAddr.district)) {
+          const opt = document.createElement('option');
+          opt.value = existingAddr.district;
+          opt.textContent = existingAddr.district;
+          fDist.appendChild(opt);
+        }
         fDist.value = existingAddr.district;
         onAddressModalDistrictChange();
         const fMan = document.getElementById('inpAddrMandal');
-        if (fMan && existingAddr.mandal_taluk_tehsil) {
-          fMan.value = existingAddr.mandal_taluk_tehsil;
+        const mVal = existingAddr.mandal_taluk_tehsil || existingAddr.mandal || '';
+        if (fMan && mVal) {
+          if (!Array.from(fMan.options).some(o => o.value === mVal)) {
+            const opt = document.createElement('option');
+            opt.value = mVal;
+            opt.textContent = mVal;
+            fMan.appendChild(opt);
+          }
+          fMan.value = mVal;
           onAddressModalMandalChange();
           const fVil = document.getElementById('inpAddrVillage');
-          if (fVil && existingAddr.village_town_city) {
-            fVil.value = existingAddr.village_town_city;
+          const vVal = existingAddr.village_town_city || existingAddr.village_city || existingAddr.village || '';
+          if (fVil && vVal) {
+            if (!Array.from(fVil.options).some(o => o.value === vVal)) {
+              const opt = document.createElement('option');
+              opt.value = vVal;
+              opt.textContent = vVal;
+              fVil.appendChild(opt);
+            }
+            fVil.value = vVal;
           }
         }
       }
@@ -3876,8 +3955,16 @@ function handleAddressFormPreview(e) {
   const country = 'India';
   const state = document.getElementById('inpAddrState').value.trim();
   const district = document.getElementById('inpAddrDistrict').value.trim();
-  const mandal = document.getElementById('inpAddrMandal').value.trim();
-  const village = document.getElementById('inpAddrVillage').value.trim();
+  let mandal = document.getElementById('inpAddrMandal').value.trim();
+  const mandalCustom = document.getElementById('inpAddrMandalCustom') ? document.getElementById('inpAddrMandalCustom').value.trim() : '';
+  if (mandal.startsWith('Other') && mandalCustom) {
+    mandal = mandalCustom;
+  }
+  let village = document.getElementById('inpAddrVillage').value.trim();
+  const villageCustom = document.getElementById('inpAddrVillageCustom') ? document.getElementById('inpAddrVillageCustom').value.trim() : '';
+  if (village.startsWith('Other') && villageCustom) {
+    village = villageCustom;
+  }
   const pincode = document.getElementById('inpAddrPincode').value.trim();
   const landmark = document.getElementById('inpAddrLandmark') ? document.getElementById('inpAddrLandmark').value.trim() : '';
 
