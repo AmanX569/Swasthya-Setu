@@ -86,7 +86,7 @@
           <td style="color:var(--ink-dim);">${s.location || 'District Center'}</td>
           <td style="color:var(--muted);">+91 ${s.phone}</td>
           <td>
-            <button style="color:#ef4444;background:none;border:none;cursor:pointer;font-size:12px;font-weight:700;" onclick="adminController.removeStaff('${s.id || s.staff_code}')">✕ Remove</button>
+            <button style="color:#ef4444;background:none;border:none;cursor:pointer;font-size:12px;font-weight:700;" onclick="adminController.confirmRemoveStaff('${s.id || s.staff_code}')">✕ Remove</button>
           </td>
         </tr>
       `).join('');
@@ -100,6 +100,71 @@
     closeProvisionStaffModal() {
       const m = document.getElementById('provisionStaffModal');
       if (m) m.style.display = 'none';
+    }
+
+    confirmRemoveStaff(id) {
+      if (!this.store) return;
+      const targetStr = String(id || '').trim();
+      const staffList = this.store.getState().staff || [];
+      const staff = staffList.find(s => s && (s.id === targetStr || s.staff_code === targetStr || s.db_id === targetStr));
+
+      this.pendingDeleteStaffId = targetStr;
+
+      const nameEl = document.getElementById('removeStaffModalName');
+      const idEl = document.getElementById('removeStaffModalId');
+      const roleEl = document.getElementById('removeStaffModalRole');
+      const locEl = document.getElementById('removeStaffModalLocation');
+
+      if (nameEl) nameEl.textContent = staff ? staff.name : targetStr;
+      if (idEl) idEl.textContent = staff ? (staff.staff_code || staff.id) : targetStr;
+      if (roleEl) roleEl.textContent = staff ? (staff.role ? staff.role.toUpperCase() : 'STAFF') : 'STAFF';
+      if (locEl) locEl.textContent = staff ? (staff.location || 'Health Facility') : 'Health Facility';
+
+      const btn = document.getElementById('confirmDeleteStaffBtn');
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '🗑️ Permanently Delete Staff';
+      }
+
+      const modal = document.getElementById('removeStaffConfirmModal');
+      if (modal) {
+        modal.style.display = 'flex';
+      }
+    }
+
+    closeRemoveStaffModal() {
+      this.pendingDeleteStaffId = null;
+      const modal = document.getElementById('removeStaffConfirmModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    async executeRemoveStaff() {
+      if (!this.pendingDeleteStaffId || !this.store) return;
+      const id = this.pendingDeleteStaffId;
+      const btn = document.getElementById('confirmDeleteStaffBtn');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '⏳ Removing from Database...';
+      }
+
+      try {
+        await this.store.deleteStaff(id);
+        this.closeRemoveStaffModal();
+        this.renderStaffTable();
+        this.renderKpis();
+        if (typeof window.toast === 'function') {
+          window.toast('✓ Permanently removed staff member from National Registry & Cloud');
+        }
+      } catch (err) {
+        console.error('[Admin] Staff deletion failed:', err);
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '🗑️ Permanently Delete Staff';
+        }
+        if (typeof window.toast === 'function') {
+          window.toast('⚠️ Failed to remove staff member: ' + (err.message || 'Database error'));
+        }
+      }
     }
 
     submitProvisionStaff(e) {
@@ -140,18 +205,15 @@
     }
 
     removeStaff(id) {
-      if (confirm('Are you sure you want to remove this staff member from Registry & Cloud?')) {
-        this.store.deleteStaff(id);
-        this.renderStaffTable();
-        this.renderKpis();
-        if (typeof window.toast === 'function') window.toast('✓ Removed staff member from Registry & Cloud');
-      }
+      // Direct remove delegates to custom confirmation modal
+      this.confirmRemoveStaff(id);
     }
 
     renderAdminBeds() {
       const el = document.getElementById('adminBedsGrid');
       if (!el || !this.store) return;
-      const hosps = this.store.getState().hospitals || [];
+      // Stably sort hospitals by name so grid order never shifts
+      const hosps = [...(this.store.getState().hospitals || [])].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
 
       el.innerHTML = hosps.map(h => `
         <div style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:var(--shadow-panel);">
@@ -159,26 +221,26 @@
           <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(110px, 1fr));gap:10px;">
             <div style="background:var(--glass-1);border:1px solid var(--glass-border);border-radius:10px;padding:10px;text-align:center;">
               <small style="color:var(--muted);display:block;font-size:11px;">General</small>
-              <strong style="font-size:18px;color:#16a34a;display:block;margin:4px 0;">${h.genBedsAvail}</strong>
+              <strong style="font-size:18px;color:#16a34a;display:block;margin:4px 0;">${h.genBedsAvail || 0}</strong>
               <div style="display:flex;justify-content:center;gap:6px;">
-                <button class="btn-glass" style="padding:2px 8px;font-size:12px;" onclick="adminController.updateBeds('${h.id}', 'gen', 1)">+1</button>
-                <button class="btn-glass" style="padding:2px 8px;font-size:12px;" onclick="adminController.updateBeds('${h.id}', 'gen', -1)">-1</button>
+                <button class="btn-glass bed-btn" style="padding:2px 8px;font-size:12px;" onclick="adminController.updateBeds(this, '${h.id}', 'gen', 1)">+1</button>
+                <button class="btn-glass bed-btn" style="padding:2px 8px;font-size:12px;" onclick="adminController.updateBeds(this, '${h.id}', 'gen', -1)">-1</button>
               </div>
             </div>
             <div style="background:var(--glass-1);border:1px solid var(--glass-border);border-radius:10px;padding:10px;text-align:center;">
               <small style="color:var(--muted);display:block;font-size:11px;">ICU</small>
-              <strong style="font-size:18px;color:#ef4444;display:block;margin:4px 0;">${h.icuBedsAvail}</strong>
+              <strong style="font-size:18px;color:#ef4444;display:block;margin:4px 0;">${h.icuBedsAvail || 0}</strong>
               <div style="display:flex;justify-content:center;gap:6px;">
-                <button class="btn-glass" style="padding:2px 8px;font-size:12px;" onclick="adminController.updateBeds('${h.id}', 'icu', 1)">+1</button>
-                <button class="btn-glass" style="padding:2px 8px;font-size:12px;" onclick="adminController.updateBeds('${h.id}', 'icu', -1)">-1</button>
+                <button class="btn-glass bed-btn" style="padding:2px 8px;font-size:12px;" onclick="adminController.updateBeds(this, '${h.id}', 'icu', 1)">+1</button>
+                <button class="btn-glass bed-btn" style="padding:2px 8px;font-size:12px;" onclick="adminController.updateBeds(this, '${h.id}', 'icu', -1)">-1</button>
               </div>
             </div>
             <div style="background:var(--glass-1);border:1px solid var(--glass-border);border-radius:10px;padding:10px;text-align:center;">
               <small style="color:var(--muted);display:block;font-size:11px;">Oxygen</small>
-              <strong style="font-size:18px;color:var(--primary-bright);display:block;margin:4px 0;">${h.oxygenBedsAvail}</strong>
+              <strong style="font-size:18px;color:var(--primary-bright);display:block;margin:4px 0;">${h.oxygenBedsAvail || 0}</strong>
               <div style="display:flex;justify-content:center;gap:6px;">
-                <button class="btn-glass" style="padding:2px 8px;font-size:12px;" onclick="adminController.updateBeds('${h.id}', 'oxygen', 1)">+1</button>
-                <button class="btn-glass" style="padding:2px 8px;font-size:12px;" onclick="adminController.updateBeds('${h.id}', 'oxygen', -1)">-1</button>
+                <button class="btn-glass bed-btn" style="padding:2px 8px;font-size:12px;" onclick="adminController.updateBeds(this, '${h.id}', 'oxygen', 1)">+1</button>
+                <button class="btn-glass bed-btn" style="padding:2px 8px;font-size:12px;" onclick="adminController.updateBeds(this, '${h.id}', 'oxygen', -1)">-1</button>
               </div>
             </div>
           </div>
@@ -186,10 +248,21 @@
       `).join('');
     }
 
-    updateBeds(hospId, type, delta) {
-      this.store.updateBedCount(hospId, type, delta);
-      this.renderAdminBeds();
-      this.renderKpis();
+    async updateBeds(btnEl, hospId, type, delta) {
+      if (btnEl) btnEl.disabled = true;
+      try {
+        await this.store.updateBedCount(hospId, type, delta);
+        this.renderAdminBeds();
+        this.renderKpis();
+      } catch (err) {
+        console.error('[Admin] Bed count update failed:', err);
+        if (typeof window.toast === 'function') {
+          window.toast('⚠️ Unable to sync bed count with database: ' + (err.message || 'Database error'));
+        }
+        this.renderAdminBeds();
+      } finally {
+        if (btnEl) btnEl.disabled = false;
+      }
     }
 
     renderAdminBlood() {
@@ -197,21 +270,38 @@
       if (!el || !this.store) return;
       const bank = this.store.getState().bloodBank || {};
 
-      el.innerHTML = Object.entries(bank).map(([grp, count]) => `
-        <div style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:12px;padding:10px;text-align:center;">
-          <strong style="color:#ef4444;font-size:16px;display:block;">${grp}</strong>
-          <span style="font-size:18px;font-weight:800;color:var(--ink);display:block;margin:4px 0;">${count}</span>
-          <div style="display:flex;justify-content:center;gap:4px;">
-            <button class="btn-glass" style="padding:2px 6px;font-size:11px;" onclick="adminController.updateBlood('${grp}', 1)">+1</button>
-            <button class="btn-glass" style="padding:2px 6px;font-size:11px;" onclick="adminController.updateBlood('${grp}', -1)">-1</button>
+      // Fixed canonical sequence: strictly invariant order so cards NEVER shuffle
+      const CANONICAL_BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
+
+      el.innerHTML = CANONICAL_BLOOD_GROUPS.map(grp => {
+        const count = bank[grp] !== undefined ? bank[grp] : 0;
+        return `
+          <div style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:12px;padding:10px;text-align:center;">
+            <strong style="color:#ef4444;font-size:16px;display:block;">${grp}</strong>
+            <span style="font-size:18px;font-weight:800;color:var(--ink);display:block;margin:4px 0;">${count}</span>
+            <div style="display:flex;justify-content:center;gap:4px;">
+              <button class="btn-glass blood-btn" style="padding:2px 6px;font-size:11px;" onclick="adminController.updateBlood(this, '${grp}', 1)">+1</button>
+              <button class="btn-glass blood-btn" style="padding:2px 6px;font-size:11px;" onclick="adminController.updateBlood(this, '${grp}', -1)">-1</button>
+            </div>
           </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
-    updateBlood(grp, delta) {
-      this.store.updateBloodStock(grp, delta);
-      this.renderAdminBlood();
+    async updateBlood(btnEl, grp, delta) {
+      if (btnEl) btnEl.disabled = true;
+      try {
+        await this.store.updateBloodStock(grp, delta);
+        this.renderAdminBlood();
+      } catch (err) {
+        console.error('[Admin] Blood stock update failed:', err);
+        if (typeof window.toast === 'function') {
+          window.toast('⚠️ Unable to sync blood inventory with database: ' + (err.message || 'Database error'));
+        }
+        this.renderAdminBlood();
+      } finally {
+        if (btnEl) btnEl.disabled = false;
+      }
     }
 
     renderAdminMedicines() {

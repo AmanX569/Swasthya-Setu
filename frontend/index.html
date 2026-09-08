@@ -3088,6 +3088,46 @@ body[data-theme="doom"] {
   </div>
 </div>
 
+<!-- ADMIN REMOVE STAFF CONFIRMATION MODAL -->
+<div id="removeStaffConfirmModal" class="modal-overlay" style="display:none;align-items:center;justify-content:center;z-index:99999;">
+  <div class="modal-card" style="max-width:480px;border:1.5px solid rgba(239, 68, 68, 0.4);background:var(--bg-panel);box-shadow:0 20px 50px rgba(0,0,0,0.6);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:28px;">⚠️</span>
+        <div>
+          <h3 style="color:#ef4444;font-size:18px;font-weight:800;margin:0;">Remove Healthcare Personnel</h3>
+          <small style="color:var(--muted);">Permanent Destructive Action</small>
+        </div>
+      </div>
+      <button type="button" onclick="adminController.closeRemoveStaffModal()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;">✕</button>
+    </div>
+    <div style="background:rgba(239, 68, 68, 0.08);border:1px solid rgba(239, 68, 68, 0.2);border-radius:12px;padding:14px;margin-bottom:16px;">
+      <p style="font-size:13px;color:var(--ink);margin:0 0 10px 0;line-height:1.5;">
+        Are you sure you want to permanently remove this staff member from the <strong>National Health Registry & Cloud Database</strong>?
+      </p>
+      <div style="background:var(--glass-2);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:4px;">
+        <div style="font-size:14px;font-weight:800;color:var(--ink);" id="removeStaffModalName">—</div>
+        <div style="display:flex;gap:8px;font-size:12px;color:var(--muted);align-items:center;">
+          <span style="font-family:'IBM Plex Mono',monospace;color:var(--primary-bright);font-weight:700;" id="removeStaffModalId">—</span>
+          <span>•</span>
+          <span id="removeStaffModalRole">—</span>
+          <span>•</span>
+          <span id="removeStaffModalLocation">—</span>
+        </div>
+      </div>
+      <small style="color:#ef4444;font-size:11px;font-weight:700;display:block;margin-top:10px;">
+        ⚠️ This action cannot be undone. All active sessions for this account will be revoked immediately and deleted from local storage & Supabase Cloud.
+      </small>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:10px;">
+      <button type="button" class="btn-glass" onclick="adminController.closeRemoveStaffModal()" style="padding:8px 16px;">Cancel</button>
+      <button type="button" id="confirmDeleteStaffBtn" class="auth-btn-primary" style="background:#ef4444;border-color:#dc2626;padding:8px 18px;" onclick="adminController.executeRemoveStaff()">
+        🗑️ Permanently Delete Staff
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- PRIVACY PASSWORD CHANGE MODAL -->
 <div id="changePasswordModal" class="modal-overlay">
   <div class="modal-card" style="max-width:440px;">

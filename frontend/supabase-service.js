@@ -312,9 +312,16 @@
               }]);
               break;
 
-            case 'delete_staff':
-              res = await this.client.from('staff').delete().or(`id.eq.${p.id},staff_code.eq.${p.id}`);
+            case 'delete_staff': {
+              const targetId = String(p.id || p.staff_code || '').trim();
+              const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(targetId);
+              if (isUuid) {
+                res = await this.client.from('staff').delete().eq('id', targetId);
+              } else {
+                res = await this.client.from('staff').delete().eq('staff_code', targetId);
+              }
               break;
+            }
             case 'delete_video_call':
               res = await this.client.from('video_call_history').delete().or('id.eq.' + p.id + ',token.eq.' + p.id);
               break;
@@ -380,15 +387,15 @@
       try {
         const [profRes, staffRes, qRes, hospRes, bloodRes, ancRes, immRes, visRes, rxRes, medRes] = await Promise.all([
           this.client.from('profiles').select('*'),
-          this.client.from('staff').select('*'),
+          this.client.from('staff').select('*').order('created_at', { ascending: true }),
           this.client.from('consult_queue').select('*').order('created_at', { ascending: true }),
-          this.client.from('hospitals').select('*'),
-          this.client.from('blood_bank').select('*'),
+          this.client.from('hospitals').select('*').order('name', { ascending: true }),
+          this.client.from('blood_bank').select('*').order('blood_group', { ascending: true }),
           this.client.from('anc_records').select('*').order('created_at', { ascending: false }),
           this.client.from('immunizations').select('*').order('created_at', { ascending: false }),
           this.client.from('home_visits').select('*').order('created_at', { ascending: false }),
           this.client.from('prescriptions').select('*').order('created_at', { ascending: false }),
-          this.client.from('medicines').select('*')
+          this.client.from('medicines').select('*').order('name', { ascending: true })
         ]);
 
         const patch = {};
@@ -425,10 +432,12 @@
             { id: 'ASH-201', staff_code: 'ASH-201', name: 'Lakshmi Didi (ASHA Lead)', role: 'worker', phone: '9833344455', location: 'Sector 4, Kondapalli', status: 'On Home Visits', regNo: 'ASHA-AP-094', password: 'asha@123', pin: '1234' }
           ];
 
+          let mappedStaff = [];
           if (staffRes.data.length > 0) {
-            patch.staff = staffRes.data.map(s => ({
+            mappedStaff = staffRes.data.map(s => ({
               id: s.staff_code || s.id,
               staff_code: s.staff_code || s.id,
+              db_id: s.id,
               name: s.name,
               role: s.role,
               phone: s.phone,
@@ -439,8 +448,20 @@
               pin: s.pin || s.password_hash || s.password || '1234'
             }));
           } else {
-            patch.staff = defaultStaff;
+            mappedStaff = defaultStaff;
           }
+
+          // Filter out any tombstoned / deleted staff members
+          const deletedCodes = global.appStore && typeof global.appStore.getDeletedStaffCodes === 'function'
+            ? global.appStore.getDeletedStaffCodes()
+            : new Set();
+
+          patch.staff = mappedStaff.filter(s => {
+            if (!s) return false;
+            const code = String(s.staff_code || s.id || '').trim();
+            const dbId = String(s.db_id || s.id || '').trim();
+            return !deletedCodes.has(code) && !deletedCodes.has(dbId);
+          });
         }
 
         if (qRes && Array.isArray(qRes.data)) {
@@ -459,26 +480,39 @@
         }
 
         if (hospRes.data && hospRes.data.length) {
-          const seen = new Set();
-          patch.hospitals = hospRes.data
+          const seen = new Map();
+          // Deterministic deduplication: keep the record with highest gen_beds_avail or latest updated_at
+          hospRes.data.forEach(h => {
+            if (!h || !h.name) return;
+            const norm = h.name.toLowerCase().trim().replace(/[^a-z0-9]/g, '');
+            if (!norm) return;
+            if (!seen.has(norm)) {
+              seen.set(norm, h);
+            } else {
+              const existing = seen.get(norm);
+              // Pick the more up-to-date or authoritative entry
+              if (h.updated_at && (!existing.updated_at || h.updated_at > existing.updated_at)) {
+                seen.set(norm, h);
+              }
+            }
+          });
+
+          patch.hospitals = Array.from(seen.values())
             .filter(h => {
-              if (!h || !h.name) return false;
-              const norm = h.name.toLowerCase().trim().replace(/[^a-z0-9]/g, '');
-              if (!norm || seen.has(norm)) return false;
-              seen.add(norm);
               const dist = parseFloat(h.distance);
               if (!isNaN(dist) && dist > 25) return false;
               return true;
             })
+            .sort((a, b) => (a.name || '').localeCompare(b.name || ''))
             .map(h => ({
               id: h.id,
               name: h.name,
               type: h.type,
               distance: h.distance,
               totalBeds: h.total_beds,
-              genBedsAvail: h.gen_beds_avail,
-              icuBedsAvail: h.icu_beds_avail,
-              oxygenBedsAvail: h.oxygen_beds_avail,
+              genBedsAvail: Number(h.gen_beds_avail) || 0,
+              icuBedsAvail: Number(h.icu_beds_avail) || 0,
+              oxygenBedsAvail: Number(h.oxygen_beds_avail) || 0,
               doctorOnDuty: h.doctor_on_duty,
               phone: h.phone
             }));
@@ -486,7 +520,15 @@
 
         if (bloodRes.data && bloodRes.data.length) {
           const bank = {};
-          bloodRes.data.forEach(b => { bank[b.blood_group] = b.units_available; });
+          // Maintain strict canonical order so keys and DOM elements never scramble
+          const CANONICAL_BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
+          CANONICAL_BLOOD_GROUPS.forEach(g => { bank[g] = 0; });
+          bloodRes.data.forEach(b => {
+            if (b && b.blood_group) {
+              const grp = String(b.blood_group).trim();
+              bank[grp] = Number(b.units_available) || 0;
+            }
+          });
           patch.bloodBank = bank;
         }
 
@@ -830,12 +872,18 @@
         return this.enqueueOfflineAction('update_beds', 'hospitals', { hospId, genBeds, icuBeds, oxyBeds });
       }
       try {
-        return await this.client.from('hospitals').update({
-          gen_beds_avail: genBeds,
-          icu_beds_avail: icuBeds,
-          oxygen_beds_avail: oxyBeds
-        }).eq('id', hospId);
+        const targetId = String(hospId || '').trim();
+        const res = await this.client.from('hospitals').update({
+          gen_beds_avail: Number(genBeds) || 0,
+          icu_beds_avail: Number(icuBeds) || 0,
+          oxygen_beds_avail: Number(oxyBeds) || 0,
+          updated_at: new Date().toISOString()
+        }).eq('id', targetId);
+
+        if (res && res.error) throw res.error;
+        return res;
       } catch (e) {
+        console.warn('[Supabase] updateBedsCount error, queueing offline outbox:', e.message || e);
         return this.enqueueOfflineAction('update_beds', 'hospitals', { hospId, genBeds, icuBeds, oxyBeds });
       }
     }
@@ -845,10 +893,16 @@
         return this.enqueueOfflineAction('update_blood', 'blood_bank', { group, count });
       }
       try {
-        return await this.client.from('blood_bank').update({
-          units_available: count
-        }).eq('blood_group', group);
+        const targetGroup = String(group || '').trim();
+        const res = await this.client.from('blood_bank').update({
+          units_available: Number(count) || 0,
+          updated_at: new Date().toISOString()
+        }).eq('blood_group', targetGroup);
+
+        if (res && res.error) throw res.error;
+        return res;
       } catch (e) {
+        console.warn('[Supabase] updateBloodUnits error, queueing offline outbox:', e.message || e);
         return this.enqueueOfflineAction('update_blood', 'blood_bank', { group, count });
       }
     }
@@ -969,8 +1023,18 @@
         return this.enqueueOfflineAction('delete_staff', 'staff', { id });
       }
       try {
-        return await this.client.from('staff').delete().or(`id.eq.${id},staff_code.eq.${id}`);
+        const targetId = String(id || '').trim();
+        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(targetId);
+        let res;
+        if (isUuid) {
+          res = await this.client.from('staff').delete().eq('id', targetId);
+        } else {
+          res = await this.client.from('staff').delete().eq('staff_code', targetId);
+        }
+        if (res && res.error) throw res.error;
+        return res;
       } catch (e) {
+        console.warn('[Supabase] deleteStaff error, queueing offline outbox:', e.message || e);
         return this.enqueueOfflineAction('delete_staff', 'staff', { id });
       }
     }

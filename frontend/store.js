@@ -111,8 +111,30 @@
       this.state = this.loadState();
     }
 
+    getDeletedStaffCodes() {
+      try {
+        const raw = localStorage.getItem('swasthya_setu_deleted_staff');
+        const arr = raw ? JSON.parse(raw) : [];
+        return new Set(Array.isArray(arr) ? arr.map(x => String(x).trim()) : []);
+      } catch (e) {
+        return new Set();
+      }
+    }
+
+    addDeletedStaffCode(code) {
+      if (!code) return;
+      try {
+        const set = this.getDeletedStaffCodes();
+        set.add(String(code).trim());
+        localStorage.setItem('swasthya_setu_deleted_staff', JSON.stringify(Array.from(set)));
+      } catch (e) {
+        console.warn('[Store] Failed to save tombstone:', e);
+      }
+    }
+
     loadState() {
       try {
+        const deletedStaff = this.getDeletedStaffCodes();
         const saved = localStorage.getItem(STORAGE_KEY);
         if (saved) {
           const parsed = JSON.parse(saved);
@@ -136,6 +158,13 @@
               if (existing && !existing.email) {
                 existing.email = defaultStaff.email;
               }
+            });
+            // Filter out any tombstoned/deleted staff
+            parsed.staff = parsed.staff.filter(s => {
+              if (!s) return false;
+              const idStr = String(s.id || '').trim();
+              const codeStr = String(s.staff_code || '').trim();
+              return !deletedStaff.has(idStr) && !deletedStaff.has(codeStr);
             });
           }
           // Safeguard permanent address flags for existing patients
@@ -165,12 +194,31 @@
               parsed.session.user.permanent_address_completed = true;
             }
           }
-          return { ...DEFAULT_INITIAL_STATE, ...parsed };
+          const merged = { ...DEFAULT_INITIAL_STATE, ...parsed };
+          if (merged.staff && Array.isArray(merged.staff)) {
+            merged.staff = merged.staff.filter(s => {
+              if (!s) return false;
+              const idStr = String(s.id || '').trim();
+              const codeStr = String(s.staff_code || '').trim();
+              return !deletedStaff.has(idStr) && !deletedStaff.has(codeStr);
+            });
+          }
+          return merged;
         }
       } catch (e) {
         console.warn('[Store] Local load fallback:', e);
       }
-      return JSON.parse(JSON.stringify(DEFAULT_INITIAL_STATE));
+      const initial = JSON.parse(JSON.stringify(DEFAULT_INITIAL_STATE));
+      const deletedStaff = this.getDeletedStaffCodes();
+      if (initial.staff && Array.isArray(initial.staff)) {
+        initial.staff = initial.staff.filter(s => {
+          if (!s) return false;
+          const idStr = String(s.id || '').trim();
+          const codeStr = String(s.staff_code || '').trim();
+          return !deletedStaff.has(idStr) && !deletedStaff.has(codeStr);
+        });
+      }
+      return initial;
     }
 
     saveState() {
@@ -936,19 +984,39 @@
     }
 
     // Staff Deletion (Instant Local & Cloud Sync)
-    deleteStaff(id) {
+    async deleteStaff(id) {
       console.log('[Store] Deleting staff member:', id);
-      this.state.staff = (this.state.staff || []).filter(s => s.id !== id && s.staff_code !== id && s.phone !== id);
+      const targetStr = String(id || '').trim();
+      const existing = (this.state.staff || []).find(s => s && (s.id === targetStr || s.staff_code === targetStr || s.db_id === targetStr || s.phone === targetStr));
+
+      // Record tombstones for all identifiers
+      this.addDeletedStaffCode(targetStr);
+      if (existing) {
+        if (existing.id) this.addDeletedStaffCode(existing.id);
+        if (existing.staff_code) this.addDeletedStaffCode(existing.staff_code);
+        if (existing.db_id) this.addDeletedStaffCode(existing.db_id);
+      }
+
+      this.state.staff = (this.state.staff || []).filter(s => {
+        if (!s) return false;
+        return s.id !== targetStr && s.staff_code !== targetStr && s.db_id !== targetStr && s.phone !== targetStr;
+      });
       this.saveState();
 
       if (global.supabaseService) {
-        global.supabaseService.deleteStaff(id);
+        try {
+          await global.supabaseService.deleteStaff(targetStr);
+        } catch (err) {
+          console.warn('[Store] Supabase deleteStaff warning:', err);
+        }
       }
 
       if (global.adminController) {
         if (typeof global.adminController.renderStaffTable === 'function') global.adminController.renderStaffTable();
         if (typeof global.adminController.renderStats === 'function') global.adminController.renderStats();
+        if (typeof global.adminController.renderKpis === 'function') global.adminController.renderKpis();
       }
+      return { success: true };
     }
 
     logout() {
@@ -1370,27 +1438,56 @@
     }
 
     // Beds, Blood & Medicines
-    updateBedCount(hospId, type, delta) {
+    async updateBedCount(hospId, type, delta) {
       const hosp = (this.state.hospitals || []).find(h => h.id === hospId);
       if (hosp) {
-        if (type === 'gen') hosp.genBedsAvail = Math.max(0, hosp.genBedsAvail + delta);
-        if (type === 'icu') hosp.icuBedsAvail = Math.max(0, hosp.icuBedsAvail + delta);
-        if (type === 'oxygen') hosp.oxygenBedsAvail = Math.max(0, hosp.oxygenBedsAvail + delta);
+        const prevGen = hosp.genBedsAvail;
+        const prevIcu = hosp.icuBedsAvail;
+        const prevOxy = hosp.oxygenBedsAvail;
+
+        if (type === 'gen') hosp.genBedsAvail = Math.max(0, (hosp.genBedsAvail || 0) + delta);
+        if (type === 'icu') hosp.icuBedsAvail = Math.max(0, (hosp.icuBedsAvail || 0) + delta);
+        if (type === 'oxygen') hosp.oxygenBedsAvail = Math.max(0, (hosp.oxygenBedsAvail || 0) + delta);
         this.saveState();
+
         if (global.supabaseService) {
-          global.supabaseService.updateBedsCount(hosp.id, hosp.genBedsAvail, hosp.icuBedsAvail, hosp.oxygenBedsAvail);
+          try {
+            await global.supabaseService.updateBedsCount(hosp.id, hosp.genBedsAvail, hosp.icuBedsAvail, hosp.oxygenBedsAvail);
+          } catch (err) {
+            console.error('[Store] Bed count sync error:', err);
+            // Rollback on failure
+            hosp.genBedsAvail = prevGen;
+            hosp.icuBedsAvail = prevIcu;
+            hosp.oxygenBedsAvail = prevOxy;
+            this.saveState();
+            throw err;
+          }
         }
+        return hosp;
       }
+      return null;
     }
 
-    updateBloodStock(group, delta) {
+    async updateBloodStock(group, delta) {
       if (this.state.bloodBank && this.state.bloodBank[group] !== undefined) {
-        this.state.bloodBank[group] = Math.max(0, this.state.bloodBank[group] + delta);
+        const prev = this.state.bloodBank[group];
+        this.state.bloodBank[group] = Math.max(0, (this.state.bloodBank[group] || 0) + delta);
         this.saveState();
+
         if (global.supabaseService) {
-          global.supabaseService.updateBloodUnits(group, this.state.bloodBank[group]);
+          try {
+            await global.supabaseService.updateBloodUnits(group, this.state.bloodBank[group]);
+          } catch (err) {
+            console.error('[Store] Blood stock sync error:', err);
+            // Rollback on failure
+            this.state.bloodBank[group] = prev;
+            this.saveState();
+            throw err;
+          }
         }
+        return this.state.bloodBank[group];
       }
+      return null;
     }
 
         addMedicine(med) {

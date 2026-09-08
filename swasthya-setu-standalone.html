@@ -5249,6 +5249,46 @@ body[data-theme="doom"] {
   </div>
 </div>
 
+<!-- ADMIN REMOVE STAFF CONFIRMATION MODAL -->
+<div id="removeStaffConfirmModal" class="modal-overlay" style="display:none;align-items:center;justify-content:center;z-index:99999;">
+  <div class="modal-card" style="max-width:480px;border:1.5px solid rgba(239, 68, 68, 0.4);background:var(--bg-panel);box-shadow:0 20px 50px rgba(0,0,0,0.6);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:28px;">⚠️</span>
+        <div>
+          <h3 style="color:#ef4444;font-size:18px;font-weight:800;margin:0;">Remove Healthcare Personnel</h3>
+          <small style="color:var(--muted);">Permanent Destructive Action</small>
+        </div>
+      </div>
+      <button type="button" onclick="adminController.closeRemoveStaffModal()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;">✕</button>
+    </div>
+    <div style="background:rgba(239, 68, 68, 0.08);border:1px solid rgba(239, 68, 68, 0.2);border-radius:12px;padding:14px;margin-bottom:16px;">
+      <p style="font-size:13px;color:var(--ink);margin:0 0 10px 0;line-height:1.5;">
+        Are you sure you want to permanently remove this staff member from the <strong>National Health Registry & Cloud Database</strong>?
+      </p>
+      <div style="background:var(--glass-2);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:4px;">
+        <div style="font-size:14px;font-weight:800;color:var(--ink);" id="removeStaffModalName">—</div>
+        <div style="display:flex;gap:8px;font-size:12px;color:var(--muted);align-items:center;">
+          <span style="font-family:'IBM Plex Mono',monospace;color:var(--primary-bright);font-weight:700;" id="removeStaffModalId">—</span>
+          <span>•</span>
+          <span id="removeStaffModalRole">—</span>
+          <span>•</span>
+          <span id="removeStaffModalLocation">—</span>
+        </div>
+      </div>
+      <small style="color:#ef4444;font-size:11px;font-weight:700;display:block;margin-top:10px;">
+        ⚠️ This action cannot be undone. All active sessions for this account will be revoked immediately and deleted from local storage & Supabase Cloud.
+      </small>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:10px;">
+      <button type="button" class="btn-glass" onclick="adminController.closeRemoveStaffModal()" style="padding:8px 16px;">Cancel</button>
+      <button type="button" id="confirmDeleteStaffBtn" class="auth-btn-primary" style="background:#ef4444;border-color:#dc2626;padding:8px 18px;" onclick="adminController.executeRemoveStaff()">
+        🗑️ Permanently Delete Staff
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- PRIVACY PASSWORD CHANGE MODAL -->
 <div id="changePasswordModal" class="modal-overlay">
   <div class="modal-card" style="max-width:440px;">
@@ -6017,9 +6057,16 @@ body[data-theme="doom"] {
               }]);
               break;
 
-            case 'delete_staff':
-              res = await this.client.from('staff').delete().or(`id.eq.${p.id},staff_code.eq.${p.id}`);
+            case 'delete_staff': {
+              const targetId = String(p.id || p.staff_code || '').trim();
+              const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(targetId);
+              if (isUuid) {
+                res = await this.client.from('staff').delete().eq('id', targetId);
+              } else {
+                res = await this.client.from('staff').delete().eq('staff_code', targetId);
+              }
               break;
+            }
             case 'delete_video_call':
               res = await this.client.from('video_call_history').delete().or('id.eq.' + p.id + ',token.eq.' + p.id);
               break;
@@ -6085,15 +6132,15 @@ body[data-theme="doom"] {
       try {
         const [profRes, staffRes, qRes, hospRes, bloodRes, ancRes, immRes, visRes, rxRes, medRes] = await Promise.all([
           this.client.from('profiles').select('*'),
-          this.client.from('staff').select('*'),
+          this.client.from('staff').select('*').order('created_at', { ascending: true }),
           this.client.from('consult_queue').select('*').order('created_at', { ascending: true }),
-          this.client.from('hospitals').select('*'),
-          this.client.from('blood_bank').select('*'),
+          this.client.from('hospitals').select('*').order('name', { ascending: true }),
+          this.client.from('blood_bank').select('*').order('blood_group', { ascending: true }),
           this.client.from('anc_records').select('*').order('created_at', { ascending: false }),
           this.client.from('immunizations').select('*').order('created_at', { ascending: false }),
           this.client.from('home_visits').select('*').order('created_at', { ascending: false }),
           this.client.from('prescriptions').select('*').order('created_at', { ascending: false }),
-          this.client.from('medicines').select('*')
+          this.client.from('medicines').select('*').order('name', { ascending: true })
         ]);
 
         const patch = {};
@@ -6130,10 +6177,12 @@ body[data-theme="doom"] {
             { id: 'ASH-201', staff_code: 'ASH-201', name: 'Lakshmi Didi (ASHA Lead)', role: 'worker', phone: '9833344455', location: 'Sector 4, Kondapalli', status: 'On Home Visits', regNo: 'ASHA-AP-094', password: 'asha@123', pin: '1234' }
           ];
 
+          let mappedStaff = [];
           if (staffRes.data.length > 0) {
-            patch.staff = staffRes.data.map(s => ({
+            mappedStaff = staffRes.data.map(s => ({
               id: s.staff_code || s.id,
               staff_code: s.staff_code || s.id,
+              db_id: s.id,
               name: s.name,
               role: s.role,
               phone: s.phone,
@@ -6144,8 +6193,20 @@ body[data-theme="doom"] {
               pin: s.pin || s.password_hash || s.password || '1234'
             }));
           } else {
-            patch.staff = defaultStaff;
+            mappedStaff = defaultStaff;
           }
+
+          // Filter out any tombstoned / deleted staff members
+          const deletedCodes = global.appStore && typeof global.appStore.getDeletedStaffCodes === 'function'
+            ? global.appStore.getDeletedStaffCodes()
+            : new Set();
+
+          patch.staff = mappedStaff.filter(s => {
+            if (!s) return false;
+            const code = String(s.staff_code || s.id || '').trim();
+            const dbId = String(s.db_id || s.id || '').trim();
+            return !deletedCodes.has(code) && !deletedCodes.has(dbId);
+          });
         }
 
         if (qRes && Array.isArray(qRes.data)) {
@@ -6164,26 +6225,39 @@ body[data-theme="doom"] {
         }
 
         if (hospRes.data && hospRes.data.length) {
-          const seen = new Set();
-          patch.hospitals = hospRes.data
+          const seen = new Map();
+          // Deterministic deduplication: keep the record with highest gen_beds_avail or latest updated_at
+          hospRes.data.forEach(h => {
+            if (!h || !h.name) return;
+            const norm = h.name.toLowerCase().trim().replace(/[^a-z0-9]/g, '');
+            if (!norm) return;
+            if (!seen.has(norm)) {
+              seen.set(norm, h);
+            } else {
+              const existing = seen.get(norm);
+              // Pick the more up-to-date or authoritative entry
+              if (h.updated_at && (!existing.updated_at || h.updated_at > existing.updated_at)) {
+                seen.set(norm, h);
+              }
+            }
+          });
+
+          patch.hospitals = Array.from(seen.values())
             .filter(h => {
-              if (!h || !h.name) return false;
-              const norm = h.name.toLowerCase().trim().replace(/[^a-z0-9]/g, '');
-              if (!norm || seen.has(norm)) return false;
-              seen.add(norm);
               const dist = parseFloat(h.distance);
               if (!isNaN(dist) && dist > 25) return false;
               return true;
             })
+            .sort((a, b) => (a.name || '').localeCompare(b.name || ''))
             .map(h => ({
               id: h.id,
               name: h.name,
               type: h.type,
               distance: h.distance,
               totalBeds: h.total_beds,
-              genBedsAvail: h.gen_beds_avail,
-              icuBedsAvail: h.icu_beds_avail,
-              oxygenBedsAvail: h.oxygen_beds_avail,
+              genBedsAvail: Number(h.gen_beds_avail) || 0,
+              icuBedsAvail: Number(h.icu_beds_avail) || 0,
+              oxygenBedsAvail: Number(h.oxygen_beds_avail) || 0,
               doctorOnDuty: h.doctor_on_duty,
               phone: h.phone
             }));
@@ -6191,7 +6265,15 @@ body[data-theme="doom"] {
 
         if (bloodRes.data && bloodRes.data.length) {
           const bank = {};
-          bloodRes.data.forEach(b => { bank[b.blood_group] = b.units_available; });
+          // Maintain strict canonical order so keys and DOM elements never scramble
+          const CANONICAL_BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
+          CANONICAL_BLOOD_GROUPS.forEach(g => { bank[g] = 0; });
+          bloodRes.data.forEach(b => {
+            if (b && b.blood_group) {
+              const grp = String(b.blood_group).trim();
+              bank[grp] = Number(b.units_available) || 0;
+            }
+          });
           patch.bloodBank = bank;
         }
 
@@ -6535,12 +6617,18 @@ body[data-theme="doom"] {
         return this.enqueueOfflineAction('update_beds', 'hospitals', { hospId, genBeds, icuBeds, oxyBeds });
       }
       try {
-        return await this.client.from('hospitals').update({
-          gen_beds_avail: genBeds,
-          icu_beds_avail: icuBeds,
-          oxygen_beds_avail: oxyBeds
-        }).eq('id', hospId);
+        const targetId = String(hospId || '').trim();
+        const res = await this.client.from('hospitals').update({
+          gen_beds_avail: Number(genBeds) || 0,
+          icu_beds_avail: Number(icuBeds) || 0,
+          oxygen_beds_avail: Number(oxyBeds) || 0,
+          updated_at: new Date().toISOString()
+        }).eq('id', targetId);
+
+        if (res && res.error) throw res.error;
+        return res;
       } catch (e) {
+        console.warn('[Supabase] updateBedsCount error, queueing offline outbox:', e.message || e);
         return this.enqueueOfflineAction('update_beds', 'hospitals', { hospId, genBeds, icuBeds, oxyBeds });
       }
     }
@@ -6550,10 +6638,16 @@ body[data-theme="doom"] {
         return this.enqueueOfflineAction('update_blood', 'blood_bank', { group, count });
       }
       try {
-        return await this.client.from('blood_bank').update({
-          units_available: count
-        }).eq('blood_group', group);
+        const targetGroup = String(group || '').trim();
+        const res = await this.client.from('blood_bank').update({
+          units_available: Number(count) || 0,
+          updated_at: new Date().toISOString()
+        }).eq('blood_group', targetGroup);
+
+        if (res && res.error) throw res.error;
+        return res;
       } catch (e) {
+        console.warn('[Supabase] updateBloodUnits error, queueing offline outbox:', e.message || e);
         return this.enqueueOfflineAction('update_blood', 'blood_bank', { group, count });
       }
     }
@@ -6674,8 +6768,18 @@ body[data-theme="doom"] {
         return this.enqueueOfflineAction('delete_staff', 'staff', { id });
       }
       try {
-        return await this.client.from('staff').delete().or(`id.eq.${id},staff_code.eq.${id}`);
+        const targetId = String(id || '').trim();
+        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(targetId);
+        let res;
+        if (isUuid) {
+          res = await this.client.from('staff').delete().eq('id', targetId);
+        } else {
+          res = await this.client.from('staff').delete().eq('staff_code', targetId);
+        }
+        if (res && res.error) throw res.error;
+        return res;
       } catch (e) {
+        console.warn('[Supabase] deleteStaff error, queueing offline outbox:', e.message || e);
         return this.enqueueOfflineAction('delete_staff', 'staff', { id });
       }
     }
@@ -8898,8 +9002,30 @@ body[data-theme="doom"] {
       this.state = this.loadState();
     }
 
+    getDeletedStaffCodes() {
+      try {
+        const raw = localStorage.getItem('swasthya_setu_deleted_staff');
+        const arr = raw ? JSON.parse(raw) : [];
+        return new Set(Array.isArray(arr) ? arr.map(x => String(x).trim()) : []);
+      } catch (e) {
+        return new Set();
+      }
+    }
+
+    addDeletedStaffCode(code) {
+      if (!code) return;
+      try {
+        const set = this.getDeletedStaffCodes();
+        set.add(String(code).trim());
+        localStorage.setItem('swasthya_setu_deleted_staff', JSON.stringify(Array.from(set)));
+      } catch (e) {
+        console.warn('[Store] Failed to save tombstone:', e);
+      }
+    }
+
     loadState() {
       try {
+        const deletedStaff = this.getDeletedStaffCodes();
         const saved = localStorage.getItem(STORAGE_KEY);
         if (saved) {
           const parsed = JSON.parse(saved);
@@ -8923,6 +9049,13 @@ body[data-theme="doom"] {
               if (existing && !existing.email) {
                 existing.email = defaultStaff.email;
               }
+            });
+            // Filter out any tombstoned/deleted staff
+            parsed.staff = parsed.staff.filter(s => {
+              if (!s) return false;
+              const idStr = String(s.id || '').trim();
+              const codeStr = String(s.staff_code || '').trim();
+              return !deletedStaff.has(idStr) && !deletedStaff.has(codeStr);
             });
           }
           // Safeguard permanent address flags for existing patients
@@ -8952,12 +9085,31 @@ body[data-theme="doom"] {
               parsed.session.user.permanent_address_completed = true;
             }
           }
-          return { ...DEFAULT_INITIAL_STATE, ...parsed };
+          const merged = { ...DEFAULT_INITIAL_STATE, ...parsed };
+          if (merged.staff && Array.isArray(merged.staff)) {
+            merged.staff = merged.staff.filter(s => {
+              if (!s) return false;
+              const idStr = String(s.id || '').trim();
+              const codeStr = String(s.staff_code || '').trim();
+              return !deletedStaff.has(idStr) && !deletedStaff.has(codeStr);
+            });
+          }
+          return merged;
         }
       } catch (e) {
         console.warn('[Store] Local load fallback:', e);
       }
-      return JSON.parse(JSON.stringify(DEFAULT_INITIAL_STATE));
+      const initial = JSON.parse(JSON.stringify(DEFAULT_INITIAL_STATE));
+      const deletedStaff = this.getDeletedStaffCodes();
+      if (initial.staff && Array.isArray(initial.staff)) {
+        initial.staff = initial.staff.filter(s => {
+          if (!s) return false;
+          const idStr = String(s.id || '').trim();
+          const codeStr = String(s.staff_code || '').trim();
+          return !deletedStaff.has(idStr) && !deletedStaff.has(codeStr);
+        });
+      }
+      return initial;
     }
 
     saveState() {
@@ -9723,19 +9875,39 @@ body[data-theme="doom"] {
     }
 
     // Staff Deletion (Instant Local & Cloud Sync)
-    deleteStaff(id) {
+    async deleteStaff(id) {
       console.log('[Store] Deleting staff member:', id);
-      this.state.staff = (this.state.staff || []).filter(s => s.id !== id && s.staff_code !== id && s.phone !== id);
+      const targetStr = String(id || '').trim();
+      const existing = (this.state.staff || []).find(s => s && (s.id === targetStr || s.staff_code === targetStr || s.db_id === targetStr || s.phone === targetStr));
+
+      // Record tombstones for all identifiers
+      this.addDeletedStaffCode(targetStr);
+      if (existing) {
+        if (existing.id) this.addDeletedStaffCode(existing.id);
+        if (existing.staff_code) this.addDeletedStaffCode(existing.staff_code);
+        if (existing.db_id) this.addDeletedStaffCode(existing.db_id);
+      }
+
+      this.state.staff = (this.state.staff || []).filter(s => {
+        if (!s) return false;
+        return s.id !== targetStr && s.staff_code !== targetStr && s.db_id !== targetStr && s.phone !== targetStr;
+      });
       this.saveState();
 
       if (global.supabaseService) {
-        global.supabaseService.deleteStaff(id);
+        try {
+          await global.supabaseService.deleteStaff(targetStr);
+        } catch (err) {
+          console.warn('[Store] Supabase deleteStaff warning:', err);
+        }
       }
 
       if (global.adminController) {
         if (typeof global.adminController.renderStaffTable === 'function') global.adminController.renderStaffTable();
         if (typeof global.adminController.renderStats === 'function') global.adminController.renderStats();
+        if (typeof global.adminController.renderKpis === 'function') global.adminController.renderKpis();
       }
+      return { success: true };
     }
 
     logout() {
@@ -10157,27 +10329,56 @@ body[data-theme="doom"] {
     }
 
     // Beds, Blood & Medicines
-    updateBedCount(hospId, type, delta) {
+    async updateBedCount(hospId, type, delta) {
       const hosp = (this.state.hospitals || []).find(h => h.id === hospId);
       if (hosp) {
-        if (type === 'gen') hosp.genBedsAvail = Math.max(0, hosp.genBedsAvail + delta);
-        if (type === 'icu') hosp.icuBedsAvail = Math.max(0, hosp.icuBedsAvail + delta);
-        if (type === 'oxygen') hosp.oxygenBedsAvail = Math.max(0, hosp.oxygenBedsAvail + delta);
+        const prevGen = hosp.genBedsAvail;
+        const prevIcu = hosp.icuBedsAvail;
+        const prevOxy = hosp.oxygenBedsAvail;
+
+        if (type === 'gen') hosp.genBedsAvail = Math.max(0, (hosp.genBedsAvail || 0) + delta);
+        if (type === 'icu') hosp.icuBedsAvail = Math.max(0, (hosp.icuBedsAvail || 0) + delta);
+        if (type === 'oxygen') hosp.oxygenBedsAvail = Math.max(0, (hosp.oxygenBedsAvail || 0) + delta);
         this.saveState();
+
         if (global.supabaseService) {
-          global.supabaseService.updateBedsCount(hosp.id, hosp.genBedsAvail, hosp.icuBedsAvail, hosp.oxygenBedsAvail);
+          try {
+            await global.supabaseService.updateBedsCount(hosp.id, hosp.genBedsAvail, hosp.icuBedsAvail, hosp.oxygenBedsAvail);
+          } catch (err) {
+            console.error('[Store] Bed count sync error:', err);
+            // Rollback on failure
+            hosp.genBedsAvail = prevGen;
+            hosp.icuBedsAvail = prevIcu;
+            hosp.oxygenBedsAvail = prevOxy;
+            this.saveState();
+            throw err;
+          }
         }
+        return hosp;
       }
+      return null;
     }
 
-    updateBloodStock(group, delta) {
+    async updateBloodStock(group, delta) {
       if (this.state.bloodBank && this.state.bloodBank[group] !== undefined) {
-        this.state.bloodBank[group] = Math.max(0, this.state.bloodBank[group] + delta);
+        const prev = this.state.bloodBank[group];
+        this.state.bloodBank[group] = Math.max(0, (this.state.bloodBank[group] || 0) + delta);
         this.saveState();
+
         if (global.supabaseService) {
-          global.supabaseService.updateBloodUnits(group, this.state.bloodBank[group]);
+          try {
+            await global.supabaseService.updateBloodUnits(group, this.state.bloodBank[group]);
+          } catch (err) {
+            console.error('[Store] Blood stock sync error:', err);
+            // Rollback on failure
+            this.state.bloodBank[group] = prev;
+            this.saveState();
+            throw err;
+          }
         }
+        return this.state.bloodBank[group];
       }
+      return null;
     }
 
         addMedicine(med) {
@@ -40201,7 +40402,7 @@ The user's preferred language is ${SUPPORTED_LANGUAGES[this.currentLang]?.name |
           <td style="color:var(--ink-dim);">${s.location || 'District Center'}</td>
           <td style="color:var(--muted);">+91 ${s.phone}</td>
           <td>
-            <button style="color:#ef4444;background:none;border:none;cursor:pointer;font-size:12px;font-weight:700;" onclick="adminController.removeStaff('${s.id || s.staff_code}')">✕ Remove</button>
+            <button style="color:#ef4444;background:none;border:none;cursor:pointer;font-size:12px;font-weight:700;" onclick="adminController.confirmRemoveStaff('${s.id || s.staff_code}')">✕ Remove</button>
           </td>
         </tr>
       `).join('');
@@ -40215,6 +40416,71 @@ The user's preferred language is ${SUPPORTED_LANGUAGES[this.currentLang]?.name |
     closeProvisionStaffModal() {
       const m = document.getElementById('provisionStaffModal');
       if (m) m.style.display = 'none';
+    }
+
+    confirmRemoveStaff(id) {
+      if (!this.store) return;
+      const targetStr = String(id || '').trim();
+      const staffList = this.store.getState().staff || [];
+      const staff = staffList.find(s => s && (s.id === targetStr || s.staff_code === targetStr || s.db_id === targetStr));
+
+      this.pendingDeleteStaffId = targetStr;
+
+      const nameEl = document.getElementById('removeStaffModalName');
+      const idEl = document.getElementById('removeStaffModalId');
+      const roleEl = document.getElementById('removeStaffModalRole');
+      const locEl = document.getElementById('removeStaffModalLocation');
+
+      if (nameEl) nameEl.textContent = staff ? staff.name : targetStr;
+      if (idEl) idEl.textContent = staff ? (staff.staff_code || staff.id) : targetStr;
+      if (roleEl) roleEl.textContent = staff ? (staff.role ? staff.role.toUpperCase() : 'STAFF') : 'STAFF';
+      if (locEl) locEl.textContent = staff ? (staff.location || 'Health Facility') : 'Health Facility';
+
+      const btn = document.getElementById('confirmDeleteStaffBtn');
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '🗑️ Permanently Delete Staff';
+      }
+
+      const modal = document.getElementById('removeStaffConfirmModal');
+      if (modal) {
+        modal.style.display = 'flex';
+      }
+    }
+
+    closeRemoveStaffModal() {
+      this.pendingDeleteStaffId = null;
+      const modal = document.getElementById('removeStaffConfirmModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    async executeRemoveStaff() {
+      if (!this.pendingDeleteStaffId || !this.store) return;
+      const id = this.pendingDeleteStaffId;
+      const btn = document.getElementById('confirmDeleteStaffBtn');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '⏳ Removing from Database...';
+      }
+
+      try {
+        await this.store.deleteStaff(id);
+        this.closeRemoveStaffModal();
+        this.renderStaffTable();
+        this.renderKpis();
+        if (typeof window.toast === 'function') {
+          window.toast('✓ Permanently removed staff member from National Registry & Cloud');
+        }
+      } catch (err) {
+        console.error('[Admin] Staff deletion failed:', err);
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '🗑️ Permanently Delete Staff';
+        }
+        if (typeof window.toast === 'function') {
+          window.toast('⚠️ Failed to remove staff member: ' + (err.message || 'Database error'));
+        }
+      }
     }
 
     submitProvisionStaff(e) {
@@ -40255,18 +40521,15 @@ The user's preferred language is ${SUPPORTED_LANGUAGES[this.currentLang]?.name |
     }
 
     removeStaff(id) {
-      if (confirm('Are you sure you want to remove this staff member from Registry & Cloud?')) {
-        this.store.deleteStaff(id);
-        this.renderStaffTable();
-        this.renderKpis();
-        if (typeof window.toast === 'function') window.toast('✓ Removed staff member from Registry & Cloud');
-      }
+      // Direct remove delegates to custom confirmation modal
+      this.confirmRemoveStaff(id);
     }
 
     renderAdminBeds() {
       const el = document.getElementById('adminBedsGrid');
       if (!el || !this.store) return;
-      const hosps = this.store.getState().hospitals || [];
+      // Stably sort hospitals by name so grid order never shifts
+      const hosps = [...(this.store.getState().hospitals || [])].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
 
       el.innerHTML = hosps.map(h => `
         <div style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:var(--shadow-panel);">
@@ -40274,26 +40537,26 @@ The user's preferred language is ${SUPPORTED_LANGUAGES[this.currentLang]?.name |
           <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(110px, 1fr));gap:10px;">
             <div style="background:var(--glass-1);border:1px solid var(--glass-border);border-radius:10px;padding:10px;text-align:center;">
               <small style="color:var(--muted);display:block;font-size:11px;">General</small>
-              <strong style="font-size:18px;color:#16a34a;display:block;margin:4px 0;">${h.genBedsAvail}</strong>
+              <strong style="font-size:18px;color:#16a34a;display:block;margin:4px 0;">${h.genBedsAvail || 0}</strong>
               <div style="display:flex;justify-content:center;gap:6px;">
-                <button class="btn-glass" style="padding:2px 8px;font-size:12px;" onclick="adminController.updateBeds('${h.id}', 'gen', 1)">+1</button>
-                <button class="btn-glass" style="padding:2px 8px;font-size:12px;" onclick="adminController.updateBeds('${h.id}', 'gen', -1)">-1</button>
+                <button class="btn-glass bed-btn" style="padding:2px 8px;font-size:12px;" onclick="adminController.updateBeds(this, '${h.id}', 'gen', 1)">+1</button>
+                <button class="btn-glass bed-btn" style="padding:2px 8px;font-size:12px;" onclick="adminController.updateBeds(this, '${h.id}', 'gen', -1)">-1</button>
               </div>
             </div>
             <div style="background:var(--glass-1);border:1px solid var(--glass-border);border-radius:10px;padding:10px;text-align:center;">
               <small style="color:var(--muted);display:block;font-size:11px;">ICU</small>
-              <strong style="font-size:18px;color:#ef4444;display:block;margin:4px 0;">${h.icuBedsAvail}</strong>
+              <strong style="font-size:18px;color:#ef4444;display:block;margin:4px 0;">${h.icuBedsAvail || 0}</strong>
               <div style="display:flex;justify-content:center;gap:6px;">
-                <button class="btn-glass" style="padding:2px 8px;font-size:12px;" onclick="adminController.updateBeds('${h.id}', 'icu', 1)">+1</button>
-                <button class="btn-glass" style="padding:2px 8px;font-size:12px;" onclick="adminController.updateBeds('${h.id}', 'icu', -1)">-1</button>
+                <button class="btn-glass bed-btn" style="padding:2px 8px;font-size:12px;" onclick="adminController.updateBeds(this, '${h.id}', 'icu', 1)">+1</button>
+                <button class="btn-glass bed-btn" style="padding:2px 8px;font-size:12px;" onclick="adminController.updateBeds(this, '${h.id}', 'icu', -1)">-1</button>
               </div>
             </div>
             <div style="background:var(--glass-1);border:1px solid var(--glass-border);border-radius:10px;padding:10px;text-align:center;">
               <small style="color:var(--muted);display:block;font-size:11px;">Oxygen</small>
-              <strong style="font-size:18px;color:var(--primary-bright);display:block;margin:4px 0;">${h.oxygenBedsAvail}</strong>
+              <strong style="font-size:18px;color:var(--primary-bright);display:block;margin:4px 0;">${h.oxygenBedsAvail || 0}</strong>
               <div style="display:flex;justify-content:center;gap:6px;">
-                <button class="btn-glass" style="padding:2px 8px;font-size:12px;" onclick="adminController.updateBeds('${h.id}', 'oxygen', 1)">+1</button>
-                <button class="btn-glass" style="padding:2px 8px;font-size:12px;" onclick="adminController.updateBeds('${h.id}', 'oxygen', -1)">-1</button>
+                <button class="btn-glass bed-btn" style="padding:2px 8px;font-size:12px;" onclick="adminController.updateBeds(this, '${h.id}', 'oxygen', 1)">+1</button>
+                <button class="btn-glass bed-btn" style="padding:2px 8px;font-size:12px;" onclick="adminController.updateBeds(this, '${h.id}', 'oxygen', -1)">-1</button>
               </div>
             </div>
           </div>
@@ -40301,10 +40564,21 @@ The user's preferred language is ${SUPPORTED_LANGUAGES[this.currentLang]?.name |
       `).join('');
     }
 
-    updateBeds(hospId, type, delta) {
-      this.store.updateBedCount(hospId, type, delta);
-      this.renderAdminBeds();
-      this.renderKpis();
+    async updateBeds(btnEl, hospId, type, delta) {
+      if (btnEl) btnEl.disabled = true;
+      try {
+        await this.store.updateBedCount(hospId, type, delta);
+        this.renderAdminBeds();
+        this.renderKpis();
+      } catch (err) {
+        console.error('[Admin] Bed count update failed:', err);
+        if (typeof window.toast === 'function') {
+          window.toast('⚠️ Unable to sync bed count with database: ' + (err.message || 'Database error'));
+        }
+        this.renderAdminBeds();
+      } finally {
+        if (btnEl) btnEl.disabled = false;
+      }
     }
 
     renderAdminBlood() {
@@ -40312,21 +40586,38 @@ The user's preferred language is ${SUPPORTED_LANGUAGES[this.currentLang]?.name |
       if (!el || !this.store) return;
       const bank = this.store.getState().bloodBank || {};
 
-      el.innerHTML = Object.entries(bank).map(([grp, count]) => `
-        <div style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:12px;padding:10px;text-align:center;">
-          <strong style="color:#ef4444;font-size:16px;display:block;">${grp}</strong>
-          <span style="font-size:18px;font-weight:800;color:var(--ink);display:block;margin:4px 0;">${count}</span>
-          <div style="display:flex;justify-content:center;gap:4px;">
-            <button class="btn-glass" style="padding:2px 6px;font-size:11px;" onclick="adminController.updateBlood('${grp}', 1)">+1</button>
-            <button class="btn-glass" style="padding:2px 6px;font-size:11px;" onclick="adminController.updateBlood('${grp}', -1)">-1</button>
+      // Fixed canonical sequence: strictly invariant order so cards NEVER shuffle
+      const CANONICAL_BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
+
+      el.innerHTML = CANONICAL_BLOOD_GROUPS.map(grp => {
+        const count = bank[grp] !== undefined ? bank[grp] : 0;
+        return `
+          <div style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:12px;padding:10px;text-align:center;">
+            <strong style="color:#ef4444;font-size:16px;display:block;">${grp}</strong>
+            <span style="font-size:18px;font-weight:800;color:var(--ink);display:block;margin:4px 0;">${count}</span>
+            <div style="display:flex;justify-content:center;gap:4px;">
+              <button class="btn-glass blood-btn" style="padding:2px 6px;font-size:11px;" onclick="adminController.updateBlood(this, '${grp}', 1)">+1</button>
+              <button class="btn-glass blood-btn" style="padding:2px 6px;font-size:11px;" onclick="adminController.updateBlood(this, '${grp}', -1)">-1</button>
+            </div>
           </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
-    updateBlood(grp, delta) {
-      this.store.updateBloodStock(grp, delta);
-      this.renderAdminBlood();
+    async updateBlood(btnEl, grp, delta) {
+      if (btnEl) btnEl.disabled = true;
+      try {
+        await this.store.updateBloodStock(grp, delta);
+        this.renderAdminBlood();
+      } catch (err) {
+        console.error('[Admin] Blood stock update failed:', err);
+        if (typeof window.toast === 'function') {
+          window.toast('⚠️ Unable to sync blood inventory with database: ' + (err.message || 'Database error'));
+        }
+        this.renderAdminBlood();
+      } finally {
+        if (btnEl) btnEl.disabled = false;
+      }
     }
 
     renderAdminMedicines() {

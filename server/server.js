@@ -145,9 +145,64 @@ const server = http.createServer((req, res) => {
     const table = pathname.replace('/rest/v1/', '');
     if (!db[table]) db[table] = [];
 
+    // Helper: query matcher supporting eq, or, and URL decoding (+ for blood groups)
+    function matchItem(item, query) {
+      if (query.or) {
+        const orStr = String(query.or).replace(/^\(|\)$/g, '');
+        const clauses = orStr.split(',');
+        for (const clause of clauses) {
+          const parts = clause.split('.eq.');
+          if (parts.length === 2) {
+            const [field, expected] = parts;
+            if (String(item[field] || '').trim() === String(expected || '').trim()) {
+              return true;
+            }
+          }
+        }
+        return false;
+      }
+
+      let hasFilters = false;
+      for (let [qKey, qVal] of Object.entries(query)) {
+        if (qKey === 'select' || qKey === 'order' || qKey === 'limit') continue;
+        hasFilters = true;
+        if (typeof qVal === 'string' && qVal.startsWith('eq.')) {
+          let targetVal = qVal.replace('eq.', '').trim();
+          if (qKey === 'blood_group' && (targetVal.endsWith(' ') || !targetVal.includes('+') && (item[qKey] || '').includes('+'))) {
+            targetVal = targetVal.trim() + '+';
+          }
+          if (qKey === 'id') {
+            const n1 = String(item.id || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+            const n2 = String(targetVal || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+            if (n1 === n2 || n1.replace('hosp0', 'hosp') === n2.replace('hosp0', 'hosp')) {
+              continue;
+            }
+          }
+          const itemVal = String(item[qKey] || '').trim();
+          if (itemVal !== targetVal) {
+            return false;
+          }
+        }
+      }
+      return hasFilters;
+    }
+
     // GET /rest/v1/:table
     if (req.method === 'GET') {
       let data = [...db[table]];
+      if (parsedUrl.query && parsedUrl.query.order) {
+        const orderParts = String(parsedUrl.query.order).split('.');
+        const orderCol = orderParts[0];
+        const isDesc = orderParts[1] === 'desc';
+        data.sort((a, b) => {
+          const valA = a[orderCol];
+          const valB = b[orderCol];
+          if (typeof valA === 'number' && typeof valB === 'number') {
+            return isDesc ? valB - valA : valA - valB;
+          }
+          return isDesc ? String(valB || '').localeCompare(String(valA || '')) : String(valA || '').localeCompare(String(valB || ''));
+        });
+      }
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify(data));
       return;
@@ -184,25 +239,32 @@ const server = http.createServer((req, res) => {
       req.on('end', () => {
         try {
           const updateData = JSON.parse(body);
-          // Check query filters (e.g. ?id=eq.xxx or ?blood_group=eq.A+)
-          for (const [qKey, qVal] of Object.entries(parsedUrl.query)) {
-            if (typeof qVal === 'string' && qVal.startsWith('eq.')) {
-              const targetVal = qVal.replace('eq.', '');
-              db[table].forEach(item => {
-                if (String(item[qKey]) === String(targetVal)) {
-                  Object.assign(item, updateData);
-                }
-              });
+          let updatedCount = 0;
+          db[table].forEach(item => {
+            if (matchItem(item, parsedUrl.query)) {
+              Object.assign(item, updateData);
+              updatedCount++;
             }
-          }
+          });
           saveDb();
           res.writeHead(200, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ success: true, updated: updateData }));
+          res.end(JSON.stringify({ success: true, count: updatedCount, updated: updateData }));
         } catch (err) {
           res.writeHead(400, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify({ error: err.message }));
         }
       });
+      return;
+    }
+
+    // DELETE /rest/v1/:table
+    if (req.method === 'DELETE') {
+      const initialLen = db[table].length;
+      db[table] = db[table].filter(item => !matchItem(item, parsedUrl.query));
+      const deletedCount = initialLen - db[table].length;
+      saveDb();
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: true, count: deletedCount }));
       return;
     }
   }
