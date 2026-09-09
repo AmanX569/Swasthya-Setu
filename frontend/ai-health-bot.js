@@ -81,16 +81,33 @@
     constructor() {
       this.isOpen = false;
       this.isMinimized = false;
-      this.currentLang = localStorage.getItem('swasthya_ai_lang') || 'en';
-      this.conversationId = sessionStorage.getItem('swasthya_ai_conv_id') || null;
+      this.currentLang = 'en';
+      try {
+        this.currentLang = localStorage.getItem('swasthya_ai_lang') || 'en';
+      } catch (e) {}
+
+      this.conversationId = null;
+      try {
+        this.conversationId = sessionStorage.getItem('swasthya_ai_conv_id') || null;
+      } catch (e) {}
+
       this.chatHistory = this.loadChatHistory();
       this.isProcessing = false;
       this.isListening = false;
       this.isSpeaking = false;
       this.recognition = null;
 
-      this.initVoiceRecognition();
-      this.initKeyboardListeners();
+      try {
+        this.initVoiceRecognition();
+      } catch (err) {
+        console.warn('[AI Triage] Voice recognition unavailable:', err);
+      }
+
+      try {
+        this.initKeyboardListeners();
+      } catch (err) {
+        console.warn('[AI Triage] Keyboard listener init error:', err);
+      }
     }
 
     loadChatHistory() {
@@ -274,10 +291,12 @@
       const launcherBtn = document.getElementById('swasthyaAiLauncherBtn');
 
       if (modal) {
-        modal.style.display = this.isOpen ? 'flex' : 'none';
         if (this.isOpen) {
+          modal.style.setProperty('display', 'flex', 'important');
           modal.classList.remove('ai-window-minimized');
           this.isMinimized = false;
+        } else {
+          modal.style.setProperty('display', 'none', 'important');
         }
       }
       if (launcherBtn) {
@@ -395,10 +414,10 @@
     }
 
     evaluateLocalClinicalFallback(query) {
-      const q = query.toLowerCase();
+      const q = (query || '').toLowerCase();
 
       // 1. Red flag emergency
-      if (/(chests*pain|hearts*attack|cannots*breathe|slurreds*speech|stroke|snakes*bite|severes*bleeding)/i.test(q)) {
+      if (/(chest\s*pain|heart\s*attack|cannot\s*breathe|shortness\s*of\s*breath|slurred\s*speech|stroke|snake\s*bite|severe\s*bleeding|tightness)/i.test(q)) {
         return {
           triageLevel: 'EMERGENCY',
           emergencyNotice: '🚨 **CRITICAL MEDICAL EMERGENCY ALERT (EMERGENCY RED FLAG)**\n\nImmediate emergency medical attention required. Call 108 or 112 now.',
@@ -407,22 +426,50 @@
         };
       }
 
-      // 2. Fever
-      if (/(fever|chills|bukhaar|jwaram)/i.test(q)) {
-        const isProlonged = /(3s*days|days|week)/i.test(q);
+      // 2. High Fever
+      if (/(fever|chills|bukhaar|jwaram|temperature)/i.test(q)) {
+        const isProlonged = /(3\s*days|days|week|high)/i.test(q);
         return {
           triageLevel: isProlonged ? 'URGENT' : 'MODERATE',
           message: `### 🌡️ Fever Assessment (${isProlonged ? 'URGENT' : 'MODERATE'})\n\n` +
-            `**Possible Causes:** Viral influenza, seasonal infection, or vector-borne illness.\n\n` +
+            `**Possible Causes:** Viral influenza, seasonal infection, or vector-borne illness (e.g. malaria, dengue).\n\n` +
             `**Recommended Actions:**\n` +
-            `• Hydrate with clean water, ORS, and warm soups.\n` +
-            `• Lukewarm sponge baths to lower temperature.\n` +
-            `• Consult a General Physician if fever persists beyond 48 hours.`,
+            `• Hydrate with clean water, ORS, and warm fluids.\n` +
+            `• Lukewarm sponge baths to lower body temperature.\n` +
+            `• Consult a registered physician or PHC if fever persists beyond 48 hours or exceeds 102°F.`,
           disclaimer: '⚠️ AI-assisted triage guidance, not a medical diagnosis.'
         };
       }
 
-      // 3. General
+      // 3. Diarrhea & Dehydration
+      if (/(diarrhea|loose\s*motion|dehydration|ors|vomiting|stomach\s*pain)/i.test(q)) {
+        return {
+          triageLevel: 'MODERATE',
+          message: '### 💧 Gastrointestinal & Dehydration Assessment (MODERATE)\n\n' +
+            '**Possible Causes:** Acute gastroenteritis, dietary irritation, or bacterial/viral infection.\n\n' +
+            '**Recommended Actions:**\n' +
+            '• Drink Oral Rehydration Salts (ORS) solution regularly after every loose stool.\n' +
+            '• Consume boiled water, rice water, and bland soft foods.\n' +
+            '• Seek immediate medical attention if blood is present in stools, or if lethargy/severe thirst occurs.',
+          disclaimer: '⚠️ AI-assisted triage guidance, not a medical diagnosis.'
+        };
+      }
+
+      // 4. Headache & Dizziness
+      if (/(headache|migraine|dizziness|sir\s*dard)/i.test(q)) {
+        return {
+          triageLevel: 'MODERATE',
+          message: '### 💆 Headache & Neurological Assessment (MODERATE)\n\n' +
+            '**Possible Causes:** Tension headache, dehydration, eyestrain, or sinus congestion.\n\n' +
+            '**Recommended Actions:**\n' +
+            '• Rest in a quiet, darkened room and stay hydrated.\n' +
+            '• Monitor blood pressure if known hypertensive.\n' +
+            '• Seek emergency care immediately if accompanied by neck stiffness, confusion, or speech changes.',
+          disclaimer: '⚠️ AI-assisted triage guidance, not a medical diagnosis.'
+        };
+      }
+
+      // 5. General Low Urgency
       return {
         triageLevel: 'LOW',
         message: '### 🩺 Health Guidance (LOW Urgency)\n\n' +
