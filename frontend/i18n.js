@@ -23959,9 +23959,6 @@
   global.onLanguageChange = function(lang) {
     if (!global.i18n) return;
     global.i18n.setLanguage(lang);
-    if (global.aiHealthBot && typeof global.aiHealthBot.setLanguage === 'function') {
-      global.aiHealthBot.setLanguage(lang);
-    }
     const names = {
   "as": "অসমীয়া (Assamese)",
   "bn": "বাংলা (Bengali)",
