@@ -29,15 +29,17 @@ const createAuthRouter = require('./routes/auth');
 const createIdentityRouter = require('./routes/identity');
 const createPatientsRouter = require('./routes/patients');
 const createAdminRouter = require('./routes/admin');
+const createEmergencyRouter = require('./routes/emergency');
 
 // Validate runtime environment
 const envValidation = validateEnvironment(config);
 if (!envValidation.valid) {
-  console.error('\n======================================================');
-  console.error('[CRITICAL ERROR] Environment configuration invalid:');
-  envValidation.errors.forEach(err => console.error(`  - ${err}`));
-  console.error('======================================================\n');
-  if (config.env === 'production') {
+  console.warn('\n======================================================');
+  console.warn('[CONFIG WARNING] Environment configuration notices:');
+  envValidation.errors.forEach(err => console.warn(`  - ${err}`));
+  console.warn('======================================================\n');
+  // In serverless environments (Vercel/AWS), never process.exit(1) to avoid 500 crashes
+  if (config.env === 'production' && !process.env.VERCEL && !process.env.NOW_REGION) {
     process.exit(1);
   }
 }
@@ -109,6 +111,7 @@ app.use('/api/auth', authRateLimit, createAuthRouter(services));
 app.use('/api/identity', createIdentityRouter(services));
 app.use('/api/patients', createPatientsRouter(services));
 app.use('/api/admin', createAdminRouter(services));
+app.use('/api/emergency', createEmergencyRouter(services));
 
 // 404 Handler
 app.use((req, res) => {

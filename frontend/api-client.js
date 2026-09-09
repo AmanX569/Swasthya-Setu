@@ -61,10 +61,21 @@
 
       try {
         const response = await fetch(url, fetchOptions);
-        const data = await response.json();
+        let data = null;
+        const text = await response.text();
+        
+        try {
+          data = text ? JSON.parse(text) : {};
+        } catch (jsonErr) {
+          if (!response.ok) {
+            console.warn(`[APIClient] Server returned non-JSON error (${response.status}):`, text.slice(0, 150));
+            throw new Error(`Server temporarily unavailable (${response.status}). Please check Vercel environment variables or try again.`);
+          }
+          data = { success: true, message: text };
+        }
 
         if (!response.ok) {
-          throw new Error(data.error || `HTTP error ${response.status}`);
+          throw new Error((data && data.error) || `HTTP error ${response.status}`);
         }
 
         return data;

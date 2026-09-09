@@ -54,6 +54,7 @@ class SandboxSMSProvider {
       success: true,
       message: 'OTP sent successfully (Sandbox mode).',
       providerRequestId: `MOCK-REQ-${Date.now()}`,
+      provider: 'sandbox',
       _sandbox: true
     };
   }

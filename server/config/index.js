@@ -37,9 +37,10 @@ const config = {
       baseUrl: process.env.MSG91_BASE_URL || 'https://control.msg91.com'
     },
     twilio: {
-      accountSid: process.env.SMS_TWILIO_ACCOUNT_SID || '',
-      authToken: process.env.SMS_TWILIO_AUTH_TOKEN || '',
-      fromNumber: process.env.SMS_TWILIO_FROM_NUMBER || ''
+      accountSid: process.env.TWILIO_ACCOUNT_SID || process.env.SMS_TWILIO_ACCOUNT_SID || '',
+      authToken: process.env.TWILIO_AUTH_TOKEN || process.env.SMS_TWILIO_AUTH_TOKEN || '',
+      fromNumber: process.env.TWILIO_PHONE_NUMBER || process.env.SMS_TWILIO_FROM_NUMBER || '',
+      verifyServiceSid: process.env.TWILIO_VERIFY_SERVICE_SID || ''
     }
   },
   abdm: {

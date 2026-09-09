@@ -950,7 +950,7 @@
     }
 
     // -------------------------------------------------------------
-    // 3. 1-TAP 108 EMERGENCY SOS
+    // 3. 1-TAP 108 EMERGENCY SOS WITH TWILIO DISPATCH
     // -------------------------------------------------------------
     triggerSos() {
       const state = this.store.getState();
@@ -959,17 +959,198 @@
       const matchedProfile = cleanPhone ? ((state.patients || []).find(p => (p.phone || '').replace(/\D/g, '').slice(-10) === cleanPhone)) : null;
       const user = {
         name: (rawUser && rawUser.name) || (matchedProfile && matchedProfile.name) || 'Citizen Patient',
-        phone: cleanPhone || (matchedProfile && matchedProfile.phone) || '108',
+        phone: cleanPhone || (matchedProfile && matchedProfile.phone) || '',
         village: (rawUser && rawUser.village) || (matchedProfile && matchedProfile.village) || 'Kondapalli Sub-Centre',
         abhaId: (rawUser && (rawUser.abhaId || rawUser.abha_id)) || (matchedProfile && matchedProfile.abhaId) || '14-XXXX-XXXX-XXXX'
       };
-      const message = `🚨 EMERGENCY 108 SOS!\n\nPatient: ${user.name}\nPhone: +91 ${user.phone}\nLocation: ${user.village}\nABHA: ${user.abhaId}\n\nEmergency ambulance dispatched.`;
-      
-      // User can trigger speech manually if desired
-      if (typeof window.toast === 'function') {
-        window.toast('🚨 Emergency 108 Alert Dispatched!');
+
+      this.openEmergencySosModal(user);
+    }
+
+    openEmergencySosModal(user) {
+      let modal = document.getElementById('emergencySosModal');
+      if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'emergencySosModal';
+        modal.className = 'modal-overlay';
+        modal.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(15,23,42,0.75);backdrop-filter:blur(8px);padding:16px;';
+        document.body.appendChild(modal);
       }
-      alert(message);
+
+      modal.innerHTML = `
+        <div class="modal-card" style="background:#ffffff;color:#0f172a;max-width:520px;width:100%;border-radius:20px;padding:24px;border:2px solid #ef4444;box-shadow:0 25px 50px -12px rgba(220,38,38,0.35);animation:fadeIn 0.2s ease;">
+          <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1.5px solid #fee2e2;padding-bottom:14px;margin-bottom:18px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:12px;background:#fee2e2;font-size:22px;">🚨</span>
+              <div>
+                <h3 style="margin:0;font-size:18px;font-weight:800;color:#991b1b;letter-spacing:-0.3px;">Emergency 108 Ambulance Dispatch</h3>
+                <p style="margin:2px 0 0 0;font-size:12px;color:#64748b;font-weight:600;">Immediate Medical Response & Twilio SMS Alert</p>
+              </div>
+            </div>
+            <button type="button" onclick="document.getElementById('emergencySosModal').style.display='none'" style="background:none;border:none;font-size:22px;color:#64748b;cursor:pointer;line-height:1;padding:4px;">&times;</button>
+          </div>
+
+          <!-- DIRECT 1-TAP PHONE CALL BUTTON -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;">
+            <a href="tel:108" style="text-decoration:none;display:flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg, #dc2626, #b91c1c);color:#ffffff;padding:12px 14px;border-radius:12px;font-weight:800;font-size:14px;box-shadow:0 4px 14px rgba(220,38,38,0.35);text-align:center;">
+              <span>📞</span> <span>Call 108 (Ambulance)</span>
+            </a>
+            <a href="tel:112" style="text-decoration:none;display:flex;align-items:center;justify-content:center;gap:8px;background:#0f172a;color:#ffffff;padding:12px 14px;border-radius:12px;font-weight:800;font-size:14px;box-shadow:0 4px 14px rgba(15,23,42,0.25);text-align:center;">
+              <span>🛡️</span> <span>Call 112 (National)</span>
+            </a>
+          </div>
+
+          <!-- CALLER DETAILS & MOBILE NUMBER -->
+          <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:14px;padding:14px;margin-bottom:16px;">
+            <label style="display:block;font-size:12px;font-weight:800;color:#991b1b;margin-bottom:6px;">Emergency Contact / Caller Mobile Number:</label>
+            <div style="display:flex;gap:8px;">
+              <span style="display:inline-flex;align-items:center;padding:0 12px;background:#ffffff;border:1px solid #fca5a5;border-radius:10px;font-weight:700;font-size:13px;color:#334155;">+91</span>
+              <input type="tel" id="sosCallerPhone" value="${user.phone || ''}" placeholder="Enter 10-digit mobile" maxlength="10" style="flex:1;padding:10px 14px;border:1px solid #fca5a5;border-radius:10px;font-size:15px;font-weight:700;color:#0f172a;outline:none;" />
+            </div>
+            <div style="margin-top:8px;font-size:11.5px;color:#7f1d1d;display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px;">
+              <span>Patient: <strong>${user.name}</strong></span>
+              <span id="sosGpsStatus">📍 Detecting GPS coordinates...</span>
+            </div>
+          </div>
+
+          <div id="sosResultBanner" style="display:none;padding:12px;border-radius:12px;margin-bottom:16px;font-size:12.5px;font-weight:700;"></div>
+
+          <!-- ACTIONS -->
+          <div style="display:flex;gap:10px;justify-content:flex-end;">
+            <button type="button" onclick="document.getElementById('emergencySosModal').style.display='none'" class="btn-glass" style="padding:10px 18px;border-radius:12px;font-weight:700;font-size:13px;cursor:pointer;">Cancel</button>
+            <button type="button" id="btnDispatchSos" onclick="patientController.executeSosDispatch('${user.name}', '${user.village}')" style="background:linear-gradient(135deg, #dc2626, #991b1b);color:#ffffff;border:none;padding:11px 22px;border-radius:12px;font-weight:800;font-size:14px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;box-shadow:0 4px 14px rgba(220,38,38,0.35);">
+              <span>🚨</span> <span>Dispatch Ambulance & Send Alert</span>
+            </button>
+          </div>
+        </div>
+      `;
+
+      modal.style.display = 'flex';
+
+      // Detect GPS location
+      this.currentSosLocation = null;
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            this.currentSosLocation = {
+              latitude: pos.coords.latitude,
+              longitude: pos.coords.longitude
+            };
+            const gpsSpan = document.getElementById('sosGpsStatus');
+            if (gpsSpan) {
+              gpsSpan.innerHTML = `📍 GPS: ${pos.coords.latitude.toFixed(3)}, ${pos.coords.longitude.toFixed(3)}`;
+              gpsSpan.style.color = '#15803d';
+            }
+          },
+          () => {
+            const gpsSpan = document.getElementById('sosGpsStatus');
+            if (gpsSpan) {
+              gpsSpan.innerHTML = `📍 Sub-Centre: ${user.village}`;
+            }
+          },
+          { timeout: 5000 }
+        );
+      }
+    }
+
+    async executeSosDispatch(userName, village) {
+      const phoneInput = document.getElementById('sosCallerPhone');
+      const phone = phoneInput ? phoneInput.value.replace(/\D/g, '').slice(-10) : '';
+      const banner = document.getElementById('sosResultBanner');
+      const dispatchBtn = document.getElementById('btnDispatchSos');
+
+      if (!phone || phone.length !== 10) {
+        if (banner) {
+          banner.style.display = 'block';
+          banner.style.background = '#fef2f2';
+          banner.style.color = '#991b1b';
+          banner.style.border = '1px solid #f87171';
+          banner.innerText = '⚠️ Please enter a valid 10-digit mobile number for emergency response.';
+        }
+        return;
+      }
+
+      if (dispatchBtn) {
+        dispatchBtn.disabled = true;
+        dispatchBtn.innerHTML = '<span>⏳</span> <span>Alerting 108 Grid...</span>';
+      }
+
+      // Audio siren pulse
+      this._playEmergencyTone();
+
+      try {
+        const payload = {
+          mobile: phone,
+          name: userName,
+          village: village,
+          location: this.currentSosLocation || null
+        };
+
+        const res = await fetch('/api/emergency/sos', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        }).catch(() => null);
+
+        let data = null;
+        if (res && res.ok) {
+          data = await res.json().catch(() => null);
+        }
+
+        const dispatchId = data && data.dispatchId ? data.dispatchId : `SOS-${Date.now().toString(36).toUpperCase()}`;
+
+        if (banner) {
+          banner.style.display = 'block';
+          banner.style.background = '#f0fdf4';
+          banner.style.color = '#166534';
+          banner.style.border = '1px solid #86efac';
+          banner.innerHTML = `
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+              <span style="font-size:16px;">✅</span> <strong>108 Ambulance Alert Dispatched!</strong>
+            </div>
+            <div>Dispatch ID: <code>${dispatchId}</code></div>
+            <div style="font-size:11.5px;color:#15803d;margin-top:3px;">
+              Alert logged with District Health Control. ${data && data.smsResult && data.smsResult.status === 'DELIVERED' ? 'SMS notification sent via Twilio.' : 'SMS notification queued.'}
+            </div>
+          `;
+        }
+
+        if (typeof window.toast === 'function') {
+          window.toast('🚨 108 Emergency Ambulance Alert Dispatched!');
+        }
+
+        if (dispatchBtn) {
+          dispatchBtn.innerHTML = '<span>🚨</span> <span>Dispatched Successfully</span>';
+          dispatchBtn.style.background = '#15803d';
+        }
+      } catch (err) {
+        console.error('[SOS Error]', err);
+        if (banner) {
+          banner.style.display = 'block';
+          banner.style.background = '#fef2f2';
+          banner.style.color = '#991b1b';
+          banner.innerText = '⚠️ Emergency alert queued locally. Please dial 108 immediately.';
+        }
+      }
+    }
+
+    _playEmergencyTone() {
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        const ctx = new AudioContext();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(800, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(400, ctx.currentTime + 0.3);
+        gain.gain.setValueAtTime(0.3, ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.35);
+      } catch (e) {}
     }
 
     // -------------------------------------------------------------

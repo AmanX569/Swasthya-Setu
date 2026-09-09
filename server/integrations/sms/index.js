@@ -68,7 +68,7 @@ class SMSService {
   }
 
   /**
-   * Send OTP via active provider (MSG91 or Sandbox)
+   * Send OTP via active provider (MSG91, Twilio, or Sandbox)
    * @param {string} mobile
    * @param {object} [options]
    */
@@ -81,6 +81,16 @@ class SMSService {
     const otp = options.otp || '123456';
     const text = `Your Swasthya Setu (स्वास्थ्य सेतु) verification code is ${otp}. Valid for 5 minutes. Do not share this OTP with anyone.`;
     return this.provider.send(mobile, text);
+  }
+
+  /**
+   * Backwards-compatible alias for sendOtp(mobile, { otp })
+   * @param {string} mobile
+   * @param {string} [otp]
+   * @param {object} [options]
+   */
+  async sendOTP(mobile, otp, options = {}) {
+    return this.sendOtp(mobile, { ...options, otp });
   }
 
   /**

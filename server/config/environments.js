@@ -53,12 +53,18 @@ function validateEnvironment(config) {
         errors.push('CRITICAL: MSG91_OTP_TEMPLATE_ID is required in production when OTP_PROVIDER=msg91.');
       }
     } else if (provider === 'twilio') {
-      if (!config.sms.twilio.accountSid || !config.sms.twilio.authToken || !config.sms.twilio.fromNumber) {
-        errors.push('CRITICAL: Twilio configuration (SMS_TWILIO_ACCOUNT_SID, SMS_TWILIO_AUTH_TOKEN, SMS_TWILIO_FROM_NUMBER) incomplete.');
+      const tw = config.sms.twilio;
+      if (!tw.accountSid || !tw.authToken || (!tw.fromNumber && !tw.verifyServiceSid)) {
+        errors.push('CRITICAL: Twilio configuration (TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, and TWILIO_PHONE_NUMBER or TWILIO_VERIFY_SERVICE_SID) incomplete.');
       }
     }
   } else {
-    if (provider === 'msg91') {
+    if (provider === 'twilio') {
+      const tw = config.sms.twilio;
+      if (!tw.accountSid || !tw.authToken || (!tw.fromNumber && !tw.verifyServiceSid)) {
+        errors.push('CRITICAL: Twilio provider selected (OTP_PROVIDER=twilio) but TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, or TWILIO_PHONE_NUMBER is missing. Configure keys or set OTP_PROVIDER=sandbox.');
+      }
+    } else if (provider === 'msg91') {
       if (!config.sms.msg91.authKey || !config.sms.msg91.templateId) {
         errors.push('CRITICAL: MSG91 provider selected (OTP_PROVIDER=msg91) but MSG91_AUTH_KEY or MSG91_OTP_TEMPLATE_ID is missing. Configure keys or set OTP_PROVIDER=sandbox for local testing.');
       }

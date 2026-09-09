@@ -13,8 +13,8 @@ const AadhaarService = require('../integrations/uidai');
 async function runTests() {
   console.log('--- Running Integrations Test Suite ---');
 
-  // 1. Test SMS Service
-  const sms = new SMSService(config);
+  // 1. Test SMS Service (Sandbox)
+  const sms = new SMSService({ ...config, sms: { provider: 'sandbox' } });
   const smsRes = await sms.sendOTP('9876543210', '123456');
   assert.strictEqual(smsRes.success, true, 'SMS sandbox dispatch should succeed');
   assert.strictEqual(smsRes.provider, 'sandbox', 'Provider should be sandbox');
