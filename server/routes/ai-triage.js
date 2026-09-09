@@ -10,7 +10,7 @@
 'use strict';
 
 const express = require('express');
-const { authenticateToken } = require('../middleware/auth');
+const { authenticateToken, optionalAuthenticateToken } = require('../middleware/auth');
 const { aiTriageRateLimit } = require('../middleware/rate-limit');
 
 function createAiTriageRouter(services) {
@@ -19,9 +19,9 @@ function createAiTriageRouter(services) {
 
   /**
    * POST /api/ai/triage/chat
-   * Core triage assessment endpoint
+   * Core triage assessment endpoint (supports authenticated patients & guest citizens)
    */
-  router.post('/chat', authenticateToken, aiTriageRateLimit, async (req, res, next) => {
+  router.post('/chat', optionalAuthenticateToken, aiTriageRateLimit, async (req, res, next) => {
     try {
       const { message, conversationId, language, patientContext } = req.body || {};
 

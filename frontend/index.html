@@ -6579,14 +6579,14 @@ checkDemoModeFlag();
     </div>
 
     <!-- INPUT FORM & VOICE CONTROLS -->
-    <form onsubmit="event.preventDefault(); swasthyaAiAssistant.sendUserQuery();" style="padding:10px 12px;background:rgba(15,23,42,0.98);border-top:1px solid rgba(255,255,255,0.1);display:flex;gap:8px;align-items:center;flex-shrink:0;">
+    <form id="swasthyaAiForm" onsubmit="event.preventDefault(); swasthyaAiAssistant.sendUserQuery();" style="padding:10px 12px;background:rgba(15,23,42,0.98);border-top:1px solid rgba(255,255,255,0.1);display:flex;gap:8px;align-items:center;flex-shrink:0;">
       <div style="flex:1;position:relative;">
-        <input type="text" id="swasthyaAiInputField" class="input-field" placeholder="Describe your symptoms (e.g. fever for 2 days, headache)..." autocomplete="off" style="width:100%;padding:10px 36px 10px 12px;font-size:12.5px;border-radius:10px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);color:#ffffff;">
+        <input type="text" id="swasthyaAiInputField" class="input-field" placeholder="Describe your symptoms (e.g. fever for 2 days, headache)..." autocomplete="off" maxlength="1000" style="width:100%;padding:10px 36px 10px 12px;font-size:12.5px;border-radius:10px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);color:#ffffff;">
         <button type="button" id="swasthyaAiMicBtn" onclick="swasthyaAiAssistant.startVoice()" title="Voice Input" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:16px;cursor:pointer;color:#34d399;padding:2px;">
           🎙️
         </button>
       </div>
-      <button type="submit" class="auth-btn-primary" style="padding:10px 16px;font-size:12.5px;font-weight:800;background:linear-gradient(135deg, #10b981, #059669);border:none;border-radius:10px;color:#ffffff;cursor:pointer;box-shadow:0 2px 10px rgba(16,185,129,0.35);display:flex;align-items:center;gap:4px;">
+      <button type="submit" id="swasthyaAiSendBtn" class="auth-btn-primary" style="padding:10px 16px;font-size:12.5px;font-weight:800;background:linear-gradient(135deg, #10b981, #059669);border:none;border-radius:10px;color:#ffffff;cursor:pointer;box-shadow:0 2px 10px rgba(16,185,129,0.35);display:flex;align-items:center;gap:4px;">
         <span>➤</span>
       </button>
     </form>

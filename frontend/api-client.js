@@ -10,11 +10,12 @@
 
   class SwasthyaAPIClient {
     constructor(options = {}) {
-      // Determine base URL: environment or localhost:5000 / relative /api
-      const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-      this.baseUrl = options.baseUrl || (isLocalhost ? 'http://localhost:5000/api' : '/api');
+      // Determine base URL: environment, file:// protocol, localhost:5000, or relative /api
+      const isFileProto = typeof window !== 'undefined' && window.location.protocol === 'file:';
+      const isLocalhost = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+      this.baseUrl = options.baseUrl || ((isFileProto || isLocalhost) ? 'http://localhost:5000/api' : '/api');
       this.tokenKey = 'swasthya_auth_token';
-      this.token = localStorage.getItem(this.tokenKey) || null;
+      this.token = (typeof localStorage !== 'undefined' ? localStorage.getItem(this.tokenKey) : null) || null;
     }
 
     setToken(token) {

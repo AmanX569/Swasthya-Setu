@@ -355,9 +355,19 @@
     }
 
     async sendUserQuery(text) {
+      if (this.isProcessing) return;
+
       const inputEl = document.getElementById('swasthyaAiInputField');
+      const sendBtn = document.getElementById('swasthyaAiSendBtn');
+      const micBtn = document.getElementById('swasthyaAiMicBtn');
+
       const query = (text || (inputEl ? inputEl.value : '') || '').trim();
       if (!query) return;
+
+      if (query.length > 1000) {
+        alert('Your message exceeds the 1,000 character limit. Please summarize your primary symptoms.');
+        return;
+      }
 
       if (inputEl) inputEl.value = '';
 
@@ -377,12 +387,15 @@
       }
 
       this.isProcessing = true;
+      if (sendBtn) sendBtn.disabled = true;
+      if (inputEl) inputEl.disabled = true;
+      if (micBtn) micBtn.disabled = true;
       this.renderChat();
 
       try {
         let triageResult = null;
 
-        // Call backend API if client has token or backend is active
+        // Call backend API (supports authenticated and guest triage)
         if (window.swasthyaAPI && typeof window.swasthyaAPI.sendAiTriageMessage === 'function') {
           try {
             triageResult = await window.swasthyaAPI.sendAiTriageMessage({
@@ -395,7 +408,7 @@
               this.conversationId = triageResult.conversationId;
             }
           } catch (apiErr) {
-            console.warn('[AI Triage] Backend API offline or token missing. Using onboard clinical engine:', apiErr.message);
+            console.warn('[AI Triage] Backend API offline. Using onboard clinical engine:', apiErr.message);
             triageResult = this.evaluateLocalClinicalFallback(query);
           }
         } else {
@@ -409,6 +422,12 @@
         this.addAssistantResponse(fallback);
       } finally {
         this.isProcessing = false;
+        if (sendBtn) sendBtn.disabled = false;
+        if (inputEl) {
+          inputEl.disabled = false;
+          inputEl.focus();
+        }
+        if (micBtn) micBtn.disabled = false;
         this.renderChat();
       }
     }

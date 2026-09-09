@@ -76,8 +76,53 @@ function requireRole(...roles) {
   };
 }
 
+/**
+ * Express middleware for endpoints that support both authenticated patients
+ * and anonymous guest sessions (such as emergency symptom triage).
+ * If a valid Bearer token is present, req.user is set to the decoded user.
+ * If absent or unauthenticated, req.user is assigned a safe guest patient session.
+ */
+function optionalAuthenticateToken(req, res, next) {
+  const setGuestUser = () => {
+    const rawIp = req.headers['x-forwarded-for'] || req.socket?.remoteAddress || 'guest';
+    const cleanIp = String(rawIp).split(',')[0].trim().replace(/[^a-zA-Z0-9]/g, '_');
+    req.user = {
+      id: `guest_${cleanIp}`,
+      patient_id: `guest_${cleanIp}`,
+      role: 'patient',
+      isGuest: true,
+      name: 'Guest Citizen'
+    };
+  };
+
+  const authHeader = req.headers['authorization'];
+  if (!authHeader) {
+    setGuestUser();
+    return next();
+  }
+
+  const parts = authHeader.split(' ');
+  if (parts.length !== 2 || parts[0].toLowerCase() !== 'bearer') {
+    setGuestUser();
+    return next();
+  }
+
+  const token = parts[1];
+  jwt.verify(token, config.jwt.secret, (err, user) => {
+    if (err) {
+      setGuestUser();
+      return next();
+    }
+
+    req.user = user;
+    next();
+  });
+}
+
 module.exports = {
   generateToken,
   authenticateToken,
+  optionalAuthenticateToken,
   requireRole
 };
+

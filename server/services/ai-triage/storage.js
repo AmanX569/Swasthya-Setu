@@ -74,7 +74,8 @@ class TriageStorage {
 
     this.memoryConversations.set(cid, newConv);
 
-    if (this.supabase) {
+    const isGuest = String(patientId).startsWith('guest_');
+    if (this.supabase && !isGuest) {
       try {
         await this.supabase
           .from('ai_triage_conversations')
@@ -115,8 +116,9 @@ class TriageStorage {
       conv.updated_at = msg.created_at;
     }
 
-    // Persist to Supabase if available
-    if (this.supabase) {
+    // Persist to Supabase if available (authenticated patients only)
+    const isGuest = String(patientId).startsWith('guest_');
+    if (this.supabase && !isGuest) {
       try {
         await this.supabase.from('ai_triage_messages').insert({
           id: msg.id,

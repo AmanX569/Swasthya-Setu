@@ -128,8 +128,8 @@ class TriageService {
       triageLevel: triageResult.triageLevel
     });
 
-    // 11. Optional Audit Log
-    if (this.auditService) {
+    // 11. Optional Audit Log (authenticated patients only)
+    if (this.auditService && !user.isGuest) {
       try {
         await this.auditService.log({
           actor_id: patientId,
