@@ -55,6 +55,13 @@ const config = {
     environment: process.env.UIDAI_ENVIRONMENT || 'sandbox', // 'sandbox' | 'production'
     auaCode: process.env.UIDAI_AUA_CODE || '',
     subAuaCode: process.env.UIDAI_SUB_AUA_CODE || ''
+  },
+  ai: {
+    provider: process.env.AI_PROVIDER || 'sandbox', // 'sandbox' | 'gemini' | 'openai'
+    geminiApiKey: process.env.GEMINI_API_KEY || '',
+    openaiApiKey: process.env.OPENAI_API_KEY || '',
+    model: process.env.AI_MODEL || 'gemini-1.5-flash',
+    maxTokens: parseInt(process.env.AI_MAX_TOKENS, 10) || 800
   }
 };
 

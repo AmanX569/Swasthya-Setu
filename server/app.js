@@ -23,6 +23,7 @@ const OTPService = require('./services/otp-service');
 const ABDMService = require('./integrations/abdm');
 const AadhaarService = require('./integrations/uidai');
 const PatientService = require('./services/patient-service');
+const TriageService = require('./services/ai-triage/triage-service');
 
 // Route factories
 const createAuthRouter = require('./routes/auth');
@@ -30,6 +31,7 @@ const createIdentityRouter = require('./routes/identity');
 const createPatientsRouter = require('./routes/patients');
 const createAdminRouter = require('./routes/admin');
 const createEmergencyRouter = require('./routes/emergency');
+const createAiTriageRouter = require('./routes/ai-triage');
 
 // Validate runtime environment
 const envValidation = validateEnvironment(config);
@@ -64,6 +66,7 @@ const otpService = new OTPService(supabase, smsService, config.env);
 const abdmService = new ABDMService(config);
 const aadhaarService = new AadhaarService(config);
 const patientService = new PatientService(supabase, auditService);
+const triageService = new TriageService(supabase, config, auditService);
 
 const services = {
   supabase,
@@ -73,7 +76,8 @@ const services = {
   otpService,
   abdmService,
   aadhaarService,
-  patientService
+  patientService,
+  triageService
 };
 
 const app = express();
@@ -95,12 +99,13 @@ app.get(['/', '/api/health'], (req, res) => {
   res.json({
     status: 'ONLINE',
     service: 'Swasthya Setu Enterprise Identity Engine',
-    version: '3.1.0',
+    version: '3.2.0',
     mode: config.env,
     integrations: {
       sms: config.sms.provider,
       abdm: config.abdm.environment,
-      uidai: config.uidai.environment
+      uidai: config.uidai.environment,
+      ai: config.ai.provider
     },
     timestamp: new Date().toISOString()
   });
@@ -112,6 +117,7 @@ app.use('/api/identity', createIdentityRouter(services));
 app.use('/api/patients', createPatientsRouter(services));
 app.use('/api/admin', createAdminRouter(services));
 app.use('/api/emergency', createEmergencyRouter(services));
+app.use('/api/ai/triage', createAiTriageRouter(services));
 
 // 404 Handler
 app.use((req, res) => {

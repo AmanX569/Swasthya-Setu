@@ -47,8 +47,22 @@ const otpRateLimit = rateLimit({
   }
 });
 
+// AI Triage Chat rate limit: 15 queries per minute per patient/IP
+const aiTriageRateLimit = rateLimit({
+  windowMs: 60 * 1000,
+  max: 15,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    error: 'Too many symptom triage requests. Please wait a moment before asking another question.',
+    code: 'AI_RATE_LIMIT_EXCEEDED'
+  }
+});
+
 module.exports = {
   generalRateLimit,
   authRateLimit,
-  otpRateLimit
+  otpRateLimit,
+  aiTriageRateLimit
 };

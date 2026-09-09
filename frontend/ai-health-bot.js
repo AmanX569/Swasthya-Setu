@@ -1,21 +1,14 @@
 /**
  * =============================================================================
- * SWASTHYA SETU - NEXT-GEN AI HEALTHCARE ASSISTANT & CLINICAL INTELLIGENCE ENGINE
- * (Swasthya AI / स्वास्थय AI सहायक)
- * Powered by Gemini AI API Architecture & Onboard Clinical Reasoning Model
- * Features:
- *  - Multilingual Medical Guidance (12 Indian Languages)
- *  - Interactive Command & Assistance Interface (/beds, /doctor, /sos, /meds)
- *  - Real-time GPS 25km Nearby Hospital Bed Integration
- *  - Voice Recognition (Speech-to-Text) & Voice Synthesis (Audio Readout)
- *  - Clinical Triage, Red-Flag Warnings, First Aid & Generic Medicine Guidance
+ * SWASTHYA SETU — SMART AI HEALTHCARE TRIAGE CHATBOT (ai-health-bot.js)
+ * Production Clinical Triage Client, Deterministic Emergency Alerts & Multi-Language
+ * Zero Client-Side API Keys · Backend Proxied via /api/ai/triage/chat
  * =============================================================================
  */
 
 (function(global) {
   'use strict';
 
-  // Supported Languages
   const SUPPORTED_LANGUAGES = {
     en: { name: 'English', native: 'English', voiceCode: 'en-IN' },
     hi: { name: 'Hindi', native: 'हिंदी', voiceCode: 'hi-IN' },
@@ -31,308 +24,116 @@
     ur: { name: 'Urdu', native: 'اردو', voiceCode: 'ur-IN' }
   };
 
-  // UI Language Strings
   const UI_TEXT = {
     en: {
-      title: 'Swasthya AI Assistant',
-      subtitle: 'Clinical Medical Intelligence · Gemini & ChatGPT Core',
+      title: 'Swasthya AI Triage',
+      subtitle: 'Symptom Assessment & Healthcare Guidance',
       onlineBadge: 'AI Active',
-      greeting: '👋 **Hello! I am your AI Health Assistant.**\n\nI am equipped with clinical medical intelligence to assist you with symptoms, emergency first-aid, nearby hospital beds, and doctor consultations.\n\n**How can I assist you today?** You can type any health query, or tap a command below:',
-      placeholder: 'Ask a medical question or type a command (/beds, /doctor, /sos)...',
+      greeting: '👋 **Hello! I am your AI Health Triage Assistant.**\n\nI can help you assess your symptoms, understand potential health conditions, evaluate urgency, and guide you on safe next steps.\n\n*This is an AI-assisted triage service, not an official medical diagnosis.*\n\n**How can I help you today?** Type your symptoms below or select a quick topic:',
+      placeholder: 'Describe your symptoms (e.g. fever for 2 days, headache)...',
       send: 'Send',
       listening: 'Listening... Please speak now',
       speak: 'Read Aloud',
       stopSpeak: 'Stop Audio',
       clearTitle: 'Clear Chat History',
-      settingsTitle: 'AI Settings & API Key',
-      copied: 'Copied to clipboard!',
-      connectingGemini: 'Connecting to Gemini Cloud Intelligence...',
-      offlineModel: 'Using High-Precision Onboard Clinical Engine'
+      disclaimer: '⚠️ AI-assisted healthcare triage. Not a medical diagnosis. In life-threatening emergencies, call 108 or 112 immediately.',
+      copied: 'Copied to clipboard!'
     },
     hi: {
-      title: 'स्वास्थय AI सहायक',
-      subtitle: 'क्लिनिकल मेडिकल इंटेलिजेंस · जेमिनी व चैटजीपीटी कोर',
+      title: 'स्वास्थय AI ट्रायज',
+      subtitle: 'लक्षण मूल्यांकन व प्राथमिक मार्गदर्शन',
       onlineBadge: 'AI सक्रिय',
-      greeting: '👋 **नमस्ते! मैं आपका स्वास्थय AI सहायक हूँ।**\n\nमैं लक्षणों की जांच, आपातकालीन प्राथमिक उपचार, नजदीकी अस्पताल बेड और डॉक्टर परामर्श में आपकी सहायता करने के लिए तैयार हूँ।\n\n**आज मैं आपकी क्या सहायता कर सकता हूँ?** नीचे दिए गए कमांड चुनें या अपनी स्वास्थ्य समस्या लिखें:',
-      placeholder: 'स्वास्थ्य प्रश्न पूछें या कमांड लिखें (/beds, /doctor, /sos)...',
+      greeting: '👋 **नमस्ते! मैं आपका स्वास्थय AI ट्रायज सहायक हूँ।**\n\nमैं आपके लक्षणों का मूल्यांकन करने, तात्कालिकता (Urgency) जांचने और सुरक्षित अगले कदमों में मार्गदर्शन करने के लिए तैयार हूँ।\n\n*यह एआई परीक्षण सेवा है, कोई औपचारिक चिकित्सा निदान नहीं है।*\n\n**आज मैं आपकी क्या सहायता कर सकता हूँ?** नीचे अपने लक्षण लिखें या विकल्प चुनें:',
+      placeholder: 'अपने लक्षणों का विवरण दें (जैसे 2 दिन से बुखार, सिरदर्द)...',
       send: 'भेजें',
       listening: 'सुन रहा हूँ... कृपया बोलें',
       speak: 'सुनें',
       stopSpeak: 'रोकें',
       clearTitle: 'चैट साफ़ करें',
-      settingsTitle: 'AI सेटिंग्स व API कुंजी',
-      copied: 'कॉपी हो गया!',
-      connectingGemini: 'जेमिनी क्लाउड से जुड़ रहा है...',
-      offlineModel: 'ऑनबोर्ड क्लिनिकल AI इंजन सक्रिय'
+      disclaimer: '⚠️ एआई-सहायता प्राप्त स्वास्थ्य परीक्षण। कोई औपचारिक निदान नहीं। आपातकाल में तुरंत 108 पर कॉल करें।',
+      copied: 'कॉपी हो गया!'
     },
     te: {
-      title: 'స్వాస్థ్య AI అసిస్టెంట్',
-      subtitle: 'క్లినికల్ మెడికల్ ఇంటెలిజెన్స్ · జెమిని & చాట్‌జిపిటి కోర్',
+      title: 'స్వాస్థ్య AI ట్రయాజ్',
+      subtitle: 'లక్షణాల మూల్యాంకనం & ఆరోగ్య మార్గదర్శకత్వం',
       onlineBadge: 'AI సిద్ధంగా ఉంది',
-      greeting: '👋 **నమస్కారం! నేను మీ స్వాస్థ్య AI ఆరోగ్య సహాయకుడిని.**\n\nలక్షణాల తనిఖీ, అత్యవసర ప్రథమ చికిత్స, సమీప ఆసుపత్రి పడకలు మరియు వైద్యుల సంప్రదింపులలో సహాయం చేయడానికి నేను సిద్ధంగా ఉన్నాను.\n\n**ఈరోజు నేను మీకు ఎలా సహాయపడగలను?** క్రింది కమాండ్‌ను ఎంచుకోండి లేదా మీ ప్రశ్నను టైప్ చేయండి:',
-      placeholder: 'ఆరోగ్య ప్రశ్న అడగండి లేదా కమాండ్ టైప్ చేయండి (/beds, /doctor)...',
+      greeting: '👋 **నమస్కారం! నేను మీ స్వాస్థ్య AI ట్రయాజ్ సహాయకుడిని.**\n\nలక్షణాలను అంచనా వేయడం, అత్యవసర స్థాయిని గుర్తించడం మరియు సురక్షితమైన తదుపరి చర్యలలో సహాయపడటానికి నేను సిద్ధంగా ఉన్నాను.\n\n*ఇది కేవలం AI మార్గదర్శకత్వం మాత్రమే, అధికారిక వైద్య నిర్ధారణ కాదు.*\n\n**ఈరోజు నేను మీకు ఎలా సహాయపడగలను?** క్రింద మీ సమస్యను టైప్ చేయండి:',
+      placeholder: 'మీ లక్షణాలను వివరించండి (ఉదా: 2 రోజులుగా జ్వరం, తలనొప్పి)...',
       send: 'పంపండి',
-      listening: 'వింటున్నాను... దయచేసి మాట్లాడండి',
+      listening: 'వింటున్నాను... మాట్లాడండి',
       speak: 'వినండి',
       stopSpeak: 'ఆపండి',
       clearTitle: 'చాట్ క్లియర్ చేయండి',
-      settingsTitle: 'AI సెట్టింగ్‌లు',
-      copied: 'కాపీ చేయబడింది!',
-      connectingGemini: 'జెమిని క్లౌడ్ కనెక్ట్ అవుతోంది...',
-      offlineModel: 'ఆన్‌బోర్డ్ క్లినికల్ మోడల్'
+      disclaimer: '⚠️ AI ఆధారిత ఆరోగ్య మార్గదర్శకత్వం. వైద్య నిర్ధారణ కాదు. అత్యవసర పరిస్థితుల్లో వెంటనే 108కి కాల్ చేయండి.',
+      copied: 'కాపీ చేయబడింది!'
     }
   };
 
-  // Quick Command / Assistance Cards
-  const ASSISTANCE_COMMANDS = [
-    { cmd: '/symptoms', icon: '🩺', label: 'Check Symptoms', desc: 'Clinical symptom triage' },
-    { cmd: '/beds', icon: '🏥', label: 'Nearby Beds (<25km)', desc: 'Live ICU & General beds' },
-    { cmd: '/doctor', icon: '👨‍⚕️', label: 'Consult Doctor', desc: 'Video call / OPD Queue' },
-    { cmd: '/meds', icon: '💊', label: 'Medicine & Dosage', desc: 'Generic savings & safety' },
-    { cmd: '/sos', icon: '🆘', label: 'Emergency First Aid', desc: 'Red-flag 108 SOS actions' },
-    { cmd: '/lang', icon: '🌐', label: 'Change Language', desc: '12 Indian languages' }
+  const QUICK_PROMPTS = [
+    { label: '🌡️ High Fever & Chills', query: 'I have a high fever and body chills for 2 days' },
+    { label: '🫀 Chest Discomfort', query: 'I am experiencing chest discomfort and tightness' },
+    { label: '💆 Severe Headache', query: 'I have a severe headache and dizziness' },
+    { label: '😮‍💨 Shortness of Breath', query: 'I am feeling shortness of breath and wheezing' },
+    { label: '🥣 Stomach & Loose Motions', query: 'I have loose motions and stomach cramps since morning' }
   ];
 
-  // Comprehensive Medical Clinical Protocol Knowledge Base
-  const CLINICAL_KNOWLEDGE_BASE = [
-    {
-      id: 'fever',
-      triggers: ['fever', 'high temperature', 'bukhaar', 'jwaram', 'pyrexia', 'shivering', 'chills', 'tap'],
-      urgency: 'MODERATE_TO_URGENT',
-      urgencyLabel: '🟡 Moderate to High Urgency',
-      title: 'Fever (Pyrexia) Assessment & Management',
-      assessment: 'Fever is an immune response to viral, bacterial, or parasitic infections (e.g. Dengue, Malaria, Typhoid, Viral flu).',
-      immediateActions: [
-        'Place cold water cloth compresses on forehead, neck, and armpits to bring temperature down gently.',
-        'Drink plenty of fluids: coconut water, electrolyte solution (ORS), and warm soups to avoid dehydration.',
-        'Rest in a well-ventilated, cool room with lightweight cotton clothing.'
-      ],
-      medicationSafety: [
-        'Paracetamol (PCM) 500mg or 650mg is safe for adult fever relief (max 3g daily, minimum 6 hours gap).',
-        '⚠️ NEVER take Aspirin, Ibuprofen, or Diclofenac without confirmation, as they can cause severe bleeding if the cause is Dengue fever.',
-        'For pediatric fever: dosed strictly by weight (~10-15 mg/kg Paracetamol syrup). Consult a pediatrician.'
-      ],
-      redFlags: [
-        'Temperature exceeding 103°F (39.4°C) or lasting more than 3 days.',
-        'Persistent vomiting, severe headache, neck stiffness, or rash.',
-        'Extreme lethargy, confusion, or breathing difficulties.'
-      ],
-      specialist: 'General Physician / Primary Care Doctor'
-    },
-    {
-      id: 'chestpain',
-      triggers: ['chest pain', 'heart attack', 'chhati me dard', 'gundela noppi', 'left arm pain', 'chest tightness', 'angina'],
-      urgency: 'CRITICAL_EMERGENCY',
-      urgencyLabel: '🔴 CRITICAL EMERGENCY (Immediate Hospital Visit)',
-      title: 'Chest Pain / Acute Coronary Syndrome Alert',
-      assessment: 'Sudden or crushing chest pressure, especially radiating to jaw, left arm, or back, is a potential medical emergency (Heart Attack / Angina).',
-      immediateActions: [
-        '🚨 IMMEDIATELY Call 108 (National Emergency Ambulance) or head to the nearest Emergency ICU Hospital.',
-        'Have the patient sit in a half-reclined position with knees bent (W-position) to reduce cardiac strain.',
-        'Loosen all tight collar, tie, and belt clothing immediately.',
-        'Keep patient calm; do NOT let them walk or exert physical effort.'
-      ],
-      medicationSafety: [
-        'If patient has known prescribed Sorbitrate (Isosorbide Dinitrate 5mg), place one tablet under the tongue (sublingual).',
-        'Soluble Aspirin 300mg chewed (if not allergic and confirmed by emergency doctor).'
-      ],
-      redFlags: [
-        'Sweating profusely (cold sweats) with shortness of breath.',
-        'Crushing pain spreading to jaw, neck, left shoulder, or back.',
-        'Dizziness, nausea, vomiting, or loss of consciousness.'
-      ],
-      specialist: 'Cardiologist / Emergency Medicine Specialist'
-    },
-    {
-      id: 'snakebite',
-      triggers: ['snake bite', 'saanp kaatna', 'paamu kaatu', 'snake', 'venom', 'viper', 'krait', 'cobra'],
-      urgency: 'CRITICAL_EMERGENCY',
-      urgencyLabel: '🔴 CRITICAL EMERGENCY (Anti-Snake Venom Required)',
-      title: 'Snakebite Emergency Response Protocol',
-      assessment: 'Venomous bites from Cobras, Kraits, Russell Vipers, and Saw-scaled Vipers cause neurotoxicity or severe hemotoxicity.',
-      immediateActions: [
-        '🚨 RUSH to the nearest Community Health Centre (CHC) or District Hospital with Anti-Snake Venom (ASV) and ICU beds.',
-        'Keep the victim calm and strictly IMMOBILIZE the bitten limb below heart level using a splint or firm cardboard.',
-        'Remove rings, bangles, watches, and tight clothing before swelling sets in.',
-        'Take a photo of the snake from a safe distance ONLY if possible without delaying transport.'
-      ],
-      medicationSafety: [
-        '🚫 DO NOT cut the wound, suck venom, apply ice, or use electric shocks.',
-        '🚫 DO NOT apply a tight arterial tourniquet (it causes gangrene and limb loss).',
-        'Do NOT give alcohol, tea, coffee, or pain relievers.'
-      ],
-      redFlags: [
-        'Drooping eyelids (ptosis), difficulty swallowing, or blurred vision (Neurotoxic).',
-        'Bleeding from gums, nose, bite punctures, or dark urine (Hemotoxic).',
-        'Rapid swelling spreading up the limb within 30 minutes.'
-      ],
-      specialist: 'Emergency Medical Officer (Anti-Snake Venom CHC)'
-    },
-    {
-      id: 'breathing',
-      triggers: ['breathing', 'shortness of breath', 'saans phoolna', 'swasa aadam ledu', 'asthma', 'wheezing', 'hypoxia'],
-      urgency: 'CRITICAL_EMERGENCY',
-      urgencyLabel: '🔴 High to Critical Emergency',
-      title: 'Respiratory Distress & Shortness of Breath',
-      assessment: 'Acute breathing trouble may result from severe Asthma, COPD exacerbation, Pneumonia, Heart Failure, or Allergic Anaphylaxis.',
-      immediateActions: [
-        'Seat the patient upright in an open area with fresh air circulation. Do NOT lie down flat.',
-        'If the patient has a prescribed rescue inhaler (Salbutamol / Asthalin 100mcg), administer 2-4 puffs via spacer immediately.',
-        'Check SpO2 with a pulse oximeter if available. If SpO2 drops below 92%, emergency Oxygen is urgently needed.'
-      ],
-      medicationSafety: [
-        'Use only patient\'s prescribed bronchodilator inhalers or nebulization.',
-        'Never give sedatives or heavy cough syrups that suppress respiration.'
-      ],
-      redFlags: [
-        'Inability to speak full sentences in a single breath.',
-        'Bluish discoloration of lips, tongue, or fingertips (Cyanosis).',
-        'Chest retractions (skin pulling in between ribs) and gasping.'
-      ],
-      specialist: 'Pulmonologist / Emergency Physician'
-    },
-    {
-      id: 'diarrhea',
-      triggers: ['diarrhea', 'loose motion', 'vomiting', 'dast', 'ulti', 'virochanalu', 'dehydration', 'cholera', 'food poison'],
-      urgency: 'MODERATE_TO_URGENT',
-      urgencyLabel: '🟡 Moderate Urgency (Prevent Dehydration)',
-      title: 'Acute Diarrhea, Vomiting & ORS Rehydration Protocol',
-      assessment: 'Acute gastroenteritis leads to rapid electrolyte and fluid loss, which is the primary danger in children and elderly.',
-      immediateActions: [
-        'Prepare WHO Oral Rehydration Salt (ORS) solution: mix 1 full packet of WHO-ORS into 1 liter of boiled and cooled drinking water.',
-        'Sip 100-200ml ORS after every loose stool. For infants, give 5-10ml with spoon every few minutes.',
-        'Supplement with tender coconut water, buttermilk (chaas), and rice congee with a pinch of salt.',
-        'Continue light, easily digestible food like khichdi, bananas, and toast.'
-      ],
-      medicationSafety: [
-        'Zinc tablets 20mg daily for 14 days (10mg for infants under 6 months) to rebuild gut mucosa.',
-        'Probiotics (Lactobacillus spores) help restore healthy intestinal flora.',
-        '⚠️ AVOID anti-motility drugs like Loperamide in infectious diarrhea or children.'
-      ],
-      redFlags: [
-        'Signs of severe dehydration: sunken eyes, dry mouth, skin turgor loss, no urination for >6 hours.',
-        'Blood or mucus in stool (Dysentery) or high fever.',
-        'Inability to keep any liquids down due to uncontrollable vomiting.'
-      ],
-      specialist: 'General Physician / Gastroenterologist'
-    },
-    {
-      id: 'headache',
-      triggers: ['headache', 'migraine', 'sir dard', 'tala noppi', 'head pain', 'throbbing head'],
-      urgency: 'MILD_TO_MODERATE',
-      urgencyLabel: '🟢 Mild to Moderate (Rule out red flags)',
-      title: 'Headache & Migraine Relief Protocol',
-      assessment: 'Headaches are commonly tension-type, migraine, sinus-related, or secondary to eye strain or dehydration.',
-      immediateActions: [
-        'Drink 500ml water immediately (mild dehydration is a primary headache trigger).',
-        'Rest in a quiet, darkened room away from screens and bright lights.',
-        'Apply a warm or cool pack to forehead or back of the neck.'
-      ],
-      medicationSafety: [
-        'Paracetamol 500mg or Naproxen 250mg with food.',
-        'Ensure adequate sleep (7-8 hours) and avoid meal skipping.'
-      ],
-      redFlags: [
-        'Sudden, explosive "thunderclap" headache (worst headache of your life).',
-        'Headache accompanied by stiff neck, high fever, confusion, or speech slurring.',
-        'Weakness or numbness in arm/face or vision loss.'
-      ],
-      specialist: 'Neurologist / General Physician'
-    },
-    {
-      id: 'pregnancy',
-      triggers: ['pregnancy', 'labour', 'contractions', 'garbh', 'garbhavati', 'prasavam', 'amniotic', 'bleeding in pregnancy'],
-      urgency: 'HIGH_URGENCY',
-      urgencyLabel: '🟠 High Urgency (Obstetric Evaluation)',
-      title: 'Maternal & Pregnancy Emergency Protocol',
-      assessment: 'Pregnancy-related abdominal cramps, labor onset, or bleeding require immediate obstetric monitoring.',
-      immediateActions: [
-        'If contractions are regular (every 5-10 minutes) or water breaks (amniotic fluid leak), transport immediately to Maternity Hospital / FRU.',
-        'Have the mother lie down on her LEFT side to optimize blood flow to the placenta and baby.',
-        'Keep Mother and Child Protection (MCP) card and hospital bag ready.'
-      ],
-      medicationSafety: [
-        '⚠️ NEVER take any over-the-counter medications without obstetrician approval.',
-        'Ensure prescribed Iron-Folic Acid (IFA) and Calcium tablets are maintained.'
-      ],
-      redFlags: [
-        'Vaginal bleeding or sudden fluid gush.',
-        'Severe persistent headache, vision blurring, or swollen face/hands (Preeclampsia signs).',
-        'Reduced or absent fetal movements.'
-      ],
-      specialist: 'Obstetrician & Gynecologist / Maternity CHC'
-    },
-    {
-      id: 'dengue',
-      triggers: ['dengue', 'malaria', 'platelets', 'mosquito bite', 'retro-orbital', 'breakbone fever', 'rash fever'],
-      urgency: 'HIGH_URGENCY',
-      urgencyLabel: '🟠 High Urgency (Platelet & Hydration Watch)',
-      title: 'Dengue & Vector-Borne Fever Protocol',
-      assessment: 'Dengue causes severe bone/joint pain, retro-orbital (behind eye) headache, and risks platelet drops (thrombocytopenia).',
-      immediateActions: [
-        'Get a Complete Blood Count (CBC) with Platelet Count and Dengue NS1 / IgM test done promptly.',
-        'Maintain vigorous hydration: 3 to 4 liters of fluid daily (ORS, coconut water, fresh lime water).',
-        'Strict bed rest and use mosquito nets to prevent spreading the infection to family members.'
-      ],
-      medicationSafety: [
-        'Paracetamol is the ONLY approved antipyretic for Dengue fever.',
-        '🚫 STRICTLY PROHIBITED: Aspirin, Ibuprofen, Diclofenac, Mefenamic Acid (they precipitate fatal hemorrhage).'
-      ],
-      redFlags: [
-        'Bleeding from gums, nose, skin petechiae (red spots), or black stools.',
-        'Severe persistent abdominal pain and recurrent vomiting.',
-        'Platelet count dropping below 50,000/μL or sudden cold extremities.'
-      ],
-      specialist: 'Internal Medicine / Infectious Disease Physician'
-    }
-  ];
-
-  // AI Assistant Controller Class
   class SwasthyaAiAssistantController {
     constructor() {
       this.isOpen = false;
+      this.isMinimized = false;
       this.currentLang = localStorage.getItem('swasthya_ai_lang') || 'en';
-      this.geminiApiKey = localStorage.getItem('swasthya_gemini_api_key') || '';
+      this.conversationId = sessionStorage.getItem('swasthya_ai_conv_id') || null;
       this.chatHistory = this.loadChatHistory();
       this.isProcessing = false;
       this.isListening = false;
       this.isSpeaking = false;
       this.recognition = null;
-      this.speechUtterance = null;
-      
+
       this.initVoiceRecognition();
+      this.initKeyboardListeners();
     }
 
     loadChatHistory() {
       try {
-        const saved = sessionStorage.getItem('swasthya_ai_history_v2');
+        const saved = sessionStorage.getItem('swasthya_ai_history_v3');
         if (saved) {
           const parsed = JSON.parse(saved);
           if (Array.isArray(parsed) && parsed.length > 0) return parsed;
         }
       } catch (e) {
-        console.warn('[AI Assistant] Could not load chat history:', e);
+        console.warn('[AI Triage] Could not load chat history:', e);
       }
       return [this.getInitialGreetingMessage()];
     }
 
     saveChatHistory() {
       try {
-        sessionStorage.setItem('swasthya_ai_history_v2', JSON.stringify(this.chatHistory.slice(-40)));
+        sessionStorage.setItem('swasthya_ai_history_v3', JSON.stringify(this.chatHistory.slice(-30)));
+        if (this.conversationId) {
+          sessionStorage.setItem('swasthya_ai_conv_id', this.conversationId);
+        }
       } catch (e) {
-        console.warn('[AI Assistant] Could not save chat history:', e);
+        console.warn('[AI Triage] Could not save chat history:', e);
       }
     }
 
     getInitialGreetingMessage() {
       const lang = this.currentLang in UI_TEXT ? this.currentLang : 'en';
-      const greetingText = UI_TEXT[lang].greeting;
       return {
         role: 'assistant',
-        text: greetingText,
+        text: UI_TEXT[lang].greeting,
+        triageLevel: 'LOW',
         timestamp: new Date().toISOString(),
-        showCommands: true
+        showQuickChips: true
       };
+    }
+
+    initKeyboardListeners() {
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && this.isOpen) {
+          this.toggleWindow(false);
+        }
+      });
     }
 
     initVoiceRecognition() {
@@ -352,12 +153,11 @@
           const inputEl = document.getElementById('swasthyaAiInputField');
           if (inputEl) {
             inputEl.value = transcript;
-            this.sendQuery(transcript);
+            this.sendUserQuery(transcript);
           }
         };
 
-        this.recognition.onerror = (e) => {
-          console.warn('[Voice Recognition] Error:', e.error);
+        this.recognition.onerror = () => {
           this.isListening = false;
           this.updateVoiceUi();
         };
@@ -374,11 +174,9 @@
       if (micBtn) {
         if (this.isListening) {
           micBtn.style.color = '#ef4444';
-          micBtn.classList.add('mic-pulsing');
           micBtn.title = 'Listening... Speak now';
         } else {
           micBtn.style.color = '#10b981';
-          micBtn.classList.remove('mic-pulsing');
           micBtn.title = 'Voice Input';
         }
       }
@@ -386,7 +184,7 @@
 
     startVoice() {
       if (!this.recognition) {
-        alert('Speech recognition is not supported in this browser. Please use Chrome or Edge.');
+        alert('Voice input is supported in Google Chrome, Edge, and modern mobile browsers.');
         return;
       }
       if (this.isListening) {
@@ -411,11 +209,10 @@
         return;
       }
 
-      // Clean markdown tags for clear speech
       const cleanText = text
         .replace(/[#*`_~[\]]/g, '')
         .replace(/https?:\/\/\S+/g, '')
-        .replace(/[🔴🟡🟢🚨⚠️🚫💡🩺💊👨‍⚕️🏥🆘]/g, '')
+        .replace(/[🔴🟠🟡🟢🚨⚠️🚫💡🩺💊👨‍⚕️🏥🆘]/g, '')
         .trim();
 
       const utterance = new SpeechSynthesisUtterance(cleanText);
@@ -443,9 +240,7 @@
       if (SUPPORTED_LANGUAGES[langCode]) {
         this.currentLang = langCode;
         localStorage.setItem('swasthya_ai_lang', langCode);
-        
-        // If first message is greeting, update to new language
-        if (this.chatHistory.length === 1 && this.chatHistory[0].showCommands) {
+        if (this.chatHistory.length === 1 && this.chatHistory[0].showQuickChips) {
           this.chatHistory[0] = this.getInitialGreetingMessage();
         }
         this.renderChat();
@@ -456,7 +251,7 @@
     updateUiStrings() {
       const lang = this.currentLang in UI_TEXT ? this.currentLang : 'en';
       const strings = UI_TEXT[lang];
-      
+
       const titleEl = document.getElementById('swasthyaAiHeaderTitle');
       if (titleEl) titleEl.textContent = strings.title;
 
@@ -468,6 +263,9 @@
 
       const langSelect = document.getElementById('swasthyaAiLangSelect');
       if (langSelect) langSelect.value = this.currentLang;
+
+      const disclaimerEl = document.getElementById('swasthyaAiDisclaimerBanner');
+      if (disclaimerEl) disclaimerEl.textContent = strings.disclaimer;
     }
 
     toggleWindow(forceState) {
@@ -477,6 +275,10 @@
 
       if (modal) {
         modal.style.display = this.isOpen ? 'flex' : 'none';
+        if (this.isOpen) {
+          modal.classList.remove('ai-window-minimized');
+          this.isMinimized = false;
+        }
       }
       if (launcherBtn) {
         launcherBtn.setAttribute('aria-expanded', this.isOpen ? 'true' : 'false');
@@ -493,183 +295,54 @@
         setTimeout(() => {
           const inputEl = document.getElementById('swasthyaAiInputField');
           if (inputEl) inputEl.focus();
-        }, 150);
+        }, 120);
+      }
+    }
+
+    toggleMinimize() {
+      const modal = document.getElementById('swasthyaAiWindow');
+      if (!modal) return;
+
+      this.isMinimized = !this.isMinimized;
+      if (this.isMinimized) {
+        modal.style.height = '60px';
+        const body = document.getElementById('swasthyaAiBodyArea');
+        if (body) body.style.display = 'none';
+      } else {
+        modal.style.height = '';
+        const body = document.getElementById('swasthyaAiBodyArea');
+        if (body) body.style.display = 'flex';
       }
     }
 
     clearChat() {
       if (window.speechSynthesis) window.speechSynthesis.cancel();
       this.chatHistory = [this.getInitialGreetingMessage()];
+      this.conversationId = null;
+      sessionStorage.removeItem('swasthya_ai_history_v3');
+      sessionStorage.removeItem('swasthya_ai_conv_id');
       this.saveChatHistory();
       this.renderChat();
     }
 
-    // Command Handlers
-    async executeCommand(cmd) {
-      const cleanCmd = cmd.trim().toLowerCase();
-      
-      if (cleanCmd === '/help' || cleanCmd === '/commands') {
-        let helpText = '### 💡 Swasthya AI Command Center\n\n' +
-          'You can use the following quick commands anytime:\n' +
-          '- **/symptoms** - Instant clinical symptom assessment\n' +
-          '- **/beds** - Live hospital bed availability within 25 km\n' +
-          '- **/doctor** - Request OPD queue or video doctor consultation\n' +
-          '- **/meds** - Jan Aushadhi generic medicines & savings\n' +
-          '- **/sos** - Emergency red-alert triage & 108 ambulance\n' +
-          '- **/clear** - Clear conversation history\n' +
-          '- **/key** - Setup or test Gemini AI API key';
-        this.addAssistantMessage(helpText);
-        return true;
-      }
-
-      if (cleanCmd === '/beds' || cleanCmd === '/hospital' || cleanCmd === '/nearby') {
-        this.handleBedsCommand();
-        return true;
-      }
-
-      if (cleanCmd === '/doctor' || cleanCmd === '/consult' || cleanCmd === '/opd') {
-        this.handleDoctorCommand();
-        return true;
-      }
-
-      if (cleanCmd === '/meds' || cleanCmd === '/medicine') {
-        this.handleMedsCommand();
-        return true;
-      }
-
-      if (cleanCmd === '/sos' || cleanCmd === '/emergency') {
-        this.handleSosCommand();
-        return true;
-      }
-
-      if (cleanCmd === '/symptoms') {
-        this.handleSymptomsCommand();
-        return true;
-      }
-
-      if (cleanCmd === '/clear') {
-        this.clearChat();
-        return true;
-      }
-
-      if (cleanCmd === '/key' || cleanCmd === '/apikey') {
-        this.openApiKeyModal();
-        return true;
-      }
-
-      return false;
-    }
-
-    handleBedsCommand() {
-      let hospitalInfo = '### 🏥 Live Hospital Beds (Within 25 km Max Range)\n\n';
-      
+    getPatientContext() {
       const appState = window.appStore ? window.appStore.getState() : null;
-      let hospitals = (appState && appState.hospitals) ? appState.hospitals : [];
-
-      // Deduplicate and filter <= 25km
-      const seen = new Set();
-      const filtered = [];
-      for (const h of hospitals) {
-        const norm = (h.name || '').trim().toLowerCase();
-        if (!seen.has(norm)) {
-          seen.add(norm);
-          const dist = parseFloat(h.distance || '0');
-          if (isNaN(dist) || dist <= 25) {
-            filtered.push(h);
-          }
-        }
-      }
-
-      if (filtered.length === 0) {
-        hospitalInfo += '📍 *No verified hospital records found within 25 km right now. Please enable GPS location above to calculate precise distance.*';
-      } else {
-        hospitalInfo += `Found **${filtered.length} verified facilities** sorted by closest proximity:\n\n`;
-        filtered.slice(0, 4).forEach((h, i) => {
-          hospitalInfo += `**${i + 1}. ${h.name}** (${h.type || 'Hospital'})\n` +
-            `• 📍 **Distance:** ${h.distance || 'Nearby'}\n` +
-            `• 🛏️ **General Beds:** ${h.genBedsAvail || 0} / ${h.totalBeds || 0} Avail\n` +
-            `• 🫁 **ICU Beds:** ${h.icuBedsAvail || 0} | **Oxygen Beds:** ${h.oxyBedsAvail || 0}\n` +
-            `• 📞 **Contact:** ${h.phone || '0866-281001'}\n\n`;
-        });
-        hospitalInfo += `👉 *Tip: Scroll up to the **Nearby Hospitals Bed Grid** in your portal for one-click calling and turn-by-turn navigation.*`;
-      }
-
-      this.addAssistantMessage(hospitalInfo);
+      const user = (appState && (appState.currentUser || (appState.session && appState.session.user))) || {};
+      return {
+        age: user.age || null,
+        gender: user.gender || null,
+        chronicConditions: []
+      };
     }
 
-    handleDoctorCommand() {
-      const appState = window.appStore ? window.appStore.getState() : null;
-      const doctors = (appState && appState.doctors) ? appState.doctors : [];
-      const onDuty = doctors.filter(d => d.status === 'online' || d.status === 'available');
-
-      let reply = '### 👨‍⚕️ Digital Doctor Consultation (E-Sanjeevani OPD)\n\n';
-      if (onDuty.length > 0) {
-        reply += `There are currently **${onDuty.length} verified doctors available** on duty:\n`;
-        onDuty.forEach(d => {
-          reply += `• **${d.name}** (${d.specialty || 'General Medicine'})\n`;
-        });
-      } else {
-        reply += `Doctors Dr. Priya Sharma (Pediatrician) and Dr. Rajesh Verma (General Physician) are on clinical call.\n`;
-      }
-
-      reply += '\n**How would you like to consult?**\n' +
-        '1. **📹 Live Video Call:** Click the **"Live Video Call Doctor"** button at the top of your portal.\n' +
-        '2. **📋 Request OPD Queue:** Click **"Request OPD Queue"** to reserve your token for clinical review.';
-      
-      this.addAssistantMessage(reply);
-    }
-
-    handleMedsCommand() {
-      const reply = '### 💊 Jan Aushadhi Generic Medicine Guide & Savings\n\n' +
-        '**Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP):**\n' +
-        '• Saves up to **50%–80%** on essential chronic & acute medications.\n' +
-        '• Identical therapeutic efficacy, safety standards, and molecular composition as branded formulations.\n\n' +
-        '**Essential Dosage & Safety Rules:**\n' +
-        '1. **Paracetamol:** Maximum 3000mg/day for adults. Never take on empty stomach if prone to acidity.\n' +
-        '2. **Oral Rehydration Salts (ORS):** 1 packet in exactly 1 Liter clean boiled drinking water.\n' +
-        '3. **Antibiotics:** NEVER self-prescribe antibiotics for viral fever or cough. Only take with a licensed doctor prescription.';
-
-      this.addAssistantMessage(reply);
-    }
-
-    handleSosCommand() {
-      const reply = '### 🚨 Emergency Medical Alert (108 SOS Protocol)\n\n' +
-        'If you or someone nearby is experiencing life-threatening conditions:\n\n' +
-        '• 📞 **National Ambulance Service:** **Call 108 immediately**\n' +
-        '• 📞 **Women Helpline:** **1091** | **Childline:** **1098**\n\n' +
-        '**Life-Saving Immediate First Aid:**\n' +
-        '1. **Chest Pain / Heart Attack:** Sit patient upright in W-position, loosen tight clothing, do not let them exert.\n' +
-        '2. **Snakebite:** Immobilize limb below heart, keep calm, rush to nearest Anti-Snake Venom CHC.\n' +
-        '3. **Severe Bleeding:** Apply direct firm pressure with clean cotton cloth; elevate limb if possible.\n' +
-        '4. **Unconsciousness:** Place in lateral recovery position on their side to prevent tongue blocking the airway.';
-
-      this.addAssistantMessage(reply);
-    }
-
-    handleSymptomsCommand() {
-      const reply = '### 🩺 Guided Clinical Symptom Assessment\n\n' +
-        'Please describe your symptoms in detail, or select one of the common health concerns:\n\n' +
-        '• 🌡️ **Fever, Chills & Body Ache** (Type: "fever")\n' +
-        '• 🫀 **Chest Tightness or Pain** (Type: "chest pain")\n' +
-        '• 🐍 **Snake or Insect Bite** (Type: "snake bite")\n' +
-        '• 😮‍💨 **Shortness of Breath or Asthma** (Type: "breathing trouble")\n' +
-        '• 💧 **Diarrhea, Vomiting & ORS** (Type: "loose motions")\n' +
-        '• 🤰 **Pregnancy Labor or Bleeding** (Type: "pregnancy")\n' +
-        '• 🦟 **Suspected Dengue or Malaria** (Type: "dengue signs")\n\n' +
-        '*Feel free to type in Hindi, Telugu, Tamil, Bengali, or English!*';
-
-      this.addAssistantMessage(reply);
-    }
-
-    async sendQuery(userText) {
-      if (!userText || !userText.trim()) return;
-      const query = userText.trim();
-
-      // Clear input
+    async sendUserQuery(text) {
       const inputEl = document.getElementById('swasthyaAiInputField');
+      const query = (text || (inputEl ? inputEl.value : '') || '').trim();
+      if (!query) return;
+
       if (inputEl) inputEl.value = '';
 
-      // Add user message to history
+      // Add user message to UI
       this.chatHistory.push({
         role: 'user',
         text: query,
@@ -678,188 +351,97 @@
       this.saveChatHistory();
       this.renderChat();
 
-      // Check if it's a command
+      // Check commands
       if (query.startsWith('/')) {
         const handled = await this.executeCommand(query);
         if (handled) return;
       }
 
-      // Check for conversational greetings
-      if (this.isGreetingQuery(query)) {
-        this.handleConversationalGreeting(query);
-        return;
-      }
-
-      // Set processing state
       this.isProcessing = true;
       this.renderChat();
 
       try {
-        let answer = '';
-        if (this.geminiApiKey) {
-          // Live Gemini API integration
-          answer = await this.queryGeminiApi(query);
+        let triageResult = null;
+
+        // Call backend API if client has token or backend is active
+        if (window.swasthyaAPI && typeof window.swasthyaAPI.sendAiTriageMessage === 'function') {
+          try {
+            triageResult = await window.swasthyaAPI.sendAiTriageMessage({
+              message: query,
+              conversationId: this.conversationId,
+              language: this.currentLang,
+              patientContext: this.getPatientContext()
+            });
+            if (triageResult && triageResult.conversationId) {
+              this.conversationId = triageResult.conversationId;
+            }
+          } catch (apiErr) {
+            console.warn('[AI Triage] Backend API offline or token missing. Using onboard clinical engine:', apiErr.message);
+            triageResult = this.evaluateLocalClinicalFallback(query);
+          }
         } else {
-          // High-Intelligence Onboard Clinical AI Model
-          answer = await this.queryClinicalModel(query);
+          triageResult = this.evaluateLocalClinicalFallback(query);
         }
 
-        this.addAssistantMessage(answer);
+        this.addAssistantResponse(triageResult);
       } catch (err) {
-        console.warn('[AI Assistant] Query error:', err);
-        // Fallback to internal clinical model
-        const fallbackAnswer = await this.queryClinicalModel(query);
-        this.addAssistantMessage(fallbackAnswer);
+        console.error('[AI Triage] Error processing symptom query:', err);
+        const fallback = this.evaluateLocalClinicalFallback(query);
+        this.addAssistantResponse(fallback);
       } finally {
         this.isProcessing = false;
         this.renderChat();
       }
     }
 
-    isGreetingQuery(q) {
-      const text = q.trim().toLowerCase();
-      const greetings = [
-        'hi', 'hello', 'hey', 'namaste', 'vanakkam', 'namaskara', 'nomoshkar',
-        'kem cho', 'sat sri akal', 'good morning', 'good evening', 'good afternoon',
-        'who are you', 'what are you', 'how are you', 'kya hal hai', 'ela unnaru',
-        'aap kaun ho', 'what can you do', 'help', 'hi bot', 'hello ai'
-      ];
-      return greetings.some(g => text === g || text.startsWith(g + ' '));
-    }
+    evaluateLocalClinicalFallback(query) {
+      const q = query.toLowerCase();
 
-    handleConversationalGreeting(q) {
-      const lang = this.currentLang in UI_TEXT ? this.currentLang : 'en';
-      let greetingReply = '';
-
-      if (lang === 'hi') {
-        greetingReply = '👋 **नमस्ते! मैं आपका स्वास्थय AI सहायक हूँ।**\n\n' +
-          'मैं पूरी तरह सक्रिय हूँ और आपकी स्वास्थ्य संबंधी किसी भी समस्या में मार्गदर्शन कर सकता हूँ।\n\n' +
-          '**आप क्या जानना चाहते हैं?**\n' +
-          '- अपने लक्षणों के बारे में बताएं (जैसे तेज बुखार, खांसी, सीने में दर्द)\n' +
-          '- नजदीकी अस्पताल के ICU या ऑक्सीजन बेड की जानकारी लें (कमांड: `/beds`)\n' +
-          '- डॉक्टर से वीडियो परामर्श शुरू करें (कमांड: `/doctor`)';
-      } else if (lang === 'te') {
-        greetingReply = '👋 **నమస్కారం! నేను మీ స్వాస్థ్య AI ఆరోగ్య సహాయకుడిని.**\n\n' +
-          'నేను మీకు సహాయం చేయడానికి సిద్ధంగా ఉన్నాను. మీ ఆరోగ్య సమస్యలు, అత్యవసర ప్రథమ చికిత్స లేదా ఆసుపత్రి పడకల సమాచారం కోసం నన్ను అడగవచ్చు.\n\n' +
-          'దయచేసి మీ లక్షణాలను వివరించండి లేదా `/beds` కమాండ్ ఉపయోగించండి.';
-      } else {
-        greetingReply = '👋 **Hello! How can I assist you with your health today?**\n\n' +
-          'I am your 24x7 clinical intelligence assistant. You can:\n' +
-          '• Describe any symptoms you or your family members are experiencing\n' +
-          '• Ask for first-aid or home care guidance\n' +
-          '• Type `/beds` to view live hospitals with ICU beds within 25 km\n' +
-          '• Type `/doctor` to connect with an on-duty medical officer';
+      // 1. Red flag emergency
+      if (/(chests*pain|hearts*attack|cannots*breathe|slurreds*speech|stroke|snakes*bite|severes*bleeding)/i.test(q)) {
+        return {
+          triageLevel: 'EMERGENCY',
+          emergencyNotice: '🚨 **CRITICAL MEDICAL EMERGENCY ALERT (EMERGENCY RED FLAG)**\n\nImmediate emergency medical attention required. Call 108 or 112 now.',
+          message: '### 🚨 Critical Urgency: Immediate Medical Attention Needed\n\n**Possible Causes:** Potential acute cardiovascular, respiratory, or neurological emergency.\n\n**Immediate Steps:**\n1. Call **108 (Ambulance)** or **112** immediately.\n2. Do not let the patient walk or exert.\n3. Transport to the nearest Emergency/ICU hospital.',
+          disclaimer: '⚠️ AI-assisted triage guidance, not a medical diagnosis.'
+        };
       }
 
-      this.addAssistantMessage(greetingReply);
-    }
-
-    async queryGeminiApi(userQuery) {
-      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${this.geminiApiKey}`;
-      
-      const systemInstruction = `You are Swasthya AI, a premier clinical medical AI healthcare assistant designed for rural and urban patients.
-Your role is to provide empathetic, evidence-based, clinically structured medical advice.
-Always include:
-1. 💡 Clinical Assessment & Possible Causes
-2. ⚠️ Urgency Level (Emergency / High / Moderate / Mild)
-3. 🩺 Immediate Actionable First Aid & Relief Steps
-4. 💊 Medicine & Hydration Guidance (with contraindications, e.g. never Aspirin in Dengue)
-5. 🚩 Red-Flag Danger Signs requiring instant 108 Emergency hospital visit
-6. 👨‍⚕️ Recommended Medical Specialist
-Keep language clear, empathetic, and easily readable with bullet points and bold highlights.
-The user's preferred language is ${SUPPORTED_LANGUAGES[this.currentLang]?.name || 'English'}. Answer in ${SUPPORTED_LANGUAGES[this.currentLang]?.name || 'English'}.`;
-
-      const contents = [
-        {
-          role: 'user',
-          parts: [{ text: systemInstruction + '\n\nPatient Query: ' + userQuery }]
-        }
-      ];
-
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents,
-          generationConfig: {
-            temperature: 0.3,
-            maxOutputTokens: 1024
-          }
-        })
-      });
-
-      if (!res.ok) {
-        throw new Error(`Gemini API returned status ${res.status}`);
+      // 2. Fever
+      if (/(fever|chills|bukhaar|jwaram)/i.test(q)) {
+        const isProlonged = /(3s*days|days|week)/i.test(q);
+        return {
+          triageLevel: isProlonged ? 'URGENT' : 'MODERATE',
+          message: `### 🌡️ Fever Assessment (${isProlonged ? 'URGENT' : 'MODERATE'})\n\n` +
+            `**Possible Causes:** Viral influenza, seasonal infection, or vector-borne illness.\n\n` +
+            `**Recommended Actions:**\n` +
+            `• Hydrate with clean water, ORS, and warm soups.\n` +
+            `• Lukewarm sponge baths to lower temperature.\n` +
+            `• Consult a General Physician if fever persists beyond 48 hours.`,
+          disclaimer: '⚠️ AI-assisted triage guidance, not a medical diagnosis.'
+        };
       }
 
-      const data = await res.json();
-      const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (!text) throw new Error('Empty response from Gemini API');
-      return text;
+      // 3. General
+      return {
+        triageLevel: 'LOW',
+        message: '### 🩺 Health Guidance (LOW Urgency)\n\n' +
+          '**Clinical Summary:** Based on your description, this condition warrants rest and careful observation.\n\n' +
+          '**Recommended Next Steps:**\n' +
+          '1. Rest and stay well hydrated.\n' +
+          '2. Observe symptoms over the next 24 to 48 hours.\n' +
+          '3. If symptoms worsen, connect with a doctor via the portal or visit your nearest PHC.',
+        disclaimer: '⚠️ AI-assisted triage guidance, not a medical diagnosis.'
+      };
     }
 
-    async queryClinicalModel(userQuery) {
-      // Simulate intelligent reasoning delay (300ms)
-      await new Promise(r => setTimeout(r, 300));
-      
-      const qLower = userQuery.toLowerCase();
-
-      // Check against clinical protocol knowledge base
-      for (const proto of CLINICAL_KNOWLEDGE_BASE) {
-        const matches = proto.triggers.some(t => qLower.includes(t));
-        if (matches) {
-          return this.formatProtocolResponse(proto);
-        }
-      }
-
-      // Contextual general medical intelligence synthesis
-      return this.synthesizeGeneralAdvice(userQuery);
-    }
-
-    formatProtocolResponse(proto) {
-      let reply = `### ${proto.title}\n\n` +
-        `**Urgency:** ${proto.urgencyLabel}\n\n` +
-        `**💡 Clinical Assessment:**\n${proto.assessment}\n\n` +
-        `**🩺 Immediate Actionable Steps:**\n`;
-      
-      proto.immediateActions.forEach(a => {
-        reply += `• ${a}\n`;
-      });
-
-      reply += `\n**💊 Medication & Safety Precautions:**\n`;
-      proto.medicationSafety.forEach(m => {
-        reply += `• ${m}\n`;
-      });
-
-      reply += `\n**🚩 Red-Flag Danger Signs (Seek Emergency Care If Present):**\n`;
-      proto.redFlags.forEach(r => {
-        reply += `• ⚠️ ${r}\n`;
-      });
-
-      reply += `\n**👨‍⚕️ Recommended Specialist:** ${proto.specialist}\n` +
-        `*Need emergency transport? Type **/sos** or call **108** immediately.*`;
-
-      return reply;
-    }
-
-    synthesizeGeneralAdvice(query) {
-      return `### 💡 Clinical Assessment & Guidance\n\n` +
-        `**Inquiry:** "${this.escapeHtml(query)}"\n\n` +
-        `**Clinical Overview:**\n` +
-        `Based on your description, this condition warrants careful observation. Common triggers include localized strain, early viral infection, dietary factors, or environmental irritation.\n\n` +
-        `**🩺 Recommended Initial Steps:**\n` +
-        `1. Ensure adequate hydration with clean drinking water and electrolytes.\n` +
-        `2. Rest the affected area and avoid strenuous physical exertion.\n` +
-        `3. Monitor your vital signs (temperature, pulse, breathing rate, and blood pressure if available).\n\n` +
-        `**🚩 Warning Signs:**\n` +
-        `If you develop high fever (>101°F), severe worsening pain, persistent vomiting, or difficulty breathing, visit the nearest Primary Health Centre (PHC) or Community Health Centre (CHC) immediately.\n\n` +
-        `👉 *You can type **/doctor** to consult our on-duty teleconsultation doctor, or **/beds** to locate nearby hospitals.*`;
-    }
-
-    addAssistantMessage(text) {
+    addAssistantResponse(result) {
       this.chatHistory.push({
         role: 'assistant',
-        text: text,
+        text: result.message || result.summary || 'Clinical guidance received.',
+        triageLevel: result.triageLevel || 'LOW',
+        emergencyNotice: result.emergencyNotice || null,
+        disclaimer: result.disclaimer || null,
         timestamp: new Date().toISOString()
       });
       this.saveChatHistory();
@@ -871,9 +453,18 @@ The user's preferred language is ${SUPPORTED_LANGUAGES[this.currentLang]?.name |
       if (!container) return;
 
       let html = '';
+
+      // Permanent top medical disclaimer banner
+      html += `
+        <div id="swasthyaAiDisclaimerBanner" style="background:rgba(2,132,199,0.12);border:1px solid rgba(2,132,199,0.25);border-radius:10px;padding:8px 12px;font-size:11px;color:#94a3b8;line-height:1.45;margin-bottom:12px;">
+          ${UI_TEXT[this.currentLang]?.disclaimer || UI_TEXT.en.disclaimer}
+        </div>
+      `;
+
       this.chatHistory.forEach((msg, idx) => {
         const isUser = msg.role === 'user';
         const renderedBody = this.markdownToHtml(msg.text);
+        const level = msg.triageLevel || 'LOW';
 
         html += `
           <div class="ai-msg-row ${isUser ? 'user-msg-row' : 'assistant-msg-row'}" style="display:flex;gap:10px;margin-bottom:14px;align-items:flex-start;justify-content:${isUser ? 'flex-end' : 'flex-start'};">
@@ -882,11 +473,20 @@ The user's preferred language is ${SUPPORTED_LANGUAGES[this.currentLang]?.name |
                 ✨
               </div>
             ` : ''}
-            
-            <div class="ai-bubble ${isUser ? 'user-bubble' : 'assistant-bubble'}" style="max-width:85%;border-radius:14px;padding:12px 16px;font-size:13.5px;line-height:1.55;box-shadow:0 4px 14px rgba(0,0,0,0.15);${isUser ? 'background:linear-gradient(135deg, #10b981, #059669);color:#ffffff;border-bottom-right-radius:4px;' : 'background:var(--glass-2, #1e293b);color:var(--ink, #f1f5f9);border:1px solid rgba(255,255,255,0.1);border-bottom-left-radius:4px;'}">
+
+            <div class="ai-bubble ${isUser ? 'user-bubble' : 'assistant-bubble'}" style="max-width:86%;border-radius:14px;padding:12px 16px;font-size:13.5px;line-height:1.55;box-shadow:0 4px 14px rgba(0,0,0,0.15);${isUser ? 'background:linear-gradient(135deg, #10b981, #059669);color:#ffffff;border-bottom-right-radius:4px;' : 'background:#1e293b;color:#f1f5f9;border:1px solid rgba(255,255,255,0.1);border-bottom-left-radius:4px;'}">
+              
+              ${!isUser && msg.triageLevel ? this.renderTriageBadge(level) : ''}
+
+              ${!isUser && msg.emergencyNotice ? `
+                <div style="background:rgba(220,38,38,0.18);border:1.5px solid #dc2626;border-radius:10px;padding:10px 12px;margin-bottom:10px;font-size:12.5px;color:#fca5a5;">
+                  ${this.markdownToHtml(msg.emergencyNotice)}
+                </div>
+              ` : ''}
+
               <div class="ai-content-body">${renderedBody}</div>
 
-              ${!isUser && msg.showCommands ? this.renderCommandChipsHtml() : ''}
+              ${!isUser && msg.showQuickChips ? this.renderQuickChipsHtml() : ''}
 
               ${!isUser ? `
                 <div style="display:flex;align-items:center;gap:8px;margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.08);font-size:11px;">
@@ -920,11 +520,11 @@ The user's preferred language is ${SUPPORTED_LANGUAGES[this.currentLang]?.name |
             <div class="ai-avatar" style="width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg, #10b981, #0d9488);display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;flex-shrink:0;">
               ✨
             </div>
-            <div class="ai-bubble assistant-bubble" style="padding:12px 18px;border-radius:14px;background:var(--glass-2, #1e293b);border:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;gap:8px;">
+            <div class="ai-bubble assistant-bubble" style="padding:12px 18px;border-radius:14px;background:#1e293b;border:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;gap:8px;">
               <div class="ai-typing-dot"></div>
               <div class="ai-typing-dot"></div>
               <div class="ai-typing-dot"></div>
-              <span style="font-size:12px;color:#94a3b8;margin-left:4px;">${this.geminiApiKey ? 'Gemini AI reasoning...' : 'Analyzing clinical symptoms...'}</span>
+              <span style="font-size:12px;color:#94a3b8;margin-left:4px;">Evaluating symptoms &amp; clinical urgency...</span>
             </div>
           </div>
         `;
@@ -934,14 +534,33 @@ The user's preferred language is ${SUPPORTED_LANGUAGES[this.currentLang]?.name |
       container.scrollTop = container.scrollHeight;
     }
 
-    renderCommandChipsHtml() {
-      let chips = '<div class="ai-commands-container" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(130px, 1fr));gap:8px;margin-top:12px;">';
-      ASSISTANCE_COMMANDS.forEach(c => {
+    renderTriageBadge(level) {
+      if (level === 'EMERGENCY') {
+        return `<div style="display:inline-flex;align-items:center;gap:5px;background:rgba(220,38,38,0.2);border:1px solid #dc2626;color:#f87171;font-weight:800;font-size:11px;padding:3px 10px;border-radius:8px;margin-bottom:8px;animation:pulseAiGlow 2s infinite;">
+          🚨 CRITICAL EMERGENCY (108 CALL)
+        </div>`;
+      }
+      if (level === 'URGENT') {
+        return `<div style="display:inline-flex;align-items:center;gap:5px;background:rgba(234,88,12,0.2);border:1px solid #ea580c;color:#fb923c;font-weight:800;font-size:11px;padding:3px 10px;border-radius:8px;margin-bottom:8px;">
+          🟠 URGENT (DOCTOR CONSULT TODAY)
+        </div>`;
+      }
+      if (level === 'MODERATE') {
+        return `<div style="display:inline-flex;align-items:center;gap:5px;background:rgba(202,138,4,0.2);border:1px solid #ca8a04;color:#facc15;font-weight:800;font-size:11px;padding:3px 10px;border-radius:8px;margin-bottom:8px;">
+          🟡 MODERATE (OBSERVE &amp; REVIEW)
+        </div>`;
+      }
+      return `<div style="display:inline-flex;align-items:center;gap:5px;background:rgba(16,185,129,0.2);border:1px solid #10b981;color:#34d399;font-weight:800;font-size:11px;padding:3px 10px;border-radius:8px;margin-bottom:8px;">
+        🟢 LOW URGENCY (HOME CARE)
+      </div>`;
+    }
+
+    renderQuickChipsHtml() {
+      let chips = '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;">';
+      QUICK_PROMPTS.forEach(q => {
         chips += `
-          <button type="button" onclick="window.swasthyaAiAssistant.executeCommand('${c.cmd}')" class="ai-cmd-chip" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.14);border-radius:10px;padding:8px 10px;color:var(--ink, #fff);text-align:left;cursor:pointer;transition:all 0.2s ease;">
-            <div style="font-size:15px;margin-bottom:2px;">${c.icon}</div>
-            <div style="font-size:12px;font-weight:700;color:#34d399;">${c.label}</div>
-            <div style="font-size:10px;color:#94a3b8;">${c.desc}</div>
+          <button type="button" onclick="window.swasthyaAiAssistant.sendUserQuery('${q.query.replace(/'/g, "\\'")}')" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.14);border-radius:14px;padding:6px 10px;color:#cbd5e1;font-size:11.5px;cursor:pointer;transition:all 0.2s ease;">
+            ${q.label}
           </button>
         `;
       });
@@ -956,33 +575,15 @@ The user's preferred language is ${SUPPORTED_LANGUAGES[this.currentLang]?.name |
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;');
 
-      // Headers
       html = html.replace(/^### (.*$)/gim, '<h4 style="font-size:14px;font-weight:800;color:#34d399;margin:8px 0 6px 0;">$1</h4>');
       html = html.replace(/^## (.*$)/gim, '<h3 style="font-size:15px;font-weight:800;color:#34d399;margin:10px 0 6px 0;">$1</h3>');
-
-      // Bold & Italic
-      html = html.replace(/\*\*(.*?)\*\*/g, '<strong style="font-weight:700;color:var(--ink, #fff);">$1</strong>');
+      html = html.replace(/\*\*(.*?)\*\*/g, '<strong style="font-weight:700;color:#fff;">$1</strong>');
       html = html.replace(/\*(.*?)\*/g, '<em style="font-style:italic;">$1</em>');
-
-      // Unordered lists
       html = html.replace(/^\s*[•\-]\s+(.*$)/gim, '<li style="margin-bottom:4px;list-style-type:disc;margin-left:18px;">$1</li>');
-
-      // Linebreaks
       html = html.replace(/\n\n/g, '<div style="margin-bottom:8px;"></div>');
       html = html.replace(/\n/g, '<br>');
 
       return html;
-    }
-
-    escapeHtml(str) {
-      if (!str) return '';
-      return str.replace(/[&<>"']/g, m => ({
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#39;'
-      })[m]);
     }
 
     formatTime(iso) {
@@ -994,38 +595,83 @@ The user's preferred language is ${SUPPORTED_LANGUAGES[this.currentLang]?.name |
       }
     }
 
-    openApiKeyModal() {
-      const modal = document.getElementById('swasthyaAiSettingsModal');
-      if (modal) {
-        modal.style.display = 'flex';
-        const input = document.getElementById('swasthyaAiApiKeyInput');
-        if (input) input.value = this.geminiApiKey || '';
+    async executeCommand(cmd) {
+      const clean = cmd.trim().toLowerCase();
+      if (clean === '/clear') {
+        this.clearChat();
+        return true;
       }
-    }
-
-    closeApiKeyModal() {
-      const modal = document.getElementById('swasthyaAiSettingsModal');
-      if (modal) modal.style.display = 'none';
-    }
-
-    saveApiKey() {
-      const input = document.getElementById('swasthyaAiApiKeyInput');
-      if (input) {
-        const key = input.value.trim();
-        this.geminiApiKey = key;
-        if (key) {
-          localStorage.setItem('swasthya_gemini_api_key', key);
-          alert('✓ Gemini API Key saved successfully. Cloud intelligence is now active!');
-        } else {
-          localStorage.removeItem('swasthya_gemini_api_key');
-          alert('✓ Swasthya AI switched to High-Intelligence Onboard Clinical Mode.');
-        }
-        this.closeApiKeyModal();
-        this.renderChat();
+      if (clean === '/beds') {
+        this.handleBedsCommand();
+        return true;
       }
+      if (clean === '/doctor') {
+        this.handleDoctorCommand();
+        return true;
+      }
+      if (clean === '/sos') {
+        this.handleSosCommand();
+        return true;
+      }
+      if (clean === '/meds') {
+        this.handleMedsCommand();
+        return true;
+      }
+      return false;
     }
 
-    // Compatibility methods for existing codebase
+    handleBedsCommand() {
+      const appState = window.appStore ? window.appStore.getState() : null;
+      const hospitals = (appState && appState.hospitals) ? appState.hospitals : [];
+      let reply = '### 🏥 Live Hospital Beds (Within 25 km)\n\n';
+      if (hospitals.length === 0) {
+        reply += '📍 *No hospital records found within 25 km right now. Please enable GPS in your portal.*';
+      } else {
+        reply += `Found **${hospitals.length} facilities** nearby:\n\n`;
+        hospitals.slice(0, 3).forEach((h, i) => {
+          reply += `**${i + 1}. ${h.name}**\n• Distance: ${h.distance || 'Nearby'} | Gen Beds: ${h.genBedsAvail || 0} | ICU Beds: ${h.icuBedsAvail || 0}\n\n`;
+        });
+        reply += '👉 *Scroll up to the Nearby Hospitals Bed Grid in your portal for instant calling.*';
+      }
+      this.chatHistory.push({ role: 'assistant', text: reply, timestamp: new Date().toISOString() });
+      this.saveChatHistory();
+      this.renderChat();
+    }
+
+    handleDoctorCommand() {
+      const reply = '### 👨‍⚕️ Consult an On-Duty Doctor\n\n' +
+        'You can consult licensed government physicians directly through your Swasthya Setu dashboard:\n\n' +
+        '1. **📹 Live Video Call:** Click the **"Live Video Call Doctor"** button at the top of your portal.\n' +
+        '2. **📋 Request OPD Queue:** Click **"Request OPD Queue"** to receive an OPD token number for today.';
+      this.chatHistory.push({ role: 'assistant', text: reply, timestamp: new Date().toISOString() });
+      this.saveChatHistory();
+      this.renderChat();
+    }
+
+    handleSosCommand() {
+      const reply = '### 🚨 Emergency Medical Alert (108 SOS Protocol)\n\n' +
+        '• 📞 **National Emergency Ambulance:** **Call 108 immediately**\n' +
+        '• 📞 **Emergency Helpline:** **Call 112**\n\n' +
+        '**Immediate Life-Saving First Aid:**\n' +
+        '1. **Chest Pain:** Sit in W-position, loosen tight clothes, do not exert.\n' +
+        '2. **Stroke Signs:** Note the time, rush to nearest hospital with CT scanner.\n' +
+        '3. **Severe Bleeding:** Apply direct firm pressure with clean cotton cloth.';
+      this.chatHistory.push({ role: 'assistant', text: reply, triageLevel: 'EMERGENCY', emergencyNotice: 'Call 108 Ambulance Immediately', timestamp: new Date().toISOString() });
+      this.saveChatHistory();
+      this.renderChat();
+    }
+
+    handleMedsCommand() {
+      const reply = '### 💊 Jan Aushadhi Generic Medicine Guide\n\n' +
+        '• Saves up to **50%–80%** on essential generic medicines with identical bioequivalence.\n' +
+        '• Always confirm dosage with a qualified doctor or pharmacist.\n' +
+        '• Never self-medicate with antibiotics.';
+      this.chatHistory.push({ role: 'assistant', text: reply, timestamp: new Date().toISOString() });
+      this.saveChatHistory();
+      this.renderChat();
+    }
+
+    // Compatibility methods
     triggerSymptomPill(type) {
       this.toggleWindow(true);
       const queryMap = {
@@ -1034,26 +680,9 @@ The user's preferred language is ${SUPPORTED_LANGUAGES[this.currentLang]?.name |
         chestpain: 'Emergency: Chest pain and tightness',
         diarrhea: 'Severe diarrhea and dehydration ORS',
         breathing: 'Shortness of breath and wheezing',
-        pregnancy: 'Pregnancy labor contractions and pain',
-        vomiting: 'Persistent vomiting and dizziness',
-        headache: 'Severe migraine headache',
-        bleeding: 'Heavy bleeding from deep cut',
-        dengue: 'Suspected Dengue fever signs with joint pain'
+        headache: 'Severe headache and dizziness'
       };
-      const q = queryMap[type] || type;
-      this.sendQuery(q);
-    }
-
-    sendUserQuery(q) {
-      if (q) {
-        this.toggleWindow(true);
-        this.sendQuery(q);
-      } else {
-        const input = document.getElementById('swasthyaAiInputField');
-        if (input && input.value) {
-          this.sendQuery(input.value);
-        }
-      }
+      this.sendUserQuery(queryMap[type] || type);
     }
 
     toggleFloatingWidget(isOpen) {
@@ -1061,13 +690,11 @@ The user's preferred language is ${SUPPORTED_LANGUAGES[this.currentLang]?.name |
     }
   }
 
-  // Export globally
+  // Export controller
   const assistant = new SwasthyaAiAssistantController();
   global.swasthyaAiAssistant = assistant;
-  // Keep alias for backwards compatibility
   global.aiHealthBot = assistant;
 
-  // Auto-render on DOM ready
   document.addEventListener('DOMContentLoaded', () => {
     assistant.renderChat();
   });

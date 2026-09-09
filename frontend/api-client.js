@@ -239,6 +239,29 @@
         body: addressData
       });
     }
+
+    /* =========================================================
+     * AI HEALTHCARE TRIAGE ENDPOINTS
+     * ========================================================= */
+
+    async sendAiTriageMessage({ message, conversationId, language, patientContext }) {
+      return this._request('/ai/triage/chat', {
+        method: 'POST',
+        body: { message, conversationId, language, patientContext }
+      });
+    }
+
+    async getAiTriageHistory(conversationId) {
+      return this._request(`/ai/triage/conversations/${encodeURIComponent(conversationId)}`, {
+        method: 'GET'
+      });
+    }
+
+    async clearAiTriageConversation(conversationId) {
+      return this._request(`/ai/triage/conversations/${encodeURIComponent(conversationId)}`, {
+        method: 'DELETE'
+      });
+    }
   }
 
   // Expose globally to window
