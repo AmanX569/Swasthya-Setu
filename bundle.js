@@ -59,6 +59,18 @@ fs.writeFileSync(outPath, html, 'utf8');
 const rootIndex = path.join(projectRoot, 'index.html');
 fs.writeFileSync(rootIndex, html, 'utf8');
 
+// Also sync public/ directory for Vercel static build output
+const publicDir = path.join(projectRoot, 'public');
+if (!fs.existsSync(publicDir)) {
+  fs.mkdirSync(publicDir, { recursive: true });
+}
+fs.writeFileSync(path.join(publicDir, 'index.html'), html, 'utf8');
+if (fs.existsSync(path.join(projectRoot, 'assets'))) {
+  const publicAssets = path.join(publicDir, 'assets');
+  if (!fs.existsSync(publicAssets)) fs.mkdirSync(publicAssets, { recursive: true });
+  if (fs.existsSync(srcLogo)) fs.copyFileSync(srcLogo, path.join(publicAssets, 'logo.png'));
+}
+
 console.log('✓ Successfully created 100% standalone single HTML file with embedded official logo at:', outPath);
-console.log('✓ Successfully synced root index.html for GitHub Pages / Cloud Hosting');
+console.log('✓ Successfully synced root index.html and public/ for GitHub Pages / Vercel Cloud Hosting');
 console.log('File size:', (html.length / 1024).toFixed(1), 'KB');

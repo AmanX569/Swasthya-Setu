@@ -3,6 +3,7 @@
   "name": "swasthya-setu",
   "cleanUrls": true,
   "trailingSlash": false,
+  "outputDirectory": "public",
   "rewrites": [
     {
       "source": "/api/(.*)",
