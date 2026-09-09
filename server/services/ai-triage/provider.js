@@ -386,12 +386,14 @@ class GeminiHealthProvider extends AIHealthProvider {
 
     try {
       const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${this.model}:generateContent?key=${this.apiKey}`;
-      const systemInstruction = `You are Swasthya Setu AI, a medical healthcare triage assistant.
-CRITICAL RULES:
-1. You provide symptom triage, NOT definitive medical diagnoses. Never state "You definitely have X" or "I diagnose you".
-2. Never prescribe specific dosages or prescription-only medicines.
-3. Classify triage level strictly as one of: LOW, MODERATE, URGENT, EMERGENCY.
-4. Output valid JSON adhering to schema:
+      const systemPreamble = `You are Swasthya AI, the AI Health Triage Assistant for Swasthya Setu.
+CRITICAL MEDICAL SAFETY DIRECTIVES:
+1. Provide symptom triage and educational guidance ONLY. Never provide a definitive medical diagnosis. Never state "You definitely have X" or "I diagnose you". Use phrasing such as "could be associated with", "possible causes include", "a doctor's clinical evaluation is needed".
+2. Never prescribe specific clinical dosages or prescription-only medicines (e.g. antibiotics).
+3. If life-threatening symptoms are detected, prioritize emergency guidance (National Ambulance 108 / Emergency 112).
+4. Classify triage level strictly as one of: LOW, MODERATE, URGENT, EMERGENCY.
+5. Respond in the requested language: ${params.language || 'en'}.
+6. Output valid JSON adhering strictly to this schema:
 {
   "triageLevel": "LOW"|"MODERATE"|"URGENT"|"EMERGENCY",
   "summary": "Brief summary",
@@ -399,36 +401,57 @@ CRITICAL RULES:
   "followUpQuestions": ["question 1", "question 2"],
   "recommendedActions": ["action 1", "action 2"],
   "redFlags": ["red flag 1", "red flag 2"],
-  "specialist": "Recommended specialist",
-  "message": "Complete formatted markdown response"
+  "specialist": "Recommended specialist or facility",
+  "message": "Complete formatted triage response in Markdown"
 }`;
 
-      const contents = [
-        {
-          role: 'user',
-          parts: [
-            {
-              text: `${systemInstruction}\n\nLanguage: ${params.language || 'en'}\nPatient Query: ${params.message}`
-            }
-          ]
-        }
-      ];
+      const contents = [];
+
+      // Forward past conversation context (up to 8 turns)
+      if (Array.isArray(params.history) && params.history.length > 0) {
+        params.history.slice(-8).forEach(h => {
+          const role = (h.sender === 'patient' || h.role === 'user') ? 'user' : 'model';
+          const text = h.content || h.text || '';
+          if (text) {
+            contents.push({
+              role,
+              parts: [{ text }]
+            });
+          }
+        });
+      }
+
+      // Current patient query with system instruction
+      contents.push({
+        role: 'user',
+        parts: [
+          {
+            text: `[SYSTEM DIRECTIVE: ${systemPreamble}]\n[PATIENT CONTEXT: Age: ${params.patientContext?.age || 'Not specified'}, Gender: ${params.patientContext?.gender || 'Not specified'}]\n\nPatient Query: ${params.message}`
+          }
+        ]
+      });
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
 
       const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        signal: controller.signal,
         body: JSON.stringify({
           contents,
           generationConfig: {
             temperature: 0.2,
-            maxOutputTokens: 800,
+            maxOutputTokens: 1000,
             responseMimeType: 'application/json'
           }
         })
       });
 
+      clearTimeout(timeoutId);
+
       if (!res.ok) {
-        console.warn(`[GeminiProvider] Status ${res.status}. Falling back to Sandbox.`);
+        console.warn(`[GeminiProvider] HTTP ${res.status}. Falling back to clinical reasoning engine.`);
         return this.fallback.generateTriage(params);
       }
 
@@ -441,7 +464,7 @@ CRITICAL RULES:
       parsed.message = SafetyEngine.enforceResponseGuardrails(parsed.message || parsed.summary);
       return parsed;
     } catch (err) {
-      console.warn('[GeminiProvider] Inference error, engaging Sandbox fallback:', err.message);
+      console.warn('[GeminiProvider] Inference exception, engaging clinical reasoning fallback:', err.message);
       return this.fallback.generateTriage(params);
     }
   }

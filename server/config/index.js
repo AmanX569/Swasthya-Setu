@@ -57,11 +57,12 @@ const config = {
     subAuaCode: process.env.UIDAI_SUB_AUA_CODE || ''
   },
   ai: {
-    provider: process.env.AI_PROVIDER || 'sandbox', // 'sandbox' | 'gemini' | 'openai'
-    geminiApiKey: process.env.GEMINI_API_KEY || '',
+    provider: process.env.AI_PROVIDER || 'gemini', // 'gemini' | 'sandbox' | 'openai'
+    geminiApiKey: process.env.GEMINI_API_KEY || process.env.AI_API_KEY || '',
     openaiApiKey: process.env.OPENAI_API_KEY || '',
     model: process.env.AI_MODEL || 'gemini-1.5-flash',
-    maxTokens: parseInt(process.env.AI_MAX_TOKENS, 10) || 800
+    maxTokens: parseInt(process.env.AI_MAX_TOKENS, 10) || 1000,
+    timeoutMs: parseInt(process.env.AI_TIMEOUT_MS, 10) || 15000
   }
 };
 

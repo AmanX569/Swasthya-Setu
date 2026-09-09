@@ -124,14 +124,21 @@ async function runTests() {
   console.log('✓ TEST 7 Passed: Refused antibiotic prescription, directed to licensed healthcare professional');
 
   // ---------------------------------------------------------------------------
-  // TEST CASE 8: Message Length Limit (>1000 characters)
+  // TEST CASE 8: Message Length Limit (>4000 characters)
   // ---------------------------------------------------------------------------
-  console.log('\n[TEST 8] Testing Extremely Long Message Rejection...');
-  const longMsg = 'A'.repeat(1050);
+  console.log('\n[TEST 8] Testing Extremely Long Message Rejection (>4000 chars)...');
+  const validLongMsg = 'A'.repeat(1050);
+  const validRes = await triageService.processMessage({
+    message: validLongMsg,
+    user: testUser1
+  });
+  assert.strictEqual(validRes.success, true, '1050 chars should be accepted within 4000 char limit');
+
+  const tooLongMsg = 'A'.repeat(4050);
   let lengthRejected = false;
   try {
     await triageService.processMessage({
-      message: longMsg,
+      message: tooLongMsg,
       user: testUser1
     });
   } catch (err) {
@@ -139,8 +146,8 @@ async function runTests() {
       lengthRejected = true;
     }
   }
-  assert.strictEqual(lengthRejected, true, 'Must reject messages > 1000 characters with 400');
-  console.log('✓ TEST 8 Passed: Message exceeding 1000 characters rejected with 400 Bad Request');
+  assert.strictEqual(lengthRejected, true, 'Must reject messages > 4000 characters with 400');
+  console.log('✓ TEST 8 Passed: Message exceeding 4000 characters rejected with 400 Bad Request, 1050 chars accepted');
 
   // ---------------------------------------------------------------------------
   // TEST CASE 9: AI Provider Failure / Graceful Fallback
@@ -164,23 +171,18 @@ async function runTests() {
   console.log('✓ TEST 9 Passed: Provider failure caught, smooth resilient fallback executed without leakage');
 
   // ---------------------------------------------------------------------------
-  // TEST CASE 10: Patient Authorization & Cross-Patient Isolation
+  // TEST CASE 10: Guest Citizen & Cross-Patient Isolation
   // ---------------------------------------------------------------------------
-  console.log('\n[TEST 10] Testing Patient Authorization & Cross-Patient Isolation...');
+  console.log('\n[TEST 10] Testing Guest Citizen & Cross-Patient Isolation...');
   
-  // 10a. Unauthenticated call
-  let unauthBlocked = false;
-  try {
-    await triageService.processMessage({
-      message: 'Test symptom query',
-      user: null
-    });
-  } catch (err) {
-    if (err.statusCode === 401 || err.code === 'UNAUTHORIZED') {
-      unauthBlocked = true;
-    }
-  }
-  assert.strictEqual(unauthBlocked, true, 'Unauthenticated user must be blocked with 401');
+  // 10a. Guest citizen call without authentication
+  const guestRes = await triageService.processMessage({
+    message: 'Hello, I have a mild stomach ache',
+    user: null
+  });
+  assert.strictEqual(guestRes.success, true, 'Guest user without login must be allowed to chat');
+  assert(guestRes.conversationId, 'Guest session must receive a valid conversationId');
+  console.log('✓ 10a: Guest patient triage processed seamlessly without prior login');
 
   // 10b. Patient 1 creates a conversation session
   const convRes = await triageService.processMessage({
@@ -199,7 +201,7 @@ async function runTests() {
     }
   }
   assert.strictEqual(crossAccessBlocked, true, 'Patient 2 must be blocked from accessing Patient 1 conversation');
-  console.log('✓ TEST 10 Passed: 401 for unauthenticated calls, 403 for cross-patient conversation access');
+  console.log('✓ TEST 10 Passed: Seamless guest patient access and strict cross-patient conversation isolation enforced');
 
   console.log('\n======================================================');
   console.log('✅ ALL 10 AI TRIAGE TEST CASES PASSED SUCCESSFULLY!');

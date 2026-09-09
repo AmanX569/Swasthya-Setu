@@ -22,16 +22,16 @@ class TriageService {
   /**
    * Main entrypoint for processing a patient's triage message
    */
-  async processMessage({ message, conversationId = null, language = 'en', patientContext = {}, user }) {
-    // 1. Authorization check
-    if (!user || (!user.id && !user.patient_id)) {
-      const err = new Error('Patient authentication required');
-      err.code = 'UNAUTHORIZED';
-      err.statusCode = 401;
-      throw err;
+  async processMessage({ message, conversationId = null, language = 'en', patientContext = {}, user = null }) {
+    // 1. Patient identity (authenticated or guest session)
+    let patientId;
+    if (user && (user.id || user.patient_id)) {
+      patientId = user.patient_id || user.id;
+    } else {
+      // Support guest citizen sessions without requiring prior login/profile completion
+      patientId = conversationId ? `guest_${conversationId}` : `guest_${Date.now().toString(36)}`;
+      user = { id: patientId, patient_id: patientId, role: 'guest', name: 'Guest Citizen' };
     }
-
-    const patientId = user.patient_id || user.id;
 
     // 2. Input validation
     if (!message || typeof message !== 'string' || !message.trim()) {
@@ -41,8 +41,8 @@ class TriageService {
       throw err;
     }
 
-    if (message.length > 1000) {
-      const err = new Error('Message exceeds maximum limit of 1000 characters');
+    if (message.length > 4000) {
+      const err = new Error('Message exceeds maximum limit of 4000 characters. Please shorten your message and try again.');
       err.code = 'MESSAGE_TOO_LONG';
       err.statusCode = 400;
       throw err;
