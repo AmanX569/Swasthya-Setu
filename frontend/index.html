@@ -3182,12 +3182,19 @@ body[data-theme="doom"] {
     <div style="font-size:36px;margin-bottom:8px;">📱</div>
     <h3 style="color:var(--ink);font-size:18px;font-weight:800;margin-bottom:6px;">Verify Mobile Number</h3>
     <p style="color:var(--muted);font-size:13px;margin-bottom:16px;">
-      A 6-digit verification code was sent to your registered mobile number: <strong id="verifyModalPhone" style="color:var(--ink);"></strong>
+      We sent a 6-digit verification code to <strong id="verifyModalPhone" style="color:var(--ink);"></strong>
     </p>
     <div style="margin-bottom:14px;">
-      <input type="text" id="mobileVerifyInputOtp" class="input-field" placeholder="123456" maxlength="6" style="width:100%;height:46px;font-size:20px;letter-spacing:6px;text-align:center;font-weight:800;">
+      <input type="text" id="mobileVerifyInputOtp" class="input-field" placeholder="Enter 6-digit OTP" maxlength="6" autocomplete="one-time-code" style="width:100%;height:46px;font-size:20px;letter-spacing:6px;text-align:center;font-weight:800;">
     </div>
     <div id="mobileVerifyError" style="display:none;color:#ef4444;font-size:12px;margin-bottom:12px;background:rgba(239,68,68,0.1);padding:8px 12px;border-radius:8px;"></div>
+    
+    <div style="display:flex;justify-content:center;margin-bottom:14px;">
+      <button type="button" id="btnResendMobileOtp" onclick="resendMobileVerifyOtp()" style="background:none;border:none;color:var(--primary-bright);font-size:12.5px;font-weight:700;cursor:pointer;padding:0;">
+        ↻ Resend OTP
+      </button>
+    </div>
+
     <div style="display:flex;gap:10px;">
       <button type="button" class="btn-glass" onclick="closeMobileVerifyModal()" style="flex:1;">Cancel</button>
       <button type="button" id="btnConfirmMobileOtp" onclick="submitMobileVerify()" class="auth-btn-primary" style="flex:2;background:#16a34a;border-color:#15803d;padding:12px;font-weight:800;cursor:pointer;">
@@ -3946,28 +3953,121 @@ async function submitAadhaarVerify() {
 }
 
 // MOBILE VERIFICATION
-function openMobileVerifyModal() {
+let currentMobileChallengeId = null;
+let mobileVerifyCountdownInterval = null;
+let mobileVerifyCountdownRemaining = 60;
+
+function startMobileVerifyCountdown(seconds = 60) {
+  if (mobileVerifyCountdownInterval) clearInterval(mobileVerifyCountdownInterval);
+  mobileVerifyCountdownRemaining = seconds;
+  const btn = document.getElementById('btnResendMobileOtp');
+  if (!btn) return;
+  btn.disabled = true;
+  btn.style.color = 'var(--muted)';
+  btn.style.cursor = 'not-allowed';
+  btn.textContent = '↻ Resend OTP in ' + (mobileVerifyCountdownRemaining < 10 ? '0' : '') + mobileVerifyCountdownRemaining + 's';
+
+  mobileVerifyCountdownInterval = setInterval(() => {
+    mobileVerifyCountdownRemaining--;
+    if (mobileVerifyCountdownRemaining <= 0) {
+      clearInterval(mobileVerifyCountdownInterval);
+      mobileVerifyCountdownInterval = null;
+      btn.disabled = false;
+      btn.style.color = 'var(--primary-bright)';
+      btn.style.cursor = 'pointer';
+      btn.textContent = '↻ Resend OTP';
+    } else {
+      btn.textContent = '↻ Resend OTP in ' + (mobileVerifyCountdownRemaining < 10 ? '0' : '') + mobileVerifyCountdownRemaining + 's';
+    }
+  }, 1000);
+}
+
+async function openMobileVerifyModal() {
   const modal = document.getElementById('mobileVerifyModal');
   if (!modal) return;
-  const state = window.appStore.getState();
+  const state = window.appStore ? window.appStore.getState() : {};
   const cur = state.currentUser || (state.session ? state.session.user : null);
-  const phone = cur ? cur.phone : '';
+  const rawPhone = cur ? (cur.phone || cur.mobile || '') : '';
+  const phone = rawPhone.replace(/\D/g, '').slice(-10);
   const phoneEl = document.getElementById('verifyModalPhone');
   if (phoneEl) phoneEl.textContent = phone ? `+91 ${phone}` : '';
   const errEl = document.getElementById('mobileVerifyError');
   if (errEl) errEl.style.display = 'none';
 
-  modal.style.display = 'flex';
+  const otpEl = document.getElementById('mobileVerifyInputOtp');
+  if (otpEl) otpEl.value = '';
 
-  // Trigger OTP dispatch
-  if (window.swasthyaAPI) {
-    window.swasthyaAPI.verifyMobile().catch(e => console.log('OTP trigger notice:', e.message));
+  modal.style.display = 'flex';
+  if (otpEl) setTimeout(() => otpEl.focus(), 150);
+
+  // Trigger real backend OTP dispatch via MSG91
+  try {
+    if (window.swasthyaAPI && typeof window.swasthyaAPI.sendOtp === 'function') {
+      const res = await window.swasthyaAPI.sendOtp(phone, 'MOBILE_VERIFICATION');
+      if (res && res.challengeId) {
+        currentMobileChallengeId = res.challengeId;
+      }
+      startMobileVerifyCountdown(res && res.cooldownSeconds ? res.cooldownSeconds : 60);
+      if (typeof window.toast === 'function') {
+        window.toast('📲 Verification OTP sent to +91 ' + phone);
+      }
+    } else {
+      startMobileVerifyCountdown(60);
+    }
+  } catch (e) {
+    console.warn('[Mobile OTP dispatch error]:', e);
+    if (errEl) {
+      errEl.textContent = e.message || 'Failed to send OTP. Please try again.';
+      errEl.style.display = 'block';
+    }
   }
 }
 
 function closeMobileVerifyModal() {
   const modal = document.getElementById('mobileVerifyModal');
   if (modal) modal.style.display = 'none';
+  if (mobileVerifyCountdownInterval) {
+    clearInterval(mobileVerifyCountdownInterval);
+    mobileVerifyCountdownInterval = null;
+  }
+}
+
+async function resendMobileVerifyOtp() {
+  const btn = document.getElementById('btnResendMobileOtp');
+  if (btn && btn.disabled) return;
+  const errEl = document.getElementById('mobileVerifyError');
+  if (errEl) errEl.style.display = 'none';
+
+  const state = window.appStore ? window.appStore.getState() : {};
+  const cur = state.currentUser || (state.session ? state.session.user : null);
+  const rawPhone = cur ? (cur.phone || cur.mobile || '') : '';
+  const phone = rawPhone.replace(/\D/g, '').slice(-10);
+
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Sending OTP...';
+  }
+
+  try {
+    if (window.swasthyaAPI && typeof window.swasthyaAPI.resendOtp === 'function') {
+      const res = await window.swasthyaAPI.resendOtp(currentMobileChallengeId, phone);
+      if (res && res.challengeId) {
+        currentMobileChallengeId = res.challengeId;
+      }
+      startMobileVerifyCountdown(res && res.cooldownSeconds ? res.cooldownSeconds : 60);
+      if (typeof window.toast === 'function') {
+        window.toast('📲 New verification OTP sent.');
+      }
+    } else {
+      startMobileVerifyCountdown(60);
+    }
+  } catch (err) {
+    if (errEl) {
+      errEl.textContent = err.message || 'Unable to resend OTP. Please wait before retrying.';
+      errEl.style.display = 'block';
+    }
+    startMobileVerifyCountdown(30);
+  }
 }
 
 async function submitMobileVerify() {
@@ -3976,17 +4076,22 @@ async function submitMobileVerify() {
   const btn = document.getElementById('btnConfirmMobileOtp');
   const otp = otpEl ? otpEl.value.trim() : '';
 
-  if (!otp) {
-    if (errEl) { errEl.textContent = 'Please enter the verification code.'; errEl.style.display = 'block'; }
+  if (!otp || otp.length < 4) {
+    if (errEl) { errEl.textContent = 'Please enter the 6-digit verification code.'; errEl.style.display = 'block'; }
     return;
   }
   if (errEl) errEl.style.display = 'none';
 
   if (btn) { btn.disabled = true; btn.textContent = 'Verifying...'; }
 
+  const state = window.appStore ? window.appStore.getState() : {};
+  const cur = state.currentUser || (state.session ? state.session.user : null);
+  const rawPhone = cur ? (cur.phone || cur.mobile || '') : '';
+  const phone = rawPhone.replace(/\D/g, '').slice(-10);
+
   try {
-    if (window.swasthyaAPI) {
-      await window.swasthyaAPI.confirmMobile(otp);
+    if (window.swasthyaAPI && typeof window.swasthyaAPI.verifyOtp === 'function') {
+      await window.swasthyaAPI.verifyOtp(phone, otp, currentMobileChallengeId, 'MOBILE_VERIFICATION');
     } else {
       if (otp !== '123456') throw new Error('Invalid code (Sandbox test code: 123456)');
     }
@@ -3994,14 +4099,25 @@ async function submitMobileVerify() {
     closeMobileVerifyModal();
 
     // Mark current user as mobile verified
-    const state = window.appStore.getState();
-    const cur = state.currentUser || (state.session ? state.session.user : null);
     if (cur) {
       cur.mobile_verified = true;
+      cur.mobileVerified = true;
       window.appStore.saveState();
     }
 
-    if (window.patientController && typeof window.patientController.renderAbhaCard === 'function') {
+    // Also update matched patient in appStore state
+    if (window.appStore && state.patients) {
+      const match = state.patients.find(p => (p.phone || '').replace(/\D/g, '').slice(-10) === phone);
+      if (match) {
+        match.mobile_verified = true;
+        match.mobileVerified = true;
+        window.appStore.saveState();
+      }
+    }
+
+    if (window.patientController && typeof window.patientController.renderAll === 'function') {
+      window.patientController.renderAll();
+    } else if (window.patientController && typeof window.patientController.renderAbhaCard === 'function') {
       window.patientController.renderAbhaCard();
     }
     if (typeof window.toast === 'function') {
@@ -4644,9 +4760,10 @@ function continueToPatientDashboardAfterAddress() {
 // =========================================================
 let citizenRecoveryToken = null;
 let citizenRecoveryResetToken = null;
+let citizenRecoveryChallengeId = null;
 let citizenRecoveryTargetPhone = '';
 let citizenCountdownInterval = null;
-let citizenCountdownRemaining = 30;
+let citizenCountdownRemaining = 60;
 let citizenFailedLoginCount = 0;
 let citizenCaptchaVal1 = 0;
 let citizenCaptchaVal2 = 0;
@@ -4758,6 +4875,8 @@ function returnToCitizenLogin() {
   }
   citizenRecoveryToken = null;
   citizenRecoveryResetToken = null;
+  citizenRecoveryChallengeId = null;
+  citizenRecoveryTargetPhone = '';
 
   hideCitizenLoginError();
   hideCitizenForgotError1();
@@ -4794,7 +4913,7 @@ function hideCitizenOtpError() {
   hideCitizenForgotOtpError();
 }
 
-function startRecoveryOtpCountdown(seconds = 30) {
+function startRecoveryOtpCountdown(seconds = 60) {
   if (citizenCountdownInterval) clearInterval(citizenCountdownInterval);
   citizenCountdownRemaining = seconds;
   const btn = document.getElementById('btnCitizenResendRecoveryOtp');
@@ -4803,7 +4922,8 @@ function startRecoveryOtpCountdown(seconds = 30) {
   btn.disabled = true;
   btn.style.color = 'var(--muted)';
   btn.style.cursor = 'not-allowed';
-  btn.textContent = 'Resend OTP in 00:' + (citizenCountdownRemaining < 10 ? '0' : '') + citizenCountdownRemaining;
+  const fmt = citizenCountdownRemaining < 10 ? '0' + citizenCountdownRemaining : citizenCountdownRemaining;
+  btn.textContent = 'Resend OTP in 00:' + fmt;
 
   citizenCountdownInterval = setInterval(() => {
     citizenCountdownRemaining--;
@@ -4815,7 +4935,8 @@ function startRecoveryOtpCountdown(seconds = 30) {
       btn.style.cursor = 'pointer';
       btn.textContent = '↻ Resend OTP';
     } else {
-      btn.textContent = 'Resend OTP in 00:' + (citizenCountdownRemaining < 10 ? '0' : '') + citizenCountdownRemaining;
+      const s = citizenCountdownRemaining < 10 ? '0' + citizenCountdownRemaining : citizenCountdownRemaining;
+      btn.textContent = 'Resend OTP in 00:' + s;
     }
   }, 1000);
 }
@@ -4962,22 +5083,28 @@ async function handleCitizenForgotRequest(e) {
   }
 
   try {
-    const res = window.appStore.requestCitizenPasswordReset(inputId);
+    let res = null;
+    if (window.swasthyaAPI && typeof window.swasthyaAPI.forgotPasswordSendOtp === 'function') {
+      try {
+        res = await window.swasthyaAPI.forgotPasswordSendOtp(inputId);
+      } catch (apiErr) {
+        console.warn('[API Forgot Password Request notice]:', apiErr);
+      }
+    }
+
+    if (!res || !res.success) {
+      // Offline / Local store fallback
+      res = window.appStore ? window.appStore.requestCitizenPasswordReset(inputId) : null;
+    }
+
     if (!res || !res.success) {
       showCitizenForgotError1((res && res.message) || 'Unable to request password recovery. Please check input.');
       return;
     }
 
-    citizenRecoveryToken = res.recoveryToken;
-    citizenRecoveryTargetPhone = res.phone || '';
-
-    // Trigger Supabase SMS dispatch if online
-    try {
-      if (window.supabaseService && window.supabaseService.client && window.supabaseService.client.auth && res.phone) {
-        const fullPhone = res.phone.startsWith('+') ? res.phone : ('+91' + res.phone.replace(/\D/g, '').slice(-10));
-        await window.supabaseService.client.auth.signInWithOtp({ phone: fullPhone }).catch(err => console.warn('[Supabase SMS OTP notice]:', err));
-      }
-    } catch (e) {}
+    citizenRecoveryChallengeId = res.challengeId || null;
+    citizenRecoveryToken = res.recoveryToken || null;
+    citizenRecoveryTargetPhone = res.mobile || res.phone || '';
 
     // Navigate to Recovery OTP Screen
     const screenF1 = document.getElementById('citizenForgotStep1');
@@ -4991,7 +5118,7 @@ async function handleCitizenForgotRequest(e) {
       screenF2.classList.add('page-enter-smooth');
     }
 
-    startRecoveryOtpCountdown(30);
+    startRecoveryOtpCountdown(res.cooldownSeconds || 60);
 
     // Clear and focus OTP inputs
     for (let i = 1; i <= 6; i++) {
@@ -5030,31 +5157,32 @@ async function handleCitizenVerifyRecoveryOtp(e) {
   }
 
   try {
-    // If account was non-existent (enumeration defense), give standard error
-    if (!citizenRecoveryToken) {
-      showCitizenForgotOtpError('Incorrect OTP. Please try again.');
-      return;
+    let verifyRes = null;
+    if (window.swasthyaAPI && typeof window.swasthyaAPI.forgotPasswordVerifyOtp === 'function' && citizenRecoveryChallengeId) {
+      try {
+        verifyRes = await window.swasthyaAPI.forgotPasswordVerifyOtp(citizenRecoveryTargetPhone, otpCode, citizenRecoveryChallengeId);
+      } catch (apiErr) {
+        console.warn('[API Forgot Password Verify error]:', apiErr);
+        showCitizenForgotOtpError(apiErr.message || 'Incorrect OTP. Please try again.');
+        return;
+      }
     }
 
-    // Try Supabase verification if online
-    try {
-      if (window.supabaseService && window.supabaseService.client && window.supabaseService.client.auth && citizenRecoveryTargetPhone) {
-        const fullPhone = citizenRecoveryTargetPhone.startsWith('+') ? citizenRecoveryTargetPhone : ('+91' + citizenRecoveryTargetPhone.replace(/\D/g, '').slice(-10));
-        await window.supabaseService.client.auth.verifyOtp({ phone: fullPhone, token: otpCode, type: 'sms' }).catch(err => console.warn('[Supabase OTP verify notice]:', err));
+    if (!verifyRes || !verifyRes.success) {
+      if (window.appStore && citizenRecoveryToken) {
+        verifyRes = window.appStore.verifyCitizenRecoveryOtp(citizenRecoveryToken, otpCode);
       }
-    } catch (e) {}
+    }
 
-    // Verify recovery OTP in store (Does NOT log into dashboard!)
-    const res = window.appStore.verifyCitizenRecoveryOtp(citizenRecoveryToken, otpCode);
-    if (!res || !res.success) {
-      showCitizenForgotOtpError((res && res.message) || 'Incorrect OTP. Please try again.');
-      if (res && (res.locked || res.expired)) {
+    if (!verifyRes || !verifyRes.success) {
+      showCitizenForgotOtpError((verifyRes && verifyRes.message) || 'Incorrect OTP. Please try again.');
+      if (verifyRes && (verifyRes.locked || verifyRes.expired)) {
         if (btnVerify) btnVerify.disabled = true;
       }
       return;
     }
 
-    citizenRecoveryResetToken = res.resetAuthToken;
+    citizenRecoveryResetToken = verifyRes.resetToken || verifyRes.resetAuthToken;
 
     if (citizenCountdownInterval) {
       clearInterval(citizenCountdownInterval);
@@ -5088,33 +5216,45 @@ async function handleCitizenVerifyRecoveryOtp(e) {
 }
 
 // Resend Recovery OTP
-function handleCitizenResendRecoveryOtp() {
+async function handleCitizenResendRecoveryOtp() {
   const btn = document.getElementById('btnCitizenResendRecoveryOtp');
   if (btn && btn.disabled) return;
   hideCitizenForgotOtpError();
 
-  if (!citizenRecoveryToken) {
-    startRecoveryOtpCountdown(30);
-    if (typeof window.toast === 'function') {
-      window.toast('📲 If an account exists, a new recovery code has been sent.');
-    }
-    return;
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Sending OTP...';
   }
 
-  const res = window.appStore.resendCitizenRecoveryOtp(citizenRecoveryToken);
-  if (res && res.success) {
+  try {
+    let res = null;
+    if (window.swasthyaAPI && typeof window.swasthyaAPI.resendOtp === 'function' && citizenRecoveryChallengeId) {
+      res = await window.swasthyaAPI.resendOtp(citizenRecoveryChallengeId, citizenRecoveryTargetPhone);
+      if (res && res.challengeId) {
+        citizenRecoveryChallengeId = res.challengeId;
+      }
+    } else if (window.appStore && citizenRecoveryToken) {
+      res = window.appStore.resendCitizenRecoveryOtp(citizenRecoveryToken);
+    }
+
+    if (res && res.success) {
+      startRecoveryOtpCountdown(res.cooldownSeconds || 60);
+      if (typeof window.toast === 'function') {
+        window.toast('📲 New 6-digit recovery OTP sent.');
+      }
+      for (let i = 1; i <= 6; i++) {
+        const b = document.getElementById('otpBox' + i);
+        if (b) b.value = '';
+      }
+      const box1 = document.getElementById('otpBox1');
+      if (box1) box1.focus();
+    } else {
+      showCitizenForgotOtpError((res && res.message) || 'Unable to resend OTP. Please wait.');
+      startRecoveryOtpCountdown(30);
+    }
+  } catch (err) {
+    showCitizenForgotOtpError(err.message || 'Unable to resend OTP.');
     startRecoveryOtpCountdown(30);
-    if (typeof window.toast === 'function') {
-      window.toast('📲 New 6-digit recovery OTP sent.');
-    }
-    for (let i = 1; i <= 6; i++) {
-      const b = document.getElementById('otpBox' + i);
-      if (b) b.value = '';
-    }
-    const box1 = document.getElementById('otpBox1');
-    if (box1) box1.focus();
-  } else {
-    showCitizenForgotOtpError((res && res.message) || 'Unable to resend OTP. Please wait.');
   }
 }
 
@@ -5145,7 +5285,21 @@ async function handleCitizenSubmitNewPassword(e) {
   }
 
   try {
-    const res = window.appStore.resetCitizenPasswordWithToken(citizenRecoveryResetToken, pass1, pass2);
+    let res = null;
+    if (window.swasthyaAPI && typeof window.swasthyaAPI.resetPassword === 'function' && citizenRecoveryResetToken) {
+      try {
+        res = await window.swasthyaAPI.resetPassword(citizenRecoveryResetToken, pass1);
+      } catch (apiErr) {
+        console.warn('[API Reset Password notice]:', apiErr);
+      }
+    }
+
+    if (!res || !res.success) {
+      if (window.appStore) {
+        res = window.appStore.resetCitizenPasswordWithToken(citizenRecoveryResetToken, pass1, pass2);
+      }
+    }
+
     if (!res || !res.success) {
       showCitizenForgotResetError((res && res.message) || 'Failed to update password. Please try again.');
       return;

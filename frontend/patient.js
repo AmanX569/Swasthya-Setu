@@ -302,7 +302,23 @@
       const isAadhaarVerified = !!(rawUser.aadhaar_verified || rawUser.aadhaarVerified || matchedProfile.aadhaar_verified);
       const isAbhaLinked = !!(rawUser.abha_verified || rawUser.abhaVerified || (rawUser.abhaId && !rawUser.abhaId.includes('XXXX')));
 
+      const unverifiedBanner = !isMobileVerified ? `
+        <div id="patientMobileUnverifiedAlert" style="background:rgba(234,179,8,0.12);border:1.5px solid rgba(234,179,8,0.5);border-radius:14px;padding:12px 16px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:22px;">⚠️</span>
+            <div>
+              <strong style="font-size:13px;color:#d97706;display:block;">Mobile Number Unverified</strong>
+              <small style="font-size:11.5px;color:var(--muted);">Verify your mobile number (+91 ${user.phone}) via SMS OTP to secure your ABDM health records.</small>
+            </div>
+          </div>
+          <button class="auth-btn-primary" style="background:#d97706;border-color:#b45309;padding:7px 14px;font-size:12px;font-weight:700;border-radius:8px;cursor:pointer;white-space:nowrap;" onclick="openMobileVerifyModal()">
+            📱 Verify Now via SMS OTP
+          </button>
+        </div>
+      ` : '';
+
       container.innerHTML = `
+        ${unverifiedBanner}
         <div class="abha-badge-card" style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:18px;padding:20px;box-shadow:var(--shadow-panel);position:relative;overflow:hidden;">
           <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1.5px solid var(--line);padding-bottom:12px;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
             <div style="display:flex;align-items:center;gap:10px;">

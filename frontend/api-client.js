@@ -104,22 +104,47 @@
       return res;
     }
 
-    async requestOtp(mobile, purpose = 'MOBILE_VERIFY') {
-      return this._request('/auth/request-otp', {
+    async requestOtp(mobile, purpose = 'MOBILE_VERIFICATION') {
+      return this.sendOtp(mobile, purpose);
+    }
+
+    async sendOtp(mobile, purpose = 'MOBILE_VERIFICATION') {
+      return this._request('/auth/mobile/send-otp', {
         method: 'POST',
         body: { mobile, purpose }
       });
     }
 
-    async verifyOtp(mobile, purpose, code) {
-      return this._request('/auth/verify-otp', {
+    async verifyOtp(mobile, otp, challengeId = null, purpose = 'MOBILE_VERIFICATION') {
+      return this._request('/auth/mobile/verify-otp', {
         method: 'POST',
-        body: { mobile, purpose, code }
+        body: { mobile, otp, challengeId, purpose }
+      });
+    }
+
+    async resendOtp(challengeId, mobile) {
+      return this._request('/auth/mobile/resend-otp', {
+        method: 'POST',
+        body: { challengeId, mobile }
+      });
+    }
+
+    async forgotPasswordSendOtp(identifier) {
+      return this._request('/auth/forgot-password/send-otp', {
+        method: 'POST',
+        body: { identifier }
+      });
+    }
+
+    async forgotPasswordVerifyOtp(mobile, otp, challengeId) {
+      return this._request('/auth/forgot-password/verify-otp', {
+        method: 'POST',
+        body: { mobile, otp, challengeId }
       });
     }
 
     async resetPassword(resetToken, newPassword) {
-      return this._request('/auth/reset-password', {
+      return this._request('/auth/forgot-password/reset', {
         method: 'POST',
         body: { resetToken, newPassword }
       });

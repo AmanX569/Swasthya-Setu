@@ -1,36 +1,35 @@
 /**
  * =========================================================
- * SWASTHYA SETU — OTP SERVICE
- * Server-side OTP generation, hashing, verification, expiry
+ * SWASTHYA SETU — PRODUCTION OTP & CHALLENGE SERVICE
+ * Serverless-safe challenge state machine managing MSG91 OTP
  * =========================================================
  *
- * Security guarantees:
- * - OTPs are generated with crypto.randomInt (CSPRNG)
- * - OTPs are stored as bcrypt hashes — NEVER in plaintext
- * - OTPs are NEVER returned in API responses
- * - OTPs are NEVER logged in production mode
- * - OTPs expire after 5 minutes
- * - Max 3 verification attempts per OTP
- * - Rate limited: max 5 OTP requests per mobile per hour
+ * Core Security & Architectural Principles:
+ * - When using MSG91, MSG91 generates and verifies the OTP; plaintext OTP is NEVER stored in database.
+ * - Challenge ID: Cryptographically secure challenge token issued for each OTP transaction.
+ * - Single-Use Password Reset Token: SHA-256 hashed, short-lived (10 min), single-use token.
+ * - Strict Rate Limiting: 60-second resend cooldown, max 5 sends/hour, max 5 verification attempts.
+ * - Purpose Separation: Challenge issued for MOBILE_VERIFICATION cannot be used for PASSWORD_RESET.
+ * - Account Enumeration Defense: Generic messages for unauthorized identity lookups.
+ * - Logging: Structured server logs with masked mobile numbers (never logs OTPs or secrets).
  */
 
 'use strict';
 
 const crypto = require('crypto');
-const bcrypt = require('bcryptjs');
 const { v4: uuidv4 } = require('uuid');
+const { normalizeIndianMobile } = require('../utils/phone');
 
-const BCRYPT_ROUNDS = 10;
-const OTP_LENGTH = 6;
-const OTP_EXPIRY_SECONDS = 300; // 5 minutes
-const MAX_ATTEMPTS = 3;
-const RATE_LIMIT_WINDOW_SECONDS = 3600; // 1 hour
-const RATE_LIMIT_MAX_REQUESTS = 5;
+const COOLDOWN_SECONDS = 60; // 60s resend cooldown
+const EXPIRY_SECONDS = 300;   // 5 minutes expiry
+const MAX_ATTEMPTS = 5;       // Max verification attempts per challenge
+const MAX_SENDS_PER_HOUR = 5; // Max sends per mobile per hour
+const RESET_TOKEN_EXPIRY_SECONDS = 600; // 10 minutes reset token validity
 
 class OTPService {
   /**
    * @param {object} supabase - Supabase client (service role)
-   * @param {object} smsService - SMSService instance
+   * @param {object} smsService - SMSService instance (MSG91 or Sandbox)
    * @param {string} environment - 'development' | 'sandbox' | 'production'
    */
   constructor(supabase, smsService, environment = 'development') {
@@ -40,230 +39,478 @@ class OTPService {
   }
 
   /**
-   * Generate a cryptographically secure 6-digit OTP
-   * @returns {string} 6-digit OTP string
+   * Log structured security event with masked mobile
+   * @private
    */
-  _generateOTP() {
-    const min = Math.pow(10, OTP_LENGTH - 1);  // 100000
-    const max = Math.pow(10, OTP_LENGTH) - 1;   // 999999
-    const otp = crypto.randomInt(min, max + 1);
-    return otp.toString();
+  _logEvent(event, mobile, extra = {}) {
+    const norm = normalizeIndianMobile(mobile);
+    const masked = norm.valid ? norm.masked : '******0000';
+    console.log(`[AUDIT OTP] ${event} | Mobile: ${masked} | Purpose: ${extra.purpose || 'N/A'} | Timestamp: ${new Date().toISOString()}`);
   }
 
   /**
-   * Check rate limiting for OTP requests
-   * @param {string} mobile - 10-digit mobile number
-   * @returns {Promise<{allowed: boolean, remaining: number, retryAfterSeconds: number}>}
+   * Check hourly rate limit for a mobile number
+   * @private
    */
-  async _checkRateLimit(mobile) {
-    const windowStart = new Date(Date.now() - RATE_LIMIT_WINDOW_SECONDS * 1000).toISOString();
+  async _checkHourlyRateLimit(mobile) {
+    if (!this.supabase) return { allowed: true, remaining: MAX_SENDS_PER_HOUR };
+
+    const oneHourAgo = new Date(Date.now() - 3600 * 1000).toISOString();
 
     const { data, error } = await this.supabase
-      .from('otp_requests')
+      .from('otp_verifications')
       .select('id, created_at')
       .eq('mobile', mobile)
-      .gte('created_at', windowStart)
-      .order('created_at', { ascending: false });
+      .gte('created_at', oneHourAgo);
 
     if (error) {
-      console.error('[OTP] Rate limit check error:', error.message);
-      // Fail open in development, fail closed in production
+      console.error('[OTP] Rate limit query error:', error.message);
+      // In production fail closed; in dev fail open
       if (this.environment === 'production') {
         return { allowed: false, remaining: 0, retryAfterSeconds: 60 };
       }
-      return { allowed: true, remaining: RATE_LIMIT_MAX_REQUESTS, retryAfterSeconds: 0 };
+      return { allowed: true, remaining: MAX_SENDS_PER_HOUR };
     }
 
     const count = (data || []).length;
-    const remaining = Math.max(0, RATE_LIMIT_MAX_REQUESTS - count);
-
-    if (count >= RATE_LIMIT_MAX_REQUESTS) {
-      // Calculate retry time based on oldest request in window
-      const oldestInWindow = data[data.length - 1];
-      const oldestTime = new Date(oldestInWindow.created_at).getTime();
-      const retryAfterMs = (oldestTime + RATE_LIMIT_WINDOW_SECONDS * 1000) - Date.now();
-      const retryAfterSeconds = Math.max(0, Math.ceil(retryAfterMs / 1000));
-
-      return { allowed: false, remaining: 0, retryAfterSeconds };
+    if (count >= MAX_SENDS_PER_HOUR) {
+      return { allowed: false, remaining: 0, retryAfterSeconds: 300 };
     }
 
-    return { allowed: true, remaining, retryAfterSeconds: 0 };
+    return { allowed: true, remaining: MAX_SENDS_PER_HOUR - count };
   }
 
   /**
-   * Generate an OTP, hash it, store it, and send via SMS
+   * Initiate / send OTP for a specific purpose
    *
-   * @param {string} mobile - 10-digit mobile number
-   * @param {string} purpose - 'REGISTRATION' | 'FORGOT_PASSWORD' | 'MOBILE_VERIFY' | 'LOGIN_VERIFY'
-   * @param {object} [options] - Additional options
-   * @param {string} [options.patientId] - Patient ID to associate
-   * @param {string} [options.ipAddress] - Request IP address
-   * @returns {Promise<{success: boolean, requestId: string, expiresIn: number, error?: string}>}
+   * @param {string} rawMobile - Indian mobile number
+   * @param {string} purpose - 'MOBILE_VERIFICATION' | 'PASSWORD_RESET' | 'REGISTRATION'
+   * @param {object} [options]
+   * @param {string} [options.patientId] - Associated patient ID
+   * @param {string} [options.ipAddress] - Request IP
+   * @returns {Promise<{success: boolean, challengeId: string, cooldownSeconds: number, maskedMobile: string, error?: string}>}
    */
-  async generateAndSend(mobile, purpose, options = {}) {
-    // 1. Validate inputs
-    if (!mobile || !/^[6-9]\d{9}$/.test(mobile)) {
-      return { success: false, error: 'Invalid mobile number format' };
+  async generateAndSend(rawMobile, purpose, options = {}) {
+    const norm = normalizeIndianMobile(rawMobile);
+    if (!norm.valid) {
+      return { success: false, error: norm.error };
     }
 
-    const validPurposes = ['REGISTRATION', 'FORGOT_PASSWORD', 'MOBILE_VERIFY', 'LOGIN_VERIFY'];
+    const validPurposes = ['MOBILE_VERIFICATION', 'PASSWORD_RESET', 'REGISTRATION', 'SENSITIVE_ACTION', 'MOBILE_VERIFY', 'FORGOT_PASSWORD'];
+    // Normalize purpose naming
+    let canonicalPurpose = purpose;
+    if (purpose === 'MOBILE_VERIFY') canonicalPurpose = 'MOBILE_VERIFICATION';
+    if (purpose === 'FORGOT_PASSWORD') canonicalPurpose = 'PASSWORD_RESET';
+
     if (!validPurposes.includes(purpose)) {
-      return { success: false, error: 'Invalid OTP purpose' };
+      return { success: false, error: 'Invalid verification purpose.' };
     }
 
-    // 2. Check rate limit
-    const rateCheck = await this._checkRateLimit(mobile);
+    this._logEvent('OTP_SEND_REQUESTED', norm.national, { purpose: canonicalPurpose });
+
+    // 1. Check rate limits
+    const rateCheck = await this._checkHourlyRateLimit(norm.national);
     if (!rateCheck.allowed) {
+      this._logEvent('OTP_SEND_RATE_LIMITED', norm.national, { purpose: canonicalPurpose });
       return {
         success: false,
-        error: `Too many OTP requests. Try again in ${rateCheck.retryAfterSeconds} seconds.`,
-        retryAfterSeconds: rateCheck.retryAfterSeconds
+        error: 'Too many OTP requests. Please wait a few minutes before trying again.',
+        cooldownSeconds: rateCheck.retryAfterSeconds
       };
     }
 
-    // 3. Invalidate any previous unused OTP for this mobile + purpose
-    await this.supabase
-      .from('otp_requests')
-      .update({ used: true, used_at: new Date().toISOString() })
-      .eq('mobile', mobile)
-      .eq('purpose', purpose)
-      .eq('used', false);
+    // 1b. Check active challenge cooldown
+    if (this.supabase) {
+      const now = new Date();
+      const { data: activeChallenges } = await this.supabase
+        .from('otp_verifications')
+        .select('cooldown_until')
+        .eq('mobile', norm.national)
+        .eq('purpose', canonicalPurpose)
+        .eq('status', 'PENDING')
+        .gte('cooldown_until', now.toISOString());
 
-    // 4. Generate OTP
-    const otp = this._generateOTP();
-
-    // 5. Hash OTP with bcrypt
-    const otpHash = await bcrypt.hash(otp, BCRYPT_ROUNDS);
-
-    // 6. Calculate expiry
-    const expiresAt = new Date(Date.now() + OTP_EXPIRY_SECONDS * 1000).toISOString();
-
-    // 7. Store hashed OTP in database
-    const requestId = uuidv4();
-    const { error: insertError } = await this.supabase
-      .from('otp_requests')
-      .insert({
-        id: requestId,
-        mobile,
-        otp_hash: otpHash,
-        purpose,
-        attempts: 0,
-        max_attempts: MAX_ATTEMPTS,
-        expires_at: expiresAt,
-        used: false,
-        patient_id: options.patientId || null,
-        request_ip: options.ipAddress || null
-      });
-
-    if (insertError) {
-      console.error('[OTP] Failed to store OTP request:', insertError.message);
-      return { success: false, error: 'Failed to create OTP request' };
-    }
-
-    // 8. Send OTP via SMS service
-    try {
-      await this.smsService.sendOTP(mobile, otp);
-    } catch (smsError) {
-      console.error('[OTP] SMS delivery failed:', smsError.message);
-      // Mark the request as failed but don't expose the error details
-      // In sandbox mode, the OTP was already logged to console by the sandbox provider
-      if (this.environment === 'production') {
-        return { success: false, error: 'Failed to send verification code. Please try again.' };
+      if (activeChallenges && activeChallenges.length > 0) {
+        const cooldownTime = new Date(activeChallenges[0].cooldown_until);
+        const remainingSeconds = Math.max(1, Math.ceil((cooldownTime.getTime() - now.getTime()) / 1000));
+        return {
+          success: false,
+          error: `Please wait ${remainingSeconds} seconds before requesting another code.`,
+          cooldownSeconds: remainingSeconds
+        };
       }
-      // In development/sandbox, continue even if SMS fails (logged to console)
     }
 
-    // 9. Return success — NEVER return the OTP in the response
+    // 2. Dispatch OTP via SMS Provider (MSG91 in production/live)
+    let sendResult;
+    try {
+      sendResult = await this.smsService.sendOtp(norm.national, {
+        purpose: canonicalPurpose,
+        templateId: options.templateId,
+        otpLength: 6,
+        otpExpiry: 5
+      });
+    } catch (err) {
+      this._logEvent('OTP_SEND_FAILED', norm.national, { purpose: canonicalPurpose, error: err.message });
+      console.error('[OTP Service] SMS Dispatch Exception:', err.message);
+      return {
+        success: false,
+        error: err.message || 'Failed to dispatch verification code via SMS.'
+      };
+    }
+
+    // 3. Create server-side challenge record in PostgreSQL
+    const challengeId = `CHAL-${uuidv4()}`;
+    const now = new Date();
+    const cooldownUntil = new Date(now.getTime() + COOLDOWN_SECONDS * 1000).toISOString();
+    const expiresAt = new Date(now.getTime() + EXPIRY_SECONDS * 1000).toISOString();
+
+    if (this.supabase) {
+      const challengeRecord = {
+        challenge_id: challengeId,
+        patient_id: options.patientId || null,
+        mobile: norm.national,
+        purpose: canonicalPurpose,
+        provider: this.smsService.providerType || 'msg91',
+        provider_request_id: sendResult.providerRequestId || null,
+        status: 'PENDING',
+        attempt_count: 0,
+        max_attempts: MAX_ATTEMPTS,
+        send_count: 1,
+        last_sent_at: now.toISOString(),
+        cooldown_until: cooldownUntil,
+        expires_at: expiresAt,
+        request_ip: options.ipAddress || null,
+        metadata: { _sandbox: !!sendResult._sandbox }
+      };
+
+      const { error: insertErr } = await this.supabase
+        .from('otp_verifications')
+        .insert(challengeRecord);
+
+      if (insertErr) {
+        console.error('[OTP Service] Failed to store challenge in database:', insertErr.message);
+      }
+    }
+
+    this._logEvent('OTP_SEND_SUCCESS', norm.national, { purpose: canonicalPurpose });
+
     return {
       success: true,
-      requestId,
-      expiresIn: OTP_EXPIRY_SECONDS,
-      remaining: rateCheck.remaining - 1
+      message: 'Verification code sent successfully.',
+      challengeId,
+      cooldownSeconds: COOLDOWN_SECONDS,
+      maskedMobile: norm.masked
     };
   }
 
   /**
-   * Verify an OTP code against the stored hash
+   * Resend / retry OTP using an existing challenge
    *
-   * @param {string} mobile - 10-digit mobile number
-   * @param {string} purpose - OTP purpose
-   * @param {string} otpCode - The 6-digit OTP entered by the user
-   * @returns {Promise<{success: boolean, error?: string, errorCode?: string}>}
+   * @param {string} challengeId - Server-issued challenge ID
+   * @param {string} rawMobile - User's mobile number
+   * @returns {Promise<{success: boolean, message: string, cooldownSeconds?: number, error?: string}>}
    */
-  async verify(mobile, purpose, otpCode) {
-    // 1. Validate inputs
-    if (!mobile || !purpose || !otpCode) {
-      return { success: false, error: 'Missing required fields', errorCode: 'INVALID_INPUT' };
+  async resendOtp(challengeId, rawMobile) {
+    if (!challengeId) {
+      return { success: false, error: 'Challenge ID is required for resend.' };
     }
 
-    if (!/^\d{6}$/.test(otpCode)) {
-      return { success: false, error: 'OTP must be a 6-digit number', errorCode: 'INVALID_FORMAT' };
+    const norm = normalizeIndianMobile(rawMobile);
+    if (!norm.valid) {
+      return { success: false, error: norm.error };
     }
 
-    // 2. Find the latest non-expired, non-used OTP for this mobile + purpose
-    const now = new Date().toISOString();
-    const { data: otpRecords, error: fetchError } = await this.supabase
-      .from('otp_requests')
+    // Lookup challenge in database
+    if (!this.supabase) {
+      return { success: true, message: 'OTP resent.', cooldownSeconds: COOLDOWN_SECONDS };
+    }
+
+    const { data: challenge, error } = await this.supabase
+      .from('otp_verifications')
       .select('*')
-      .eq('mobile', mobile)
-      .eq('purpose', purpose)
-      .eq('used', false)
-      .gte('expires_at', now)
-      .order('created_at', { ascending: false })
-      .limit(1);
+      .eq('challenge_id', challengeId)
+      .maybeSingle();
 
-    if (fetchError) {
-      console.error('[OTP] Verification lookup error:', fetchError.message);
-      return { success: false, error: 'Verification failed. Please try again.', errorCode: 'SYSTEM_ERROR' };
+    if (error || !challenge) {
+      return { success: false, error: 'Verification session expired. Please start over.' };
     }
 
-    if (!otpRecords || otpRecords.length === 0) {
-      return { success: false, error: 'No valid verification code found. Request a new one.', errorCode: 'NOT_FOUND' };
+    // Security: Validate mobile matches challenge
+    if (challenge.mobile !== norm.national) {
+      return { success: false, error: 'Mobile number mismatch for this verification session.' };
     }
 
-    const otpRecord = otpRecords[0];
+    // Check status
+    if (challenge.status === 'BLOCKED' || challenge.status === 'VERIFIED') {
+      return { success: false, error: 'This verification session is no longer active.' };
+    }
 
-    // 3. Check attempt count
-    if (otpRecord.attempts >= otpRecord.max_attempts) {
-      // Mark as used (exhausted)
-      await this.supabase
-        .from('otp_requests')
-        .update({ used: true, used_at: now })
-        .eq('id', otpRecord.id);
-
+    // Enforce server-side cooldown
+    const now = new Date();
+    const cooldownTime = new Date(challenge.cooldown_until);
+    if (now < cooldownTime) {
+      const remainingSeconds = Math.ceil((cooldownTime.getTime() - now.getTime()) / 1000);
       return {
         success: false,
-        error: 'Maximum verification attempts exceeded. Request a new code.',
-        errorCode: 'MAX_ATTEMPTS'
+        error: `Please wait ${remainingSeconds} seconds before requesting another code.`,
+        cooldownSeconds: remainingSeconds
       };
     }
 
-    // 4. Compare OTP hash
-    const isMatch = await bcrypt.compare(otpCode, otpRecord.otp_hash);
-
-    if (!isMatch) {
-      // Increment attempts
-      await this.supabase
-        .from('otp_requests')
-        .update({ attempts: otpRecord.attempts + 1 })
-        .eq('id', otpRecord.id);
-
-      const remainingAttempts = otpRecord.max_attempts - otpRecord.attempts - 1;
+    // Check send count limit
+    if (challenge.send_count >= challenge.max_sends) {
       return {
         success: false,
-        error: `Invalid verification code. ${remainingAttempts} attempt(s) remaining.`,
-        errorCode: 'INVALID_OTP',
+        error: 'Maximum resend limit reached for this session. Please try again later.'
+      };
+    }
+
+    // Call SMS provider retry or send
+    try {
+      await this.smsService.retryOtp(norm.national, {
+        purpose: challenge.purpose
+      });
+    } catch (err) {
+      console.error('[OTP Service] Resend error:', err.message);
+      return { success: false, error: err.message || 'Failed to resend verification code.' };
+    }
+
+    // Update challenge cooldown and send count
+    const newCooldownUntil = new Date(now.getTime() + COOLDOWN_SECONDS * 1000).toISOString();
+    await this.supabase
+      .from('otp_verifications')
+      .update({
+        send_count: challenge.send_count + 1,
+        last_sent_at: now.toISOString(),
+        cooldown_until: newCooldownUntil,
+        updated_at: now.toISOString()
+      })
+      .eq('challenge_id', challengeId);
+
+    this._logEvent('OTP_RESEND_SUCCESS', norm.national, { purpose: challenge.purpose });
+
+    return {
+      success: true,
+      message: 'A new verification code has been dispatched.',
+      cooldownSeconds: COOLDOWN_SECONDS
+    };
+  }
+
+  /**
+   * Verify an OTP submitted by the user
+   *
+   * @param {string} rawMobile - Indian mobile number
+   * @param {string} otpCode - 4-6 digit OTP
+   * @param {string} [challengeId] - Server challenge ID
+   * @param {string} [purpose] - Verification purpose for cross-validation
+   * @returns {Promise<{
+   *   success: boolean,
+   *   verified?: boolean,
+   *   resetToken?: string,
+   *   error?: string,
+   *   remainingAttempts?: number
+   * }>}
+   */
+  async verify(rawMobile, otpCode, challengeId, purpose) {
+    const norm = normalizeIndianMobile(rawMobile);
+    if (!norm.valid) {
+      return { success: false, error: norm.error };
+    }
+
+    const cleanOtp = String(otpCode || '').trim();
+    if (!/^\d{4,8}$/.test(cleanOtp)) {
+      return { success: false, error: 'Please enter a valid numeric verification code.' };
+    }
+
+    let canonicalPurpose = purpose;
+    if (purpose === 'MOBILE_VERIFY') canonicalPurpose = 'MOBILE_VERIFICATION';
+    if (purpose === 'FORGOT_PASSWORD') canonicalPurpose = 'PASSWORD_RESET';
+
+    this._logEvent('OTP_VERIFY_REQUESTED', norm.national, { purpose: canonicalPurpose });
+
+    let challenge = null;
+
+    if (this.supabase) {
+      // Find challenge by ID or find latest active challenge for this mobile + purpose
+      let query = this.supabase
+        .from('otp_verifications')
+        .select('*');
+
+      if (challengeId) {
+        query = query.eq('challenge_id', challengeId);
+      } else {
+        query = query
+          .eq('mobile', norm.national)
+          .eq('status', 'PENDING')
+          .order('created_at', { ascending: false })
+          .limit(1);
+      }
+
+      const { data, error } = await query;
+      if (!error && data && data.length > 0) {
+        challenge = data[0];
+      }
+    }
+
+    // If challenge found, enforce validation rules
+    if (challenge) {
+      // Mobile check
+      if (challenge.mobile !== norm.national) {
+        return { success: false, error: 'Mobile number mismatch for this verification session.' };
+      }
+
+      // Purpose separation check
+      if (canonicalPurpose && challenge.purpose !== canonicalPurpose) {
+        return { success: false, error: 'Invalid verification purpose for this session.' };
+      }
+
+      // Status check
+      if (challenge.status === 'BLOCKED') {
+        return { success: false, error: 'Too many incorrect attempts. This verification session has been locked.' };
+      }
+      if (challenge.status === 'VERIFIED') {
+        return { success: false, error: 'This verification session has already been completed.' };
+      }
+
+      // Expiry check
+      const now = new Date();
+      if (now > new Date(challenge.expires_at)) {
+        await this.supabase
+          .from('otp_verifications')
+          .update({ status: 'EXPIRED', updated_at: now.toISOString() })
+          .eq('id', challenge.id);
+        return { success: false, error: 'This OTP has expired. Please request a new verification code.' };
+      }
+
+      // Attempt count check
+      if (challenge.attempt_count >= challenge.max_attempts) {
+        await this.supabase
+          .from('otp_verifications')
+          .update({ status: 'BLOCKED', updated_at: now.toISOString() })
+          .eq('id', challenge.id);
+        return { success: false, error: 'Maximum attempts exceeded. Please request a new OTP.' };
+      }
+    }
+
+    // Verify OTP against SMS Provider (MSG91 in production)
+    let verifyResult;
+    try {
+      verifyResult = await this.smsService.verifyOtp(norm.national, cleanOtp);
+    } catch (err) {
+      console.error('[OTP Service] Verify Gateway Exception:', err.message);
+      return { success: false, error: 'SMS verification gateway unavailable. Please try again.' };
+    }
+
+    const now = new Date();
+
+    if (!verifyResult.success) {
+      this._logEvent('OTP_VERIFY_FAILED', norm.national, { purpose: canonicalPurpose });
+
+      // Increment attempt count in DB
+      let remainingAttempts = MAX_ATTEMPTS - 1;
+      if (challenge && this.supabase) {
+        const nextAttempts = challenge.attempt_count + 1;
+        remainingAttempts = Math.max(0, challenge.max_attempts - nextAttempts);
+        await this.supabase
+          .from('otp_verifications')
+          .update({
+            attempt_count: nextAttempts,
+            status: nextAttempts >= challenge.max_attempts ? 'BLOCKED' : 'PENDING',
+            updated_at: now.toISOString()
+          })
+          .eq('id', challenge.id);
+      }
+
+      return {
+        success: false,
+        error: verifyResult.error || `Incorrect OTP. ${remainingAttempts} attempt(s) remaining.`,
         remainingAttempts
       };
     }
 
-    // 5. Mark as used
-    await this.supabase
-      .from('otp_requests')
-      .update({ used: true, used_at: now })
-      .eq('id', otpRecord.id);
+    // SUCCESS! Mark challenge as VERIFIED
+    let resetToken = null;
+    if (this.supabase && challenge) {
+      const updateData = {
+        status: 'VERIFIED',
+        verified_at: now.toISOString(),
+        updated_at: now.toISOString()
+      };
 
-    return { success: true };
+      // If purpose is PASSWORD_RESET: generate single-use crypto resetToken
+      if (challenge.purpose === 'PASSWORD_RESET') {
+        resetToken = `RST-${crypto.randomBytes(32).toString('hex')}`;
+        const resetTokenHash = crypto.createHash('sha256').update(resetToken).digest('hex');
+        updateData.reset_token_hash = resetTokenHash;
+        updateData.reset_token_expires = new Date(now.getTime() + RESET_TOKEN_EXPIRY_SECONDS * 1000).toISOString();
+        updateData.reset_used = false;
+      }
+
+      await this.supabase
+        .from('otp_verifications')
+        .update(updateData)
+        .eq('id', challenge.id);
+    }
+
+    this._logEvent('OTP_VERIFY_SUCCESS', norm.national, { purpose: canonicalPurpose });
+
+    return {
+      success: true,
+      verified: true,
+      resetToken,
+      message: 'Mobile verification completed successfully.'
+    };
+  }
+
+  /**
+   * Validate a password reset authorization token and invalidate it
+   *
+   * @param {string} resetToken - Opaque single-use reset token
+   * @returns {Promise<{valid: boolean, mobile?: string, patientId?: string, error?: string}>}
+   */
+  async validateAndConsumeResetToken(resetToken) {
+    if (!resetToken || typeof resetToken !== 'string' || !resetToken.startsWith('RST-')) {
+      return { valid: false, error: 'Invalid or missing password reset authorization token.' };
+    }
+
+    if (!this.supabase) {
+      return { valid: true };
+    }
+
+    const tokenHash = crypto.createHash('sha256').update(resetToken).digest('hex');
+    const now = new Date().toISOString();
+
+    const { data: record, error } = await this.supabase
+      .from('otp_verifications')
+      .select('*')
+      .eq('reset_token_hash', tokenHash)
+      .eq('reset_used', false)
+      .eq('purpose', 'PASSWORD_RESET')
+      .gt('reset_token_expires', now)
+      .maybeSingle();
+
+    if (error || !record) {
+      return {
+        valid: false,
+        error: 'Password reset token is invalid, expired, or has already been used.'
+      };
+    }
+
+    // Invalidate immediately (single-use)
+    await this.supabase
+      .from('otp_verifications')
+      .update({
+        reset_used: true,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', record.id);
+
+    return {
+      valid: true,
+      mobile: record.mobile,
+      patientId: record.patient_id
+    };
   }
 }
 

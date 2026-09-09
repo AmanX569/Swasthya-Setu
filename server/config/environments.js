@@ -19,7 +19,6 @@ function validateEnvironment(config) {
   const warnings = [];
 
   const isProd = config.env === 'production';
-  const isSandbox = config.env === 'sandbox';
 
   // JWT Secret checks
   if (isProd) {
@@ -41,18 +40,30 @@ function validateEnvironment(config) {
     }
   }
 
-  // SMS Gateway validation
+  // SMS & OTP Gateway validation
+  const provider = config.sms.provider;
   if (isProd) {
-    if (config.sms.provider === 'sandbox') {
-      errors.push('CRITICAL: SMS_PROVIDER cannot be "sandbox" in production. Configure a licensed provider (e.g., twilio/msg91).');
-    } else if (config.sms.provider === 'twilio') {
+    if (provider === 'sandbox' || provider === 'mock') {
+      errors.push('CRITICAL: OTP_PROVIDER / SMS_PROVIDER cannot be "sandbox" or "mock" in production. Configure a licensed provider (msg91/twilio).');
+    } else if (provider === 'msg91') {
+      if (!config.sms.msg91.authKey) {
+        errors.push('CRITICAL: MSG91_AUTH_KEY is required in production when OTP_PROVIDER=msg91.');
+      }
+      if (!config.sms.msg91.templateId) {
+        errors.push('CRITICAL: MSG91_OTP_TEMPLATE_ID is required in production when OTP_PROVIDER=msg91.');
+      }
+    } else if (provider === 'twilio') {
       if (!config.sms.twilio.accountSid || !config.sms.twilio.authToken || !config.sms.twilio.fromNumber) {
         errors.push('CRITICAL: Twilio configuration (SMS_TWILIO_ACCOUNT_SID, SMS_TWILIO_AUTH_TOKEN, SMS_TWILIO_FROM_NUMBER) incomplete.');
       }
     }
   } else {
-    if (config.sms.provider === 'sandbox') {
-      warnings.push('INFO: SMS_PROVIDER is set to "sandbox". Verification codes will be printed to server console.');
+    if (provider === 'msg91') {
+      if (!config.sms.msg91.authKey || !config.sms.msg91.templateId) {
+        errors.push('CRITICAL: MSG91 provider selected (OTP_PROVIDER=msg91) but MSG91_AUTH_KEY or MSG91_OTP_TEMPLATE_ID is missing. Configure keys or set OTP_PROVIDER=sandbox for local testing.');
+      }
+    } else if (provider === 'sandbox' || provider === 'mock') {
+      warnings.push('INFO: OTP_PROVIDER is set to "sandbox/mock". Verification codes will be printed to server console.');
     }
   }
 

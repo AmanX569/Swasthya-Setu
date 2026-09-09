@@ -28,7 +28,14 @@ const config = {
     expiresIn: process.env.JWT_EXPIRES_IN || '24h'
   },
   sms: {
-    provider: process.env.SMS_PROVIDER || 'sandbox', // 'sandbox' | 'twilio' | 'msg91'
+    provider: process.env.OTP_PROVIDER || process.env.SMS_PROVIDER || 'sandbox', // 'msg91' | 'sandbox' | 'mock' | 'twilio'
+    msg91: {
+      authKey: process.env.MSG91_AUTH_KEY || '',
+      templateId: process.env.MSG91_OTP_TEMPLATE_ID || '',
+      dltTemplateId: process.env.MSG91_DLT_TEMPLATE_ID || '',
+      senderId: process.env.MSG91_SENDER_ID || '',
+      baseUrl: process.env.MSG91_BASE_URL || 'https://control.msg91.com'
+    },
     twilio: {
       accountSid: process.env.SMS_TWILIO_ACCOUNT_SID || '',
       authToken: process.env.SMS_TWILIO_AUTH_TOKEN || '',
