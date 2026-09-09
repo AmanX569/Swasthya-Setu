@@ -439,6 +439,101 @@
         };
       }
 
+      // Cut / Wound / Active Bleeding
+      if (q.includes('cut') || q.includes('bleed') || q.includes('blood') || q.includes('wound') || q.includes('injury') || q.includes('laceration') || q.includes('chot') || q.includes('ghav') || q.includes('rakta')) {
+        const isSpurting = q.includes('spurting') || q.includes('uncontrolled') || q.includes('gushing') || q.includes('artery');
+        if (isSpurting) {
+          return {
+            triageLevel: 'EMERGENCY',
+            message: '### 🚨 EMERGENCY CLINICAL ALERT: Severe Bleeding / Hemorrhage\n\n' +
+              '**CRITICAL SAFETY DIRECTIVE:** Spurting or uncontrolled blood loss can rapidly lead to hypovolemic shock and requires emergency hospital intervention.\n\n' +
+              '**IMMEDIATE FIRST-AID:**\n' +
+              '1. 🚨 **CALL NATIONAL AMBULANCE 108 OR EMERGENCY 112 IMMEDIATELY.**\n' +
+              '2. Press as firmly as possible directly on the wound with a clean cloth or towel. Do NOT let go.\n' +
+              '3. Keep the injured limb elevated above the patient\'s heart.\n' +
+              '4. Keep the patient lying flat with legs raised slightly.',
+            emergencyNotice: '🚨 EMERGENCY: CALL NATIONAL AMBULANCE 108 IMMEDIATELY'
+          };
+        }
+        return {
+          triageLevel: 'URGENT',
+          message: '### 🩹 Clinical Assessment: Cut & Active Bleeding (URGENT First-Aid)\n\n' +
+            '**Clinical Assessment:** Active bleeding from a cut requires immediate first-aid pressure to control blood loss and prevent wound infection.\n\n' +
+            '**Urgency Level:** **🟠 URGENT (Immediate First-Aid & Wound Care)**\n\n' +
+            '**🩺 Essential First-Aid Steps (Do These Right Now):**\n' +
+            '1. **Direct Pressure**: Press firmly and continuously directly over the cut with a clean cloth or sterile gauze for **10 full minutes** without lifting to check.\n' +
+            '2. **Elevate the Injured Limb**: Keep your injured leg or arm propped up on pillows above heart level to decrease gravitational blood pressure.\n' +
+            '3. **Cleanse with Clean Water**: Gently rinse visible grit or dirt away under clean drinking or boiled water. Do NOT apply turmeric, ash, or soil to the wound.\n' +
+            '4. **Antiseptic & Bandage**: Apply Povidone Iodine 5% ointment and secure with a clean sterile dressing.\n' +
+            '5. **Tetanus (TT) Booster**: If you have not had a Tetanus Toxoid shot within the past 5 years, get one at your nearest PHC within 24 hours.\n\n' +
+            '**🚩 Danger Red Flags (Go to Hospital / Call 108 Immediately):**\n' +
+            '• Blood is spurting or pulsating out in rhythm with your heartbeat.\n' +
+            '• Bleeding does not stop after 15 minutes of firm direct pressure.\n' +
+            '• Deep gaping wound where edges remain pulled apart (requires doctor\'s stitches within 6–8 hours).\n' +
+            '• Numbness, tingling, or weakness in toes or foot beyond the cut.\n\n' +
+            '**👨‍⚕️ Recommended Facility:** Visit your nearest Primary Health Centre (PHC) or Community Health Centre (CHC) for professional wound dressing and sutures if needed.'
+        };
+      }
+
+      // Burns & Scalds
+      if (q.includes('burn') || q.includes('scald') || q.includes('jalan') || q.includes('blister') || q.includes('fire') || q.includes('hot water')) {
+        return {
+          triageLevel: 'MODERATE',
+          message: '### 🔥 Clinical Assessment: Burn First-Aid (MODERATE to URGENT)\n\n' +
+            '**Immediate First-Aid:** Hold the burn under gentle cool running tap water for 15 to 20 minutes to halt tissue damage.\n\n' +
+            '**Crucial Don\'ts:** Do NOT apply ice, ice water, toothpaste, butter, or turmeric. Do NOT puncture blisters.\n\n' +
+            '**Care Steps:** Apply Silver Sulfadiazine or Betadine ointment and cover loosely with sterile non-stick gauze. Visit your PHC if the burn is larger than your palm.'
+        };
+      }
+
+      // Animal / Dog Bite
+      if (q.includes('dog bite') || q.includes('animal bite') || q.includes('kutta') || q.includes('monkey bite') || q.includes('rabies')) {
+        return {
+          triageLevel: 'URGENT',
+          message: '### 🐕 Clinical Alert: Animal / Dog Bite (URGENT Rabies Protocol)\n\n' +
+            '**CRITICAL FIRST-AID:** Wash the bite wound vigorously with soap and running water for **15 full minutes**. This physically washes away the majority of rabies viral particles.\n\n' +
+            '**Immediate Next Step:** Apply Povidone Iodine and go immediately to your nearest PHC/Hospital for Anti-Rabies Vaccine (ARV Day 0) and Rabies Immunoglobulin (RIG).'
+        };
+      }
+
+      // Snake Bite
+      if (q.includes('snake') || q.includes('saanp') || q.includes('paamu') || q.includes('venom')) {
+        return {
+          triageLevel: 'EMERGENCY',
+          message: '### 🚨 EMERGENCY CLINICAL ALERT: Snake Bite Protocol\n\n' +
+            '**IMMEDIATE DIRECTIVE:** All snake bites in India must be treated as potential medical emergencies requiring Anti-Snake Venom (ASV).\n\n' +
+            '1. 🚨 **CALL NATIONAL AMBULANCE 108 IMMEDIATELY.**\n' +
+            '2. Keep the patient completely still and quiet. Movement speeds venom absorption.\n' +
+            '3. Keep the bitten limb immobilized BELOW heart level.\n' +
+            '4. **DO NOT** cut the bite, do NOT suck venom, do NOT tie tight tourniquets.\n' +
+            '5. Transport immediately to the nearest CHC/Hospital having Anti-Snake Venom.',
+          emergencyNotice: '🚨 EMERGENCY: CALL 108 AMBULANCE IMMEDIATELY FOR ANTI-SNAKE VENOM (ASV)'
+        };
+      }
+
+      // Difficulty Breathing
+      if (q.includes('breathing') || q.includes('asthma') || q.includes('wheezing') || q.includes('shortness of breath') || q.includes('saans')) {
+        return {
+          triageLevel: 'URGENT',
+          message: '### 🫁 Clinical Assessment: Acute Breathing Difficulty\n\n' +
+            '**First-Aid Care:** Sit upright leaning slightly forward. Take slow deep breaths. If you have a prescribed inhaler (Salbutamol/Asthalin), take 2 puffs immediately via spacer.\n\n' +
+            '**🚩 Emergency Red Flags:** Lips turning bluish, inability to speak full sentences without gasping, or chest retractions -> Call 108 Ambulance immediately.'
+        };
+      }
+
+      // Pregnancy Labor / Contractions
+      if (q.includes('pregnancy') || q.includes('labour') || q.includes('pregnant') || q.includes('prasav') || q.includes('water break') || q.includes('contractions')) {
+        return {
+          triageLevel: 'EMERGENCY',
+          message: '### 🤰 Maternal Labour & Pregnancy Alert\n\n' +
+            '**Directives:** Active labor pains, amniotic fluid leakage, or vaginal bleeding require immediate institutional delivery at your nearest 24x7 CHC/FRU hospital.\n\n' +
+            '1. Call 108 Ambulance and alert your local ASHA worker.\n' +
+            '2. Keep the mother resting on her left side to optimize oxygen to the baby.\n' +
+            '3. Keep MCP card, ABHA ID, and warm clean baby clothes ready.',
+          emergencyNotice: '🚨 MATERNAL ALERT: DISPATCH 108 AMBULANCE FOR INSTITUTIONAL DELIVERY'
+        };
+      }
+
       // Fever
       if (q.includes('fever') || q.includes('temperature') || q.includes('chills')) {
         const isUrgent = q.includes('3 day') || q.includes('4 day') || q.includes('high') || q.includes('shiver');

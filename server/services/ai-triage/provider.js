@@ -48,22 +48,42 @@ class SandboxHealthProvider extends AIHealthProvider {
       return this.buildFeverResponse(isProlonged, lang);
     }
 
-    // 5. Check for Headache
+    // 5. Check for Cut / Wound / Bleeding / Injury
+    if (/\b(cut|bleed|bleeding|wound|injury|laceration|chot|ghav|rakta|blood|scraped|stab)\b/i.test(q)) {
+      return this.buildCutBleedingResponse(lang);
+    }
+
+    // 6. Check for Burns & Scalds
+    if (/\b(burn|scald|blister|jalan|fire|hot\s*water|acid)\b/i.test(q)) {
+      return this.buildBurnResponse(lang);
+    }
+
+    // 7. Check for Dog / Animal Bite
+    if (/\b(dog\s*bite|kutta|animal\s*bite|monkey\s*bite|cat\s*scratch|rabies)\b/i.test(q)) {
+      return this.buildDogBiteResponse(lang);
+    }
+
+    // 8. Check for Snake Bite
+    if (/\b(snake|snake\s*bite|saanp|paamu|venom|cobra|viper)\b/i.test(q)) {
+      return this.buildSnakeBiteResponse(lang);
+    }
+
+    // 9. Check for Headache
     if (/\b(headache|migraine|sir\s*dard|tala\s*noppi)\b/i.test(q)) {
       return this.buildHeadacheResponse(lang);
     }
 
-    // 6. Check for Respiratory / Cough
+    // 10. Check for Respiratory / Cough
     if (/\b(cough|cold|throat|khansi|daggu|phlegm)\b/i.test(q)) {
       return this.buildCoughColdResponse(lang);
     }
 
-    // 7. Check for Stomach / Abdominal Discomfort
+    // 11. Check for Stomach / Abdominal Discomfort
     if (/\b(stomach\s*pain|abdominal|diarrhea|vomiting|pet\s*dard|kadupu\s*noppi|loose\s*motion)\b/i.test(q)) {
       return this.buildGastroResponse(lang);
     }
 
-    // 8. General Clinical Triage Formulation
+    // 12. General Clinical Triage Formulation
     return this.buildGeneralTriageResponse(message, lang);
   }
 
@@ -147,6 +167,150 @@ class SandboxHealthProvider extends AIHealthProvider {
         `**🚩 Red-Flag Symptoms to Watch For:**\n` +
         `• Temperature > 103°F, stiff neck, extreme lethargy, or bleeding spots.\n\n` +
         `**👨‍⚕️ Recommended Professional:** General Physician or local Primary Health Centre (PHC).`
+    };
+  }
+
+  buildCutBleedingResponse(lang) {
+    return {
+      triageLevel: 'URGENT',
+      summary: 'Acute skin laceration or wound with active bleeding requiring immediate direct pressure, elevation, wound hygiene, and tetanus prevention.',
+      possibleCauses: [
+        'Acute mechanical laceration or cut',
+        'Sharp object incision (metal, glass, tool, or knife)',
+        'Abrasion with capillary hemorrhage'
+      ],
+      followUpQuestions: [
+        'Is the blood spurting/pulsating or steadily oozing?',
+        'Does the bleeding stop when you press firmly with a clean cloth for 10 minutes?',
+        'When did you last receive a Tetanus Toxoid (TT) vaccine?'
+      ],
+      recommendedActions: [
+        'Apply firm, continuous direct pressure over the cut with a clean cloth or sterile gauze for 10 full minutes without lifting.',
+        'Elevate the injured limb (leg or arm) above the level of the heart to slow down blood flow.',
+        'Rinse gently under clean drinking or boiled water to wash away dirt. Do NOT apply turmeric, cow dung, or household powders.',
+        'Apply Povidone Iodine 5% ointment and bandage with sterile gauze.',
+        'Visit your nearest PHC within 24 hours for a Tetanus Toxoid (TT) booster if your last dose was more than 5 years ago.'
+      ],
+      redFlags: [
+        'Pulsating or spurting bright red blood (arterial cut — CALL 108 IMMEDIATELY)',
+        'Bleeding does not stop after 10 to 15 minutes of continuous firm pressure',
+        'Deep gaping wound where edges do not stay together (requires surgical stitches/sutures within 6–8 hours)',
+        'Loss of sensation, numbness, or inability to move toes/fingers beyond the wound',
+        'Wound contaminated with rust, animal bite, or soil'
+      ],
+      specialist: 'General Physician / Medical Officer / General Surgeon at PHC or CHC',
+      emergencyNotice: null,
+      disclaimer: SafetyEngine.getDisclaimer(lang),
+      message: `### 🩹 Clinical Assessment: Cut & Active Bleeding (URGENT First-Aid)\n\n` +
+        `**Clinical Assessment:** Active bleeding from a cut requires immediate first-aid pressure to control blood loss and prevent wound infection.\n\n` +
+        `**Urgency Level:** **🟠 URGENT (Immediate First-Aid & PHC Evaluation)**\n\n` +
+        `**🩺 Essential First-Aid Steps (Do These Right Now):**\n` +
+        `1. **Direct Pressure**: Press firmly and continuously on the cut with a clean cloth or sterile gauze for 10 full minutes without lifting to check.\n` +
+        `2. **Elevate**: Keep your injured leg propped up on pillows above heart level to decrease bleeding pressure.\n` +
+        `3. **Clean with Clean Water**: Gently flush away visible grit or dirt using clean drinking water or saline. Do NOT put turmeric, ash, or soil in the wound.\n` +
+        `4. **Antiseptic & Dressing**: Apply Povidone Iodine 5% ointment and secure with a clean bandage.\n` +
+        `5. **Tetanus (TT) Shot**: If you have not had a Tetanus vaccine in the last 5 years, get a TT injection at your nearest PHC within 24 hours.\n\n` +
+        `**🚩 Danger Red Flags (Seek Emergency / Hospital Care Immediately):**\n` +
+        `• Blood is spurting or pulsating out in rhythm with your pulse.\n` +
+        `• Bleeding does not stop after 15 minutes of firm direct pressure.\n` +
+        `• Deep gaping cut where skin edges stay apart (needs doctor's stitches).\n` +
+        `• Numbness or weakness in your foot or toes.\n\n` +
+        `**👨‍⚕️ Recommended Facility:** Visit your nearest Primary Health Centre (PHC) or Community Health Centre (CHC) for wound dressing and TT booster.`
+    };
+  }
+
+  buildBurnResponse(lang) {
+    return {
+      triageLevel: 'MODERATE',
+      summary: 'Thermal or chemical burn injury requiring immediate cooling and sterile barrier protection.',
+      possibleCauses: ['Thermal burn from hot liquid/flame', 'Scald', 'Contact burn'],
+      followUpQuestions: [
+        'How large is the burn area (e.g. size of palm)?',
+        'Are there any intact or broken blisters?',
+        'Is the burn on the face, hands, joints, or groin?'
+      ],
+      recommendedActions: [
+        'Hold the burned area under gentle, cool running tap water for 15–20 minutes immediately.',
+        'Do NOT apply ice, ice water, butter, toothpaste, or turmeric.',
+        'Do NOT pop or puncture intact blisters.',
+        'Apply Silver Sulfadiazine or Betadine ointment and cover loosely with a sterile non-stick bandage.'
+      ],
+      redFlags: [
+        'Burns covering a large body surface area (larger than patient’s palm)',
+        'Burns involving the face, hands, joints, or genitals',
+        'White, charred, or painless deep burn areas'
+      ],
+      specialist: 'Medical Officer / Burn Care Unit at District Hospital',
+      emergencyNotice: null,
+      disclaimer: SafetyEngine.getDisclaimer(lang),
+      message: `### 🔥 Clinical Assessment: Burn First-Aid (MODERATE to URGENT)\n\n` +
+        `**Immediate Action:** Hold the burn under cool running tap water for 15 to 20 minutes to halt tissue damage.\n\n` +
+        `**Important Don'ts:** Do NOT apply ice, toothpaste, or turmeric. Do NOT break blisters.\n\n` +
+        `**Care Steps:** Apply Silver Sulfadiazine ointment and cover loosely with clean gauze. Visit your PHC for sterile dressing.`
+    };
+  }
+
+  buildDogBiteResponse(lang) {
+    return {
+      triageLevel: 'URGENT',
+      summary: 'Animal or dog bite carrying acute rabies and bacterial infection risk requiring immediate wound flushing and vaccination.',
+      possibleCauses: ['Canine or mammalian bite / scratch'],
+      followUpQuestions: [
+        'Did the bite pierce the skin and cause bleeding?',
+        'Was the animal a stray or pet dog?',
+        'How many minutes or hours ago did the bite happen?'
+      ],
+      recommendedActions: [
+        'Wash the wound vigorously under running tap water with laundry/toilet soap for 15 continuous minutes immediately.',
+        'Apply Povidone Iodine antiseptic solution to the wound.',
+        'Do NOT suture or stitch the bite wound immediately, and do NOT apply soil or home remedies.',
+        'Go directly to the nearest Government Hospital / PHC for Anti-Rabies Vaccine (ARV) and Rabies Immunoglobulin (RIG).'
+      ],
+      redFlags: [
+        'Severe deep laceration or bleeding',
+        'Bite from an aggressive, salivating, or unknown stray animal',
+        'Bites on the head, neck, face, or fingertips'
+      ],
+      specialist: 'PHC Medical Officer / District Anti-Rabies Clinic',
+      emergencyNotice: null,
+      disclaimer: SafetyEngine.getDisclaimer(lang),
+      message: `### 🐕 Clinical Alert: Animal / Dog Bite (URGENT Rabies Protocol)\n\n` +
+        `**CRITICAL FIRST-AID:** Wash the bite wound vigorously with soap and running water for **15 full minutes**. This physically washes away the majority of rabies viral particles.\n\n` +
+        `**Immediate Next Step:** Apply Povidone Iodine and go immediately to your nearest PHC/Hospital for Anti-Rabies Vaccine (ARV Day 0) and Rabies Immunoglobulin (RIG).`
+    };
+  }
+
+  buildSnakeBiteResponse(lang) {
+    return {
+      triageLevel: 'EMERGENCY',
+      summary: 'Potentially venomous snakebite requiring immediate immobilization and emergency Anti-Snake Venom (ASV) at nearest CHC/Hospital.',
+      possibleCauses: ['Venomous or non-venomous snake bite'],
+      followUpQuestions: [
+        'How many minutes ago did the bite happen?',
+        'Can you describe the snake (color, markings)?',
+        'Are you experiencing any drooping eyelids, difficulty breathing, or bleeding?'
+      ],
+      recommendedActions: [
+        'Call 108 Emergency Ambulance immediately.',
+        'Immobilize the bitten limb and keep it calm below heart level.',
+        'Remove tight rings, bangles, and shoes before swelling starts.',
+        'DO NOT cut the wound, do NOT suck venom, and do NOT apply tourniquets.'
+      ],
+      redFlags: [
+        'Drooping eyelids (Ptosis), difficulty swallowing or breathing',
+        'Bleeding from gums or bite marks',
+        'Rapidly spreading swelling and severe pain'
+      ],
+      specialist: 'Emergency Department / CHC with Anti-Snake Venom (ASV)',
+      emergencyNotice: '🚨 EMERGENCY: CALL 108 AMBULANCE IMMEDIATELY FOR ANTI-SNAKE VENOM (ASV)',
+      disclaimer: SafetyEngine.getDisclaimer(lang),
+      message: `### 🚨 EMERGENCY CLINICAL ALERT: Snake Bite Protocol\n\n` +
+        `**IMMEDIATE DIRECTIVE:** All snake bites in India must be treated as potential medical emergencies requiring Anti-Snake Venom (ASV).\n\n` +
+        `1. 🚨 **CALL NATIONAL AMBULANCE 108 IMMEDIATELY.**\n` +
+        `2. Keep the patient completely still and quiet. Movement speeds venom absorption.\n` +
+        `3. Keep the bitten limb immobilized BELOW heart level.\n` +
+        `4. **DO NOT** cut the bite, do NOT suck venom, do NOT tie tight tourniquets.\n` +
+        `5. Transport immediately to the nearest CHC/Hospital having Anti-Snake Venom.`
     };
   }
 

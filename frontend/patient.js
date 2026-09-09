@@ -42,6 +42,9 @@
       if (global.gpsTrackingController) {
         global.gpsTrackingController.initMap('patientLiveGpsMap');
       }
+      if (global.aiHealthBot && typeof global.aiHealthBot.renderChat === 'function') {
+        global.aiHealthBot.renderChat();
+      }
     }
 
     // -------------------------------------------------------------
