@@ -6,3 +6,4 @@ server/.env
 *.pem
 *.key
 *.cert
+*.docx
