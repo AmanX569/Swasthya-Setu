@@ -3610,6 +3610,12 @@ body[data-theme="doom"] {
       <option value="ur">اردو (Urdu)</option>
     </select>
 
+    <!-- ✨ TOP NAVBAR AI ASSISTANT BUTTON -->
+    <button type="button" onclick="swasthyaAiAssistant.toggleWindow(true)" class="btn-glass" title="Open AI Healthcare Triage Assistant" style="padding:8px 14px;border-radius:12px;font-weight:800;font-size:13px;background:linear-gradient(135deg, rgba(16,185,129,0.18), rgba(5,150,105,0.25));border:1.5px solid #10b981;color:#34d399;cursor:pointer;display:inline-flex;align-items:center;gap:6px;box-shadow:0 2px 10px rgba(16,185,129,0.2);transition:all 0.2s ease;">
+      <span>✨</span>
+      <span>AI Triage</span>
+    </button>
+
     <!-- 🟢 GREEN POSITION: 🚨 108 SOS BUTTON -->
     <button type="button" class="auth-btn-primary" style="background:linear-gradient(135deg, #dc2626, #b91c1c);color:#ffffff;padding:9px 18px;font-size:13px;font-weight:900;border:1px solid #991b1b;border-radius:12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;box-shadow:0 4px 14px rgba(220,38,38,0.38);transition:all 0.2s ease;" onclick="patientController.triggerSos()" data-i18n="btn_sos">
       <span>🚨</span> <span>108 SOS</span>
@@ -4139,12 +4145,47 @@ body[data-theme="doom"] {
         </div>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button type="button" class="auth-btn-primary" style="background:linear-gradient(135deg, #10b981, #059669);border:none;padding:10px 18px;font-size:13px;font-weight:800;border-radius:10px;box-shadow:0 4px 14px rgba(16,185,129,0.4);cursor:pointer;display:inline-flex;align-items:center;gap:6px;" onclick="swasthyaAiAssistant.toggleWindow(true)">
+          ✨ AI Symptom Triage
+        </button>
         <button class="auth-btn-primary" style="background:linear-gradient(135deg, #16a34a, #15803d);border:none;padding:10px 18px;font-size:13px;font-weight:800;border-radius:10px;box-shadow:0 4px 14px rgba(22,163,74,0.4);cursor:pointer;" onclick="if (window.patientController) { window.patientController.openPatientVideoCallModal(); } else if (window.openPatientVideoCallModal) { window.openPatientVideoCallModal(); }">
           📹 Live Video Call Doctor
         </button>
         <button class="auth-btn-primary" style="background:linear-gradient(135deg, #0284c7, #0369a1);border:none;padding:10px 18px;font-size:13px;font-weight:800;border-radius:10px;box-shadow:0 4px 14px rgba(2,132,199,0.4);cursor:pointer;" onclick="patientController.openRequestConsultModal()">
           + Request OPD Queue
         </button>
+      </div>
+    </div>
+
+    <!-- AI HEALTHCARE TRIAGE & CLINICAL ASSISTANT PANEL (IN PATIENT SECTION) -->
+    <div class="glass-panel" id="patientAiTriagePanel" style="border:1.5px solid rgba(16,185,129,0.35);background:linear-gradient(145deg, rgba(16,185,129,0.08), rgba(15,23,42,0.4));margin-bottom:18px;border-radius:16px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:14px;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg, #10b981, #0d9488);display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 3px 12px rgba(16,185,129,0.4);">
+            ✨
+          </div>
+          <div>
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <h2 class="panel-title" style="margin:0;color:var(--ink);font-size:17px;font-weight:800;">Smart AI Healthcare Triage Assistant</h2>
+              <span class="badge" style="background:rgba(16,185,129,0.2);color:#34d399;font-size:10px;padding:2px 8px;border-radius:8px;border:1px solid #10b981;font-weight:800;">24x7 Live</span>
+            </div>
+            <small style="color:var(--muted);font-size:12px;">Check symptoms, assess urgency level, get safe home care steps, or identify emergency red flags</small>
+          </div>
+        </div>
+        <button type="button" class="auth-btn-primary" onclick="swasthyaAiAssistant.toggleWindow(true)" style="background:linear-gradient(135deg, #10b981, #059669);border:none;padding:10px 20px;font-size:13px;font-weight:800;border-radius:10px;box-shadow:0 4px 14px rgba(16,185,129,0.4);cursor:pointer;display:inline-flex;align-items:center;gap:6px;">
+          <span>💬 Open AI Chatbot</span>
+        </button>
+      </div>
+
+      <!-- QUICK SYMPTOM BUTTONS GRID -->
+      <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
+        <span style="font-size:12px;font-weight:700;color:var(--ink-dim);margin-right:4px;">Quick Assessment:</span>
+        <button type="button" onclick="swasthyaAiAssistant.triggerSymptomPill('fever')" class="btn-glass" style="padding:6px 12px;font-size:12px;font-weight:700;border-radius:10px;cursor:pointer;color:var(--ink);">🌡️ High Fever</button>
+        <button type="button" onclick="swasthyaAiAssistant.triggerSymptomPill('chestpain')" class="btn-glass" style="padding:6px 12px;font-size:12px;font-weight:700;border-radius:10px;cursor:pointer;color:#f87171;background:rgba(220,38,38,0.1);border-color:rgba(220,38,38,0.3);">🫀 Chest Pain</button>
+        <button type="button" onclick="swasthyaAiAssistant.triggerSymptomPill('breathing')" class="btn-glass" style="padding:6px 12px;font-size:12px;font-weight:700;border-radius:10px;cursor:pointer;color:var(--ink);">😮‍💨 Breathing Trouble</button>
+        <button type="button" onclick="swasthyaAiAssistant.triggerSymptomPill('headache')" class="btn-glass" style="padding:6px 12px;font-size:12px;font-weight:700;border-radius:10px;cursor:pointer;color:var(--ink);">💆 Severe Headache</button>
+        <button type="button" onclick="swasthyaAiAssistant.triggerSymptomPill('diarrhea')" class="btn-glass" style="padding:6px 12px;font-size:12px;font-weight:700;border-radius:10px;cursor:pointer;color:var(--ink);">💧 Diarrhea &amp; ORS</button>
+        <button type="button" onclick="swasthyaAiAssistant.triggerSymptomPill('snakebite')" class="btn-glass" style="padding:6px 12px;font-size:12px;font-weight:700;border-radius:10px;cursor:pointer;color:#ef4444;background:rgba(239,68,68,0.1);border-color:rgba(239,68,68,0.3);">🐍 Snakebite</button>
       </div>
     </div>
 
@@ -43875,7 +43916,7 @@ checkDemoModeFlag();
      ========================================================= -->
 
 <!-- NEW AI LAUNCHER BUTTON (ACCORDING TO PHOTO) -->
-<button type="button" id="swasthyaAiLauncherBtn" onclick="swasthyaAiAssistant.toggleWindow()" aria-label="Open Swasthya AI Assistant" aria-expanded="false" title="Open Swasthya AI Assistant">
+<button type="button" id="swasthyaAiLauncherBtn" onclick="swasthyaAiAssistant.toggleWindow()" aria-label="Open Swasthya AI Assistant" aria-expanded="false" title="Open Swasthya AI Assistant" style="position:fixed !important;bottom:24px !important;right:24px !important;height:54px !important;padding:0 22px 0 16px !important;border-radius:28px !important;background:linear-gradient(135deg, #10b981 0%, #059669 40%, #4f46e5 100%) !important;color:#ffffff !important;border:2px solid rgba(255, 255, 255, 0.45) !important;box-shadow:0 10px 32px rgba(16, 185, 129, 0.5), 0 0 20px rgba(99, 102, 241, 0.4) !important;cursor:pointer !important;z-index:2147483647 !important;display:flex !important;align-items:center !important;gap:10px !important;">
   <span class="ai-sparkle-spin">✨</span>
   <span style="font-size:14px;font-weight:800;letter-spacing:0.3px;">
     <span>AI</span><span class="ai-btn-long-label"> Assistant</span>
@@ -43884,7 +43925,7 @@ checkDemoModeFlag();
 </button>
 
 <!-- NEW SWASTHYA AI ASSISTANT WINDOW -->
-<div id="swasthyaAiWindow" role="dialog" aria-label="Swasthya AI Healthcare Assistant" style="display:none;">
+<div id="swasthyaAiWindow" role="dialog" aria-label="Swasthya AI Healthcare Assistant" style="display:none;position:fixed !important;bottom:90px !important;right:24px !important;z-index:2147483647 !important;">
   <!-- HEADER -->
   <div style="padding:14px 16px;background:linear-gradient(135deg, rgba(16,185,129,0.22), rgba(15,23,42,0.85));border-bottom:1.5px solid rgba(52,211,153,0.3);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">
     <div style="display:flex;align-items:center;gap:10px;">
