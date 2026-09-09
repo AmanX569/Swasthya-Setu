@@ -1,8 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 
-const baseDir = 'C:/Users/grani/OneDrive/Desktop/Swasthya-setu/frontend';
-const projectRoot = 'C:/Users/grani/OneDrive/Desktop/Swasthya-setu';
+const projectRoot = __dirname;
+const baseDir = path.join(projectRoot, 'frontend');
 let html = fs.readFileSync(path.join(baseDir, 'index.html'), 'utf8');
 
 // Copy assets
