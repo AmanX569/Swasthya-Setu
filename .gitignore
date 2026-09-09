@@ -3,6 +3,8 @@ node_modules/
 *.log
 scratch/
 server/.env
+.env
+.env.*
 *.pem
 *.key
 *.cert

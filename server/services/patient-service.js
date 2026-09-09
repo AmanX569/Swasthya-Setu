@@ -8,6 +8,7 @@
 'use strict';
 
 const bcrypt = require('bcryptjs');
+const { normalizeAddress, isPermanentAddressComplete } = require('../utils/address');
 
 const BCRYPT_ROUNDS = 10;
 
@@ -19,6 +20,7 @@ class PatientService {
   constructor(supabase, auditService) {
     this.supabase = supabase;
     this.auditService = auditService;
+    this._localAddresses = new Map();
   }
 
   /**
@@ -89,49 +91,83 @@ class PatientService {
     if (!identifier) return null;
     const clean = identifier.trim();
 
+    let patient = null;
+
     // 1. Direct Patient ID match
     if (clean.startsWith('PT-')) {
       const { data } = await this.supabase.from('patients').select('*').eq('patient_id', clean).maybeSingle();
-      if (data) return data;
+      if (data) patient = data;
     }
 
     // 2. 10-digit mobile match
-    if (/^[6-9]\d{9}$/.test(clean)) {
-      const patient = await this.findByMobile(clean);
-      if (patient) return patient;
+    if (!patient && /^[6-9]\d{9}$/.test(clean)) {
+      patient = await this.findByMobile(clean);
     }
 
     // 3. ABHA ID or External Identity match
-    const identity = await this.findIdentity('ABHA', clean);
-    if (identity && identity.patient_id) {
-      const { data } = await this.supabase.from('patients').select('*').eq('patient_id', identity.patient_id).maybeSingle();
-      if (data) return data;
+    if (!patient) {
+      const identity = await this.findIdentity('ABHA', clean);
+      if (identity && identity.patient_id) {
+        const { data } = await this.supabase.from('patients').select('*').eq('patient_id', identity.patient_id).maybeSingle();
+        if (data) patient = data;
+      }
     }
 
     // 4. Legacy profiles table fallback
-    const { data: legacy } = await this.supabase
-      .from('profiles')
-      .select('*')
-      .or(`phone.eq.${clean},abha_id.eq.${clean}`)
-      .maybeSingle();
+    if (!patient && this.supabase) {
+      try {
+        const { data: legacy } = await this.supabase
+          .from('profiles')
+          .select('*')
+          .or(`phone.eq.${clean},abha_id.eq.${clean}`)
+          .maybeSingle();
 
-    if (legacy) {
-      return {
-        patient_id: legacy.patient_id || legacy.id,
-        name: legacy.name,
-        mobile: legacy.phone,
-        mobile_verified: legacy.mobile_verified || false,
-        abha_id: legacy.abha_id,
-        age: legacy.age,
-        gender: legacy.gender,
-        blood_group: legacy.blood_group,
-        village: legacy.village,
-        permanent_address_completed: legacy.permanent_address_completed || false,
-        profile_source: legacy.profile_source || 'LEGACY_PROFILES'
-      };
+        if (legacy) {
+          patient = {
+            patient_id: legacy.patient_id || legacy.id,
+            name: legacy.name,
+            mobile: legacy.phone,
+            mobile_verified: legacy.mobile_verified || false,
+            abha_id: legacy.abha_id,
+            age: legacy.age,
+            gender: legacy.gender,
+            blood_group: legacy.blood_group,
+            village: legacy.village,
+            permanent_address_completed: legacy.permanent_address_completed || false,
+            profile_source: legacy.profile_source || 'LEGACY_PROFILES'
+          };
+        }
+      } catch (e) {}
     }
 
-    return null;
+    if (!patient) return null;
+
+    // Retrieve address to establish backend single source of truth for address completeness
+    let address = null;
+    if (this.supabase && patient.patient_id) {
+      try {
+        const { data: addrRows } = await this.supabase
+          .from('patient_addresses_v2')
+          .select('*')
+          .eq('patient_id', patient.patient_id)
+          .order('created_at', { ascending: false })
+          .limit(1);
+        if (addrRows && addrRows.length > 0) {
+          address = normalizeAddress(addrRows[0]);
+        }
+      } catch (e) {}
+    }
+
+    if (!address && this._localAddresses && patient.patient_id) {
+      address = this._localAddresses.get(patient.patient_id) || null;
+    }
+
+    const hasCompleteAddress = isPermanentAddressComplete(address || patient);
+    patient.permanent_address_completed = hasCompleteAddress;
+    patient.permanent_address = address;
+    patient.address = address;
+
+    return patient;
   }
 
   /**
@@ -310,68 +346,223 @@ class PatientService {
   }
 
   /**
-   * Saves or updates structured address
+   * Saves or updates structured permanent address.
+   * PREVENTS DUPLICATE RECORDS by updating the existing permanent address record if present.
    */
   async saveAddress(patientId, address, source = 'PATIENT_PROVIDED') {
+    const normalized = normalizeAddress(address);
+    if (!normalized) {
+      throw new Error('Invalid address data provided.');
+    }
+
     const now = new Date().toISOString();
-    const record = {
-      patient_id: patientId,
-      address_type: address.address_type || 'PERMANENT',
-      address_line_1: address.address_line_1 || address.addressLine1 || '',
-      address_line_2: address.address_line_2 || address.addressLine2 || '',
-      landmark: address.landmark || '',
-      country: 'India',
-      state: address.state || '',
-      district: address.district || '',
-      mandal: address.mandal || '',
-      village_city: address.village_city || address.villageCity || '',
-      pincode: address.pincode || '',
+    const isComplete = isPermanentAddressComplete(normalized);
+
+    // Resolve canonical patient ID (e.g. if patientId was mobile number or legacy profile)
+    let canonicalPatientId = patientId;
+    if (this.supabase) {
+      try {
+        const resolved = await this.resolvePatientByIdentifier(patientId);
+        if (resolved && resolved.patient_id) {
+          canonicalPatientId = resolved.patient_id;
+        }
+      } catch (e) {}
+    }
+
+    let existingAddressId = null;
+    if (this.supabase) {
+      try {
+        const { data: existing } = await this.supabase
+          .from('patient_addresses_v2')
+          .select('id, created_at')
+          .eq('patient_id', canonicalPatientId)
+          .order('created_at', { ascending: false })
+          .limit(1);
+
+        if (existing && existing.length > 0) {
+          existingAddressId = existing[0].id;
+        }
+      } catch (e) {
+        console.warn('[PatientService] Address query notice:', e.message);
+      }
+    }
+
+    const dbRecord = {
+      patient_id: canonicalPatientId,
+      address_type: normalized.address_type || 'PERMANENT',
+      address_line_1: normalized.address_line_1,
+      address_line_2: normalized.address_line_2,
+      landmark: normalized.landmark,
+      country: normalized.country || 'India',
+      state: normalized.state,
+      district: normalized.district,
+      mandal: normalized.mandal,
+      village_city: normalized.village_city,
+      pincode: normalized.pincode,
       source,
-      created_at: now,
       updated_at: now
     };
 
-    await this.supabase.from('patient_addresses_v2').insert(record);
+    if (existingAddressId) {
+      // 1. UPDATE existing record: Never duplicate address rows!
+      dbRecord.id = existingAddressId;
+      if (this.supabase) {
+        try {
+          await this.supabase
+            .from('patient_addresses_v2')
+            .update(dbRecord)
+            .eq('id', existingAddressId);
+        } catch (e) {
+          console.warn('[PatientService] Address update notice:', e.message);
+        }
+      }
+    } else {
+      // 2. INSERT initial record
+      dbRecord.id = `ADDR-${Date.now()}`;
+      dbRecord.created_at = now;
+      if (this.supabase) {
+        try {
+          await this.supabase
+            .from('patient_addresses_v2')
+            .insert(dbRecord);
+        } catch (e) {
+          console.warn('[PatientService] Address insert notice:', e.message);
+        }
+      }
+    }
 
-    // Update completed flag
-    await this.supabase
-      .from('patients')
-      .update({ permanent_address_completed: true, updated_at: now })
-      .eq('patient_id', patientId);
+    // Cache locally for resilient mode
+    if (this._localAddresses) {
+      this._localAddresses.set(canonicalPatientId, { ...dbRecord, ...normalized, permanent_address_completed: isComplete });
+      if (canonicalPatientId !== patientId) {
+        this._localAddresses.set(patientId, { ...dbRecord, ...normalized, permanent_address_completed: isComplete });
+      }
+    }
 
-    return record;
+    // 3. Update patient completed flag and village in database
+    if (this.supabase) {
+      const villageString = normalized.village_city + (normalized.mandal ? (', ' + normalized.mandal) : '');
+      try {
+        await this.supabase
+          .from('patients')
+          .update({
+            permanent_address_completed: isComplete,
+            village: villageString,
+            updated_at: now
+          })
+          .eq('patient_id', canonicalPatientId);
+      } catch (e) {
+        console.warn('[PatientService] Patient table update notice:', e.message);
+      }
+
+      if (canonicalPatientId !== patientId) {
+        try {
+          await this.supabase
+            .from('patients')
+            .update({
+              permanent_address_completed: isComplete,
+              village: villageString,
+              updated_at: now
+            })
+            .eq('mobile', patientId);
+        } catch (e) {}
+      }
+
+      // Also update legacy profiles table if present
+      try {
+        await this.supabase
+          .from('profiles')
+          .update({
+            permanent_address_completed: isComplete,
+            village: villageString,
+            updated_at: now
+          })
+          .eq('patient_id', canonicalPatientId);
+      } catch (e) {}
+    }
+
+    // 4. Audit log
+    if (this.auditService && typeof this.auditService.log === 'function') {
+      try {
+        await this.auditService.log({
+          action: existingAddressId ? 'ADDRESS_UPDATED' : 'ADDRESS_CREATED',
+          patientId,
+          status: 'SUCCESS',
+          details: { source, isComplete, pincode: normalized.pincode }
+        });
+      } catch (e) {}
+    }
+
+    return {
+      ...dbRecord,
+      ...normalized,
+      permanent_address_completed: isComplete
+    };
   }
 
   /**
    * Retrieves sanitized patient profile with linked identities and address
    */
   async getFullPatientProfile(patientId) {
-    if (!this.supabase) return null;
+    let patient = null;
 
-    const { data: patient } = await this.supabase
-      .from('patients')
-      .select('patient_id, name, age, gender, mobile, mobile_verified, blood_group, abha_id, village, profile_status, profile_source, permanent_address_completed, created_at')
-      .eq('patient_id', patientId)
-      .maybeSingle();
+    if (this.supabase) {
+      try {
+        const { data } = await this.supabase
+          .from('patients')
+          .select('patient_id, name, age, gender, mobile, mobile_verified, blood_group, abha_id, village, profile_status, profile_source, permanent_address_completed, created_at')
+          .eq('patient_id', patientId)
+          .maybeSingle();
+        patient = data;
+      } catch (e) {}
+    }
+
+    if (!patient) {
+      // Check legacy profiles or fallback
+      patient = await this.resolvePatientByIdentifier(patientId);
+    }
 
     if (!patient) return null;
 
-    const { data: identities } = await this.supabase
-      .from('patient_identities')
-      .select('identity_type, external_reference, verification_status, verified_at, source')
-      .eq('patient_id', patientId);
+    let identities = [];
+    if (this.supabase) {
+      try {
+        const { data: idRows } = await this.supabase
+          .from('patient_identities')
+          .select('identity_type, external_reference, verification_status, verified_at, source')
+          .eq('patient_id', patientId);
+        identities = idRows || [];
+      } catch (e) {}
+    }
 
-    const { data: addresses } = await this.supabase
-      .from('patient_addresses_v2')
-      .select('*')
-      .eq('patient_id', patientId)
-      .order('created_at', { ascending: false })
-      .limit(1);
+    let address = null;
+    if (this.supabase) {
+      try {
+        const { data: addresses } = await this.supabase
+          .from('patient_addresses_v2')
+          .select('*')
+          .eq('patient_id', patientId)
+          .order('created_at', { ascending: false })
+          .limit(1);
+
+        if (addresses && addresses.length > 0) {
+          address = normalizeAddress(addresses[0]);
+        }
+      } catch (e) {}
+    }
+
+    if (!address && this._localAddresses) {
+      address = this._localAddresses.get(patientId) || null;
+    }
+
+    const isComplete = isPermanentAddressComplete(address || patient);
 
     return {
       ...patient,
-      identities: identities || [],
-      address: (addresses && addresses[0]) || null
+      permanent_address_completed: isComplete,
+      identities,
+      address,
+      permanent_address: address
     };
   }
 }

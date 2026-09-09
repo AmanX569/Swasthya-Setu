@@ -1757,81 +1757,25 @@ body[data-theme="doom"] {
         </form>
       </div>
 
-      <!-- VIEW B: FORGOT PASSWORD - STEP 1 (IDENTIFIER REQUEST) -->
+      <!-- VIEW B: FORGOT PASSWORD (UNAVAILABLE NOTICE) -->
       <div id="citizenForgotStep1" style="display:none;">
-        <div style="text-align:center;margin-bottom:16px;">
-          <h3 style="font-size:17px;font-weight:800;color:var(--ink);margin:0 0 4px;">Account Recovery</h3>
-          <p style="font-size:13px;color:var(--muted);margin:0;">Enter your Mobile Number or ABHA ID to receive an SMS verification code.</p>
+        <div style="text-align:center;margin-bottom:18px;">
+          <div style="width:54px;height:54px;border-radius:50%;background:rgba(234,179,8,0.15);border:1.5px solid #eab308;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:24px;">
+            🔒
+          </div>
+          <h3 style="font-size:17px;font-weight:800;color:var(--ink);margin:0 0 6px;">Password Recovery</h3>
+          <p style="font-size:13.5px;color:var(--muted);margin:0;line-height:1.5;">Password recovery is currently unavailable. Please contact your administrator.</p>
         </div>
 
-        <div id="citizenForgotError1" style="display:none;background:rgba(220,38,38,0.12);border:1.5px solid #dc2626;border-radius:10px;padding:10px 14px;color:#dc2626;font-size:12.5px;font-weight:600;margin-bottom:14px;"></div>
-
-        <form onsubmit="handleCitizenForgotRequest(event)">
-          <div style="margin-bottom:18px;">
-            <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:6px;">Registered Mobile Number or 14-Digit ABHA ID *</label>
-            <input type="text" id="citizenForgotInputId" class="input-field" placeholder="Enter mobile number or 14-digit ABHA ID" required style="width:100%;height:46px;font-size:14px;font-weight:600;">
-          </div>
-
-          <button type="submit" id="btnCitizenForgotSubmit1" class="auth-btn-primary" style="width:100%;padding:13px;background:linear-gradient(135deg, #16a34a, #15803d);border:none;font-size:15px;font-weight:800;border-radius:10px;cursor:pointer;box-shadow:0 4px 14px rgba(22,163,74,0.35);display:flex;align-items:center;justify-content:center;gap:8px;color:#ffffff;margin-bottom:12px;">
-            <span>📩</span> <span>Send Recovery OTP</span>
-          </button>
-
-          <div style="text-align:center;">
-            <button type="button" onclick="returnToCitizenLogin()" class="btn-glass" style="border:none;background:none;color:var(--muted);font-size:12.5px;font-weight:700;cursor:pointer;padding:6px 12px;">
-              ← Back to Login
-            </button>
-          </div>
-        </form>
-      </div>
-
-      <!-- VIEW C: FORGOT PASSWORD - STEP 2 (SMS OTP VERIFICATION) -->
-      <div id="citizenForgotStep2Otp" style="display:none;">
-        <div style="text-align:center;margin-bottom:16px;">
-          <h3 style="font-size:17px;font-weight:800;color:var(--ink);margin:0 0 4px;">Verify Recovery Code</h3>
-          <p style="font-size:13px;color:var(--muted);margin:0;">Enter the 6-digit code sent to your registered mobile number.</p>
+        <div style="background:rgba(100,116,139,0.08);border:1px solid rgba(100,116,139,0.2);border-radius:10px;padding:12px 14px;margin-bottom:18px;font-size:12.5px;color:var(--ink-dim);line-height:1.5;text-align:center;">
+          SMS OTP password resets have been temporarily disabled. To reset your patient portal credentials, please reach out to your local healthcare center or system administrator.
         </div>
 
-        <div id="citizenForgotOtpError" style="display:none;background:rgba(220,38,38,0.12);border:1.5px solid #dc2626;border-radius:10px;padding:10px 14px;color:#dc2626;font-size:12.5px;font-weight:600;margin-bottom:14px;"></div>
-
-        <div style="background:rgba(22,163,74,0.08);border:1px solid rgba(22,163,74,0.25);border-radius:12px;padding:10px 14px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:10px;">
-          <div>
-            <div style="font-size:11px;color:var(--muted);font-weight:600;">Recovery OTP Sent To</div>
-            <div id="citizenRecoveryMaskedPhone" style="font-size:14px;font-weight:800;color:var(--ink);letter-spacing:1px;">+91 ******3210</div>
-          </div>
-          <button type="button" onclick="showCitizenForgotPasswordScreen()" class="btn-glass" style="padding:6px 10px;font-size:11px;font-weight:700;border-radius:8px;cursor:pointer;">
-            ← Change
+        <div style="text-align:center;">
+          <button type="button" onclick="returnToCitizenLogin()" class="auth-btn-primary" style="width:100%;padding:12px;background:var(--primary);border:none;font-size:14px;font-weight:700;border-radius:10px;cursor:pointer;color:#ffffff;">
+            ← Back to Login
           </button>
         </div>
-
-        <form onsubmit="handleCitizenVerifyRecoveryOtp(event)">
-          <div style="margin-bottom:18px;text-align:center;">
-            <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:10px;">Enter 6-Digit SMS Verification OTP *</label>
-            <div class="otp-boxes-wrapper" onpaste="handleOtpPaste(event)">
-              <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-box" id="otpBox1" data-index="1" autocomplete="one-time-code" oninput="handleOtpInput(this, 1)" onkeydown="handleOtpKeydown(event, 1)" required>
-              <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-box" id="otpBox2" data-index="2" oninput="handleOtpInput(this, 2)" onkeydown="handleOtpKeydown(event, 2)">
-              <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-box" id="otpBox3" data-index="3" oninput="handleOtpInput(this, 3)" onkeydown="handleOtpKeydown(event, 3)">
-              <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-box" id="otpBox4" data-index="4" oninput="handleOtpInput(this, 4)" onkeydown="handleOtpKeydown(event, 4)">
-              <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-box" id="otpBox5" data-index="5" oninput="handleOtpInput(this, 5)" onkeydown="handleOtpKeydown(event, 5)">
-              <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-box" id="otpBox6" data-index="6" oninput="handleOtpInput(this, 6)" onkeydown="handleOtpKeydown(event, 6)">
-            </div>
-            <div style="display:flex;justify-content:center;margin-top:10px;font-size:11.5px;color:var(--muted);">
-              <span>⏱️ OTP expires in 5 minutes</span>
-            </div>
-          </div>
-
-          <button type="submit" id="btnCitizenVerifyRecoveryOtp" class="auth-btn-primary" style="width:100%;padding:13px;background:linear-gradient(135deg, #16a34a, #15803d);border:none;font-size:15px;font-weight:800;border-radius:10px;cursor:pointer;box-shadow:0 4px 14px rgba(22,163,74,0.35);display:flex;align-items:center;justify-content:center;gap:8px;color:#ffffff;margin-bottom:12px;">
-            <span>✓</span> <span>Verify Code</span>
-          </button>
-
-          <div style="display:flex;justify-content:space-between;align-items:center;">
-            <button type="button" onclick="returnToCitizenLogin()" class="btn-glass" style="border:none;background:none;color:var(--muted);font-size:12px;font-weight:700;cursor:pointer;padding:4px 8px;">
-              ← Back to Login
-            </button>
-            <button type="button" id="btnCitizenResendRecoveryOtp" onclick="handleCitizenResendRecoveryOtp()" class="btn-glass" style="border:none;background:none;color:var(--primary-bright);font-size:12px;font-weight:700;cursor:pointer;text-decoration:underline;padding:4px 8px;" disabled>
-              Resend OTP in 00:30
-            </button>
-          </div>
-        </form>
       </div>
 
       <!-- VIEW D: FORGOT PASSWORD - STEP 3 (CREATE NEW PASSWORD/PIN) -->
@@ -2931,27 +2875,42 @@ body[data-theme="doom"] {
 </div>
 
 <!-- EXISTING PATIENT ADDRESS PROMPT MODAL (COMPLETE YOUR PROFILE) -->
-<div id="patientAddressPromptModal" class="modal-overlay" style="z-index:9999;">
-  <div class="modal-card" style="max-width:480px;text-align:center;padding:26px 20px;">
-    <div style="width:64px;height:64px;background:rgba(2,132,199,0.15);border:2px solid var(--primary-bright);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 14px;">
+<div id="patientAddressPromptModal" class="modal-overlay" style="z-index:9999;" role="dialog" aria-modal="true" aria-labelledby="promptModalTitle">
+  <div class="modal-card" style="max-width:480px;text-align:center;padding:32px 24px;position:relative;background:var(--bg-card, #1e293b);border:1.5px solid var(--glass-border, rgba(255,255,255,0.15));border-radius:20px;box-shadow:0 20px 40px rgba(0,0,0,0.5);">
+    <!-- PROMINENT VISIBLE X CLOSE BUTTON -->
+    <button type="button" 
+            id="btnCloseAddressPromptX" 
+            onclick="closeExistingPatientAddressPrompt()" 
+            aria-label="Close dialog" 
+            title="Close (Esc)" 
+            tabindex="0"
+            style="position:absolute;top:14px;right:14px;width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.25);color:var(--ink, #ffffff);font-size:18px;font-weight:800;display:flex;align-items:center;justify-content:center;cursor:pointer;line-height:1;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,0.25);transition:all 0.2s ease;">
+      ✕
+    </button>
+    <div style="width:68px;height:68px;background:rgba(2,132,199,0.15);border:2px solid var(--primary-bright);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:34px;margin:0 auto 16px;">
       🏠
     </div>
-    <span class="badge" style="background:rgba(245,158,11,0.2);color:#f59e0b;font-size:11px;font-weight:800;padding:4px 12px;border-radius:12px;border:1px solid rgba(245,158,11,0.4);display:inline-block;margin-bottom:10px;">
+    <span class="badge" style="background:rgba(245,158,11,0.2);color:#f59e0b;font-size:11.5px;font-weight:800;padding:5px 14px;border-radius:12px;border:1px solid rgba(245,158,11,0.4);display:inline-block;margin-bottom:12px;letter-spacing:0.5px;">
       ⚠️ ACTION REQUIRED
     </span>
-    <h3 style="color:var(--ink);font-size:20px;font-weight:800;margin-bottom:8px;">Complete Your Profile</h3>
-    <p style="color:var(--muted);font-size:14px;line-height:1.5;margin-bottom:20px;">
+    <h3 id="promptModalTitle" style="color:var(--ink, #ffffff);font-size:22px;font-weight:800;margin-bottom:8px;">Complete Your Profile</h3>
+    <p style="color:var(--muted, #94a3b8);font-size:14.5px;line-height:1.5;margin-bottom:24px;">
       Your permanent address is missing from your patient profile. Please add your permanent address to continue.
     </p>
-    <button type="button" class="auth-btn-primary" onclick="openExistingPatientAddressForm()" style="width:100%;padding:14px;background:#0284c7;border-color:#0369a1;font-size:15px;font-weight:800;cursor:pointer;border-radius:12px;">
-      + Add Permanent Address
-    </button>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <button type="button" class="auth-btn-primary" onclick="openExistingPatientAddressForm()" style="width:100%;padding:14px;background:#0284c7;border:none;color:#ffffff;font-size:15px;font-weight:800;cursor:pointer;border-radius:12px;box-shadow:0 4px 14px rgba(2,132,199,0.35);">
+        + Add Permanent Address
+      </button>
+      <button type="button" class="btn-glass" onclick="closeExistingPatientAddressPrompt()" style="width:100%;padding:12px;font-size:14px;font-weight:700;cursor:pointer;border-radius:10px;border:1.5px solid var(--line, rgba(255,255,255,0.15));color:var(--ink-dim, #cbd5e1);background:rgba(255,255,255,0.05);">
+        Cancel / Remind Me Later
+      </button>
+    </div>
   </div>
 </div>
 
 <!-- PATIENT STRUCTURED PERMANENT ADDRESS FORM & CONFIRMATION MODAL -->
 <div id="patientAddressFormModal" class="modal-overlay" style="z-index:10000;">
-  <div class="modal-card" style="max-width:580px;max-height:90vh;overflow-y:auto;">
+  <div class="modal-card" style="max-width:580px;max-height:90vh;overflow-y:auto;position:relative;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;border-bottom:1.5px solid var(--line);padding-bottom:10px;">
       <div style="display:flex;align-items:center;gap:10px;">
         <span style="font-size:26px;">📍</span>
@@ -2960,7 +2919,7 @@ body[data-theme="doom"] {
           <small style="color:var(--muted);">National Digital Health Mission (ABDM) Profile Record</small>
         </div>
       </div>
-      <button id="btnCloseAddrModal" type="button" onclick="closePatientAddressFormModal()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;display:none;">✕</button>
+      <button id="btnCloseAddrModal" type="button" onclick="closePatientAddressFormModal()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;" title="Close">✕</button>
     </div>
 
     <!-- STEP 1: ADDRESS ENTRY FORM -->
@@ -2994,9 +2953,9 @@ body[data-theme="doom"] {
             </select>
           </div>
           <div>
-            <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Mandal / Taluk / Tehsil *</label>
-            <select id="inpAddrMandal" class="input-field" style="height:44px;" onchange="onAddressModalMandalChange()" required>
-              <option value="">Select Mandal</option>
+            <label style="font-size:11px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:3px;">Mandal / Taluk / Tehsil</label>
+            <select id="inpAddrMandal" class="input-field" style="height:44px;" onchange="onAddressModalMandalChange()">
+              <option value="">Select Mandal (Optional)</option>
             </select>
             <input type="text" id="inpAddrMandalCustom" class="input-field" placeholder="Type Mandal / Tehsil name" style="display:none;margin-top:6px;">
           </div>
@@ -3019,9 +2978,14 @@ body[data-theme="doom"] {
           <input type="text" id="inpAddrLandmark" class="input-field" placeholder="e.g. Opp. Panchayat Office / Near Bus Stand">
         </div>
         <div id="addrFormError" style="display:none;color:#ef4444;font-size:12px;margin-bottom:12px;background:rgba(239,68,68,0.1);padding:8px 12px;border-radius:8px;border:1px solid rgba(239,68,68,0.3);"></div>
-        <button type="submit" class="auth-btn-primary" style="width:100%;padding:12px;background:#0284c7;border-color:#0369a1;font-size:15px;cursor:pointer;">
-          Preview &amp; Confirm Address →
-        </button>
+        <div style="display:flex;gap:10px;">
+          <button type="button" class="btn-glass" onclick="closePatientAddressFormModal()" style="flex:1;padding:12px;font-size:14px;cursor:pointer;">
+            Cancel
+          </button>
+          <button type="submit" class="auth-btn-primary" style="flex:2;padding:12px;background:#0284c7;border-color:#0369a1;font-size:15px;cursor:pointer;">
+            Preview &amp; Confirm Address →
+          </button>
+        </div>
       </form>
     </div>
 
@@ -3038,7 +3002,11 @@ body[data-theme="doom"] {
         <div style="margin-bottom:6px;"><span style="color:var(--muted);font-weight:600;">State &amp; Pincode:</span> <strong id="confAddrStatePin" style="color:var(--primary-bright);"></strong></div>
         <div><span style="color:var(--muted);font-weight:600;">Country:</span> <span id="confAddrCountry" style="color:var(--ink);">India</span></div>
       </div>
-      <div style="display:flex;gap:10px;">
+      <div id="addrConfirmError" style="display:none;color:#ef4444;font-size:12.5px;margin-bottom:12px;background:rgba(239,68,68,0.1);padding:10px 14px;border-radius:8px;border:1px solid rgba(239,68,68,0.3);"></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button type="button" class="btn-glass" onclick="closePatientAddressFormModal()" style="padding:12px 16px;font-size:14px;cursor:pointer;">
+          Cancel
+        </button>
         <button type="button" class="btn-glass" onclick="returnToAddressFormStep()" style="flex:1;padding:12px;font-size:14px;cursor:pointer;">
           ✏️ Edit Details
         </button>
@@ -3051,7 +3019,7 @@ body[data-theme="doom"] {
     <!-- STEP 3: SUCCESS VIEW -->
     <div id="addrStepSuccess" style="display:none;text-align:center;padding:20px 10px;">
       <div style="font-size:48px;margin-bottom:10px;">🎉</div>
-      <h3 style="color:#16a34a;font-size:18px;font-weight:800;margin-bottom:8px;">Permanent address added successfully.</h3>
+      <h3 style="color:#16a34a;font-size:18px;font-weight:800;margin-bottom:8px;">Permanent address saved successfully.</h3>
       <p style="color:var(--muted);font-size:13px;margin-bottom:20px;">Your permanent address has been saved to your national health profile and cloud registry.</p>
       <button type="button" class="auth-btn-primary" onclick="continueToPatientDashboardAfterAddress()" style="width:100%;padding:14px;background:#16a34a;border-color:#15803d;font-size:15px;font-weight:800;cursor:pointer;">
         Continue to Dashboard →
@@ -4484,20 +4452,57 @@ let pendingAddressData = null;
 let isAddressModalInEditMode = false;
 
 function openExistingPatientAddressPrompt(patientUser) {
-  pendingAddressPatientUser = patientUser || (window.appStore && window.appStore.getState().session.user);
+  const user = patientUser || (window.appStore && window.appStore.getState().session.user);
+  if (typeof window.isPermanentAddressComplete === 'function' && window.isPermanentAddressComplete(user)) {
+    return; // Address is already complete in DB! NEVER show popup!
+  }
+  pendingAddressPatientUser = user;
   const promptModal = document.getElementById('patientAddressPromptModal');
   if (promptModal) {
     promptModal.style.display = 'flex';
+    const btnX = document.getElementById('btnCloseAddressPromptX');
+    if (btnX) setTimeout(() => btnX.focus(), 80);
   }
 }
 
-function closeExistingPatientAddressPrompt() {
+function closeExistingPatientAddressPrompt(skipToDashboard = true) {
+  window.addressPromptDismissedThisSession = true;
   const promptModal = document.getElementById('patientAddressPromptModal');
   if (promptModal) promptModal.style.display = 'none';
+
+  if (skipToDashboard) {
+    const session = window.appStore ? window.appStore.getState().session : null;
+    if (session && session.isLoggedIn && (session.role === 'patient' || session.customRole === 'citizen')) {
+      window.location.hash = '#/citizen';
+      if (typeof showView === 'function') showView('Patient');
+      if (window.patientController && typeof window.patientController.renderAll === 'function') {
+        try { window.patientController.renderAll(); } catch (err) {}
+      }
+      if (typeof window.toast === 'function') {
+        window.toast('ℹ️ You can complete or edit your permanent address anytime in your profile.');
+      }
+    }
+  }
+}
+
+// Global Keyboard Accessibility: ESC key dismisses open address modals cleanly
+if (typeof document !== 'undefined') {
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' || e.key === 'Esc') {
+      const promptModal = document.getElementById('patientAddressPromptModal');
+      if (promptModal && promptModal.style.display === 'flex') {
+        closeExistingPatientAddressPrompt();
+      }
+      const formModal = document.getElementById('patientAddressFormModal');
+      if (formModal && formModal.style.display === 'flex') {
+        closePatientAddressFormModal();
+      }
+    }
+  });
 }
 
 function openExistingPatientAddressForm(isEdit = false) {
-  closeExistingPatientAddressPrompt();
+  closeExistingPatientAddressPrompt(false);
   isAddressModalInEditMode = !!isEdit;
   initAddressLocationDropdowns();
 
@@ -4507,8 +4512,10 @@ function openExistingPatientAddressForm(isEdit = false) {
   const titleEl = document.getElementById('addrModalTitle');
   const btnClose = document.getElementById('btnCloseAddrModal');
   const errEl = document.getElementById('addrFormError');
+  const errConfirm = document.getElementById('addrConfirmError');
 
   if (errEl) errEl.style.display = 'none';
+  if (errConfirm) errConfirm.style.display = 'none';
   if (stepForm) stepForm.style.display = 'block';
   if (stepConfirm) stepConfirm.style.display = 'none';
   if (stepSuccess) stepSuccess.style.display = 'none';
@@ -4517,7 +4524,7 @@ function openExistingPatientAddressForm(isEdit = false) {
     titleEl.textContent = isEdit ? 'Edit Permanent Address' : 'Permanent Address';
   }
   if (btnClose) {
-    btnClose.style.display = isEdit ? 'block' : 'none';
+    btnClose.style.display = 'block'; // Always visible so user is never trapped!
   }
 
   // Pre-fill if editing or existing address available
@@ -4531,8 +4538,8 @@ function openExistingPatientAddressForm(isEdit = false) {
     const fSt = document.getElementById('inpAddrState');
     const fPin = document.getElementById('inpAddrPincode');
 
-    if (f1) f1.value = existingAddr.address_line1 || '';
-    if (f2) f2.value = existingAddr.address_line2 || '';
+    if (f1) f1.value = existingAddr.address_line_1 || existingAddr.address_line1 || '';
+    if (f2) f2.value = existingAddr.address_line_2 || existingAddr.address_line2 || '';
     if (fLm) fLm.value = existingAddr.landmark || '';
     if (fPin) fPin.value = existingAddr.pincode || '';
 
@@ -4560,17 +4567,17 @@ function openExistingPatientAddressForm(isEdit = false) {
           }
           fMan.value = mVal;
           onAddressModalMandalChange();
-          const fVil = document.getElementById('inpAddrVillage');
-          const vVal = existingAddr.village_town_city || existingAddr.village_city || existingAddr.village || '';
-          if (fVil && vVal) {
-            if (!Array.from(fVil.options).some(o => o.value === vVal)) {
-              const opt = document.createElement('option');
-              opt.value = vVal;
-              opt.textContent = vVal;
-              fVil.appendChild(opt);
-            }
-            fVil.value = vVal;
+        }
+        const fVil = document.getElementById('inpAddrVillage');
+        const vVal = existingAddr.village_town_city || existingAddr.village_city || existingAddr.village || '';
+        if (fVil && vVal) {
+          if (!Array.from(fVil.options).some(o => o.value === vVal)) {
+            const opt = document.createElement('option');
+            opt.value = vVal;
+            opt.textContent = vVal;
+            fVil.appendChild(opt);
           }
+          fVil.value = vVal;
         }
       }
     }
@@ -4583,6 +4590,19 @@ function openExistingPatientAddressForm(isEdit = false) {
 function closePatientAddressFormModal() {
   const modal = document.getElementById('patientAddressFormModal');
   if (modal) modal.style.display = 'none';
+  window.addressPromptDismissedThisSession = true;
+
+  // If user dismissed during onboarding, ensure they can access the dashboard cleanly
+  if (!isAddressModalInEditMode) {
+    const session = window.appStore ? window.appStore.getState().session : null;
+    if (session && session.isLoggedIn && (session.role === 'patient' || session.customRole === 'citizen')) {
+      window.location.hash = '#/citizen';
+      if (typeof showView === 'function') showView('Patient');
+      if (window.patientController && typeof window.patientController.renderAll === 'function') {
+        try { window.patientController.renderAll(); } catch (err) {}
+      }
+    }
+  }
   isAddressModalInEditMode = false;
 }
 
@@ -4596,7 +4616,7 @@ function handleAddressFormPreview(e) {
   const country = 'India';
   const state = document.getElementById('inpAddrState').value.trim();
   const district = document.getElementById('inpAddrDistrict').value.trim();
-  let mandal = document.getElementById('inpAddrMandal').value.trim();
+  let mandal = document.getElementById('inpAddrMandal') ? document.getElementById('inpAddrMandal').value.trim() : '';
   const mandalCustom = document.getElementById('inpAddrMandalCustom') ? document.getElementById('inpAddrMandalCustom').value.trim() : '';
   if (mandal.startsWith('Other') && mandalCustom) {
     mandal = mandalCustom;
@@ -4630,29 +4650,30 @@ function handleAddressFormPreview(e) {
     showError('Please select District.');
     return;
   }
-  if (!mandal) {
-    showError('Please select Mandal / Taluk / Tehsil.');
-    return;
-  }
   if (!village) {
     showError('Please select Village / Town / City.');
     return;
   }
-  if (!window.locationService || !window.locationService.validatePincode(pincode)) {
+  if (!pincode || !/^[1-9][0-9]{5}$/.test(pincode)) {
     showError('Please enter a valid 6-digit Indian postal Pincode (e.g. 521228).');
     return;
   }
 
   pendingAddressData = {
+    address_line_1: line1,
     address_line1: line1,
+    address_line_2: line2,
     address_line2: line2,
     country,
     state,
     district,
+    mandal,
     mandal_taluk_tehsil: mandal,
+    village_city: village,
     village_town_city: village,
     pincode,
-    landmark
+    landmark,
+    address_type: 'PERMANENT'
   };
 
   // Populate Confirmation Card (Step 2)
@@ -4685,7 +4706,7 @@ function handleAddressFormPreview(e) {
     }
   }
   if (elVil) elVil.textContent = village;
-  if (elMan) elMan.textContent = mandal;
+  if (elMan) elMan.textContent = mandal || 'N/A';
   if (elDist) elDist.textContent = district;
   if (elStatePin) elStatePin.textContent = state + ' - ' + pincode;
   if (elCountry) elCountry.textContent = country;
@@ -4704,10 +4725,10 @@ function returnToAddressFormStep() {
   if (stepForm) stepForm.style.display = 'block';
 }
 
-function submitFinalPermanentAddress() {
+async function submitFinalPermanentAddress() {
   if (!pendingAddressData || !window.appStore) return;
   const user = pendingAddressPatientUser || (window.appStore.getState().session.user);
-  const patientId = user ? (user.id || user.phone || user.abhaId) : null;
+  const patientId = user ? (user.id || user.patient_id || user.phone || user.abhaId) : null;
 
   if (!patientId) {
     alert('Unable to identify patient profile. Please sign in again.');
@@ -4715,23 +4736,65 @@ function submitFinalPermanentAddress() {
   }
 
   const btnSave = document.getElementById('btnSavePermanentAddress');
+  const errConfirm = document.getElementById('addrConfirmError');
+  if (errConfirm) errConfirm.style.display = 'none';
+
   if (btnSave) {
     btnSave.disabled = true;
     btnSave.innerHTML = '⏳ Saving Address...';
   }
 
   try {
-    const res = window.appStore.savePatientAddress(patientId, pendingAddressData);
-    if (!res || !res.success) {
-      alert((res && res.message) || 'Failed to save address.');
-      if (btnSave) {
-        btnSave.disabled = false;
-        btnSave.innerHTML = '✓ Save Permanent Address';
+    let apiSuccess = false;
+    let serverPatient = null;
+    let serverAddress = null;
+
+    // 1. Asynchronously save address to Backend API (Single Source of Truth)
+    if (window.swasthyaAPI && typeof window.swasthyaAPI.updateAddress === 'function') {
+      try {
+        const apiRes = await window.swasthyaAPI.updateAddress(pendingAddressData);
+        if (apiRes && apiRes.success) {
+          apiSuccess = true;
+          serverPatient = apiRes.patient;
+          serverAddress = apiRes.address;
+        }
+      } catch (apiErr) {
+        console.warn('[Address API notice]:', apiErr.message);
+        if (!apiErr.message.includes('offline') && !apiErr.message.includes('fetch') && !apiErr.message.includes('resilient')) {
+          throw apiErr;
+        }
       }
-      return;
     }
 
-    // Success! Transition to Step 3
+    // 2. Persist to local application store
+    const res = window.appStore.savePatientAddress(patientId, pendingAddressData);
+    if (!res || !res.success) {
+      if (!apiSuccess) {
+        throw new Error((res && res.message) || 'Unable to save your address. Please try again.');
+      }
+    }
+
+    // 3. Guarantee updated patient state in appStore session
+    const state = window.appStore.getState();
+    const finalAddress = serverAddress || (res && res.address) || pendingAddressData;
+    const activeUser = state.session ? state.session.user : state.currentUser;
+    if (activeUser) {
+      activeUser.permanent_address_completed = true;
+      activeUser.permanent_address = finalAddress;
+      activeUser.address = finalAddress;
+      if (serverPatient && serverPatient.village) activeUser.village = serverPatient.village;
+      if (state.currentUser) {
+        state.currentUser.permanent_address_completed = true;
+        state.currentUser.permanent_address = finalAddress;
+        state.currentUser.address = finalAddress;
+      }
+      if (state.session && state.session.metadata) {
+        state.session.metadata.permanent_address_completed = true;
+      }
+      window.appStore.saveState();
+    }
+
+    // 4. Success! Transition to Step 3
     const stepConfirm = document.getElementById('addrStepConfirm');
     const stepSuccess = document.getElementById('addrStepSuccess');
     if (stepConfirm) stepConfirm.style.display = 'none';
@@ -4739,7 +4802,13 @@ function submitFinalPermanentAddress() {
 
   } catch (err) {
     console.error('[Save Address Error]', err);
-    alert('Failed to save address: ' + (err.message || 'Please try again.'));
+    const msg = err.message || 'Unable to save your address. Please try again.';
+    if (errConfirm) {
+      errConfirm.textContent = msg;
+      errConfirm.style.display = 'block';
+    } else {
+      alert(msg);
+    }
   } finally {
     if (btnSave) {
       btnSave.disabled = false;
@@ -4993,17 +5062,26 @@ async function handleCitizenLogin(e) {
       try {
         const apiRes = await window.swasthyaAPI.login(inputId, inputPass);
         if (apiRes && apiRes.success && apiRes.patient) {
+          const p = apiRes.patient;
+          const addr = p.permanent_address || p.address || null;
+          const isComplete = (typeof window.isPermanentAddressComplete === 'function')
+            ? window.isPermanentAddressComplete(p)
+            : !!p.permanent_address_completed;
+
           res = {
             success: true,
             user: {
-              ...apiRes.patient,
-              id: apiRes.patient.patient_id,
-              phone: apiRes.patient.mobile,
-              abhaId: apiRes.patient.abha_id,
+              ...p,
+              id: p.patient_id,
+              phone: p.mobile,
+              abhaId: p.abha_id,
               role: 'patient',
-              customRole: 'citizen'
+              customRole: 'citizen',
+              permanent_address: addr,
+              address: addr,
+              permanent_address_completed: isComplete
             },
-            permanent_address_completed: apiRes.patient.permanent_address_completed
+            permanent_address_completed: isComplete
           };
           window.appStore.loginAs('patient', res.user);
         }
@@ -5036,7 +5114,11 @@ async function handleCitizenLogin(e) {
     } catch (e) {}
 
     // Check if permanent address is missing for existing patient!
-    if (!res.permanent_address_completed) {
+    const isAddrComplete = (typeof window.isPermanentAddressComplete === 'function')
+      ? window.isPermanentAddressComplete(res.user)
+      : !!res.permanent_address_completed;
+
+    if (!isAddrComplete) {
       openExistingPatientAddressPrompt(res.user);
       return;
     }
@@ -5549,13 +5631,15 @@ function showView(viewName) {
     viewName = 'Patient';
   }
 
-  // Address completion route guard for citizen
+  // Address completion check for citizen
   if (isCitizen && viewName === 'Patient') {
     const patientUser = session.user;
-    if (patientUser && !patientUser.permanent_address_completed) {
+    const isAddrComplete = (typeof window.isPermanentAddressComplete === 'function')
+      ? window.isPermanentAddressComplete(patientUser)
+      : !!(patientUser && patientUser.permanent_address_completed);
+    if (patientUser && !isAddrComplete && !window.addressPromptDismissedThisSession) {
       console.warn('[Route Guard] Citizen permanent address missing. Prompting to complete profile.');
       openExistingPatientAddressPrompt(patientUser);
-      return;
     }
   }
   
@@ -5718,9 +5802,8 @@ function renderActivePortalView() {
   const views = ['Home', 'Login', 'Patient', 'Doctor', 'Worker', 'Admin'];
 
   const isCitizenUnauth = session && session.role === 'patient' && session.authState !== 'AUTHENTICATED';
-  const isCitizenMissingAddr = session && (session.role === 'patient' || session.customRole === 'citizen') && session.user && !session.user.permanent_address_completed;
 
-  if (!session || !session.isLoggedIn || isCitizenUnauth || isCitizenMissingAddr) {
+  if (!session || !session.isLoggedIn || isCitizenUnauth) {
     views.forEach(v => {
       const el = document.getElementById('view' + v);
       if (el) {
@@ -5732,10 +5815,17 @@ function renderActivePortalView() {
     if (headerControls) headerControls.style.display = 'none';
     const userBadgeEl = document.getElementById('activeUserBadge');
     if (userBadgeEl) userBadgeEl.style.display = 'none';
-    if (isCitizenMissingAddr) {
+    return;
+  }
+
+  const isCitizen = session.role === 'patient' || session.customRole === 'citizen';
+  if (isCitizen && session.user) {
+    const isAddrComplete = (typeof window.isPermanentAddressComplete === 'function')
+      ? window.isPermanentAddressComplete(session.user)
+      : !!session.user.permanent_address_completed;
+    if (!isAddrComplete && !window.addressPromptDismissedThisSession) {
       openExistingPatientAddressPrompt(session.user);
     }
-    return;
   }
 
   const role = session.role;
@@ -5867,11 +5957,11 @@ function handleUrlContextRouting() {
 
   if (hash === '#/citizen' || hash === '#citizen' || path.endsWith('/citizen')) {
     if (isLoggedIn && (session.role === 'patient' || isCitizen)) {
-      if (session.user && !session.user.permanent_address_completed) {
-        showView('Login');
-        switchLoginTab('patient');
+      const isAddrComplete = (typeof window.isPermanentAddressComplete === 'function')
+        ? window.isPermanentAddressComplete(session.user)
+        : !!(session.user && session.user.permanent_address_completed);
+      if (session.user && !isAddrComplete && !window.addressPromptDismissedThisSession) {
         openExistingPatientAddressPrompt(session.user);
-        return;
       }
       showView('Patient');
     } else {

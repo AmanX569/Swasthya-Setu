@@ -21,12 +21,14 @@ const config = {
   supabase: {
     url: process.env.SUPABASE_URL || 'https://bqtinztvktsosuypuifi.supabase.co',
     anonKey: process.env.SUPABASE_ANON_KEY || 'sb_publishable_TLWSYjSbIrgVfbt86PjgOQ_TaOyTtz4',
-    serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || ''
+    serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || 'sb_publishable_TLWSYjSbIrgVfbt86PjgOQ_TaOyTtz4'
   },
   jwt: {
     secret: process.env.JWT_SECRET || 'swasthya-setu-development-secret-key-32chars',
     expiresIn: process.env.JWT_EXPIRES_IN || '24h'
   },
+  // Feature flag to completely isolate OTP functionality when no SMS subscription is active
+  otpEnabled: (process.env.OTP_ENABLED === 'true' || process.env.AUTH_OTP_ENABLED === 'true') || false,
   sms: {
     provider: process.env.OTP_PROVIDER || process.env.SMS_PROVIDER || 'sandbox', // 'msg91' | 'sandbox' | 'mock' | 'twilio'
     msg91: {

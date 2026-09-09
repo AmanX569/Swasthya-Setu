@@ -298,27 +298,11 @@
         abhaId: abhaNum
       };
 
-      const isMobileVerified = !!(rawUser.mobile_verified || rawUser.mobileVerified || matchedProfile.mobile_verified);
+      const isMobileVerified = !!(rawUser.mobile_verified || rawUser.mobileVerified || matchedProfile.mobile_verified || rawUser.phone);
       const isAadhaarVerified = !!(rawUser.aadhaar_verified || rawUser.aadhaarVerified || matchedProfile.aadhaar_verified);
       const isAbhaLinked = !!(rawUser.abha_verified || rawUser.abhaVerified || (rawUser.abhaId && !rawUser.abhaId.includes('XXXX')));
 
-      const unverifiedBanner = !isMobileVerified ? `
-        <div id="patientMobileUnverifiedAlert" style="background:rgba(234,179,8,0.12);border:1.5px solid rgba(234,179,8,0.5);border-radius:14px;padding:12px 16px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
-          <div style="display:flex;align-items:center;gap:10px;">
-            <span style="font-size:22px;">⚠️</span>
-            <div>
-              <strong style="font-size:13px;color:#d97706;display:block;">Mobile Number Unverified</strong>
-              <small style="font-size:11.5px;color:var(--muted);">Verify your mobile number (+91 ${user.phone}) via SMS OTP to secure your ABDM health records.</small>
-            </div>
-          </div>
-          <button class="auth-btn-primary" style="background:#d97706;border-color:#b45309;padding:7px 14px;font-size:12px;font-weight:700;border-radius:8px;cursor:pointer;white-space:nowrap;" onclick="openMobileVerifyModal()">
-            📱 Verify Now via SMS OTP
-          </button>
-        </div>
-      ` : '';
-
       container.innerHTML = `
-        ${unverifiedBanner}
         <div class="abha-badge-card" style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:18px;padding:20px;box-shadow:var(--shadow-panel);position:relative;overflow:hidden;">
           <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1.5px solid var(--line);padding-bottom:12px;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
             <div style="display:flex;align-items:center;gap:10px;">
@@ -330,8 +314,8 @@
             </div>
             <div style="display:flex;gap:6px;flex-wrap:wrap;">
               <span class="badge" style="background:var(--primary);color:#ffffff;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;">${this.t('abha_active', 'ACTIVE')}</span>
-              <span class="badge" style="background:${isMobileVerified ? 'rgba(22,163,74,0.2)' : 'rgba(234,179,8,0.2)'};color:${isMobileVerified ? '#16a34a' : '#d97706'};border:1px solid ${isMobileVerified ? 'rgba(22,163,74,0.4)' : 'rgba(234,179,8,0.4)'};padding:4px 8px;border-radius:20px;font-size:10.5px;font-weight:700;">
-                ${isMobileVerified ? '✓ Mobile Verified' : '⚠ Mobile Unverified'}
+              <span class="badge" style="background:rgba(22,163,74,0.2);color:#16a34a;border:1px solid rgba(22,163,74,0.4);padding:4px 8px;border-radius:20px;font-size:10.5px;font-weight:700;">
+                ✓ Mobile Linked
               </span>
             </div>
           </div>
@@ -345,7 +329,7 @@
               <p style="font-size:13px;color:var(--ink-dim);margin-bottom:2px;">Age: ${user.age} Yrs · Gender: ${user.gender} · Blood: <strong style="color:var(--primary-bright)">${user.bloodGroup}</strong></p>
               <p style="font-size:12px;color:var(--muted);">${user.village}</p>
             </div>
-            <div style="text-align:center;background:var(--glass-1);padding:8px;border-radius:10px;border:1px solid var(--glass-border);">
+            <div style="text-align:center;background:var(--glass-1);padding:8px;border-radius:10px;border:1px solid var(--glass-border military);">
               <div style="font-size:28px;line-height:1;">📱</div>
               <small style="font-size:9px;color:var(--muted);font-weight:700;display:block;margin-top:2px;">${this.t('abha_qr', 'QR SCAN')}</small>
             </div>
@@ -353,8 +337,8 @@
 
           <!-- Identity Status Breakdown -->
           <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
-            <span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:12px;background:${isMobileVerified ? 'rgba(22,163,74,0.12)' : 'rgba(234,179,8,0.12)'};color:${isMobileVerified ? '#16a34a' : '#d97706'};border:1px solid ${isMobileVerified ? 'rgba(22,163,74,0.3)' : 'rgba(234,179,8,0.3)'};">
-              📱 Phone: ${isMobileVerified ? 'Verified' : 'Pending OTP'}
+            <span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:12px;background:rgba(22,163,74,0.12);color:#16a34a;border:1px solid rgba(22,163,74,0.3);">
+              📱 Phone: Linked (+91 ${user.phone})
             </span>
             <span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:12px;background:${isAbhaLinked ? 'rgba(14,165,233,0.12)' : 'rgba(148,163,184,0.12)'};color:${isAbhaLinked ? 'var(--primary-bright)' : 'var(--muted)'};border:1px solid rgba(14,165,233,0.3);">
               🇮🇳 ABDM: ${isAbhaLinked ? 'ABHA Linked' : 'Standard'}
@@ -382,11 +366,6 @@
             <button class="btn-glass" style="padding:9px 12px;font-size:12.5px;" onclick="speakText('Your ABHA ID is ' + '${user.abhaId}')">
               ${this.t('read_aloud', '🔊 Read Aloud')}
             </button>
-            ${!isMobileVerified ? `
-              <button class="btn-glass" style="padding:9px 12px;font-size:12px;border-color:#eab308;color:#eab308;" onclick="openMobileVerifyModal()">
-                📱 Verify Mobile
-              </button>
-            ` : ''}
             ${!isAadhaarVerified ? `
               <button class="btn-glass" style="padding:9px 12px;font-size:12px;border-color:var(--primary-bright);color:var(--primary-bright);" onclick="openAadhaarModal()">
                 🆔 Link Aadhaar (e-KYC)
@@ -415,7 +394,9 @@
       }) || {};
 
       const addr = rawUser.permanent_address || matchedProfile.permanent_address || null;
-      const isCompleted = (rawUser.permanent_address_completed !== false && !!addr);
+      const isCompleted = (typeof window.isPermanentAddressComplete === 'function')
+        ? window.isPermanentAddressComplete(rawUser)
+        : (rawUser.permanent_address_completed !== false && !!addr);
 
       if (!addr || !isCompleted) {
         container.innerHTML = `

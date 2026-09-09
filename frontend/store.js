@@ -168,31 +168,37 @@
             });
           }
           // Safeguard permanent address flags for existing patients
+          const checkAddr = (target) => {
+            if (!target) return false;
+            if (target.permanent_address_completed === true && (target.permanent_address || target.address || target.village)) {
+              return true;
+            }
+            if (typeof global.isPermanentAddressComplete === 'function') {
+              return global.isPermanentAddressComplete(target);
+            }
+            if (typeof window !== 'undefined' && typeof window.isPermanentAddressComplete === 'function') {
+              return window.isPermanentAddressComplete(target);
+            }
+            const a = target.permanent_address || target.address || target.permanentAddress;
+            if (!a) return false;
+            const l1 = a.address_line_1 || a.address_line1 || '';
+            const pin = a.pincode || '';
+            const st = a.state || '';
+            const dist = a.district || '';
+            const vil = a.village_city || a.village_town_city || a.village || '';
+            return !!(l1.trim() && pin.trim().length === 6 && st.trim() && dist.trim() && vil.trim());
+          };
+
           if (parsed.patients && Array.isArray(parsed.patients)) {
             parsed.patients.forEach(p => {
-              if (p && !p.permanent_address) {
-                p.permanent_address = null;
-                p.permanent_address_completed = false;
-              } else if (p && p.permanent_address) {
-                p.permanent_address_completed = true;
-              }
+              if (p) p.permanent_address_completed = checkAddr(p);
             });
           }
           if (parsed.currentUser && parsed.currentUser.role === 'patient') {
-            if (!parsed.currentUser.permanent_address) {
-              parsed.currentUser.permanent_address = null;
-              parsed.currentUser.permanent_address_completed = false;
-            } else {
-              parsed.currentUser.permanent_address_completed = true;
-            }
+            parsed.currentUser.permanent_address_completed = checkAddr(parsed.currentUser);
           }
           if (parsed.session && parsed.session.user && (parsed.session.role === 'patient' || parsed.session.customRole === 'citizen')) {
-            if (!parsed.session.user.permanent_address) {
-              parsed.session.user.permanent_address = null;
-              parsed.session.user.permanent_address_completed = false;
-            } else {
-              parsed.session.user.permanent_address_completed = true;
-            }
+            parsed.session.user.permanent_address_completed = checkAddr(parsed.session.user);
           }
           const merged = { ...DEFAULT_INITIAL_STATE, ...parsed };
           if (merged.staff && Array.isArray(merged.staff)) {
@@ -640,8 +646,11 @@
       patientUser.role = 'patient';
       patientUser.customRole = 'citizen';
 
-      // Check if structured permanent address exists
-      const hasPermanentAddress = !!(patientUser.permanent_address_completed && patientUser.permanent_address && patientUser.permanent_address.pincode && patientUser.permanent_address.address_line_1);
+      // Check if structured permanent address exists using single source of truth
+      const hasPermanentAddress = (typeof global.isPermanentAddressComplete === 'function')
+        ? global.isPermanentAddressComplete(patientUser)
+        : !!(patientUser.permanent_address_completed && (patientUser.permanent_address || patientUser.address));
+
       patientUser.permanent_address_completed = hasPermanentAddress;
 
       this.state.session = {

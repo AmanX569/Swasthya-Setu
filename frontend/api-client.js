@@ -162,6 +162,23 @@
     }
 
     /* =========================================================
+     * PATIENT PROFILE & ADDRESS ENDPOINTS
+     * ========================================================= */
+
+    async getPatientProfile() {
+      return this._request('/patients/me', {
+        method: 'GET'
+      });
+    }
+
+    async updateAddress(addressData) {
+      return this._request('/patients/me/address', {
+        method: 'PATCH',
+        body: addressData
+      });
+    }
+
+    /* =========================================================
      * IDENTITY VERIFICATION & LINKING ENDPOINTS
      * ========================================================= */
 

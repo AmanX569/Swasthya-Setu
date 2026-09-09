@@ -76,20 +76,22 @@ function createAuthRouter(services) {
         name: patient.name
       });
 
-      // Dispatch verification OTP via MSG91
+      // Dispatch verification OTP via SMS only if OTP is enabled in config
       let otpDispatch = null;
-      try {
-        otpDispatch = await otpService.generateAndSend(patient.mobile, 'MOBILE_VERIFICATION', {
-          patientId: patient.patient_id,
-          ipAddress: req.ip
-        });
-      } catch (otpErr) {
-        console.warn('[Register] Initial OTP dispatch warning:', otpErr.message);
+      if (config.otpEnabled) {
+        try {
+          otpDispatch = await otpService.generateAndSend(patient.mobile, 'MOBILE_VERIFICATION', {
+            patientId: patient.patient_id,
+            ipAddress: req.ip
+          });
+        } catch (otpErr) {
+          console.warn('[Register] Initial OTP dispatch notice:', otpErr.message);
+        }
       }
 
       res.status(201).json({
         success: true,
-        message: 'Account registered successfully. Please verify your mobile number with the SMS code.',
+        message: 'Account registered successfully.',
         token,
         patient,
         challengeId: otpDispatch ? otpDispatch.challengeId : null,
@@ -174,7 +176,10 @@ function createAuthRouter(services) {
           mobile: patient.mobile,
           mobile_verified: patient.mobile_verified || false,
           abha_id: patient.abha_id,
-          permanent_address_completed: patient.permanent_address_completed || false,
+          permanent_address_completed: !!patient.permanent_address_completed,
+          permanent_address: patient.permanent_address || patient.address || null,
+          address: patient.address || patient.permanent_address || null,
+          village: patient.village || '',
           age: patient.age,
           gender: patient.gender,
           blood_group: patient.blood_group
@@ -188,9 +193,16 @@ function createAuthRouter(services) {
 
   /**
    * POST /api/auth/mobile/send-otp (and /api/auth/request-otp)
-   * Sends real SMS OTP to Indian mobile via MSG91
+   * Sends real SMS OTP to Indian mobile via SMS provider (MSG91 / Twilio)
    */
   const handleSendOtp = async (req, res) => {
+    if (!config.otpEnabled) {
+      return res.status(503).json({
+        success: false,
+        error: 'SMS OTP service is currently disabled.'
+      });
+    }
+
     try {
       const { mobile, purpose = 'MOBILE_VERIFICATION' } = req.body;
 
@@ -220,16 +232,8 @@ function createAuthRouter(services) {
         maskedMobile: result.maskedMobile
       });
     } catch (err) {
-      console.warn('[Send OTP Notice - Resilient Demo Fallback]:', err.message);
-      const cleanPhone = (req.body && req.body.mobile ? String(req.body.mobile) : '').replace(/\D/g, '').slice(-4);
-      res.status(200).json({
-        success: true,
-        message: 'Verification code generated.',
-        challengeId: `CHAL-DEMO-${Date.now()}`,
-        cooldownSeconds: 60,
-        maskedMobile: `******${cleanPhone || '0000'}`,
-        testOtp: '123456'
-      });
+      console.error('[Send OTP Error]:', err.message);
+      res.status(500).json({ success: false, error: 'Failed to send verification code.' });
     }
   };
 
@@ -238,9 +242,16 @@ function createAuthRouter(services) {
 
   /**
    * POST /api/auth/mobile/verify-otp (and /api/auth/verify-otp)
-   * Verifies OTP submitted by citizen against MSG91 V5 API
+   * Verifies OTP submitted by citizen against SMS Provider
    */
   const handleVerifyOtp = async (req, res) => {
+    if (!config.otpEnabled) {
+      return res.status(503).json({
+        success: false,
+        error: 'SMS OTP verification is currently disabled.'
+      });
+    }
+
     try {
       const { mobile, otp, code, challengeId, purpose = 'MOBILE_VERIFICATION' } = req.body;
       const otpValue = otp || code;
@@ -292,6 +303,13 @@ function createAuthRouter(services) {
    * Resends OTP respecting server-side 60s cooldown
    */
   router.post('/mobile/resend-otp', async (req, res) => {
+    if (!config.otpEnabled) {
+      return res.status(503).json({
+        success: false,
+        error: 'SMS OTP service is currently disabled.'
+      });
+    }
+
     try {
       const { challengeId, mobile } = req.body;
 
@@ -328,10 +346,16 @@ function createAuthRouter(services) {
 
   /**
    * POST /api/auth/forgot-password/send-otp
-   * Step 1 of Password Recovery: Send OTP to registered mobile.
-   * Defends against account enumeration with generic messages.
+   * Step 1 of Password Recovery
    */
   router.post('/forgot-password/send-otp', otpRateLimit, async (req, res) => {
+    if (!config.otpEnabled) {
+      return res.status(503).json({
+        success: false,
+        error: 'Password recovery is currently unavailable. Please contact your administrator.'
+      });
+    }
+
     try {
       const { identifier } = req.body;
 
@@ -343,7 +367,6 @@ function createAuthRouter(services) {
       const patient = await patientService.resolvePatientByIdentifier(cleanId);
 
       // Account enumeration defense:
-      // Even if user does NOT exist, return the exact same generic message with a simulated challenge ID
       if (!patient || !patient.mobile) {
         const dummyChallengeId = `CHAL-SEC-${uuidv4()}`;
         const masked = cleanId.length >= 4 ? `******${cleanId.slice(-4)}` : '******0000';
@@ -356,7 +379,7 @@ function createAuthRouter(services) {
         });
       }
 
-      // Existing patient found: Send real OTP via MSG91
+      // Existing patient found: Send real OTP via provider
       const norm = normalizeIndianMobile(patient.mobile);
       const result = await otpService.generateAndSend(norm.national, 'PASSWORD_RESET', {
         patientId: patient.patient_id,
@@ -387,9 +410,16 @@ function createAuthRouter(services) {
 
   /**
    * POST /api/auth/forgot-password/verify-otp
-   * Step 2 of Password Recovery: Verify OTP and issue single-use resetToken
+   * Step 2 of Password Recovery
    */
   router.post('/forgot-password/verify-otp', async (req, res) => {
+    if (!config.otpEnabled) {
+      return res.status(503).json({
+        success: false,
+        error: 'Password recovery is currently unavailable. Please contact your administrator.'
+      });
+    }
+
     try {
       const { mobile, otp, challengeId } = req.body;
 

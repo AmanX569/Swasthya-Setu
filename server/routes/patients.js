@@ -40,35 +40,53 @@ function createPatientsRouter(services) {
   });
 
   /**
-   * PATCH /api/patients/me/address
+   * PATCH & PUT /api/patients/me/address
    * Saves or updates permanent structured address
    */
-  router.patch('/me/address', async (req, res) => {
+  const handleUpdateAddress = async (req, res) => {
     try {
       const patientId = req.user.patient_id || req.user.id;
       const addressData = req.body;
 
-      if (!addressData || !addressData.pincode || !addressData.state || !addressData.district) {
-        return res.status(400).json({ success: false, error: 'Pincode, State, and District are required' });
+      if (!addressData || typeof addressData !== 'object') {
+        return res.status(400).json({ success: false, error: 'Address payload is required.' });
       }
 
-      const pinCheck = validatePincode(addressData.pincode);
+      const pincode = String(addressData.pincode || '').trim();
+      const state = String(addressData.state || '').trim();
+      const district = String(addressData.district || '').trim();
+      const line1 = String(addressData.address_line_1 || addressData.address_line1 || addressData.addressLine1 || '').trim();
+
+      if (!line1) {
+        return res.status(400).json({ success: false, error: 'Address Line 1 is required.' });
+      }
+      if (!state || !district) {
+        return res.status(400).json({ success: false, error: 'State and District are required.' });
+      }
+
+      const pinCheck = validatePincode(pincode);
       if (!pinCheck.valid) {
         return res.status(400).json({ success: false, error: pinCheck.error });
       }
 
       const saved = await patientService.saveAddress(patientId, addressData, 'PATIENT_PROVIDED');
+      const updatedProfile = await patientService.getFullPatientProfile(patientId);
 
       res.json({
         success: true,
-        message: 'Permanent address updated successfully',
-        address: saved
+        message: 'Permanent address saved successfully.',
+        address: saved,
+        patient: updatedProfile,
+        permanent_address_completed: true
       });
     } catch (err) {
       console.error('[PATCH /patients/me/address] Error:', err.message);
-      res.status(500).json({ success: false, error: 'Failed to update address' });
+      res.status(500).json({ success: false, error: 'Unable to save your address. Please try again.' });
     }
-  });
+  };
+
+  router.patch('/me/address', handleUpdateAddress);
+  router.put('/me/address', handleUpdateAddress);
 
   return router;
 }

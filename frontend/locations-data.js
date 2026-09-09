@@ -1967,8 +1967,78 @@
       }
       if (addr.country && addr.country !== 'India') parts.push(addr.country);
       return parts.join(', ');
+    },
+
+    normalizeAddress(raw) {
+      if (!raw || typeof raw !== 'object') return null;
+      const clean = (v) => (v === null || v === undefined) ? '' : String(v).trim();
+      const line1 = clean(raw.address_line_1 || raw.address_line1 || raw.addressLine1 || raw.street);
+      const line2 = clean(raw.address_line_2 || raw.address_line2 || raw.addressLine2 || raw.locality);
+      const landmark = clean(raw.landmark);
+      const country = clean(raw.country) || 'India';
+      const state = clean(raw.state);
+      const district = clean(raw.district);
+      const mandal = clean(raw.mandal || raw.mandal_taluk_tehsil || raw.subdistrict || raw.tehsil || raw.taluk);
+      const villageCity = clean(raw.village_city || raw.village_town_city || raw.villageCity || raw.village || raw.city || raw.town);
+      const pincode = clean(raw.pincode || raw.postal_code || raw.pin);
+
+      return {
+        address_line_1: line1,
+        address_line_2: line2,
+        landmark,
+        country,
+        state,
+        district,
+        mandal,
+        village_city: villageCity,
+        pincode,
+        address_line1: line1,
+        address_line2: line2,
+        mandal_taluk_tehsil: mandal,
+        village_town_city: villageCity,
+        address_type: raw.address_type || 'PERMANENT',
+        is_verified: true
+      };
+    },
+
+    isPermanentAddressComplete(target) {
+      if (!target || typeof target !== 'object') return false;
+
+      // Extract address from patient/user container if wrapped
+      let addr = target;
+      if (target.permanent_address || target.address || target.permanentAddress || target.patientAddress) {
+        addr = target.permanent_address || target.address || target.permanentAddress || target.patientAddress;
+      }
+
+      // If patient object itself has permanent_address_completed verified by server and address or village present
+      if (target.permanent_address_completed === true && (addr || target.village)) {
+        if (!addr || typeof addr !== 'object') return true;
+      }
+
+      if (!addr || typeof addr !== 'object') return false;
+
+      const norm = this.normalizeAddress ? this.normalizeAddress(addr) : addr;
+      if (!norm) return false;
+
+      const line1 = String(norm.address_line_1 || norm.address_line1 || norm.addressLine1 || '').trim();
+      const country = String(norm.country || 'India').trim();
+      const state = String(norm.state || '').trim();
+      const district = String(norm.district || '').trim();
+      const villageCity = String(norm.village_city || norm.village_town_city || norm.villageCity || norm.village || '').trim();
+      const pincode = String(norm.pincode || norm.postal_code || '').trim();
+
+      if (!line1) return false;
+      if (!country) return false;
+      if (!state) return false;
+      if (!district) return false;
+      if (!villageCity) return false;
+      if (!this.validatePincode(pincode)) return false;
+
+      return true;
     }
   };
 
   global.locationService = LocationService;
+  global.isPermanentAddressComplete = LocationService.isPermanentAddressComplete.bind(LocationService);
+  global.normalizeAddress = LocationService.normalizeAddress.bind(LocationService);
 })(typeof window !== 'undefined' ? window : global);
