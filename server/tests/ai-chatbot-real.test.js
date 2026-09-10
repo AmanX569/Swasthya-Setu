@@ -141,15 +141,21 @@ async function runTests() {
   // PART 3: PRODUCTION AI KEY MISSING ERROR HANDLING (SECTION 25 & 48)
   // -------------------------------------------------------------
   await testCase('Production AI mode without API key returns safe 503 error (no fake silent fallback)', async () => {
+    const origKey = config.ai.geminiApiKey;
     config.ai.mockMode = false;
-    const res = await makeRequest(port, 'POST', '/api/ai/triage/chat', {
-      message: 'I have a mild headache'
-    });
-    assert.strictEqual(res.status, 503);
-    assert.strictEqual(res.body.success, false);
-    assert.strictEqual(res.body.code, 'AI_KEY_MISSING');
-    // Ensure no secrets or stack traces leaked
-    assert.strictEqual(res.body.stack, undefined);
+    config.ai.geminiApiKey = '';
+    try {
+      const res = await makeRequest(port, 'POST', '/api/ai/triage/chat', {
+        message: 'I have a mild headache'
+      });
+      assert.strictEqual(res.status, 503);
+      assert.strictEqual(res.body.success, false);
+      assert.strictEqual(res.body.code, 'AI_KEY_MISSING');
+      // Ensure no secrets or stack traces leaked
+      assert.strictEqual(res.body.stack, undefined);
+    } finally {
+      config.ai.geminiApiKey = origKey;
+    }
   });
 
   // -------------------------------------------------------------

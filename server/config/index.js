@@ -61,7 +61,7 @@ const config = {
     provider: process.env.AI_PROVIDER || 'gemini', // 'gemini' | 'sandbox' | 'openai'
     geminiApiKey: process.env.GEMINI_API_KEY || process.env.AI_API_KEY || '',
     openaiApiKey: process.env.OPENAI_API_KEY || '',
-    model: process.env.AI_MODEL || 'gemini-1.5-flash',
+    model: process.env.AI_MODEL || 'gemini-3.1-flash-lite',
     maxTokens: parseInt(process.env.AI_MAX_TOKENS, 10) || 1000,
     timeoutMs: parseInt(process.env.AI_TIMEOUT_MS, 10) || 15000,
     mockMode: process.env.AI_MOCK_MODE === 'true' // Strictly false by default in production

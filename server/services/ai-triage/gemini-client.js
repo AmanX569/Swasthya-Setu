@@ -8,10 +8,16 @@
 'use strict';
 
 class GeminiClient {
-  constructor(apiKey, model = 'gemini-1.5-flash', timeoutMs = 15000) {
+  constructor(apiKey, model = 'gemini-3.1-flash-lite', timeoutMs = 15000) {
     this.apiKey = apiKey;
     this.model = model;
     this.timeoutMs = timeoutMs;
+    this.candidateModels = Array.from(new Set([
+      model,
+      'gemini-3.1-flash-lite',
+      'gemini-3.5-flash-lite',
+      'gemini-flash-latest'
+    ]));
   }
 
   /**
@@ -83,16 +89,10 @@ CORE PRINCIPLES & MEDICAL SAFETY DIRECTIVES:
       throw err;
     }
 
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(this.model)}:generateContent?key=${encodeURIComponent(this.apiKey)}`;
     const systemInstruction = this.getSystemInstructions(language, patientContext);
 
-    // Build multi-turn contents array
+    // Build multi-turn contents array with clean user/model alternating turns
     const contents = [];
-
-    // System instruction preamble
-    const systemPart = {
-      text: `[SYSTEM INSTRUCTION]\n${systemInstruction}\n\n[PATIENT CONTEXT: Age: ${patientContext.age || 'Unspecified'}, Gender: ${patientContext.gender || 'Unspecified'}, Conditions: ${(patientContext.chronicConditions || []).join(', ') || 'None reported'}]`
-    };
 
     // Forward past conversation context (up to 8 turns)
     if (Array.isArray(history) && history.length > 0) {
@@ -113,62 +113,112 @@ CORE PRINCIPLES & MEDICAL SAFETY DIRECTIVES:
       ? `[SAFETY DETECTED POTENTIAL EMERGENCY: ${emergencyMatch.title} - ${emergencyMatch.reason}]\nPatient Message: ${message}`
       : `Patient Message: ${message}`;
 
-    if (contents.length === 0) {
-      // First turn: include system instruction in the first user message
-      contents.push({
-        role: 'user',
-        parts: [systemPart, { text: currentQueryText }]
-      });
-    } else {
-      // Subsequent turns: append current query with system reminder
-      contents.push({
-        role: 'user',
-        parts: [
-          { text: `[REMINDER: Follow Swasthya AI clinical directives and output valid JSON]\n${currentQueryText}` }
-        ]
-      });
-    }
+    contents.push({
+      role: 'user',
+      parts: [{ text: currentQueryText }]
+    });
 
-    // Setup AbortController for timeout
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), this.timeoutMs);
-
-    let res;
-    try {
-      res = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        signal: controller.signal,
-        body: JSON.stringify({
-          contents,
-          generationConfig: {
-            temperature: 0.2,
-            maxOutputTokens: 1200,
-            responseMimeType: 'application/json'
-          }
-        })
-      });
-    } catch (fetchErr) {
-      clearTimeout(timeout);
-      if (fetchErr.name === 'AbortError') {
-        const err = new Error('AI service timed out while analyzing symptoms. Please try again.');
-        err.code = 'AI_TIMEOUT';
-        err.statusCode = 504;
-        throw err;
+    const requestPayload = {
+      system_instruction: {
+        parts: [{ text: `${systemInstruction}\n\n[PATIENT CONTEXT: Age: ${patientContext.age || 'Unspecified'}, Gender: ${patientContext.gender || 'Unspecified'}, Conditions: ${(patientContext.chronicConditions || []).join(', ') || 'None reported'}]` }]
+      },
+      contents,
+      generationConfig: {
+        temperature: 0.2,
+        maxOutputTokens: 1200,
+        responseMimeType: 'application/json'
       }
-      const err = new Error('Network error connecting to AI provider: ' + fetchErr.message);
-      err.code = 'AI_NETWORK_ERROR';
-      err.statusCode = 502;
-      throw err;
-    } finally {
-      clearTimeout(timeout);
-    }
+    };
 
-    if (!res.ok) {
+    const modelsToTry = this.candidateModels;
+    let lastError = null;
+
+    for (const currentModel of modelsToTry) {
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(currentModel)}:generateContent?key=${encodeURIComponent(this.apiKey)}`;
+
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), this.timeoutMs);
+
+      let res;
+      try {
+        res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          signal: controller.signal,
+          body: JSON.stringify(requestPayload)
+        });
+      } catch (fetchErr) {
+        clearTimeout(timeout);
+        if (fetchErr.name === 'AbortError') {
+          const err = new Error('AI service timed out while analyzing symptoms. Please try again.');
+          err.code = 'AI_TIMEOUT';
+          err.statusCode = 504;
+          throw err;
+        }
+        const err = new Error('Network error connecting to AI provider: ' + fetchErr.message);
+        err.code = 'AI_NETWORK_ERROR';
+        err.statusCode = 502;
+        throw err;
+      } finally {
+        clearTimeout(timeout);
+      }
+
+      if (res.ok) {
+        // Success with currentModel! Update this.model if changed
+        this.model = currentModel;
+
+        const data = await res.json();
+        const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+        if (!rawText) {
+          const err = new Error('AI provider returned an empty response candidate.');
+          err.code = 'AI_EMPTY_RESPONSE';
+          err.statusCode = 502;
+          throw err;
+        }
+
+        let parsed;
+        try {
+          parsed = JSON.parse(rawText);
+        } catch (parseErr) {
+          // Fallback: extract JSON from markdown block if wrapped
+          const match = rawText.match(/```json\s*([\s\S]*?)\s*```/) || rawText.match(/\{[\s\S]*\}/);
+          if (match) {
+            parsed = JSON.parse(match[1] || match[0]);
+          } else {
+            const err = new Error('Failed to parse AI response into structured clinical format.');
+            err.code = 'AI_PARSE_ERROR';
+            err.statusCode = 502;
+            throw err;
+          }
+        }
+
+        // Normalize output fields
+        const validLevels = ['LOW', 'MODERATE', 'URGENT', 'EMERGENCY'];
+        let level = (parsed.triageLevel || 'MODERATE').toUpperCase();
+        if (!validLevels.includes(level)) level = 'MODERATE';
+
+        // If deterministic emergency was matched, override to EMERGENCY
+        if (emergencyMatch && emergencyMatch.severity === 'critical') {
+          level = 'EMERGENCY';
+        }
+
+        return {
+          triageLevel: level,
+          summary: parsed.summary || 'Clinical assessment generated for reported symptoms.',
+          possibleCauses: Array.isArray(parsed.possibleCauses) ? parsed.possibleCauses : [],
+          followUpQuestions: Array.isArray(parsed.followUpQuestions) ? parsed.followUpQuestions : [],
+          recommendedActions: Array.isArray(parsed.recommendedActions) ? parsed.recommendedActions : [],
+          redFlags: Array.isArray(parsed.redFlags) ? parsed.redFlags : [],
+          specialist: parsed.specialist || 'General Physician / Primary Health Centre',
+          message: parsed.message || parsed.summary || 'Clinical triage completed.'
+        };
+      }
+
       let errBody = '';
       try { errBody = await res.text(); } catch (e) {}
 
-      console.error(`[GeminiClient] HTTP ${res.status}:`, errBody.slice(0, 300));
+      console.error(`[GeminiClient] Model ${currentModel} returned HTTP ${res.status}:`, errBody.slice(0, 300));
 
       if (res.status === 429) {
         const err = new Error('AI provider rate limit reached. Please wait a moment and try again.');
@@ -184,58 +234,12 @@ CORE PRINCIPLES & MEDICAL SAFETY DIRECTIVES:
         throw err;
       }
 
-      const err = new Error(`AI service temporarily unavailable (HTTP ${res.status}). Please try again.`);
-      err.code = 'AI_UNAVAILABLE';
-      err.statusCode = 503;
-      throw err;
+      lastError = new Error(`AI service temporarily unavailable with model ${currentModel} (HTTP ${res.status}).`);
+      lastError.code = 'AI_UNAVAILABLE';
+      lastError.statusCode = 503;
     }
 
-    const data = await res.json();
-    const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-
-    if (!rawText) {
-      const err = new Error('AI provider returned an empty response candidate.');
-      err.code = 'AI_EMPTY_RESPONSE';
-      err.statusCode = 502;
-      throw err;
-    }
-
-    let parsed;
-    try {
-      parsed = JSON.parse(rawText);
-    } catch (parseErr) {
-      // Fallback: extract JSON from markdown block if wrapped
-      const match = rawText.match(/```json\s*([\s\S]*?)\s*```/) || rawText.match(/\{[\s\S]*\}/);
-      if (match) {
-        parsed = JSON.parse(match[1] || match[0]);
-      } else {
-        const err = new Error('Failed to parse AI response into structured clinical format.');
-        err.code = 'AI_PARSE_ERROR';
-        err.statusCode = 502;
-        throw err;
-      }
-    }
-
-    // Normalize output fields
-    const validLevels = ['LOW', 'MODERATE', 'URGENT', 'EMERGENCY'];
-    let level = (parsed.triageLevel || 'MODERATE').toUpperCase();
-    if (!validLevels.includes(level)) level = 'MODERATE';
-
-    // If deterministic emergency was matched, override to EMERGENCY
-    if (emergencyMatch && emergencyMatch.severity === 'critical') {
-      level = 'EMERGENCY';
-    }
-
-    return {
-      triageLevel: level,
-      summary: parsed.summary || 'Clinical assessment generated for reported symptoms.',
-      possibleCauses: Array.isArray(parsed.possibleCauses) ? parsed.possibleCauses : [],
-      followUpQuestions: Array.isArray(parsed.followUpQuestions) ? parsed.followUpQuestions : [],
-      recommendedActions: Array.isArray(parsed.recommendedActions) ? parsed.recommendedActions : [],
-      redFlags: Array.isArray(parsed.redFlags) ? parsed.redFlags : [],
-      specialist: parsed.specialist || 'General Physician / Primary Health Centre',
-      message: parsed.message || parsed.summary || 'Clinical triage completed.'
-    };
+    throw lastError || new Error('All candidate AI models were unavailable. Please try again.');
   }
 }
 

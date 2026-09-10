@@ -23,7 +23,10 @@ class TriageService {
     if (this.config && this.config.ai && this.config.ai.mockMode === true) {
       return new SandboxHealthProvider();
     }
-    return this.provider || createAIProvider(this.config);
+    if (!this.provider || (this.config && this.config.ai && this.provider.apiKey !== this.config.ai.geminiApiKey)) {
+      return createAIProvider(this.config);
+    }
+    return this.provider;
   }
 
   /**

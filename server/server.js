@@ -9,6 +9,8 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const url = require('url');
+const { app } = require('./app');
+const config = require('./config');
 
 const PORT = 54321;
 const DATA_FILE = path.join(__dirname, 'supabase_data.json');
@@ -128,8 +130,13 @@ const server = http.createServer((req, res) => {
   const parsedUrl = url.parse(req.url, true);
   const pathname = parsedUrl.pathname;
 
+  // Delegate /api/ routes to Express application (auth, identity, triage, patients, etc.)
+  if (pathname.startsWith('/api/')) {
+    return app(req, res);
+  }
+
   // Root / Health check
-  if (pathname === '/' || pathname === '/api/health') {
+  if (pathname === '/') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({
       name: 'Swasthya Setu Supabase PostgREST Engine',
@@ -282,3 +289,20 @@ server.listen(PORT, () => {
   console.log(`  Tables:     ${Object.keys(db).join(', ')}`);
   console.log('================================================================');
 });
+
+// Also ensure Express API & AI Triage Engine runs on its designated port
+try {
+  const expressPort = config.server.port || 5000;
+  if (expressPort !== PORT) {
+    const expressServer = app.listen(expressPort, () => {
+      console.log(`  ⚡ SWASTHYA SETU API & AI TRIAGE ENGINE: http://localhost:${expressPort}/api`);
+    });
+    expressServer.on('error', (err) => {
+      if (err.code !== 'EADDRINUSE') {
+        console.warn('[Server] Express port notice:', err.message);
+      }
+    });
+  }
+} catch (err) {
+  console.warn('[Server] Express startup notice:', err.message);
+}

@@ -649,8 +649,10 @@ function createAIProvider(config) {
   }
 
   // Production Real AI Provider: Google Gemini
-  const apiKey = (config.ai && (config.ai.geminiApiKey || config.ai.apiKey)) || process.env.GEMINI_API_KEY || process.env.AI_API_KEY || '';
-  const model = (config.ai && config.ai.model) || process.env.AI_MODEL || 'gemini-1.5-flash';
+  const apiKey = (config.ai && typeof config.ai.geminiApiKey === 'string')
+    ? config.ai.geminiApiKey
+    : (process.env.GEMINI_API_KEY || process.env.AI_API_KEY || '');
+  const model = (config.ai && config.ai.model) || process.env.AI_MODEL || 'gemini-3.1-flash-lite';
   const timeoutMs = (config.ai && config.ai.timeoutMs) || 15000;
 
   return new GeminiClient(apiKey, model, timeoutMs);
