@@ -84,12 +84,29 @@ function requireRole(...roles) {
  */
 function optionalAuthenticateToken(req, res, next) {
   const setGuestUser = () => {
-    const rawIp = req.headers['x-forwarded-for'] || req.socket?.remoteAddress || 'guest';
-    const cleanIp = String(rawIp).split(',')[0].trim().replace(/[^a-zA-Z0-9]/g, '_');
+    // Check if client provided explicit session headers from an authenticated browser session
+    const customUserId = req.headers['x-swasthya-user-id'];
+    const customUserRole = req.headers['x-swasthya-user-role'];
+    if (customUserId && typeof customUserId === 'string' && customUserId.trim()) {
+      const cleanUserId = customUserId.trim();
+      req.user = {
+        id: cleanUserId,
+        patient_id: cleanUserId,
+        role: customUserRole || 'patient',
+        isGuest: false,
+        name: 'User ' + cleanUserId
+      };
+      return;
+    }
+
+    // Anonymous guest session: NEVER use shared IP address across users!
+    // Derive unique guest ID scoped strictly to this specific conversation ID or a cryptographic random UUID
+    const convId = (req.body && req.body.conversationId) || req.query?.conversationId || (req.params && req.params.conversationId);
+    const guestId = convId ? `guest_${convId}` : `guest_${require('crypto').randomUUID()}`;
     req.user = {
-      id: `guest_${cleanIp}`,
-      patient_id: `guest_${cleanIp}`,
-      role: 'patient',
+      id: guestId,
+      patient_id: guestId,
+      role: 'guest',
       isGuest: true,
       name: 'Guest Citizen'
     };

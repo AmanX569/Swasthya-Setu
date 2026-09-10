@@ -5849,6 +5849,35 @@ body[data-theme="doom"] {
     <button type="button" onclick="window.swasthyaAi && window.swasthyaAi.toggleWindow(false)" title="Close" aria-label="Close Swasthya AI" style="background:none;border:none;color:#94a3b8;cursor:pointer;font-size:16px;padding:4px;display:flex;align-items:center;justify-content:center;">✕</button>
   </div>
 
+  <!-- Toolbar: New Chat & Clear Chat Actions -->
+  <div style="padding:6px 12px;background:rgba(30,41,59,0.7);display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.06);font-size:11px;flex-shrink:0;">
+    <div style="display:flex;align-items:center;gap:6px;">
+      <button type="button" id="swasthyaAiNewChatBtn" onclick="window.swasthyaAi && window.swasthyaAi.startNewChat()" title="Start a fresh conversation" aria-label="New Chat" style="background:rgba(2,132,199,0.18);border:1px solid rgba(2,132,199,0.4);border-radius:6px;padding:3px 8px;color:#38bdf8;font-size:11px;font-weight:600;display:inline-flex;align-items:center;gap:4px;cursor:pointer;transition:all 0.15s;">
+        <span style="font-weight:700;font-size:12px;">+</span> <span>New Chat</span>
+      </button>
+      <button type="button" id="swasthyaAiClearChatBtn" onclick="window.swasthyaAi && window.swasthyaAi.promptClearChat()" title="Clear this chat history" aria-label="Clear Chat" style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.35);border-radius:6px;padding:3px 8px;color:#fca5a5;font-size:11px;font-weight:600;display:inline-flex;align-items:center;gap:4px;cursor:pointer;transition:all 0.15s;">
+        <span>🗑</span> <span>Clear</span>
+      </button>
+    </div>
+    <div style="font-size:10.5px;color:#94a3b8;display:flex;align-items:center;gap:4px;">
+      <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#10b981;"></span>
+      <span>Gemini 3.1 AI</span>
+    </div>
+  </div>
+
+  <!-- Clear Chat Confirmation Modal Overlay -->
+  <div id="swasthyaAiClearModal" style="display:none;position:absolute;inset:0;background:rgba(15,23,42,0.88);backdrop-filter:blur(4px);z-index:100;flex-direction:column;align-items:center;justify-content:center;padding:20px;text-align:center;">
+    <div style="background:#1e293b;border:1px solid rgba(255,255,255,0.12);border-radius:14px;padding:18px;max-width:280px;width:100%;box-shadow:0 15px 35px rgba(0,0,0,0.6);">
+      <div style="font-size:28px;margin-bottom:8px;">🗑️</div>
+      <div style="font-size:14px;font-weight:700;color:#ffffff;margin-bottom:6px;">Clear this conversation?</div>
+      <div style="font-size:11.5px;color:#94a3b8;line-height:1.4;margin-bottom:16px;">This will remove the messages from this chat. This action cannot be undone.</div>
+      <div style="display:flex;gap:8px;justify-content:center;">
+        <button type="button" onclick="window.swasthyaAi && window.swasthyaAi.cancelClearChat()" style="flex:1;padding:7px 12px;border-radius:8px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#cbd5e1;font-size:11.5px;font-weight:600;cursor:pointer;">Cancel</button>
+        <button type="button" onclick="window.swasthyaAi && window.swasthyaAi.executeClearChat()" style="flex:1;padding:7px 12px;border-radius:8px;background:#ef4444;border:none;color:#ffffff;font-size:11.5px;font-weight:600;cursor:pointer;">Clear Chat</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Messages Container -->
   <div id="swasthyaAiMessages" role="log" aria-live="polite" style="flex:1;overflow-y:auto;padding:14px 16px;scroll-behavior:smooth;">
     <!-- Rendered dynamically by swasthya-ai-chat.js -->
@@ -7153,6 +7182,16 @@ body[data-theme="doom"] {
         headers['Authorization'] = `Bearer ${token}`;
       }
 
+      // Attach active session headers if user is logged in
+      try {
+        const user = (window.appStore && window.appStore.state && window.appStore.state.session && window.appStore.state.session.user) || (window.appStore && window.appStore.state && window.appStore.state.currentUser);
+        if (user && (user.id || user.patient_id || user.staff_code)) {
+          const uid = user.id || user.patient_id || user.staff_code;
+          headers['x-swasthya-user-id'] = String(uid);
+          headers['x-swasthya-user-role'] = String(user.role || 'patient');
+        }
+      } catch (e) {}
+
       const fetchOptions = {
         ...options,
         headers
@@ -7351,6 +7390,19 @@ body[data-theme="doom"] {
       return this._request('/ai/triage/chat', {
         method: 'POST',
         body: { message, conversationId, language, patientContext }
+      });
+    }
+
+    async createAiTriageConversation(title = 'New Health Triage Chat') {
+      return this._request('/ai/triage/conversations', {
+        method: 'POST',
+        body: { title }
+      });
+    }
+
+    async getAiTriageConversations() {
+      return this._request('/ai/triage/conversations', {
+        method: 'GET'
       });
     }
 
@@ -9785,6 +9837,7 @@ body[data-theme="doom"] {
         this.state.currentUser = targetMatch.user;
       }
       this.saveState();
+      this._notifyAuthLogin(targetMatch.user);
 
       return { success: true, role: targetMatch.role, user: targetMatch.user, availableRoles: matchedRoles };
     }
@@ -9811,7 +9864,18 @@ body[data-theme="doom"] {
         this.state.currentUser = sessionUser;
       }
       this.saveState();
+      this._notifyAuthLogin(sessionUser);
       return { success: true, user: sessionUser };
+    }
+
+    _notifyAuthLogin(user) {
+      try {
+        if (typeof global.dispatchEvent === 'function') {
+          global.dispatchEvent(new CustomEvent('swasthya:auth-login', { detail: { user } }));
+        }
+      } catch (e) {
+        console.warn('[store] login notify error:', e);
+      }
     }
 
     // Save or Update Patient Permanent Address
@@ -9989,6 +10053,7 @@ body[data-theme="doom"] {
       this.state.currentUser = newPatient;
       this.state.session = { isLoggedIn: true, authState: 'AUTHENTICATED', role: 'patient', customRole: 'citizen', user: newPatient };
       this.saveState();
+      this._notifyAuthLogin(newPatient);
 
       if (global.supabaseService) {
         if (typeof global.supabaseService.insertProfile === 'function') {
@@ -10089,6 +10154,7 @@ body[data-theme="doom"] {
       this.state.currentUser = patientUser;
       this.tempCitizenAuth = null;
       this.saveState();
+      this._notifyAuthLogin(patientUser);
 
       return {
         success: true,
@@ -10416,6 +10482,19 @@ body[data-theme="doom"] {
       this.tempCitizenAuth = null;
       this.state.currentUser = null;
       this.saveState();
+      try {
+        if (global.swasthyaAPI && typeof global.swasthyaAPI.clearToken === 'function') {
+          global.swasthyaAPI.clearToken();
+        }
+        if (typeof global.sessionStorage !== 'undefined') {
+          global.sessionStorage.removeItem('swasthya_session_token');
+        }
+        if (typeof global.dispatchEvent === 'function') {
+          global.dispatchEvent(new CustomEvent('swasthya:auth-logout'));
+        }
+      } catch (e) {
+        console.warn('[store] logout event error:', e);
+      }
     }
 
     setLanguage(lang) {
@@ -40600,9 +40679,11 @@ body[data-theme="doom"] {
         if (savedLang && SUPPORTED_LANGS[savedLang]) this.currentLang = savedLang;
       } catch (e) {}
 
+      this.clearLegacyGlobalCache();
       this.conversationId = null;
       try {
-        this.conversationId = sessionStorage.getItem('swasthya_ai_conv_id') || null;
+        const convKey = this.getStorageConvIdKey();
+        this.conversationId = sessionStorage.getItem(convKey) || null;
       } catch (e) {}
 
       this.chatHistory = this.loadHistory();
@@ -40613,11 +40694,62 @@ body[data-theme="doom"] {
 
       this.initVoiceInput();
       this.initKeyboardEsc();
+      this.initAuthListeners();
+    }
+
+    getCurrentUserId() {
+      try {
+        const appState = window.appStore ? window.appStore.getState() : null;
+        const user = (appState && (appState.currentUser || (appState.session && appState.session.user)));
+        if (user && (user.id || user.patient_id || user.staff_code)) {
+          return String(user.id || user.patient_id || user.staff_code).trim();
+        }
+      } catch (e) {}
+      return 'guest';
+    }
+
+    getStorageHistoryKey() {
+      return 'swasthya_ai_history_' + this.getCurrentUserId();
+    }
+
+    getStorageConvIdKey() {
+      return 'swasthya_ai_conv_id_' + this.getCurrentUserId();
+    }
+
+    clearLegacyGlobalCache() {
+      try {
+        sessionStorage.removeItem('swasthya_ai_history_v5');
+        sessionStorage.removeItem('swasthya_ai_conv_id');
+      } catch (e) {}
+    }
+
+    initAuthListeners() {
+      if (typeof window !== 'undefined') {
+        window.addEventListener('swasthya:auth-logout', () => this.onUserLoggedOut());
+        window.addEventListener('swasthya:auth-login', (e) => this.onUserLoggedIn(e.detail?.user));
+      }
+    }
+
+    onUserLoggedOut() {
+      this.conversationId = null;
+      this.chatHistory = [this.getWelcomeMessage()];
+      this.renderChat();
+    }
+
+    onUserLoggedIn(user) {
+      this.conversationId = null;
+      try {
+        const convKey = this.getStorageConvIdKey();
+        this.conversationId = sessionStorage.getItem(convKey) || null;
+      } catch (e) {}
+      this.chatHistory = this.loadHistory();
+      this.renderChat();
     }
 
     loadHistory() {
       try {
-        const saved = sessionStorage.getItem('swasthya_ai_history_v5');
+        const key = this.getStorageHistoryKey();
+        const saved = sessionStorage.getItem(key);
         if (saved) {
           const parsed = JSON.parse(saved);
           if (Array.isArray(parsed) && parsed.length > 0) return parsed;
@@ -40628,11 +40760,95 @@ body[data-theme="doom"] {
 
     saveHistory() {
       try {
-        sessionStorage.setItem('swasthya_ai_history_v5', JSON.stringify(this.chatHistory.slice(-30)));
+        const historyKey = this.getStorageHistoryKey();
+        sessionStorage.setItem(historyKey, JSON.stringify(this.chatHistory.slice(-30)));
         if (this.conversationId) {
-          sessionStorage.setItem('swasthya_ai_conv_id', this.conversationId);
+          const convKey = this.getStorageConvIdKey();
+          sessionStorage.setItem(convKey, this.conversationId);
         }
       } catch (e) {}
+    }
+
+    /**
+     * Creates a genuinely brand-new conversation context
+     */
+    async startNewChat() {
+      if (this.isProcessing) return;
+
+      this.conversationId = null;
+      try {
+        if (window.swasthyaAPI && typeof window.swasthyaAPI.createAiTriageConversation === 'function') {
+          const res = await window.swasthyaAPI.createAiTriageConversation('New Health Triage Chat');
+          if (res && res.conversation && res.conversation.id) {
+            this.conversationId = res.conversation.id;
+          }
+        }
+      } catch (e) {
+        console.warn('[Swasthya AI] Backend new conversation notice:', e.message);
+      }
+
+      if (!this.conversationId) {
+        this.conversationId = 'conv_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9);
+      }
+
+      this.chatHistory = [this.getWelcomeMessage()];
+      this.saveHistory();
+      this.renderChat();
+
+      const input = document.getElementById('swasthyaAiInput');
+      if (input) {
+        input.value = '';
+        input.focus();
+      }
+    }
+
+    /**
+     * Prompts confirmation modal before clearing chat
+     */
+    promptClearChat() {
+      const modal = document.getElementById('swasthyaAiClearModal');
+      if (modal) {
+        modal.style.setProperty('display', 'flex', 'important');
+      }
+    }
+
+    cancelClearChat() {
+      const modal = document.getElementById('swasthyaAiClearModal');
+      if (modal) {
+        modal.style.setProperty('display', 'none', 'important');
+      }
+    }
+
+    /**
+     * Confirms and executes atomic conversation deletion
+     */
+    async executeClearChat() {
+      this.cancelClearChat();
+
+      const convIdToDelete = this.conversationId;
+
+      if (convIdToDelete && window.swasthyaAPI && typeof window.swasthyaAPI.clearAiTriageConversation === 'function') {
+        try {
+          await window.swasthyaAPI.clearAiTriageConversation(convIdToDelete);
+        } catch (e) {
+          console.warn('[Swasthya AI] Backend delete conversation notice:', e.message);
+        }
+      }
+
+      try {
+        sessionStorage.removeItem(this.getStorageHistoryKey());
+        sessionStorage.removeItem(this.getStorageConvIdKey());
+      } catch (e) {}
+
+      this.conversationId = null;
+      const welcome = this.getWelcomeMessage();
+      welcome.text = '🧹 **Chat cleared.** How can I help you today? Please describe your symptoms or health concern.';
+      this.chatHistory = [welcome];
+      this.saveHistory();
+      this.renderChat();
+
+      const input = document.getElementById('swasthyaAiInput');
+      if (input) input.focus();
     }
 
     getWelcomeMessage() {
@@ -40918,9 +41134,21 @@ body[data-theme="doom"] {
           let lastErr = null;
           for (const ep of endpoints) {
             try {
+              const reqHeaders = { 'Content-Type': 'application/json' };
+              const token = (window.swasthyaAPI && window.swasthyaAPI.getToken()) || localStorage.getItem('swasthya_auth_token');
+              if (token) {
+                reqHeaders['Authorization'] = `Bearer ${token}`;
+              }
+              const uid = this.getCurrentUserId();
+              if (uid && uid !== 'guest') {
+                reqHeaders['x-swasthya-user-id'] = uid;
+                const role = window.appStore?.state?.session?.role || 'patient';
+                reqHeaders['x-swasthya-user-role'] = role;
+              }
+
               const res = await fetch(ep, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: reqHeaders,
                 signal: controller.signal,
                 body: JSON.stringify({
                   message: query,

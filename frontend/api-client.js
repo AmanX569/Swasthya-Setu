@@ -51,6 +51,16 @@
         headers['Authorization'] = `Bearer ${token}`;
       }
 
+      // Attach active session headers if user is logged in
+      try {
+        const user = (window.appStore && window.appStore.state && window.appStore.state.session && window.appStore.state.session.user) || (window.appStore && window.appStore.state && window.appStore.state.currentUser);
+        if (user && (user.id || user.patient_id || user.staff_code)) {
+          const uid = user.id || user.patient_id || user.staff_code;
+          headers['x-swasthya-user-id'] = String(uid);
+          headers['x-swasthya-user-role'] = String(user.role || 'patient');
+        }
+      } catch (e) {}
+
       const fetchOptions = {
         ...options,
         headers
@@ -249,6 +259,19 @@
       return this._request('/ai/triage/chat', {
         method: 'POST',
         body: { message, conversationId, language, patientContext }
+      });
+    }
+
+    async createAiTriageConversation(title = 'New Health Triage Chat') {
+      return this._request('/ai/triage/conversations', {
+        method: 'POST',
+        body: { title }
+      });
+    }
+
+    async getAiTriageConversations() {
+      return this._request('/ai/triage/conversations', {
+        method: 'GET'
       });
     }
 

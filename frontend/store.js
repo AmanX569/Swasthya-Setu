@@ -362,6 +362,7 @@
         this.state.currentUser = targetMatch.user;
       }
       this.saveState();
+      this._notifyAuthLogin(targetMatch.user);
 
       return { success: true, role: targetMatch.role, user: targetMatch.user, availableRoles: matchedRoles };
     }
@@ -388,7 +389,18 @@
         this.state.currentUser = sessionUser;
       }
       this.saveState();
+      this._notifyAuthLogin(sessionUser);
       return { success: true, user: sessionUser };
+    }
+
+    _notifyAuthLogin(user) {
+      try {
+        if (typeof global.dispatchEvent === 'function') {
+          global.dispatchEvent(new CustomEvent('swasthya:auth-login', { detail: { user } }));
+        }
+      } catch (e) {
+        console.warn('[store] login notify error:', e);
+      }
     }
 
     // Save or Update Patient Permanent Address
@@ -566,6 +578,7 @@
       this.state.currentUser = newPatient;
       this.state.session = { isLoggedIn: true, authState: 'AUTHENTICATED', role: 'patient', customRole: 'citizen', user: newPatient };
       this.saveState();
+      this._notifyAuthLogin(newPatient);
 
       if (global.supabaseService) {
         if (typeof global.supabaseService.insertProfile === 'function') {
@@ -666,6 +679,7 @@
       this.state.currentUser = patientUser;
       this.tempCitizenAuth = null;
       this.saveState();
+      this._notifyAuthLogin(patientUser);
 
       return {
         success: true,
@@ -993,6 +1007,19 @@
       this.tempCitizenAuth = null;
       this.state.currentUser = null;
       this.saveState();
+      try {
+        if (global.swasthyaAPI && typeof global.swasthyaAPI.clearToken === 'function') {
+          global.swasthyaAPI.clearToken();
+        }
+        if (typeof global.sessionStorage !== 'undefined') {
+          global.sessionStorage.removeItem('swasthya_session_token');
+        }
+        if (typeof global.dispatchEvent === 'function') {
+          global.dispatchEvent(new CustomEvent('swasthya:auth-logout'));
+        }
+      } catch (e) {
+        console.warn('[store] logout event error:', e);
+      }
     }
 
     setLanguage(lang) {

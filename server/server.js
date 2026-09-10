@@ -89,7 +89,9 @@ const INITIAL_SEED_DATA = {
     { id: 'm5', name: 'ORS Powder Sachets', category: 'Dehydration / Diarrhea', stock: 500, unit: 'Packets', generic_price: 5, brand_price: 24, status: 'In Stock' },
     { id: 'm6', name: 'Iron & Folic Acid (IFA)', category: 'Maternal Nutrition', stock: 650, unit: 'Tablets', generic_price: 4, brand_price: 32, status: 'In Stock' }
   ],
-  sos_alerts: []
+  sos_alerts: [],
+  ai_triage_conversations: [],
+  ai_triage_messages: []
 };
 
 // Database persistence

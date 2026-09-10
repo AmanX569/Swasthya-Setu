@@ -33,14 +33,18 @@ class TriageService {
    * Main entrypoint for processing a patient's triage message
    */
   async processMessage({ message, conversationId = null, language = 'en', patientContext = {}, user = null }) {
-    // 1. Patient identity (authenticated or guest session)
-    let patientId;
+    // 1. Resolve authenticated user identity (or isolated guest session)
+    let ownerUserId;
+    let ownerRole = 'patient';
+
     if (user && (user.id || user.patient_id)) {
-      patientId = user.patient_id || user.id;
+      ownerUserId = user.id || user.patient_id;
+      ownerRole = user.role || 'patient';
     } else {
-      // Support guest citizen sessions without requiring prior login/profile completion
-      patientId = conversationId ? `guest_${conversationId}` : `guest_${Date.now().toString(36)}`;
-      user = { id: patientId, patient_id: patientId, role: 'guest', name: 'Guest Citizen' };
+      // Unauthenticated guest: isolate strictly to this conversation ID or a unique UUID
+      ownerUserId = conversationId ? `guest_${conversationId}` : `guest_${require('crypto').randomUUID()}`;
+      ownerRole = 'guest';
+      user = { id: ownerUserId, patient_id: ownerUserId, role: 'guest', name: 'Guest Citizen', isGuest: true };
     }
 
     // 2. Input validation
@@ -70,15 +74,16 @@ class TriageService {
     // 4. Deterministic Emergency Red Flag Detection
     const emergencyCheck = SafetyEngine.checkEmergencyRedFlags(sanitized);
 
-    // 5. Session & Storage Preparation
-    const conv = await this.storage.getOrCreateConversation(conversationId, patientId, sanitized.slice(0, 50));
+    // 5. Session & Storage Preparation with Strict Ownership Verification
+    // (If conversationId is provided, getOrCreateConversation verifies ownerUserId and throws 403 on mismatch)
+    const conv = await this.storage.getOrCreateConversation(conversationId, ownerUserId, ownerRole, sanitized.slice(0, 50));
     const activeConvId = conv.id;
 
     // Store incoming user message
     await this.storage.appendMessage({
       conversationId: activeConvId,
-      patientId,
-      sender: 'patient',
+      ownerUserId,
+      sender: user.role === 'patient' ? 'patient' : (user.role || 'patient'),
       content: sanitized
     });
 
@@ -90,7 +95,7 @@ class TriageService {
     };
 
     // 7. Retrieve recent history for context
-    const recentHistory = await this.storage.getMessages(activeConvId, patientId, 6);
+    const recentHistory = await this.storage.getMessages(activeConvId, ownerUserId, 8);
 
     // 8. AI Provider Inference (or Immediate Deterministic Emergency Override)
     let triageResult = null;
@@ -159,7 +164,7 @@ class TriageService {
     // 10. Persist Assistant Response
     await this.storage.appendMessage({
       conversationId: activeConvId,
-      patientId,
+      ownerUserId,
       sender: 'assistant',
       content: triageResult.message,
       structuredPayload: triageResult,
@@ -170,8 +175,8 @@ class TriageService {
     if (this.auditService && !user.isGuest) {
       try {
         await this.auditService.log({
-          actor_id: patientId,
-          actor_type: 'patient',
+          actor_id: ownerUserId,
+          actor_type: ownerRole,
           action: 'AI_TRIAGE_QUERY',
           resource_type: 'ai_triage',
           resource_id: activeConvId,
@@ -187,12 +192,41 @@ class TriageService {
     return {
       success: true,
       conversationId: activeConvId,
+      reply: triageResult.message,
       ...triageResult
     };
   }
 
   /**
-   * Retrieves message history for a conversation with authorization
+   * Creates a brand-new conversation for the user
+   */
+  async createConversation(user, title = 'New Health Triage Chat') {
+    const ownerUserId = (user && (user.id || user.patient_id)) || ('guest_' + require('crypto').randomUUID());
+    const ownerRole = (user && user.role) || 'patient';
+    const conversation = await this.storage.createConversation(ownerUserId, ownerRole, title);
+    return {
+      success: true,
+      conversation
+    };
+  }
+
+  /**
+   * Lists all conversations owned by the user
+   */
+  async listConversations(user) {
+    if (!user || (!user.id && !user.patient_id)) {
+      return { success: true, conversations: [] };
+    }
+    const ownerUserId = user.id || user.patient_id;
+    const conversations = await this.storage.listUserConversations(ownerUserId);
+    return {
+      success: true,
+      conversations
+    };
+  }
+
+  /**
+   * Retrieves message history for a conversation with strict ownership verification
    */
   async getHistory(conversationId, user) {
     if (!user || (!user.id && !user.patient_id)) {
@@ -201,17 +235,25 @@ class TriageService {
       err.statusCode = 401;
       throw err;
     }
-    const patientId = user.patient_id || user.id;
-    const messages = await this.storage.getMessages(conversationId, patientId, 20);
+    const ownerUserId = user.id || user.patient_id;
+    const conv = await this.storage.getConversation(conversationId, ownerUserId);
+    if (!conv) {
+      const err = new Error('Conversation not found');
+      err.code = 'NOT_FOUND';
+      err.statusCode = 404;
+      throw err;
+    }
+    const messages = await this.storage.getMessages(conversationId, ownerUserId, 50);
     return {
       success: true,
       conversationId,
+      conversation: conv,
       messages
     };
   }
 
   /**
-   * Clears conversation history
+   * Clears and permanently deletes a conversation and all its messages
    */
   async clearConversation(conversationId, user) {
     if (!user || (!user.id && !user.patient_id)) {
@@ -220,11 +262,12 @@ class TriageService {
       err.statusCode = 401;
       throw err;
     }
-    const patientId = user.patient_id || user.id;
-    await this.storage.clearConversation(conversationId, patientId);
+    const ownerUserId = user.id || user.patient_id;
+    await this.storage.deleteConversation(conversationId, ownerUserId);
     return {
       success: true,
-      message: 'Conversation cleared successfully'
+      message: 'Conversation cleared successfully',
+      conversationId
     };
   }
 }

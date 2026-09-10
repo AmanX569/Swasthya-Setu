@@ -162,9 +162,11 @@
         if (savedLang && SUPPORTED_LANGS[savedLang]) this.currentLang = savedLang;
       } catch (e) {}
 
+      this.clearLegacyGlobalCache();
       this.conversationId = null;
       try {
-        this.conversationId = sessionStorage.getItem('swasthya_ai_conv_id') || null;
+        const convKey = this.getStorageConvIdKey();
+        this.conversationId = sessionStorage.getItem(convKey) || null;
       } catch (e) {}
 
       this.chatHistory = this.loadHistory();
@@ -175,11 +177,62 @@
 
       this.initVoiceInput();
       this.initKeyboardEsc();
+      this.initAuthListeners();
+    }
+
+    getCurrentUserId() {
+      try {
+        const appState = window.appStore ? window.appStore.getState() : null;
+        const user = (appState && (appState.currentUser || (appState.session && appState.session.user)));
+        if (user && (user.id || user.patient_id || user.staff_code)) {
+          return String(user.id || user.patient_id || user.staff_code).trim();
+        }
+      } catch (e) {}
+      return 'guest';
+    }
+
+    getStorageHistoryKey() {
+      return 'swasthya_ai_history_' + this.getCurrentUserId();
+    }
+
+    getStorageConvIdKey() {
+      return 'swasthya_ai_conv_id_' + this.getCurrentUserId();
+    }
+
+    clearLegacyGlobalCache() {
+      try {
+        sessionStorage.removeItem('swasthya_ai_history_v5');
+        sessionStorage.removeItem('swasthya_ai_conv_id');
+      } catch (e) {}
+    }
+
+    initAuthListeners() {
+      if (typeof window !== 'undefined') {
+        window.addEventListener('swasthya:auth-logout', () => this.onUserLoggedOut());
+        window.addEventListener('swasthya:auth-login', (e) => this.onUserLoggedIn(e.detail?.user));
+      }
+    }
+
+    onUserLoggedOut() {
+      this.conversationId = null;
+      this.chatHistory = [this.getWelcomeMessage()];
+      this.renderChat();
+    }
+
+    onUserLoggedIn(user) {
+      this.conversationId = null;
+      try {
+        const convKey = this.getStorageConvIdKey();
+        this.conversationId = sessionStorage.getItem(convKey) || null;
+      } catch (e) {}
+      this.chatHistory = this.loadHistory();
+      this.renderChat();
     }
 
     loadHistory() {
       try {
-        const saved = sessionStorage.getItem('swasthya_ai_history_v5');
+        const key = this.getStorageHistoryKey();
+        const saved = sessionStorage.getItem(key);
         if (saved) {
           const parsed = JSON.parse(saved);
           if (Array.isArray(parsed) && parsed.length > 0) return parsed;
@@ -190,11 +243,95 @@
 
     saveHistory() {
       try {
-        sessionStorage.setItem('swasthya_ai_history_v5', JSON.stringify(this.chatHistory.slice(-30)));
+        const historyKey = this.getStorageHistoryKey();
+        sessionStorage.setItem(historyKey, JSON.stringify(this.chatHistory.slice(-30)));
         if (this.conversationId) {
-          sessionStorage.setItem('swasthya_ai_conv_id', this.conversationId);
+          const convKey = this.getStorageConvIdKey();
+          sessionStorage.setItem(convKey, this.conversationId);
         }
       } catch (e) {}
+    }
+
+    /**
+     * Creates a genuinely brand-new conversation context
+     */
+    async startNewChat() {
+      if (this.isProcessing) return;
+
+      this.conversationId = null;
+      try {
+        if (window.swasthyaAPI && typeof window.swasthyaAPI.createAiTriageConversation === 'function') {
+          const res = await window.swasthyaAPI.createAiTriageConversation('New Health Triage Chat');
+          if (res && res.conversation && res.conversation.id) {
+            this.conversationId = res.conversation.id;
+          }
+        }
+      } catch (e) {
+        console.warn('[Swasthya AI] Backend new conversation notice:', e.message);
+      }
+
+      if (!this.conversationId) {
+        this.conversationId = 'conv_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9);
+      }
+
+      this.chatHistory = [this.getWelcomeMessage()];
+      this.saveHistory();
+      this.renderChat();
+
+      const input = document.getElementById('swasthyaAiInput');
+      if (input) {
+        input.value = '';
+        input.focus();
+      }
+    }
+
+    /**
+     * Prompts confirmation modal before clearing chat
+     */
+    promptClearChat() {
+      const modal = document.getElementById('swasthyaAiClearModal');
+      if (modal) {
+        modal.style.setProperty('display', 'flex', 'important');
+      }
+    }
+
+    cancelClearChat() {
+      const modal = document.getElementById('swasthyaAiClearModal');
+      if (modal) {
+        modal.style.setProperty('display', 'none', 'important');
+      }
+    }
+
+    /**
+     * Confirms and executes atomic conversation deletion
+     */
+    async executeClearChat() {
+      this.cancelClearChat();
+
+      const convIdToDelete = this.conversationId;
+
+      if (convIdToDelete && window.swasthyaAPI && typeof window.swasthyaAPI.clearAiTriageConversation === 'function') {
+        try {
+          await window.swasthyaAPI.clearAiTriageConversation(convIdToDelete);
+        } catch (e) {
+          console.warn('[Swasthya AI] Backend delete conversation notice:', e.message);
+        }
+      }
+
+      try {
+        sessionStorage.removeItem(this.getStorageHistoryKey());
+        sessionStorage.removeItem(this.getStorageConvIdKey());
+      } catch (e) {}
+
+      this.conversationId = null;
+      const welcome = this.getWelcomeMessage();
+      welcome.text = '🧹 **Chat cleared.** How can I help you today? Please describe your symptoms or health concern.';
+      this.chatHistory = [welcome];
+      this.saveHistory();
+      this.renderChat();
+
+      const input = document.getElementById('swasthyaAiInput');
+      if (input) input.focus();
     }
 
     getWelcomeMessage() {
@@ -480,9 +617,21 @@
           let lastErr = null;
           for (const ep of endpoints) {
             try {
+              const reqHeaders = { 'Content-Type': 'application/json' };
+              const token = (window.swasthyaAPI && window.swasthyaAPI.getToken()) || localStorage.getItem('swasthya_auth_token');
+              if (token) {
+                reqHeaders['Authorization'] = `Bearer ${token}`;
+              }
+              const uid = this.getCurrentUserId();
+              if (uid && uid !== 'guest') {
+                reqHeaders['x-swasthya-user-id'] = uid;
+                const role = window.appStore?.state?.session?.role || 'patient';
+                reqHeaders['x-swasthya-user-role'] = role;
+              }
+
               const res = await fetch(ep, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: reqHeaders,
                 signal: controller.signal,
                 body: JSON.stringify({
                   message: query,
