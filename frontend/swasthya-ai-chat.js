@@ -2,6 +2,7 @@
  * =============================================================================
  * SWASTHYA SETU — PRODUCTION AI HEALTH TRIAGE CONTROLLER (Swasthya AI)
  * Real-time Clinical Triage Assistant with Multilingual & Voice Support
+ * Connects directly to backend API (/api/ai/triage/chat) -> Real AI Model
  * =============================================================================
  */
 
@@ -11,142 +12,142 @@
   const SUPPORTED_LANGS = {
     en: { name: 'English', voiceCode: 'en-IN' },
     hi: { name: 'हिंदी', voiceCode: 'hi-IN' },
+    te: { name: 'తెలుగు', voiceCode: 'te-IN' },
     gu: { name: 'ગુજરાતી', voiceCode: 'gu-IN' },
     mr: { name: 'मराठी', voiceCode: 'mr-IN' },
     ta: { name: 'தமிழ்', voiceCode: 'ta-IN' },
-    te: { name: 'తెలుగు', voiceCode: 'te-IN' },
     bn: { name: 'বাংলা', voiceCode: 'bn-IN' }
   };
 
   const I18N_TEXT = {
     en: {
       title: 'Swasthya AI',
-      subtitle: 'AI Health Triage Assistant',
+      subtitle: 'AI Health Triage',
       welcome: "Hello! I'm Swasthya AI, your health triage assistant. Tell me about your symptoms or health concern, and I'll help you understand possible causes, warning signs, and what to do next.",
-      disclaimer: '⚠️ AI guidance is for information and triage only and does not replace a qualified healthcare professional.',
-      placeholder: 'Describe symptoms (e.g. fever, headache)...',
+      disclaimer: 'AI guidance is for information and triage only and does not replace a qualified healthcare professional.',
+      placeholder: 'Describe your symptoms...',
       send: 'Send',
-      thinking: 'Analyzing symptoms...',
-      error: 'Sorry, could not process your health query. Please check your connection or retry.',
+      thinking: 'Thinking...',
+      error: "Sorry, I couldn't process that request right now. Please try again.",
       retry: 'Retry',
-      tooFast: 'You are sending messages too quickly. Please wait a moment before trying again.',
-      tooLong: 'Please shorten your message (maximum 4,000 characters).',
+      tooFast: "You're sending messages too quickly. Please wait a moment and try again.",
+      tooLong: 'Please shorten your message and try again (maximum 4,000 characters).',
       listen: 'Read Aloud',
       stopAudio: 'Stop',
       copied: 'Copied to clipboard!',
-      quickLabel: 'Suggested topics:'
+      quickLabel: 'Quick suggestions:'
     },
     hi: {
       title: 'स्वास्थ्य AI',
       subtitle: 'AI स्वास्थ्य ट्राइएज',
-      welcome: 'नमस्ते! मैं स्वास्थ्य AI हूँ, आपका स्वास्थ्य ट्राइएज सहायक। अपने लक्षणों या स्वास्थ्य संबंधी चिंताओं के बारे में बताएं, और मैं संभावित कारणों, चेतावनी संकेतों और आगे क्या करना है, यह समझने में आपकी मदद करूँगा।',
-      disclaimer: '⚠️ AI मार्गदर्शन केवल जानकारी और ट्राइएज के लिए है और योग्य डॉक्टर का विकल्प नहीं है।',
-      placeholder: 'लक्षण बताएं (जैसे बुखार, सिरदर्द)...',
+      welcome: "Hello! I'm Swasthya AI, your health triage assistant. Tell me about your symptoms or health concern, and I'll help you understand possible causes, warning signs, and what to do next.",
+      disclaimer: 'AI मार्गदर्शन केवल जानकारी और ट्राइएज के लिए है और योग्य स्वास्थ्य सेवा पेशेवर का विकल्प नहीं है।',
+      placeholder: 'अपने लक्षणों का वर्णन करें...',
       send: 'भेजें',
-      thinking: 'लक्षणों का विश्लेषण जारी है...',
+      thinking: 'सोच रहा हूँ...',
       error: 'क्षमा करें, अनुरोध पूरा नहीं हो सका। कृपया पुनः प्रयास करें।',
       retry: 'पुनः प्रयास करें',
-      tooFast: 'आप बहुत तेज़ी से संदेश भेज रहे हैं। कृपया कुछ क्षण प्रतीक्षा करें।',
-      tooLong: 'कृपया अपना संदेश छोटा करें (अधिकतम 4,000 अक्षर)।',
+      tooFast: 'आप बहुत तेज़ी से संदेश भेज रहे हैं। कृपया कुछ क्षण प्रतीक्षा करें और पुनः प्रयास करें।',
+      tooLong: 'कृपया अपना संदेश छोटा करें और पुनः प्रयास करें (अधिकतम 4,000 अक्षर)।',
       listen: 'सुनें',
       stopAudio: 'रोकें',
       copied: 'कॉपी हो गया!',
-      quickLabel: 'सुझाए गए विषय:'
-    },
-    gu: {
-      title: 'સ્વાસ્થ્ય AI',
-      subtitle: 'AI હેલ્થ ટ્રાયજ',
-      welcome: 'નમસ્તે! હું સ્વાસ્થ્ય AI છું, તમારો હેલ્થ ટ્રાયજ સહાયક. તમારા લક્ષણો જણાવો, હું શક્ય કારણો અને યોગ્ય સલાહ આપીશ.',
-      disclaimer: '⚠️ AI માર્ગદર્શન માત્ર માહિતી અને ટ્રાયજ માટે છે, ડૉક્ટરનો વિકલ્પ નથી.',
-      placeholder: 'તમારા લક્ષણો વર્ણવો...',
-      send: 'મોકલો',
-      thinking: 'વિશ્લેષણ કરી રહ્યું છે...',
-      error: 'વિનંતી પ્રક્રિયા કરવામાં નિષ્ફળ. ફરી પ્રયાસ કરો.',
-      retry: 'ફરી પ્રયાસ કરો',
-      tooFast: 'કૃપા કરીને થોડી રાહ જુઓ.',
-      tooLong: 'સંદેશ 4,000 અક્ષરોથી નાનો હોવો જોઈએ.',
-      listen: 'સાંભળો',
-      stopAudio: 'રોકો',
-      copied: 'કૉપિ થઈ ગયું!',
-      quickLabel: 'સૂચિત વિષયો:'
-    },
-    mr: {
-      title: 'स्वास्थ्य AI',
-      subtitle: 'AI आरोग्य ट्रायज',
-      welcome: 'नमस्कार! मी स्वास्थ्य AI आहे, तुमचा आरोग्य ट्रायज सहाय्यक. तुमची लक्षणे सांगा, मी संभाव्य कारणे आणि मार्गदर्शन देईन.',
-      disclaimer: '⚠️ AI मार्गदर्शन केवळ माहितीसाठी आहे आणि डॉक्टरांचा पर्याय नाही.',
-      placeholder: 'तुमची लक्षणे सांगा...',
-      send: 'पाठवा',
-      thinking: 'विश्लेषण करत आहे...',
-      error: 'विनंती प्रक्रिया करण्यात अयशस्वी. पुन्हा प्रयत्न करा.',
-      retry: 'पुन्हा प्रयत्न',
-      tooFast: 'कृपया थोडा वेळ थांबा.',
-      tooLong: 'संदेश 4,000 अक्षरांपेक्षा लहान असावा.',
-      listen: 'ऐका',
-      stopAudio: 'थांबवा',
-      copied: 'कॉपी झाले!',
-      quickLabel: 'सुचवलेले विषय:'
-    },
-    ta: {
-      title: 'ஸ்வஸ்த்யா AI',
-      subtitle: 'AI சுகாதார வழிகாட்டி',
-      welcome: 'வணக்கம்! நான் ஸ்வஸ்த்யா AI. உங்கள் அறிகுறிகளைச் சொல்லுங்கள், தகுந்த வழிகாட்டலை வழங்குகிறேன்.',
-      disclaimer: '⚠️ AI வழிகாட்டுதல் தகவலுக்கு மட்டுமே, மருத்துவருக்கு மாற்றாகாது.',
-      placeholder: 'அறிகுறிகளை விவரிக்கவும்...',
-      send: 'அனுப்பு',
-      thinking: 'ஆராய்கிறது...',
-      error: 'செயலாக்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்.',
-      retry: 'மீண்டும் முயற்சி',
-      tooFast: 'சிறிது நேரம் காத்திருக்கவும்.',
-      tooLong: 'செய்தி 4,000 எழுத்துகளுக்குள் இருக்க வேண்டும்.',
-      listen: 'கேட்க',
-      stopAudio: 'நிறுத்து',
-      copied: 'நகலெடுக்கப்பட்டது!',
-      quickLabel: 'பரிந்துரைக்கப்பட்டவை:'
+      quickLabel: 'त्वरित सुझाव:'
     },
     te: {
       title: 'స్వాస్థ్య AI',
       subtitle: 'AI హెల్త్ ట్రయాజ్',
-      welcome: 'నమస్కారం! నేను స్వాస్థ్య AI, మీ ఆరోగ్య ట్రయాజ్ సహాయకుడిని. మీ లక్షణాలను తెలియజేయండి, సాధ్యమయ్యే కారణాలు, ప్రమాద సంకేతాలు మరియు తీసుకోవలసిన జాగ్రత్తలను వివరించడంలో నేను మీకు సహాయపడతాను.',
-      disclaimer: '⚠️ AI మార్గదర్శకత్వం సమాచారం మరియు ట్రయాజ్ కోసం మాత్రమే, ఇది అర్హత కలిగిన వైద్యునికి ప్రత్యామ్నాయం కాదు.',
+      welcome: "Hello! I'm Swasthya AI, your health triage assistant. Tell me about your symptoms or health concern, and I'll help you understand possible causes, warning signs, and what to do next.",
+      disclaimer: 'AI మార్గదర్శకత్వం సమాచారం మరియు ట్రయాజ్ కోసం మాత్రమే మరియు అర్హత కలిగిన వైద్యునికి ప్రత్యామ్నాయం కాదు.',
       placeholder: 'మీ లక్షణాలను వివరించండి...',
       send: 'పంపండి',
       thinking: 'ఆలోచిస్తున్నాను...',
-      error: 'క్షమించండి, అభ్యర్థన ప్రాసెస్ చేయడం సాధ్యం కాలేదు. దయచేసి మళ్ళీ ప్రయత్నించండి.',
+      error: 'క్షమించండి, అభ్యర్థనను ప్రాసెస్ చేయడం సాధ్యం కాలేదు. దయచేసి మళ్లీ ప్రయత్నించండి.',
       retry: 'మళ్లీ ప్రయత్నించు',
-      tooFast: 'మీరు చాలా వేగంగా సందేశాలు పంపుతున్నారు. దయచేసి కాసేపు వేచి ఉండండి.',
-      tooLong: 'దయచేసి మీ సందేశాన్ని కుదించండి (గరిష్టంగా 4,000 అక్షరాలు).',
+      tooFast: 'మీరు చాలా వేగంగా సందేశాలు పంపుతున్నారు. దయచేసి కాసేపు వేచి ఉండి మళ్లీ ప్రయత్నించండి.',
+      tooLong: 'దయచేసి మీ సందేశాన్ని కుదించి మళ్లీ ప్రయత్నించండి (గరిష్టంగా 4,000 అక్షరాలు).',
       listen: 'వినండి',
       stopAudio: 'ఆపండి',
       copied: 'కాపీ చేయబడింది!',
-      quickLabel: 'సూచించిన అంశాలు:'
+      quickLabel: 'త్వరిత సూచనలు:'
+    },
+    gu: {
+      title: 'સ્વાસ્થ્ય AI',
+      subtitle: 'AI હેલ્થ ટ્રાયજ',
+      welcome: "Hello! I'm Swasthya AI, your health triage assistant. Tell me about your symptoms or health concern, and I'll help you understand possible causes, warning signs, and what to do next.",
+      disclaimer: 'AI માર્ગદર્શન માત્ર માહિતી અને ટ્રાયજ માટે છે, ડૉક્ટરનો વિકલ્પ નથી.',
+      placeholder: 'તમારા લક્ષણો વર્ણવો...',
+      send: 'મોકલો',
+      thinking: 'વિચારી રહ્યું છે...',
+      error: 'ક્ષમા કરશો, વિનંતી પ્રક્રિયા થઈ શકી નથી. કૃપા કરીને ફરી પ્રયાસ કરો.',
+      retry: 'ફરી પ્રયાસ કરો',
+      tooFast: 'કૃપા કરીને થોડી રાહ જુઓ અને ફરી પ્રયાસ કરો.',
+      tooLong: 'સંદેશ 4,000 અક્ષરોથી નાનો હોવો જોઈએ.',
+      listen: 'સાંભળો',
+      stopAudio: 'રોકો',
+      copied: 'કૉપિ થઈ ગયું!',
+      quickLabel: 'સૂચનો:'
+    },
+    mr: {
+      title: 'स्वास्थ्य AI',
+      subtitle: 'AI आरोग्य ट्रायज',
+      welcome: "Hello! I'm Swasthya AI, your health triage assistant. Tell me about your symptoms or health concern, and I'll help you understand possible causes, warning signs, and what to do next.",
+      disclaimer: 'AI मार्गदर्शन केवळ माहितीसाठी आहे आणि डॉक्टरांचा पर्याय नाही.',
+      placeholder: 'तुमची लक्षणे सांगा...',
+      send: 'पाठवा',
+      thinking: 'विचार करत आहे...',
+      error: 'माफ करा, विनंती पूर्ण होऊ शकली नाही. कृपया पुन्हा प्रयत्न करा.',
+      retry: 'पुन्हा प्रयत्न',
+      tooFast: 'कृपया थोडा वेळ थांबा आणि पुन्हा प्रयत्न करा.',
+      tooLong: 'संदेश 4,000 अक्षरांपेक्षा लहान असावा.',
+      listen: 'ऐका',
+      stopAudio: 'थांबवा',
+      copied: 'कॉपी झाले!',
+      quickLabel: 'सूचना:'
+    },
+    ta: {
+      title: 'ஸ்வஸ்த்யா AI',
+      subtitle: 'AI சுகாதார வழிகாட்டி',
+      welcome: "Hello! I'm Swasthya AI, your health triage assistant. Tell me about your symptoms or health concern, and I'll help you understand possible causes, warning signs, and what to do next.",
+      disclaimer: 'AI வழிகாட்டுதல் தகவலுக்கு மட்டுமே, மருத்துவருக்கு மாற்றாகாது.',
+      placeholder: 'அறிகுறிகளை விவரிக்கவும்...',
+      send: 'அனுப்பு',
+      thinking: 'யோசிக்கிறது...',
+      error: 'மன்னிக்கவும், செயலாக்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்.',
+      retry: 'மீண்டும் முயற்சி',
+      tooFast: 'சிறிது நேரம் காத்திருந்து மீண்டும் முயற்சிக்கவும்.',
+      tooLong: 'செய்தி 4,000 எழுத்துகளுக்குள் இருக்க வேண்டும்.',
+      listen: 'கேட்க',
+      stopAudio: 'நிறுத்து',
+      copied: 'நகலெடுக்கப்பட்டது!',
+      quickLabel: 'பரிந்துரைகள்:'
     },
     bn: {
       title: 'স্বাস্থ্য AI',
       subtitle: 'AI হেলথ ট্রায়াজ',
-      welcome: 'নমস্কার! আমি স্বাস্থ্য AI, আপনার স্বাস্থ্য ট্রায়াজ সহায়ক। আপনার লক্ষণগুলি বলুন, আমি সঠিক পরামর্শ প্রদান করব।',
-      disclaimer: '⚠️ AI নির্দেশিকা শুধুমাত্র তথ্য ও ট্রায়াজের জন্য, যোগ্য চিকিৎসকের বিকল্প নয়।',
+      welcome: "Hello! I'm Swasthya AI, your health triage assistant. Tell me about your symptoms or health concern, and I'll help you understand possible causes, warning signs, and what to do next.",
+      disclaimer: 'AI নির্দেশিকা শুধুমাত্র তথ্য ও ট্রায়াজের জন্য, যোগ্য চিকিৎসকের বিকল্প নয়।',
       placeholder: 'লক্ষণগুলি লিখুন...',
       send: 'পাঠান',
-      thinking: 'বিশ্লেষণ করা হচ্ছে...',
+      thinking: 'ভাবছে...',
       error: 'অনুরোধটি ব্যর্থ হয়েছে। আবার চেষ্টা করুন।',
       retry: 'পুনরায় চেষ্টা',
-      tooFast: 'দয়া করে একটু অপেক্ষা করুন।',
+      tooFast: 'দয়া করে একটু অপেক্ষা করুন এবং আবার চেষ্টা করুন।',
       tooLong: 'বার্তাটি ৪,০০০ অক্ষরের কম হতে হবে।',
       listen: 'শুনুন',
       stopAudio: 'থামুন',
       copied: 'কপি হয়েছে!',
-      quickLabel: 'প্রস্তাবিত বিষয়:'
+      quickLabel: 'পরামর্শ:'
     }
   };
 
   const QUICK_PROMPTS = [
     { label: 'Check my symptoms', query: 'I would like to check my symptoms' },
-    { label: 'Fever', query: 'I have a fever' },
-    { label: 'Cough', query: 'I have a persistent cough' },
-    { label: 'Headache', query: 'I have a headache' },
-    { label: 'Stomach pain', query: 'My stomach hurts' },
-    { label: 'Medication question', query: 'I have a question about my medication' }
+    { label: 'Fever', query: 'I have fever' },
+    { label: 'Cough', query: 'I have cough' },
+    { label: 'Headache', query: 'I have headache' },
+    { label: 'Stomach pain', query: 'I have stomach pain' },
+    { label: 'Medication question', query: 'I have a medication question' }
   ];
 
   class SwasthyaAiChatController {
@@ -155,6 +156,7 @@
       this.isMinimized = false;
       this.isProcessing = false;
       this.currentLang = 'en';
+
       try {
         const savedLang = localStorage.getItem('swasthya_ai_lang');
         if (savedLang && SUPPORTED_LANGS[savedLang]) this.currentLang = savedLang;
@@ -177,7 +179,7 @@
 
     loadHistory() {
       try {
-        const saved = sessionStorage.getItem('swasthya_ai_history_v4');
+        const saved = sessionStorage.getItem('swasthya_ai_history_v5');
         if (saved) {
           const parsed = JSON.parse(saved);
           if (Array.isArray(parsed) && parsed.length > 0) return parsed;
@@ -188,7 +190,7 @@
 
     saveHistory() {
       try {
-        sessionStorage.setItem('swasthya_ai_history_v4', JSON.stringify(this.chatHistory.slice(-30)));
+        sessionStorage.setItem('swasthya_ai_history_v5', JSON.stringify(this.chatHistory.slice(-30)));
         if (this.conversationId) {
           sessionStorage.setItem('swasthya_ai_conv_id', this.conversationId);
         }
@@ -207,32 +209,36 @@
     }
 
     initVoiceInput() {
-      const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (SpeechRec) {
-        this.recognition = new SpeechRec();
-        this.recognition.continuous = false;
-        this.recognition.interimResults = false;
+      try {
+        const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (SpeechRec) {
+          this.recognition = new SpeechRec();
+          this.recognition.continuous = false;
+          this.recognition.interimResults = false;
 
-        this.recognition.onstart = () => {
-          this.isRecording = true;
-          this.updateMicUi(true);
-        };
-        this.recognition.onresult = (e) => {
-          const transcript = e.results[0][0].transcript;
-          const input = document.getElementById('swasthyaAiInput');
-          if (input) {
-            input.value = transcript;
+          this.recognition.onstart = () => {
+            this.isRecording = true;
+            this.updateMicUi(true);
+          };
+          this.recognition.onresult = (e) => {
+            const transcript = e.results[0][0].transcript;
+            const input = document.getElementById('swasthyaAiInput');
+            if (input) {
+              input.value = transcript;
+            }
             this.sendUserMessage(transcript);
-          }
-        };
-        this.recognition.onerror = () => {
-          this.isRecording = false;
-          this.updateMicUi(false);
-        };
-        this.recognition.onend = () => {
-          this.isRecording = false;
-          this.updateMicUi(false);
-        };
+          };
+          this.recognition.onerror = () => {
+            this.isRecording = false;
+            this.updateMicUi(false);
+          };
+          this.recognition.onend = () => {
+            this.isRecording = false;
+            this.updateMicUi(false);
+          };
+        }
+      } catch (e) {
+        console.warn('[SwasthyaAI] Speech recognition init failed:', e);
       }
     }
 
@@ -275,11 +281,13 @@
     }
 
     initKeyboardEsc() {
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && this.isOpen) {
-          this.toggleWindow(false);
-        }
-      });
+      try {
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && this.isOpen) {
+            this.toggleWindow(false);
+          }
+        });
+      } catch (e) {}
     }
 
     bindEvents() {
@@ -310,29 +318,33 @@
     }
 
     toggleWindow(forceState) {
-      this.isOpen = (typeof forceState === 'boolean') ? forceState : !this.isOpen;
-      const modal = document.getElementById('swasthyaAiWindow');
-      const launcher = document.getElementById('swasthyaAiLauncherBtn');
+      try {
+        this.isOpen = (typeof forceState === 'boolean') ? forceState : !this.isOpen;
+        const modal = document.getElementById('swasthyaAiWindow');
+        const launcher = document.getElementById('swasthyaAiLauncherBtn');
 
-      if (modal) {
-        if (this.isOpen) {
-          modal.style.setProperty('display', 'flex', 'important');
-          this.isMinimized = false;
-          modal.classList.remove('minimized');
-          this.renderChat();
-          this.updateStrings();
-          this.bindEvents();
-          setTimeout(() => {
-            const input = document.getElementById('swasthyaAiInput');
-            if (input) input.focus();
-          }, 100);
-        } else {
-          modal.style.setProperty('display', 'none', 'important');
+        if (modal) {
+          if (this.isOpen) {
+            modal.style.setProperty('display', 'flex', 'important');
+            this.isMinimized = false;
+            modal.classList.remove('minimized');
+            this.renderChat();
+            this.updateStrings();
+            this.bindEvents();
+            setTimeout(() => {
+              const input = document.getElementById('swasthyaAiInput');
+              if (input) input.focus();
+            }, 100);
+          } else {
+            modal.style.setProperty('display', 'none', 'important');
+          }
         }
-      }
 
-      if (launcher) {
-        launcher.setAttribute('aria-expanded', this.isOpen ? 'true' : 'false');
+        if (launcher) {
+          launcher.setAttribute('aria-expanded', this.isOpen ? 'true' : 'false');
+        }
+      } catch (e) {
+        console.error('[SwasthyaAI] toggleWindow error:', e);
       }
     }
 
@@ -376,7 +388,8 @@
         const user = (appState && (appState.currentUser || (appState.session && appState.session.user))) || {};
         return {
           age: user.age || null,
-          gender: user.gender || null
+          gender: user.gender || null,
+          chronicConditions: Array.isArray(user.chronicConditions) ? user.chronicConditions : []
         };
       } catch (e) {
         return {};
@@ -395,223 +408,9 @@
       return false;
     }
 
-    generateOfflineTriage(query) {
-      const q = (query || '').toLowerCase();
-      
-      // Emergency: chest pain
-      if (q.includes('chest pain') || q.includes('heart attack') || q.includes('radiating to') || (q.includes('chest') && q.includes('sweat'))) {
-        return {
-          triageLevel: 'EMERGENCY',
-          message: '### 🚨 EMERGENCY CLINICAL ALERT: Chest Pain Detected\n\n' +
-            '**CRITICAL SAFETY DIRECTIVE:** Your symptoms indicate potential cardiovascular distress requiring IMMEDIATE medical intervention.\n\n' +
-            '**IMMEDIATE ACTIONS:**\n' +
-            '1. 🚨 **CALL NATIONAL AMBULANCE 108 OR EMERGENCY 112 IMMEDIATELY.**\n' +
-            '2. Stop all physical activity and sit in a comfortable, propped-up position.\n' +
-            '3. Loosen tight clothing around neck and waist.\n' +
-            '4. Do NOT drive yourself to the hospital.',
-          emergencyNotice: '🚨 EMERGENCY: CALL NATIONAL AMBULANCE 108 IMMEDIATELY'
-        };
-      }
-
-      // Emergency: stroke FAST
-      if (q.includes('stroke') || q.includes('slurred speech') || q.includes('facial droop') || q.includes('face droop') || (q.includes('cannot move') && q.includes('arm'))) {
-        return {
-          triageLevel: 'EMERGENCY',
-          message: '### 🚨 EMERGENCY CLINICAL ALERT: Suspected Stroke (FAST Signs)\n\n' +
-            '**CRITICAL SAFETY DIRECTIVE:** Sudden weakness, facial drooping, or slurred speech are potential indicators of acute stroke.\n\n' +
-            '**IMMEDIATE ACTIONS:**\n' +
-            '1. 🚨 **CALL NATIONAL AMBULANCE 108 IMMEDIATELY.** Time lost is brain lost.\n' +
-            '2. Note the exact time symptoms started.\n' +
-            '3. Do NOT give food, water, or oral medications.\n' +
-            '4. Keep the patient in a safe recovery position.',
-          emergencyNotice: '🚨 EMERGENCY: CALL 108 IMMEDIATELY'
-        };
-      }
-
-      // Prescription refusal
-      if (q.includes('prescribe') || q.includes('antibiotic') || q.includes('amoxicillin') || q.includes('azithromycin') || q.includes('dosage of')) {
-        return {
-          triageLevel: 'LOW',
-          message: '### 💊 Medication & Prescription Policy\n\n' +
-            'As an AI Health Triage Assistant, I **cannot prescribe antibiotics, prescription medications, or recommend clinical drug dosages**.\n\n' +
-            'Prescription drugs require an in-person or verified telemedicine clinical examination by a licensed medical practitioner to prevent antibiotic resistance and adverse drug interactions.\n\n' +
-            '👉 Please connect with an on-duty doctor on the Swasthya Setu portal or visit your nearest Primary Health Centre (PHC).'
-        };
-      }
-
-      // Cut / Wound / Active Bleeding
-      if (q.includes('cut') || q.includes('bleed') || q.includes('blood') || q.includes('wound') || q.includes('injury') || q.includes('laceration') || q.includes('chot') || q.includes('ghav') || q.includes('rakta')) {
-        const isSpurting = q.includes('spurting') || q.includes('uncontrolled') || q.includes('gushing') || q.includes('artery');
-        if (isSpurting) {
-          return {
-            triageLevel: 'EMERGENCY',
-            message: '### 🚨 EMERGENCY CLINICAL ALERT: Severe Bleeding / Hemorrhage\n\n' +
-              '**CRITICAL SAFETY DIRECTIVE:** Spurting or uncontrolled blood loss can rapidly lead to hypovolemic shock and requires emergency hospital intervention.\n\n' +
-              '**IMMEDIATE FIRST-AID:**\n' +
-              '1. 🚨 **CALL NATIONAL AMBULANCE 108 OR EMERGENCY 112 IMMEDIATELY.**\n' +
-              '2. Press as firmly as possible directly on the wound with a clean cloth or towel. Do NOT let go.\n' +
-              '3. Keep the injured limb elevated above the patient\'s heart.\n' +
-              '4. Keep the patient lying flat with legs raised slightly.',
-            emergencyNotice: '🚨 EMERGENCY: CALL NATIONAL AMBULANCE 108 IMMEDIATELY'
-          };
-        }
-        return {
-          triageLevel: 'URGENT',
-          message: '### 🩹 Clinical Assessment: Cut & Active Bleeding (URGENT First-Aid)\n\n' +
-            '**Clinical Assessment:** Active bleeding from a cut requires immediate first-aid pressure to control blood loss and prevent wound infection.\n\n' +
-            '**Urgency Level:** **🟠 URGENT (Immediate First-Aid & Wound Care)**\n\n' +
-            '**🩺 Essential First-Aid Steps (Do These Right Now):**\n' +
-            '1. **Direct Pressure**: Press firmly and continuously directly over the cut with a clean cloth or sterile gauze for **10 full minutes** without lifting to check.\n' +
-            '2. **Elevate the Injured Limb**: Keep your injured leg or arm propped up on pillows above heart level to decrease gravitational blood pressure.\n' +
-            '3. **Cleanse with Clean Water**: Gently rinse visible grit or dirt away under clean drinking or boiled water. Do NOT apply turmeric, ash, or soil to the wound.\n' +
-            '4. **Antiseptic & Bandage**: Apply Povidone Iodine 5% ointment and secure with a clean sterile dressing.\n' +
-            '5. **Tetanus (TT) Booster**: If you have not had a Tetanus Toxoid shot within the past 5 years, get one at your nearest PHC within 24 hours.\n\n' +
-            '**🚩 Danger Red Flags (Go to Hospital / Call 108 Immediately):**\n' +
-            '• Blood is spurting or pulsating out in rhythm with your heartbeat.\n' +
-            '• Bleeding does not stop after 15 minutes of firm direct pressure.\n' +
-            '• Deep gaping wound where edges remain pulled apart (requires doctor\'s stitches within 6–8 hours).\n' +
-            '• Numbness, tingling, or weakness in toes or foot beyond the cut.\n\n' +
-            '**👨‍⚕️ Recommended Facility:** Visit your nearest Primary Health Centre (PHC) or Community Health Centre (CHC) for professional wound dressing and sutures if needed.'
-        };
-      }
-
-      // Burns & Scalds
-      if (q.includes('burn') || q.includes('scald') || q.includes('jalan') || q.includes('blister') || q.includes('fire') || q.includes('hot water')) {
-        return {
-          triageLevel: 'MODERATE',
-          message: '### 🔥 Clinical Assessment: Burn First-Aid (MODERATE to URGENT)\n\n' +
-            '**Immediate First-Aid:** Hold the burn under gentle cool running tap water for 15 to 20 minutes to halt tissue damage.\n\n' +
-            '**Crucial Don\'ts:** Do NOT apply ice, ice water, toothpaste, butter, or turmeric. Do NOT puncture blisters.\n\n' +
-            '**Care Steps:** Apply Silver Sulfadiazine or Betadine ointment and cover loosely with sterile non-stick gauze. Visit your PHC if the burn is larger than your palm.'
-        };
-      }
-
-      // Animal / Dog Bite
-      if (q.includes('dog bite') || q.includes('animal bite') || q.includes('kutta') || q.includes('monkey bite') || q.includes('rabies')) {
-        return {
-          triageLevel: 'URGENT',
-          message: '### 🐕 Clinical Alert: Animal / Dog Bite (URGENT Rabies Protocol)\n\n' +
-            '**CRITICAL FIRST-AID:** Wash the bite wound vigorously with soap and running water for **15 full minutes**. This physically washes away the majority of rabies viral particles.\n\n' +
-            '**Immediate Next Step:** Apply Povidone Iodine and go immediately to your nearest PHC/Hospital for Anti-Rabies Vaccine (ARV Day 0) and Rabies Immunoglobulin (RIG).'
-        };
-      }
-
-      // Snake Bite
-      if (q.includes('snake') || q.includes('saanp') || q.includes('paamu') || q.includes('venom')) {
-        return {
-          triageLevel: 'EMERGENCY',
-          message: '### 🚨 EMERGENCY CLINICAL ALERT: Snake Bite Protocol\n\n' +
-            '**IMMEDIATE DIRECTIVE:** All snake bites in India must be treated as potential medical emergencies requiring Anti-Snake Venom (ASV).\n\n' +
-            '1. 🚨 **CALL NATIONAL AMBULANCE 108 IMMEDIATELY.**\n' +
-            '2. Keep the patient completely still and quiet. Movement speeds venom absorption.\n' +
-            '3. Keep the bitten limb immobilized BELOW heart level.\n' +
-            '4. **DO NOT** cut the bite, do NOT suck venom, do NOT tie tight tourniquets.\n' +
-            '5. Transport immediately to the nearest CHC/Hospital having Anti-Snake Venom.',
-          emergencyNotice: '🚨 EMERGENCY: CALL 108 AMBULANCE IMMEDIATELY FOR ANTI-SNAKE VENOM (ASV)'
-        };
-      }
-
-      // Difficulty Breathing
-      if (q.includes('breathing') || q.includes('asthma') || q.includes('wheezing') || q.includes('shortness of breath') || q.includes('saans')) {
-        return {
-          triageLevel: 'URGENT',
-          message: '### 🫁 Clinical Assessment: Acute Breathing Difficulty\n\n' +
-            '**First-Aid Care:** Sit upright leaning slightly forward. Take slow deep breaths. If you have a prescribed inhaler (Salbutamol/Asthalin), take 2 puffs immediately via spacer.\n\n' +
-            '**🚩 Emergency Red Flags:** Lips turning bluish, inability to speak full sentences without gasping, or chest retractions -> Call 108 Ambulance immediately.'
-        };
-      }
-
-      // Pregnancy Labor / Contractions
-      if (q.includes('pregnancy') || q.includes('labour') || q.includes('pregnant') || q.includes('prasav') || q.includes('water break') || q.includes('contractions')) {
-        return {
-          triageLevel: 'EMERGENCY',
-          message: '### 🤰 Maternal Labour & Pregnancy Alert\n\n' +
-            '**Directives:** Active labor pains, amniotic fluid leakage, or vaginal bleeding require immediate institutional delivery at your nearest 24x7 CHC/FRU hospital.\n\n' +
-            '1. Call 108 Ambulance and alert your local ASHA worker.\n' +
-            '2. Keep the mother resting on her left side to optimize oxygen to the baby.\n' +
-            '3. Keep MCP card, ABHA ID, and warm clean baby clothes ready.',
-          emergencyNotice: '🚨 MATERNAL ALERT: DISPATCH 108 AMBULANCE FOR INSTITUTIONAL DELIVERY'
-        };
-      }
-
-      // Fever
-      if (q.includes('fever') || q.includes('temperature') || q.includes('chills')) {
-        const isUrgent = q.includes('3 day') || q.includes('4 day') || q.includes('high') || q.includes('shiver');
-        return {
-          triageLevel: isUrgent ? 'URGENT' : 'MODERATE',
-          message: '### 🌡️ Clinical Assessment: Fever (' + (isUrgent ? 'URGENT' : 'MODERATE') + ')\n\n' +
-            '**Possible Causes:** Acute viral illness, seasonal flu, respiratory tract infection, or vector-borne conditions (such as dengue or malaria).\n\n' +
-            '**🩺 Safe Home Care & Observation:**\n' +
-            '• Drink plenty of clean boiled water, ORS fluids, and warm broths to prevent dehydration.\n' +
-            '• Use lukewarm water sponge compresses on forehead and neck.\n' +
-            '• Rest in a well-ventilated room wearing light cotton clothing.\n\n' +
-            '**🚩 Red-Flag Symptoms to Watch For:**\n' +
-            '• Temperature > 103°F (39.4°C)\n' +
-            '• Stiff neck, severe persistent vomiting, or skin rash/bleeding spots\n' +
-            '• Fever lasting more than 48–72 hours\n\n' +
-            '**👨‍⚕️ Recommended Professional:** General Physician or local Primary Health Centre (PHC) Medical Officer.'
-        };
-      }
-
-      // Headache
-      if (q.includes('headache') || q.includes('head hurt') || q.includes('migraine')) {
-        return {
-          triageLevel: 'LOW',
-          message: '### 🧠 Clinical Assessment: Headache (LOW Urgency)\n\n' +
-            '**Possible Causes:** Tension headache, eye strain, dehydration, irregular sleep, or mild sinus pressure.\n\n' +
-            '**🩺 Safe Home Care Steps:**\n' +
-            '• Drink 1–2 glasses of water to address possible dehydration.\n' +
-            '• Take a break from computer and phone screens.\n' +
-            '• Rest in a quiet, dimly lit room.\n\n' +
-            '**🚩 Red-Flag Danger Signs:**\n' +
-            '• Sudden \'thunderclap\' headache (worst pain of your life)\n' +
-            '• Headache with fever and stiff neck, or sudden numbness/weakness\n\n' +
-            '**👨‍⚕️ Recommended Next Step:** Home care observation; consult a physician if pain persists or recurs frequently.'
-        };
-      }
-
-      // Cough / Cold
-      if (q.includes('cough') || q.includes('cold') || q.includes('sore throat')) {
-        return {
-          triageLevel: 'LOW',
-          message: '### 🫁 Clinical Assessment: Cough & Respiratory Symptoms (LOW Urgency)\n\n' +
-            '**Possible Causes:** Common viral upper respiratory tract infection, seasonal allergy, or pharyngitis.\n\n' +
-            '**🩺 Safe Home Care Steps:**\n' +
-            '• Warm water gargles with a pinch of salt 2–3 times daily.\n' +
-            '• Steam inhalation to relieve nasal and throat congestion.\n' +
-            '• Sip warm water with honey and ginger.\n\n' +
-            '**🚩 Red Flags:** Shortness of breath, chest pain when coughing, or coughing up blood.\n\n' +
-            '**👨‍⚕️ Recommended Professional:** Primary Care Physician or Community Health Officer (CHO).'
-        };
-      }
-
-      // Stomach Pain / Digestion
-      if (q.includes('stomach') || q.includes('belly') || q.includes('vomit') || q.includes('diarrhea') || q.includes('loose')) {
-        return {
-          triageLevel: 'MODERATE',
-          message: '### 🥣 Clinical Assessment: Digestive Symptoms (MODERATE Urgency)\n\n' +
-            '**Possible Causes:** Acute gastritis, dietary indiscretion, mild gastroenteritis, or indigestion.\n\n' +
-            '**🩺 Safe Home Care Steps:**\n' +
-            '• Prepare WHO Oral Rehydration Salts (ORS) in 1 Liter clean boiled water and sip frequently.\n' +
-            '• Eat light, bland foods (khichdi, curd rice, bananas).\n' +
-            '• Avoid spicy, greasy, or raw street foods.\n\n' +
-            '**🚩 Red Flags:** Severe unrelenting pain, blood in vomit or stools, or unable to retain any liquids for >6 hours.\n\n' +
-            '**👨‍⚕️ Recommended Professional:** General Physician or Gastroenterologist.'
-        };
-      }
-
-      // Default General Triage
-      return {
-        triageLevel: 'LOW',
-        message: '### 🩺 Health Triage Guidance\n\n' +
-          '**Clinical Assessment:** Your symptoms could be related to temporary environmental factors, localized strain, or a mild prodrome.\n\n' +
-          '**🩺 Recommended Next Steps:**\n' +
-          '1. Ensure adequate rest and stay well hydrated.\n' +
-          '2. Monitor whether symptoms improve over the next 24 to 48 hours.\n' +
-          '3. If symptoms worsen or you experience persistent discomfort, consult an on-duty doctor on Swasthya Setu.'
-      };
-    }
-
+    /**
+     * Sends user message to real backend API endpoint (/api/ai/triage/chat)
+     */
     async sendUserMessage(text) {
       if (this.isProcessing) return;
 
@@ -637,44 +436,48 @@
         timestamp: new Date().toISOString()
       });
       this.saveHistory();
-      this.renderChat();
 
+      // Double-send protection: disable input and send button while in-flight
       this.isProcessing = true;
       if (sendBtn) sendBtn.disabled = true;
       if (input) input.disabled = true;
       if (micBtn) micBtn.disabled = true;
       this.renderChat();
 
+      // 16-second timeout with AbortController
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 16000);
 
       try {
         let result = null;
+        let responseStatus = 200;
+        let responseData = null;
 
-        // Try API client first
+        // Try API client gateway first if available
         if (window.swasthyaAPI && typeof window.swasthyaAPI.sendAiTriageMessage === 'function') {
           try {
-            result = await window.swasthyaAPI.sendAiTriageMessage({
+            responseData = await window.swasthyaAPI.sendAiTriageMessage({
               message: query,
               conversationId: this.conversationId,
               language: this.currentLang,
               patientContext: this.getPatientContext()
             });
-            if (result && result.conversationId) {
-              this.conversationId = result.conversationId;
+            if (responseData && responseData.success) {
+              result = responseData;
             }
           } catch (apiErr) {
-            console.warn('[Swasthya AI] API Client attempt:', apiErr.message);
+            console.warn('[Swasthya AI] API Client gateway error:', apiErr.message);
           }
         }
 
-        // Direct fetch fallback if API client didn't return success
-        if (!result || !result.success) {
+        // Direct fetch to backend endpoints
+        if (!result) {
           const endpoints = [
             '/api/ai/triage/chat',
-            'http://localhost:5000/api/ai/triage/chat',
-            'http://localhost:54321/api/ai/triage/chat'
+            'http://localhost:5000/api/ai/triage/chat'
           ];
+
+          let lastErr = null;
           for (const ep of endpoints) {
             try {
               const res = await fetch(ep, {
@@ -688,52 +491,83 @@
                   patientContext: this.getPatientContext()
                 })
               });
-              if (res.ok) {
-                const data = await res.json();
-                if (data && data.success) {
-                  result = data;
-                  if (data.conversationId) this.conversationId = data.conversationId;
-                  break;
-                }
+
+              responseStatus = res.status;
+              let data = null;
+              try { data = await res.json(); } catch (e) {}
+
+              if (res.ok && data && data.success) {
+                result = data;
+                break;
+              } else if (res.status === 429) {
+                const err = new Error(strings.tooFast);
+                err.status = 429;
+                throw err;
+              } else if (!res.ok) {
+                const errMsg = (data && data.error) || strings.error;
+                const err = new Error(errMsg);
+                err.status = res.status;
+                throw err;
               }
-            } catch (fetchErr) {
-              // try next endpoint
+            } catch (epErr) {
+              lastErr = epErr;
+              if (epErr.name === 'AbortError' || epErr.status === 429) {
+                throw epErr; // Don't keep retrying if rate limited or timed out
+              }
             }
+          }
+
+          if (!result && lastErr) {
+            throw lastErr;
           }
         }
 
         clearTimeout(timeoutId);
 
-        // If backend is unreachable or offline, provide safe offline clinical triage
         if (!result || !result.success) {
-          result = this.generateOfflineTriage(query);
-          result.success = true;
-          if (!this.conversationId) {
-            this.conversationId = 'local_' + Date.now().toString(36);
-          }
-          result.conversationId = this.conversationId;
+          throw new Error(strings.error);
+        }
+
+        // Real AI model response succeeded
+        if (result.conversationId) {
+          this.conversationId = result.conversationId;
         }
 
         this.chatHistory.push({
           role: 'assistant',
-          text: result.message || result.summary || 'Guidance received.',
+          text: result.message || result.summary || 'Clinical assessment completed.',
           triageLevel: result.triageLevel || 'LOW',
           emergencyNotice: result.emergencyNotice || null,
           disclaimer: result.disclaimer || null,
-          timestamp: new Date().toISOString()
+          followUpQuestions: result.followUpQuestions || [],
+          timestamp: new Date().toISOString(),
+          isError: false
         });
         this.saveHistory();
+
       } catch (err) {
         clearTimeout(timeoutId);
-        const fallback = this.generateOfflineTriage(query);
+        console.error('[Swasthya AI] Triage request failed:', err);
+
+        this.lastFailedMessage = query;
+        let userErrorMessage = strings.error;
+
+        if (err.name === 'AbortError') {
+          userErrorMessage = "The request timed out. Please check your connection and tap Retry.";
+        } else if (err.status === 429) {
+          userErrorMessage = strings.tooFast;
+        }
+
+        // Display error message state with Retry button (NO fake medical fallback)
         this.chatHistory.push({
           role: 'assistant',
-          text: fallback.message,
-          triageLevel: fallback.triageLevel || 'LOW',
-          emergencyNotice: fallback.emergencyNotice || null,
-          timestamp: new Date().toISOString()
+          text: userErrorMessage,
+          triageLevel: 'LOW',
+          timestamp: new Date().toISOString(),
+          isError: true
         });
         this.saveHistory();
+
       } finally {
         this.isProcessing = false;
         if (sendBtn) sendBtn.disabled = false;
@@ -749,9 +583,16 @@
     retryLast() {
       if (!this.lastFailedMessage) return;
       const msg = this.lastFailedMessage;
+
+      // Remove the error response message from chat history
       if (this.chatHistory.length > 0 && this.chatHistory[this.chatHistory.length - 1].isError) {
         this.chatHistory.pop();
       }
+      // Remove the user message that caused the error so sendUserMessage won't duplicate it
+      if (this.chatHistory.length > 0 && this.chatHistory[this.chatHistory.length - 1].role === 'user') {
+        this.chatHistory.pop();
+      }
+
       this.sendUserMessage(msg);
     }
 
@@ -759,8 +600,10 @@
       if (window.speechSynthesis) window.speechSynthesis.cancel();
       this.chatHistory = [this.getWelcomeMessage()];
       this.conversationId = null;
-      sessionStorage.removeItem('swasthya_ai_history_v4');
-      sessionStorage.removeItem('swasthya_ai_conv_id');
+      try {
+        sessionStorage.removeItem('swasthya_ai_history_v5');
+        sessionStorage.removeItem('swasthya_ai_conv_id');
+      } catch (e) {}
       this.saveHistory();
       this.renderChat();
     }
@@ -786,7 +629,7 @@
 
     escapeHtml(str) {
       if (!str) return '';
-      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
     }
 
     markdownToHtml(md) {
@@ -836,20 +679,22 @@
 
         html += '<div style="word-break:break-word;">' + this.markdownToHtml(msg.text) + '</div>';
 
+        // Error State with Retry Button
         if (!isUser && msg.isError) {
-          html += '<div style="margin-top:8px;">' +
-            '<button type="button" onclick="window.swasthyaAi.retryLast()" style="background:#dc2626;border:none;color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;cursor:pointer;">🔄 ' + strings.retry + '</button>' +
+          html += '<div style="margin-top:10px;">' +
+            '<button type="button" onclick="window.swasthyaAi && window.swasthyaAi.retryLast()" aria-label="Retry last request" style="background:#dc2626;border:none;color:#fff;font-size:11.5px;font-weight:700;padding:5px 12px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;box-shadow:0 2px 6px rgba(220,38,38,0.3);">🔄 ' + strings.retry + '</button>' +
           '</div>';
         }
 
-        if (!isUser && msg.showQuickPrompts) {
+        // Quick prompts when no conversation history yet
+        if (!isUser && msg.showQuickPrompts && this.chatHistory.length === 1) {
           html += this.renderQuickPromptsHtml();
         }
 
         if (!isUser && !msg.isError) {
           html += '<div style="display:flex;align-items:center;gap:8px;margin-top:8px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.08);font-size:11px;">' +
-            '<button type="button" onclick="window.swasthyaAi.speak(window.swasthyaAi.chatHistory[' + idx + '].text)" style="background:none;border:none;color:#34d399;cursor:pointer;font-size:11px;font-weight:700;padding:0;">🔊 ' + strings.listen + '</button>' +
-            '<button type="button" onclick="window.swasthyaAi.copyMessage(' + idx + ')" style="background:none;border:none;color:#94a3b8;cursor:pointer;font-size:11px;padding:0;">📋 Copy</button>' +
+            '<button type="button" onclick="window.swasthyaAi && window.swasthyaAi.speak(window.swasthyaAi.chatHistory[' + idx + '].text)" style="background:none;border:none;color:#34d399;cursor:pointer;font-size:11px;font-weight:700;padding:0;">🔊 ' + strings.listen + '</button>' +
+            '<button type="button" onclick="window.swasthyaAi && window.swasthyaAi.copyMessage(' + idx + ')" style="background:none;border:none;color:#94a3b8;cursor:pointer;font-size:11px;padding:0;">📋 Copy</button>' +
             '<span style="margin-left:auto;color:#64748b;font-size:10px;">' + this.formatTime(msg.timestamp) + '</span>' +
           '</div>';
         } else {
@@ -865,6 +710,7 @@
         html += '</div>';
       });
 
+      // Loading state ("Thinking...")
       if (this.isProcessing) {
         html += '<div style="display:flex;gap:8px;margin-bottom:12px;align-items:center;">' +
           '<div style="width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg, #10b981, #0d9488);display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;flex-shrink:0;">🩺</div>' +
@@ -914,7 +760,7 @@
     renderQuickPromptsHtml() {
       let html = '<div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px;">';
       QUICK_PROMPTS.forEach((qp, idx) => {
-        html += '<button type="button" onclick="window.swasthyaAi.clickQuickPrompt(' + idx + ')" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:12px;padding:5px 9px;color:#cbd5e1;font-size:11px;cursor:pointer;">' + qp.label + '</button>';
+        html += '<button type="button" onclick="window.swasthyaAi && window.swasthyaAi.clickQuickPrompt(' + idx + ')" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:12px;padding:5px 10px;color:#cbd5e1;font-size:11px;cursor:pointer;transition:all 0.2s ease;">' + qp.label + '</button>';
       });
       html += '</div>';
       return html;
@@ -930,16 +776,26 @@
     }
   }
 
-  // Global instance
-  const instance = new SwasthyaAiChatController();
-  global.swasthyaAi = instance;
-  global.triggerSwasthyaAiChat = function(force) {
-    instance.toggleWindow(force);
-  };
+  // Safe Global Instantiation with Error Boundary
+  try {
+    const instance = new SwasthyaAiChatController();
+    global.swasthyaAi = instance;
+    global.triggerSwasthyaAiChat = function(force) {
+      instance.toggleWindow(force);
+    };
 
-  document.addEventListener('DOMContentLoaded', () => {
-    instance.renderChat();
-    instance.bindEvents();
-  });
+    if (typeof document !== 'undefined') {
+      document.addEventListener('DOMContentLoaded', () => {
+        try {
+          instance.renderChat();
+          instance.bindEvents();
+        } catch (domErr) {
+          console.error('[SwasthyaAI] DOM initialization error:', domErr);
+        }
+      });
+    }
+  } catch (initErr) {
+    console.error('[SwasthyaAI] Controller initialization error:', initErr);
+  }
 
 })(typeof window !== 'undefined' ? window : this);

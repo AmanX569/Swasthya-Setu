@@ -8,7 +8,7 @@
 'use strict';
 
 const { SafetyEngine } = require('./safety-engine');
-const { createAIProvider } = require('./provider');
+const { createAIProvider, SandboxHealthProvider } = require('./provider');
 const TriageStorage = require('./storage');
 
 class TriageService {
@@ -17,6 +17,13 @@ class TriageService {
     this.auditService = auditService;
     this.storage = new TriageStorage(supabaseClient);
     this.provider = createAIProvider(config);
+  }
+
+  getProvider() {
+    if (this.config && this.config.ai && this.config.ai.mockMode === true) {
+      return new SandboxHealthProvider();
+    }
+    return this.provider || createAIProvider(this.config);
   }
 
   /**
@@ -82,31 +89,59 @@ class TriageService {
     // 7. Retrieve recent history for context
     const recentHistory = await this.storage.getMessages(activeConvId, patientId, 6);
 
-    // 8. AI Provider Inference (with automatic Sandbox fallback inside provider)
+    // 8. AI Provider Inference (or Immediate Deterministic Emergency Override)
     let triageResult = null;
-    try {
-      triageResult = await this.provider.generateTriage({
-        message: sanitized,
-        history: recentHistory,
-        patientContext: safeContext,
-        language: ['hi', 'te', 'en'].includes(language) ? language : 'en',
-        emergencyMatch: emergencyCheck.isEmergency ? emergencyCheck.match : null
-      });
-    } catch (err) {
-      console.warn('[TriageService] Inference exception, using safety engine fallback:', err.message);
-      // Fallback
+
+    if (emergencyCheck.isEmergency) {
+      const emergencyNotice = SafetyEngine.getEmergencyNotice(emergencyCheck.match, language);
       triageResult = {
-        triageLevel: emergencyCheck.isEmergency ? 'EMERGENCY' : 'MODERATE',
-        summary: 'Clinical triage guidance generated under resilient fallback mode.',
-        possibleCauses: ['Symptom evaluation requires clinical observation'],
-        followUpQuestions: ['How long have you felt this symptom?'],
-        recommendedActions: ['Rest, stay hydrated, and observe vital signs.'],
-        redFlags: ['Sudden worsening of symptoms or high fever'],
-        specialist: 'General Physician / Community Health Centre (CHC)',
-        emergencyNotice: emergencyCheck.isEmergency ? SafetyEngine.getEmergencyNotice(emergencyCheck.match, language) : null,
+        triageLevel: 'EMERGENCY',
+        summary: `Immediate emergency red-flag detected: ${emergencyCheck.match.title}`,
+        possibleCauses: ['Acute cardiovascular, neurological, or trauma emergency'],
+        followUpQuestions: [],
+        recommendedActions: [
+          '🚨 Call 108 (National Ambulance) or 112 immediately without delay.',
+          'Keep the patient sitting or half-reclined (do not let them exert or walk).',
+          'Loosen tight clothing around neck and waist.',
+          'Do not give anything to eat or drink if consciousness is altered.'
+        ],
+        redFlags: [emergencyCheck.match.reason],
+        specialist: 'Emergency Department / Trauma & Critical Care ICU',
+        emergencyNotice: emergencyNotice,
         disclaimer: SafetyEngine.getDisclaimer(language),
-        message: '### 🩺 Health Guidance\n\nPlease rest and observe your symptoms. If severe, consult your local doctor.'
+        message: `### 🚨 Critical Urgency: Emergency Care Required\n\n${emergencyNotice}\n\n**👨‍⚕️ Facility to Rush To:** Nearest Government Hospital, CHC, or Emergency Department.`
       };
+    } else {
+      try {
+        triageResult = await this.getProvider().generateTriage({
+          message: sanitized,
+          history: recentHistory,
+          patientContext: safeContext,
+          language: ['hi', 'te', 'en'].includes(language) ? language : 'en',
+          emergencyMatch: null
+        });
+      } catch (err) {
+        console.error('[TriageService] AI Provider error:', err.message);
+
+        if (this.config.ai && this.config.ai.mockMode === true) {
+          // Explicit development mock mode only
+          triageResult = {
+            triageLevel: 'MODERATE',
+            summary: 'Clinical triage guidance generated under development mock mode.',
+            possibleCauses: ['Symptom evaluation under mock mode'],
+            followUpQuestions: ['How long have you experienced these symptoms?'],
+            recommendedActions: ['Rest, stay hydrated, and observe vital signs.'],
+            redFlags: ['Sudden worsening of symptoms or high fever'],
+            specialist: 'General Physician / Primary Health Centre (PHC)',
+            emergencyNotice: null,
+            disclaimer: SafetyEngine.getDisclaimer(language),
+            message: '### 🩺 Health Guidance (Development Mock Mode)\n\nPlease rest and observe your symptoms. Consult your local doctor.'
+          };
+        } else {
+          // Production: Do not silently fallback to fake AI
+          throw err;
+        }
+      }
     }
 
     // 9. Post-Inference Guardrails & Deterministic Emergency Enforcement

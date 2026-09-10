@@ -19,7 +19,11 @@ async function runTests() {
   console.log('--- STARTING SWASTHYA SETU AI TRIAGE TEST SUITE ---');
   console.log('======================================================\n');
 
-  const triageService = new TriageService(null, config);
+  const testConfig = {
+    ...config,
+    ai: { ...config.ai, mockMode: true }
+  };
+  const triageService = new TriageService(null, testConfig);
 
   const testUser1 = { id: 'PAT-9001', patient_id: 'PAT-9001', role: 'patient', name: 'Ramesh Kumar' };
   const testUser2 = { id: 'PAT-9002', patient_id: 'PAT-9002', role: 'patient', name: 'Sunita Devi' };
@@ -150,25 +154,31 @@ async function runTests() {
   console.log('✓ TEST 8 Passed: Message exceeding 4000 characters rejected with 400 Bad Request, 1050 chars accepted');
 
   // ---------------------------------------------------------------------------
-  // TEST CASE 9: AI Provider Failure / Graceful Fallback
+  // TEST CASE 9: AI Provider Failure / Graceful Safe Error Boundary (No Fake Fallback in Prod)
   // ---------------------------------------------------------------------------
-  console.log('\n[TEST 9] Testing AI Provider Graceful Fallback...');
+  console.log('\n[TEST 9] Testing AI Provider Failure Safe Error Handling (No Fake AI in Prod)...');
   const brokenConfig = {
     ai: {
       provider: 'gemini',
       geminiApiKey: 'invalid-nonexistent-key-12345',
-      model: 'nonexistent-model'
+      model: 'nonexistent-model',
+      mockMode: false
     }
   };
   const fallbackService = new TriageService(null, brokenConfig);
-  const res9 = await fallbackService.processMessage({
-    message: 'I have mild throat irritation and dry cough',
-    user: testUser1
-  });
-  assert.strictEqual(res9.success, true);
-  assert(res9.message && res9.message.length > 20, 'Fallback must produce valid clinical guidance');
-  assert(!res9.message.includes('invalid-nonexistent-key'), 'Fallback must never leak API keys or stack traces');
-  console.log('✓ TEST 9 Passed: Provider failure caught, smooth resilient fallback executed without leakage');
+  let providerFailedSafely = false;
+  try {
+    await fallbackService.processMessage({
+      message: 'I have mild throat irritation and dry cough',
+      user: testUser1
+    });
+  } catch (err) {
+    providerFailedSafely = true;
+    assert.strictEqual(err.statusCode >= 500, true, 'Must return 502/503 server error on provider failure');
+    assert.strictEqual(err.message.includes('invalid-nonexistent-key-12345'), false, 'Must never leak API keys');
+  }
+  assert.strictEqual(providerFailedSafely, true, 'Must safely catch and propagate provider error without crashing');
+  console.log('✓ TEST 9 Passed: Provider failure safely handled with clean error code and zero secret leakage');
 
   // ---------------------------------------------------------------------------
   // TEST CASE 10: Guest Citizen & Cross-Patient Isolation

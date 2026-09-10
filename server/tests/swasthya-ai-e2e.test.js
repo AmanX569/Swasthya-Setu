@@ -13,7 +13,11 @@ const createAiTriageRouter = require('../routes/ai-triage');
 async function runE2ETest() {
   console.log('--- RUNNING SWASTHYA AI END-TO-END HTTP INTEGRATION TEST ---');
   
-  const triageService = new TriageService(null, config);
+  const testConfig = {
+    ...config,
+    ai: { ...config.ai, mockMode: true }
+  };
+  const triageService = new TriageService(null, testConfig);
   const app = express();
   app.use(express.json());
   app.use('/api/ai/triage', createAiTriageRouter({ triageService }));

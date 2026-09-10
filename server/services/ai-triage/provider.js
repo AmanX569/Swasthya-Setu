@@ -634,24 +634,32 @@ CRITICAL MEDICAL SAFETY DIRECTIVES:
   }
 }
 
+const GeminiClient = require('./gemini-client');
+
 /**
  * Provider Factory
+ * Defaults strictly to Real AI (Google Gemini) in production.
+ * Mock/Sandbox mode requires explicit AI_MOCK_MODE=true setting.
  */
 function createAIProvider(config) {
-  const sandbox = new SandboxHealthProvider();
-  const providerType = (config.ai && config.ai.provider) ? config.ai.provider.toLowerCase() : 'sandbox';
-
-  if (providerType === 'gemini' && config.ai && config.ai.geminiApiKey) {
-    return new GeminiHealthProvider(config.ai.geminiApiKey, config.ai.model || 'gemini-1.5-flash', sandbox);
+  // Explicit Development Mock Mode Flag (AI_MOCK_MODE=true)
+  if (config.ai && config.ai.mockMode === true) {
+    console.log('[AIProvider] Explicit development mock mode active (AI_MOCK_MODE=true)');
+    return new SandboxHealthProvider();
   }
 
-  // Default to Sandbox for high reliability, zero latency, and safe tests
-  return sandbox;
+  // Production Real AI Provider: Google Gemini
+  const apiKey = (config.ai && (config.ai.geminiApiKey || config.ai.apiKey)) || process.env.GEMINI_API_KEY || process.env.AI_API_KEY || '';
+  const model = (config.ai && config.ai.model) || process.env.AI_MODEL || 'gemini-1.5-flash';
+  const timeoutMs = (config.ai && config.ai.timeoutMs) || 15000;
+
+  return new GeminiClient(apiKey, model, timeoutMs);
 }
 
 module.exports = {
   AIHealthProvider,
   SandboxHealthProvider,
   GeminiHealthProvider,
+  GeminiClient,
   createAIProvider
 };

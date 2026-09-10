@@ -19,15 +19,27 @@ const EMERGENCY_PATTERNS = [
   },
   {
     id: 'stroke_emergency',
-    regex: /\b(facial\s*droop|face\s*droop|slurred\s*speech|speech\s*difficulty|weakness\s*on\s*one\s*side|arm\s*weakness|sudden\s*numbness|cannot\s*move\s*arm|paralysis|stroke|pakshaghat)\b/i,
+    regex: /\b(facial\s*droop|face\s*(suddenly\s*became\s*)?droop(y)?|slurred\s*speech|speech\s*difficulty|weakness\s*on\s*one\s*side|arm\s*weakness|cannot\s*move\s*(one\s*)?arm|paralysis|stroke|pakshaghat)\b/i,
     title: 'Potential Stroke / Acute Neurological Emergency (FAST)',
     reason: 'Sudden facial weakness, arm drift, or speech difficulty requires immediate emergency neurological thrombolysis assessment.'
   },
   {
     id: 'respiratory_distress',
-    regex: /\b(cannot\s*breathe|severe\s*shortness\s*of\s*breath|gasping\s*for\s*air|blue\s*lips|blue\s*fingers|cyanosis|choking|saans\s*nahi\s*aarahi|swasa\s*aadam\s*ledu)\b/i,
+    regex: /\b(cannot\s*breathe|severe\s*difficulty\s*breathing|severe\s*shortness\s*of\s*breath|gasping\s*for\s*air|blue\s*(or\s*gray\s*)?lips|cyanosis|choking|saans\s*nahi\s*aarahi|swasa\s*aadam\s*ledu)\b/i,
     title: 'Severe Respiratory Distress / Hypoxia',
     reason: 'Acute inability to breathe or bluish discoloration is a critical airway/oxygen emergency.'
+  },
+  {
+    id: 'allergic_anaphylaxis',
+    regex: /\b(allergic\s*reaction|swelling\s*of\s*(lips|tongue|throat|face)|anaphylaxis|throat\s*closing)\b/i,
+    title: 'Severe Allergic Reaction (Anaphylaxis)',
+    reason: 'Rapid airway compromise or shock from severe allergic reaction requires emergency epinephrine.'
+  },
+  {
+    id: 'suicide_self_harm',
+    regex: /\b(suicid|kill\s*myself|end\s*my\s*life|self[\s-]harm|atmahathya)\b/i,
+    title: 'Mental Health Crisis & Suicide Prevention Alert',
+    reason: 'Immediate crisis support is available. Please reach out to emergency services or Tele-MANAS (14416).'
   },
   {
     id: 'snakebite_poisoning',
@@ -37,15 +49,15 @@ const EMERGENCY_PATTERNS = [
   },
   {
     id: 'severe_hemorrhage',
-    regex: /\b(uncontrolled\s*bleeding|coughing\s*up\s*blood|vomiting\s*blood|heavy\s*blood\s*loss|khoon\s*ki\s*ulti|raktasravam)\b/i,
+    regex: /\b(uncontrolled\s*bleeding|severe\s*bleeding|coughing\s*up\s*blood|vomiting\s*blood|heavy\s*blood\s*loss|khoon\s*ki\s*ulti|raktasravam)\b/i,
     title: 'Severe Hemorrhage / Internal Bleeding',
     reason: 'Vomiting blood or uncontrolled external arterial bleeding causes rapid hypovolemic shock.'
   },
   {
     id: 'neurological_thunderclap',
-    regex: /\b(worst\s*headache\s*of\s*(my\s*)?life|thunderclap\s*headache|headache\s*with\s*stiff\s*neck\s*and\s*fever|sudden\s*loss\s*of\s*consciousness|unresponsive|seizure\s*lasting)\b/i,
-    title: 'Severe Neurological Red Flag / Suspected Hemorrhage or Meningitis',
-    reason: 'Sudden explosive headaches or loss of consciousness with fever/neck rigidity require emergency trauma/ICU neuro-imaging.'
+    regex: /\b(worst\s*headache\s*of\s*(my\s*)?life|thunderclap\s*headache|headache\s*with\s*stiff\s*neck\s*and\s*fever|sudden\s*loss\s*of\s*consciousness|unresponsive|passed\s*out|seizure|convulsion|fits)\b/i,
+    title: 'Severe Neurological Red Flag / Suspected Hemorrhage or Seizure',
+    reason: 'Sudden explosive headaches, seizures, or loss of consciousness require immediate emergency evaluation.'
   },
   {
     id: 'maternal_obstetric_emergency',
@@ -94,8 +106,8 @@ class SafetyEngine {
     }
 
     let sanitized = text.trim();
-    if (sanitized.length > 1000) {
-      sanitized = sanitized.slice(0, 1000);
+    if (sanitized.length > 4000) {
+      sanitized = sanitized.slice(0, 4000);
     }
 
     sanitized = sanitized
@@ -130,7 +142,7 @@ class SafetyEngine {
     const reason = emergencyMatch ? emergencyMatch.reason : 'Your symptoms suggest an urgent, life-threatening condition.';
 
     if (lang === 'hi') {
-      return `🚨 **आपातकालीन चेतावनी (EMERGENCY RED FLAG)**\n\n` +
+      return `⚠️ **यह एक आपातकालीन चिकित्सा स्थिति हो सकती है।**\n\nकृपया तुरंत आपातकालीन चिकित्सा सहायता लें या अपनी स्थानीय आपातकालीन सेवा (राष्ट्रीय एम्बुलेंस 108 या आपातकालीन 112) से संपर्क करें।\n\n🚨 **आपातकालीन चेतावनी (EMERGENCY RED FLAG)**\n\n` +
         `**${title}**\n` +
         `⚠️ ${reason}\n\n` +
         `**तत्काल आवश्यक कदम:**\n` +
@@ -140,7 +152,7 @@ class SafetyEngine {
     }
 
     if (lang === 'te') {
-      return `🚨 **అత్యవసర హెచ్చరిక (EMERGENCY RED FLAG)**\n\n` +
+      return `⚠️ **ఇది అత్యవసర వైద్య సంరక్షణ అవసరమయ్యే పరిస్థితి కావచ్చు.**\n\nదయచేసి వెంటనే అత్యవసర వైద్య సంరక్షణను పొందండి లేదా మీ స్థానిక అత్యవసర సేవను సంప్రదించండి (జాతీయ అంబులెన్స్ 108 / 112).\n\n🚨 **అత్యవసర హెచ్చరిక (EMERGENCY RED FLAG)**\n\n` +
         `**${title}**\n` +
         `⚠️ ${reason}\n\n` +
         `**వెంటనే చేయవలసిన పనులు:**\n` +
@@ -149,7 +161,7 @@ class SafetyEngine {
         `3. సహాయం కోసం స్థానిక ఆశా (ASHA) కార్యకర్తను సంప్రదించండి.`;
     }
 
-    return `🚨 **CRITICAL MEDICAL EMERGENCY ALERT (EMERGENCY RED FLAG)**\n\n` +
+    return `⚠️ **This may require emergency medical attention.**\n\nPlease seek emergency medical care now or contact your local emergency medical service.\n\n🚨 **CRITICAL MEDICAL EMERGENCY ALERT (EMERGENCY RED FLAG)**\n\n` +
       `**${title}**\n` +
       `⚠️ ${reason}\n\n` +
       `**IMMEDIATE LIFE-SAVING ACTIONS:**\n` +
