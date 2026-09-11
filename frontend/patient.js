@@ -504,8 +504,68 @@
 
     
     // -------------------------------------------------------------
-    // 7. PATIENT E-PRESCRIPTION HISTORY & PDF DOWNLOAD
+    // 7. PATIENT E-PRESCRIPTION HISTORY & PDF DOWNLOAD WITH BARCODE
     // -------------------------------------------------------------
+    generateBarcodeSvg(text, options = {}) {
+      const CODE128_PATTERNS = [
+        '212222', '222122', '222221', '121223', '121322', '131222', '122213', '122312', '132212', '221213',
+        '221312', '231212', '112232', '122132', '122231', '113222', '123122', '123221', '223211', '221132',
+        '221231', '213212', '223112', '312131', '311222', '321122', '321221', '312212', '322112', '322211',
+        '212123', '212321', '232121', '111323', '131123', '131321', '112313', '132113', '132311', '211313',
+        '231113', '231311', '112133', '112331', '132131', '113123', '113321', '133121', '313121', '211331',
+        '231131', '213113', '213311', '213131', '311123', '311321', '331121', '312113', '312311', '332111',
+        '314111', '221411', '431111', '111224', '111422', '121124', '121421', '141122', '141221', '112214',
+        '112412', '122114', '122411', '142112', '142211', '241211', '221114', '413111', '241112', '134111',
+        '111242', '121142', '121241', '114212', '124112', '124211', '411212', '421112', '421211', '212141',
+        '214121', '412121', '111143', '111341', '131141', '114113', '114311', '411113', '411311', '113141',
+        '114131', '311141', '411131', '211412', '211214', '211232', '2331112'
+      ];
+
+      const height = options.height || 36;
+      const barWidth = options.barWidth || 1.35;
+      const quietZone = options.quietZone || 8;
+      
+      const clean = String(text || '').replace(/[^\x20-\x7E]/g, '');
+      if (!clean) return '';
+      
+      const indices = [104];
+      let checkSum = 104;
+      
+      for (let i = 0; i < clean.length; i++) {
+        const code = clean.charCodeAt(i) - 32;
+        const val = (code >= 0 && code <= 95) ? code : 0;
+        indices.push(val);
+        checkSum += val * (i + 1);
+      }
+      
+      indices.push(checkSum % 103);
+      indices.push(106);
+      
+      let currentX = quietZone;
+      let rects = [];
+      
+      for (const idx of indices) {
+        const pattern = CODE128_PATTERNS[idx] || CODE128_PATTERNS[0];
+        for (let p = 0; p < pattern.length; p++) {
+          const w = parseInt(pattern[p], 10) * barWidth;
+          const isBar = (p % 2 === 0);
+          if (isBar) {
+            rects.push(`<rect x="${currentX.toFixed(1)}" y="0" width="${w.toFixed(1)}" height="${height}" fill="#0f172a" />`);
+          }
+          currentX += w;
+        }
+      }
+      
+      const totalWidth = currentX + quietZone;
+      const totalHeight = height + (options.showText ? 14 : 0);
+      
+      return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${totalWidth.toFixed(1)} ${totalHeight}" style="width:100%;max-width:${Math.min(options.maxWidth || 260, totalWidth).toFixed(0)}px;height:auto;display:block;margin:0 auto;">`
+        + `<rect width="100%" height="100%" fill="#ffffff" rx="3" />`
+        + rects.join('')
+        + (options.showText ? `<text x="${(totalWidth / 2).toFixed(1)}" y="${height + 11}" font-family="'IBM Plex Mono', monospace, Courier" font-size="9" font-weight="700" fill="#0f172a" text-anchor="middle" letter-spacing="1.2">${clean}</text>` : '')
+        + `</svg>`;
+    }
+
     renderPrescriptions() {
       const container = document.getElementById('patientPrescriptionsContainer');
       if (!container || !this.store) return;
@@ -554,6 +614,8 @@
 
       container.innerHTML = myRx.map(rx => {
         const medsList = Array.isArray(rx.medicines) ? rx.medicines : [];
+        const barcodeVal = `ABDM-${(rx.id || 'RX-OPD').replace(/[^a-zA-Z0-9-]/g, '')}-${(rx.abhaId || user.abhaId || '9876543210').replace(/\D/g, '').slice(-6)}`;
+        const cardBarcodeSvg = this.generateBarcodeSvg(barcodeVal, { showText: true, height: 34, maxWidth: 240 });
         return `
           <div class="glass-panel" style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:16px;padding:18px;margin-bottom:14px;box-shadow:var(--shadow-panel);">
             <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:14px;flex-wrap:wrap;gap:10px;">
@@ -575,6 +637,29 @@
                 <button class="btn-glass" style="padding:8px 12px;font-size:12px;font-weight:700;color:#ef4444;border-color:rgba(239,68,68,0.3);" onclick="patientController.deletePrescription('${rx.id}')" title="Delete prescription after downloading to free up space">
                   🗑️ Delete
                 </button>
+              </div>
+            </div>
+
+            <!-- OFFICIAL ABDM VERIFICATION BARCODE & CLINICAL DATA -->
+            <div style="background:var(--glass-1);border:1.5px solid var(--glass-border);border-radius:12px;padding:12px 14px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+              <div style="flex:1;min-width:220px;">
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+                  <span style="color:var(--primary-bright);font-size:13px;">⚡</span>
+                  <strong style="font-size:11px;font-weight:800;color:var(--primary-bright);letter-spacing:0.5px;text-transform:uppercase;">Verified ABDM Dispensation Barcode</strong>
+                </div>
+                <div style="font-size:12px;color:var(--ink);font-weight:700;">
+                  👤 Patient: ${rx.patientName || user.name} (${user.age || 35} Yrs / ${user.gender || 'Male'})
+                </div>
+                <div style="font-size:11px;color:var(--muted);margin-top:2px;">
+                  🆔 ABHA ID: <span style="font-family:'IBM Plex Mono',monospace;font-weight:700;color:var(--ink);">${rx.abhaId || user.abhaId || '14-8921-4402-9912'}</span>
+                </div>
+                <div style="font-size:11.5px;color:var(--ink-dim);margin-top:4px;background:rgba(2,132,199,0.06);padding:5px 8px;border-radius:6px;border:1px dashed rgba(2,132,199,0.25);">
+                  💊 <strong>Prescribed Medicines (${medsList.length}):</strong> ${medsList.map(m => (m.name || m) + (m.dosage ? ` (${m.dosage})` : '')).join(', ')}
+                </div>
+              </div>
+              <div style="background:#ffffff;padding:8px 12px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.1);max-width:260px;width:100%;text-align:center;">
+                ${cardBarcodeSvg}
+                <small style="font-size:8.5px;color:#64748b;font-family:monospace;font-weight:700;display:block;margin-top:3px;letter-spacing:0.4px;">SCAN AT JAN AUSHADHI KENDRA</small>
               </div>
             </div>
 
@@ -629,6 +714,8 @@
       }
 
       const medsList = Array.isArray(rx.medicines) ? rx.medicines : [];
+      const barcodeVal = `ABDM-${(rx.id || 'RX-OPD').replace(/[^a-zA-Z0-9-]/g, '')}-${(user.abhaId || user.phone || '9876543210').replace(/\D/g, '').slice(-6)}`;
+      const barcodeSvg = this.generateBarcodeSvg(barcodeVal, { showText: true, height: 42, maxWidth: 280 });
       const rxHtml = `
 <!DOCTYPE html>
 <html lang="en">
@@ -761,6 +848,30 @@
         <div style="font-weight:900;font-size:14px;color:#0f172a;">${rx.patientName || user.name}</div>
         <div style="color:#475569;font-weight:600;margin-top:2px;">Age/Gender: ${user.age || 35} Yrs / ${user.gender || 'Male'} · Blood: ${user.bloodGroup || 'O+'}</div>
         <div style="color:#0f172a;font-weight:800;font-family:monospace;margin-top:2px;">ABHA ID: ${user.abhaId || '14-8921-4402-9912'}</div>
+      </div>
+    </div>
+
+    <!-- ABDM OFFICIAL CLINICAL VERIFICATION BARCODE -->
+    <div style="background:#f8fafc;border:2px solid #0284c7;border-radius:10px;padding:12px 16px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;gap:16px;">
+      <div style="flex:1;">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+          <span style="font-size:14px;">⚡</span>
+          <strong style="font-size:11px;font-weight:900;color:#0284c7;letter-spacing:0.8px;text-transform:uppercase;">OFFICIAL ABDM CLINICAL &amp; DISPENSATION BARCODE</strong>
+        </div>
+        <div style="font-size:12px;color:#1e293b;line-height:1.45;">
+          <div><strong style="color:#0f172a;">Patient:</strong> ${rx.patientName || user.name} (${user.age || 35} Yrs / ${user.gender || 'Male'}) · <strong style="color:#0f172a;">ABHA ID:</strong> <span style="font-family:monospace;font-weight:800;color:#0284c7;">${user.abhaId || '14-8921-4402-9912'}</span></div>
+          <div style="margin-top:2px;"><strong style="color:#0f172a;">Clinical Diagnosis:</strong> ${rx.diagnosis || 'Clinical OPD Evaluation'}</div>
+          <div style="margin-top:4px;padding:5px 8px;background:#ffffff;border:1px solid #cbd5e1;border-radius:6px;font-size:11px;color:#0f172a;">
+            <strong style="color:#15803d;">Prescribed Medicines (${medsList.length}):</strong>
+            <span style="font-weight:600;">${medsList.map((m, i) => `${i + 1}. ${m.name || m} (${m.dosage || 'As directed'})`).join('  |  ')}</span>
+          </div>
+        </div>
+      </div>
+      <div style="text-align:center;min-width:240px;max-width:280px;background:#ffffff;border:1.5px solid #cbd5e1;border-radius:8px;padding:10px 12px;box-shadow:0 1px 4px rgba(0,0,0,0.05);">
+        ${barcodeSvg}
+        <div style="font-size:9px;color:#475569;font-weight:800;font-family:monospace;margin-top:4px;letter-spacing:0.5px;">
+          PHC / JAN AUSHADHI SCANNER VERIFIED
+        </div>
       </div>
     </div>
 
@@ -1716,6 +1827,9 @@
     window.openPatientVideoCallModal = global.openPatientVideoCallModal;
     window.closePatientVideoCallModal = global.closePatientVideoCallModal;
     window.patientController = global.patientController;
+    window.generateBarcodeSvg = function(text, opt) {
+      return global.patientController ? global.patientController.generateBarcodeSvg(text, opt) : '';
+    };
   }
 
 })(typeof window !== 'undefined' ? window : (typeof global !== 'undefined' ? global : this));

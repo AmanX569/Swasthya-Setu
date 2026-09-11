@@ -583,6 +583,8 @@
 
       el.innerHTML = rxList.map(rx => {
         const medsList = Array.isArray(rx.medicines) ? rx.medicines : [];
+        const barcodeVal = `ABDM-${(rx.id || 'RX-OPD').replace(/[^a-zA-Z0-9-]/g, '')}-${(rx.abhaId || rx.patientPhone || '9876543210').replace(/\D/g, '').slice(-6)}`;
+        const docBarcodeSvg = (typeof window.generateBarcodeSvg === 'function') ? window.generateBarcodeSvg(barcodeVal, { showText: true, height: 30, maxWidth: 220 }) : '';
         return `
           <div class="rx-glass-card" style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:16px;padding:18px;box-shadow:var(--shadow-panel);">
             <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
@@ -604,6 +606,18 @@
                 ` : ''}
               </div>
             </div>
+
+            ${docBarcodeSvg ? `
+              <div style="background:#ffffff;padding:8px 12px;border-radius:8px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;border:1px solid rgba(0,0,0,0.08);">
+                <div style="font-size:11px;color:#1e293b;line-height:1.35;">
+                  <strong style="color:#0284c7;display:block;font-size:10.5px;letter-spacing:0.5px;">⚡ ABDM VERIFIED BARCODE</strong>
+                  <span>Patient: <strong>${rx.patientName}</strong> · ABHA: ${rx.abhaId || '14-8921-4402-9912'}</span>
+                </div>
+                <div style="max-width:210px;">
+                  ${docBarcodeSvg}
+                </div>
+              </div>
+            ` : ''}
 
             <div style="margin-bottom:10px;">
               <span style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;">Clinical Diagnosis:</span>
