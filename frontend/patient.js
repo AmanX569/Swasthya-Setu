@@ -331,7 +331,7 @@
             </div>
           </div>
 
-          <div style="display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center;">
+          <div style="display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center;">
             <div style="width:68px;height:68px;background:rgba(2,132,199,0.15);border:1.5px solid var(--primary-bright);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:32px;">
               👤
             </div>
@@ -339,10 +339,6 @@
               <h3 style="font-size:18px;color:var(--ink);margin-bottom:4px;font-weight:700;">${user.name}</h3>
               <p style="font-size:13px;color:var(--ink-dim);margin-bottom:2px;">Age: ${user.age} Yrs · Gender: ${user.gender} · Blood: <strong style="color:var(--primary-bright)">${user.bloodGroup}</strong></p>
               <p style="font-size:12px;color:var(--muted);">${user.village}</p>
-            </div>
-            <div style="text-align:center;background:var(--glass-1);padding:8px;border-radius:10px;border:1px solid var(--glass-border military);">
-              <div style="font-size:28px;line-height:1;">📱</div>
-              <small style="font-size:9px;color:var(--muted);font-weight:700;display:block;margin-top:2px;">${this.t('abha_qr', 'QR SCAN')}</small>
             </div>
           </div>
 
