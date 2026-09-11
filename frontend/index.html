@@ -1822,14 +1822,19 @@ body[data-theme="doom"] {
     
     <!-- DIGITAL ABHA HEALTH CARD (PRIMARY CITIZEN DASHBOARD ID) -->
     <div class="glass-panel" id="patientAbhaPanel" style="margin-bottom:18px;">
-      <div class="panel-header">
-        <h2 class="panel-title" data-i18n="abha_title">🆔 Digital ABHA Health Card</h2>
+      <div class="panel-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:8px;">
+        <h2 class="panel-title" style="margin:0;" data-i18n="abha_title">🆔 Digital ABHA Health Card</h2>
+        <button type="button" id="patientAbhaToggleBtn" onclick="patientController.toggleAbhaCardView()" class="btn-glass" style="padding:4px 10px;font-size:11px;font-weight:800;display:inline-flex;align-items:center;gap:4px;border-radius:8px;cursor:pointer;" title="Minimize / Expand ABHA Card">
+          <span id="patientAbhaToggleIcon">🔼</span> <span id="patientAbhaToggleText">Minimize</span>
+        </button>
       </div>
-      <p style="color:var(--muted);font-size:13px;margin-bottom:14px;" data-i18n="abha_desc">
-        Your government health identity card. Keep it handy for free consultations and hospital visits.
-      </p>
-      <div id="abhaCardContainer"></div>
-      <div id="patientPermanentAddressContainer" style="margin-top:16px;"></div>
+      <div id="patientAbhaContent" style="display:block;">
+        <p style="color:var(--muted);font-size:13px;margin-bottom:14px;" data-i18n="abha_desc">
+          Your government health identity card. Keep it handy for free consultations and hospital visits.
+        </p>
+        <div id="abhaCardContainer"></div>
+        <div id="patientPermanentAddressContainer" style="margin-top:16px;"></div>
+      </div>
     </div>
 
     <!-- 1. DIRECT DOCTOR CONSULTATION REQUEST ACTION BANNER (TOP POSITION) -->

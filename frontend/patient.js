@@ -17,6 +17,7 @@
       this.hospitalSearch = '';
       this.isHistoryMinimized = false;
       this.isMedsMinimized = false;
+      this.isAbhaMinimized = false;
     }
 
     init() {
@@ -175,6 +176,22 @@
       }
     }
 
+    toggleAbhaCardView() {
+      this.isAbhaMinimized = !this.isAbhaMinimized;
+      const text = document.getElementById('patientAbhaToggleText');
+      const icon = document.getElementById('patientAbhaToggleIcon');
+      const container = document.getElementById('patientAbhaContent');
+
+      if (text && icon) {
+        text.textContent = this.isAbhaMinimized ? 'Expand' : 'Minimize';
+        icon.textContent = this.isAbhaMinimized ? '🔽' : '🔼';
+      }
+
+      if (container) {
+        container.style.display = this.isAbhaMinimized ? 'none' : 'block';
+      }
+    }
+
     renderVideoCallHistory() {
       const el = document.getElementById('patientVideoCallHistoryContainer');
       const countBadge = document.getElementById('patientHistoryCountBadge');
@@ -304,19 +321,13 @@
 
       container.innerHTML = `
         <div class="abha-badge-card" style="background:var(--glass-2);border:1.5px solid var(--glass-border);border-radius:18px;padding:20px;box-shadow:var(--shadow-panel);position:relative;overflow:hidden;">
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1.5px solid var(--line);padding-bottom:12px;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1.5px solid var(--line);padding-bottom:12px;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
             <div style="display:flex;align-items:center;gap:10px;">
               <img src="assets/logo.png" style="width:34px;height:34px;border-radius:50%;object-fit:cover;border:1.5px solid var(--primary-bright);" alt="Swasthya Setu Logo">
               <div>
                 <strong style="font-size:15px;color:var(--primary-bright);display:block;">${this.t('abha_nha', 'NATIONAL HEALTH AUTHORITY (ABHA)')}</strong>
                 <small style="color:var(--muted);font-weight:600;">${this.t('abha_gov', 'Government of India')}</small>
               </div>
-            </div>
-            <div style="display:flex;gap:6px;flex-wrap:wrap;">
-              <span class="badge" style="background:var(--primary);color:#ffffff;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;">${this.t('abha_active', 'ACTIVE')}</span>
-              <span class="badge" style="background:rgba(22,163,74,0.2);color:#16a34a;border:1px solid rgba(22,163,74,0.4);padding:4px 8px;border-radius:20px;font-size:10.5px;font-weight:700;">
-                ✓ Mobile Linked
-              </span>
             </div>
           </div>
 
@@ -374,6 +385,19 @@
           </div>
         </div>
       `;
+
+      const abhaContent = document.getElementById('patientAbhaContent');
+      const toggleText = document.getElementById('patientAbhaToggleText');
+      const toggleIcon = document.getElementById('patientAbhaToggleIcon');
+      if (this.isAbhaMinimized) {
+        if (abhaContent) abhaContent.style.display = 'none';
+        if (toggleText) toggleText.textContent = 'Expand';
+        if (toggleIcon) toggleIcon.textContent = '🔽';
+      } else {
+        if (abhaContent) abhaContent.style.display = 'block';
+        if (toggleText) toggleText.textContent = 'Minimize';
+        if (toggleIcon) toggleIcon.textContent = '🔼';
+      }
     }
 
     renderPermanentAddress() {
