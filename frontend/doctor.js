@@ -377,45 +377,140 @@
         adviceInput.value = this.t('default_advice_fever', 'Drink plenty of clean boiled water. Rest well.');
       }
 
-            // Localize Dropdown Select Options for Medicines dynamically from Store
+      // Populate Dynamic Prescribed Medicines
       const allMeds = (this.store ? this.store.getState().medicines : []) || [];
-      const med1Select = document.getElementById('rxMed1');
-      if (med1Select) {
-        if (allMeds.length) {
-          med1Select.innerHTML = allMeds.map(m => `
-            <option value="${m.name}" data-gen="${m.genericPrice}" data-brand="${m.brandPrice}">${m.name} (₹${m.genericPrice} vs ₹${m.brandPrice || (m.genericPrice * 4)})</option>
-          `).join('');
-        } else {
-          med1Select.innerHTML = `
-            <option value="Paracetamol 650mg">${this.t('opt_para', 'Paracetamol 650mg Tab (₹8 vs ₹34 Dolo)')}</option>
-            <option value="Amoxicillin 500mg">${this.t('opt_amox', 'Amoxicillin 500mg Cap (₹28 vs ₹110)')}</option>
-            <option value="Metformin 500mg">${this.t('opt_met', 'Metformin 500mg Tab (₹12 vs ₹58)')}</option>
-            <option value="Amlodipine 5mg">${this.t('opt_amlo', 'Amlodipine 5mg Tab (₹6 vs ₹38)')}</option>
-            <option value="ORS Powder Sachets">${this.t('opt_ors', 'ORS Sachet Powder (₹5 vs ₹24)')}</option>
-          `;
-        }
+      const container = document.getElementById('rxMedicinesContainer');
+      if (container) {
+        container.innerHTML = '';
+        const defaultMed1 = q.complaint.includes('Fever') ? 'Paracetamol 650mg' :
+                            q.complaint.includes('Trimester') ? 'Iron & Folic Acid' :
+                            q.complaint.includes('Chest') ? 'Amlodipine 5mg' : 'Paracetamol 650mg';
+        this.addMedicineRow({ selectedName: defaultMed1, dosage: '1 Tab Morning & Night after food' });
+        
+        const defaultMed2 = q.complaint.includes('Fever') ? 'Vitamin C + Zinc' :
+                            q.complaint.includes('Trimester') ? 'Vitamin C + Zinc' : '';
+        this.addMedicineRow({ selectedName: defaultMed2, dosage: '1 Tab Noon after food' });
       }
 
+      // Backward compatibility for legacy select elements if present
+      const med1Select = document.getElementById('rxMed1');
+      if (med1Select) med1Select.innerHTML = this.buildMedicineOptionsHtml(allMeds, 'Paracetamol 650mg');
       const med2Select = document.getElementById('rxMed2');
-      if (med2Select) {
-        if (allMeds.length) {
-          med2Select.innerHTML = `<option value="">-- None (Single Medicine) --</option>` + allMeds.map(m => `
-            <option value="${m.name}" data-gen="${m.genericPrice}" data-brand="${m.brandPrice}">${m.name} (₹${m.genericPrice} vs ₹${m.brandPrice || (m.genericPrice * 4)})</option>
-          `).join('');
-        } else {
-          med2Select.innerHTML = `
-            <option value="Cetirizine 10mg">${this.t('opt_cetz', 'Cetirizine 10mg Tab (₹4 vs ₹22)')}</option>
-            <option value="Vitamin C + Zinc">${this.t('opt_vitc', 'Vitamin C + Zinc Tab (₹15 vs ₹75)')}</option>
-            <option value="Iron & Folic Acid">${this.t('opt_ifa', 'Iron & Folic Acid Tab (₹4 vs ₹32)')}</option>
-          `;
-        }
-      }
+      if (med2Select) med2Select.innerHTML = this.buildMedicineOptionsHtml(allMeds, '');
 
       // Apply any data-i18n inside modal
       if (global.i18n) global.i18n.applyTranslations(global.i18n.currentLang);
 
       const modal = document.getElementById('doctorConsultModal');
       if (modal) modal.style.display = 'flex';
+    }
+
+    buildMedicineOptionsHtml(allMeds, selectedValue) {
+      const list = (allMeds && allMeds.length) ? allMeds : [
+        { name: 'Paracetamol 650mg', genericPrice: 8, brandPrice: 34 },
+        { name: 'Amoxicillin 500mg', genericPrice: 28, brandPrice: 110 },
+        { name: 'Metformin 500mg', genericPrice: 12, brandPrice: 58 },
+        { name: 'Amlodipine 5mg', genericPrice: 6, brandPrice: 38 },
+        { name: 'ORS Powder Sachets', genericPrice: 5, brandPrice: 24 },
+        { name: 'Cetirizine 10mg', genericPrice: 4, brandPrice: 22 },
+        { name: 'Azithromycin 500mg', genericPrice: 35, brandPrice: 130 },
+        { name: 'Pantoprazole 40mg', genericPrice: 18, brandPrice: 85 },
+        { name: 'Vitamin C + Zinc', genericPrice: 15, brandPrice: 75 },
+        { name: 'Iron & Folic Acid', genericPrice: 4, brandPrice: 32 },
+        { name: 'Ibuprofen 400mg', genericPrice: 7, brandPrice: 30 },
+        { name: 'Ciprofloxacin 500mg', genericPrice: 22, brandPrice: 95 }
+      ];
+
+      let html = `<option value="">-- Select Generic Medicine --</option>`;
+      html += list.map(m => {
+        const isSel = selectedValue && selectedValue === m.name ? 'selected' : '';
+        const brand = m.brandPrice || (m.genericPrice * 4);
+        return `<option value="${m.name}" data-gen="${m.genericPrice}" data-brand="${brand}" ${isSel}>${m.name} (₹${m.genericPrice} vs ₹${brand})</option>`;
+      }).join('');
+      const isCustomSel = selectedValue === '__custom__' ? 'selected' : '';
+      html += `<option value="__custom__" data-gen="15" ${isCustomSel}>✍️ Other / Write Custom Medicine...</option>`;
+      return html;
+    }
+
+    addMedicineRow(data = {}) {
+      const container = document.getElementById('rxMedicinesContainer');
+      if (!container) return;
+
+      const rowIndex = container.children.length + 1;
+      const row = document.createElement('div');
+      row.className = 'rx-medicine-row';
+      row.style.cssText = 'background:var(--glass-1);border:1px solid var(--glass-border);border-radius:10px;padding:10px 12px;margin-bottom:2px;';
+
+      const allMeds = (this.store ? this.store.getState().medicines : []) || [];
+      const optionsHtml = this.buildMedicineOptionsHtml(allMeds, data.selectedName);
+
+      const defaultDosage = data.dosage || (rowIndex === 1 ? '1 Tab Morning & Night after food' : rowIndex === 2 ? '1 Tab Noon after food' : '1 Tab Once Daily after food');
+
+      row.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <span class="rx-med-label" style="font-size:11px;font-weight:700;color:var(--ink-dim);text-transform:uppercase;">Medicine #${rowIndex}</span>
+          <button type="button" class="btn-glass rx-remove-med-btn" onclick="doctorController.removeMedicineRow(this)" style="font-size:11px;padding:2px 8px;color:#ef4444;border-color:rgba(239,68,68,0.3);border-radius:6px;cursor:pointer;line-height:1;" title="Remove this medicine">✕ Remove</button>
+        </div>
+        <div style="display:grid;grid-template-columns:1.2fr 1fr;gap:8px;">
+          <div>
+            <label style="font-size:10px;font-weight:700;color:var(--muted);display:block;margin-bottom:2px;">GENERIC DRUG / INVENTORY</label>
+            <select class="input-field rx-med-select" onchange="doctorController.onMedicineSelectChange(this)" style="height:38px;font-size:12px;width:100%;">
+              ${optionsHtml}
+            </select>
+          </div>
+          <div>
+            <label style="font-size:10px;font-weight:700;color:var(--muted);display:block;margin-bottom:2px;">DOSAGE SCHEDULE</label>
+            <input type="text" class="input-field rx-med-dosage" placeholder="e.g. 1 Tab BD after food" value="${defaultDosage}" style="height:38px;font-size:12px;width:100%;">
+          </div>
+        </div>
+        <div class="rx-custom-med-wrap" style="display:${data.isCustom ? 'block' : 'none'};margin-top:6px;">
+          <label style="font-size:10px;font-weight:700;color:var(--primary-bright);display:block;margin-bottom:2px;">✍️ CUSTOM MEDICINE NAME & STRENGTH *</label>
+          <input type="text" class="input-field rx-med-custom-name" placeholder="Type medicine name (e.g. Azithromycin 500mg, Cough Syrup...)" value="${data.customName || ''}" style="height:36px;font-size:12px;width:100%;">
+        </div>
+      `;
+
+      container.appendChild(row);
+      this.updateMedicineRowLabels();
+    }
+
+    removeMedicineRow(btn) {
+      const row = btn.closest('.rx-medicine-row');
+      if (!row) return;
+      const container = document.getElementById('rxMedicinesContainer');
+      if (!container) return;
+      if (container.children.length <= 1) {
+        if (typeof window.toast === 'function') window.toast('At least one medicine is required.');
+        return;
+      }
+      row.remove();
+      this.updateMedicineRowLabels();
+    }
+
+    updateMedicineRowLabels() {
+      const container = document.getElementById('rxMedicinesContainer');
+      if (!container) return;
+      const rows = container.querySelectorAll('.rx-medicine-row');
+      rows.forEach((r, idx) => {
+        const lbl = r.querySelector('.rx-med-label');
+        if (lbl) lbl.textContent = `Medicine #${idx + 1}${idx === 0 ? ' *' : ''}`;
+        const removeBtn = r.querySelector('.rx-remove-med-btn');
+        if (removeBtn) {
+          removeBtn.style.display = rows.length > 1 ? 'inline-block' : 'none';
+        }
+      });
+    }
+
+    onMedicineSelectChange(selectEl) {
+      const row = selectEl.closest('.rx-medicine-row');
+      if (!row) return;
+      const customWrap = row.querySelector('.rx-custom-med-wrap');
+      const customInput = row.querySelector('.rx-med-custom-name');
+      if (selectEl.value === '__custom__') {
+        if (customWrap) customWrap.style.display = 'block';
+        if (customInput) customInput.focus();
+      } else {
+        if (customWrap) customWrap.style.display = 'none';
+      }
     }
 
     closeConsultModal() {
@@ -539,32 +634,73 @@
       const diagnosis = document.getElementById('rxDiagnosis') ? document.getElementById('rxDiagnosis').value.trim() : 'Clinical Evaluation';
       const advice = document.getElementById('rxAdvice') ? document.getElementById('rxAdvice').value.trim() : 'Take prescribed doses and rest.';
       
-      const med1Select = document.getElementById('rxMed1');
-      const med2Select = document.getElementById('rxMed2');
-
       const medicines = [];
-      if (med1Select && med1Select.value) {
-        const opt = med1Select.options ? med1Select.options[med1Select.selectedIndex] : null;
-        const genPrice = opt && opt.getAttribute && opt.getAttribute('data-gen') ? parseFloat(opt.getAttribute('data-gen')) : 15;
-        medicines.push({
-          name: med1Select.value,
-          genericPrice: genPrice || 15,
-          dosage: '1 Tab Morning & Night after food'
+      const container = document.getElementById('rxMedicinesContainer');
+
+      if (container) {
+        const rows = container.querySelectorAll('.rx-medicine-row');
+        rows.forEach(row => {
+          const select = row.querySelector('.rx-med-select');
+          const dosageInput = row.querySelector('.rx-med-dosage');
+          const customInput = row.querySelector('.rx-med-custom-name');
+
+          if (!select) return;
+          let medName = select.value;
+          let genPrice = 15;
+
+          if (medName === '__custom__') {
+            medName = customInput ? customInput.value.trim() : '';
+            genPrice = 15;
+          } else if (medName) {
+            const opt = select.options ? select.options[select.selectedIndex] : null;
+            if (opt && opt.getAttribute && opt.getAttribute('data-gen')) {
+              genPrice = parseFloat(opt.getAttribute('data-gen')) || 15;
+            }
+          }
+
+          const dosage = dosageInput ? dosageInput.value.trim() : '1 Tab TDS after food';
+
+          if (medName) {
+            medicines.push({
+              name: medName,
+              genericPrice: genPrice,
+              dosage: dosage || '1 Tab as directed'
+            });
+          }
         });
       }
 
-      if (med2Select && med2Select.value) {
-        const opt = med2Select.options ? med2Select.options[med2Select.selectedIndex] : null;
-        const genPrice = opt && opt.getAttribute && opt.getAttribute('data-gen') ? parseFloat(opt.getAttribute('data-gen')) : 10;
-        medicines.push({
-          name: med2Select.value,
-          genericPrice: genPrice || 10,
-          dosage: '1 Tab Noon after food'
-        });
+      // Backward fallback if dynamic container was absent
+      if (!medicines.length) {
+        const med1Select = document.getElementById('rxMed1');
+        const med2Select = document.getElementById('rxMed2');
+        if (med1Select && med1Select.value) {
+          const opt = med1Select.options ? med1Select.options[med1Select.selectedIndex] : null;
+          const genPrice = opt && opt.getAttribute && opt.getAttribute('data-gen') ? parseFloat(opt.getAttribute('data-gen')) : 15;
+          medicines.push({
+            name: med1Select.value,
+            genericPrice: genPrice || 15,
+            dosage: '1 Tab Morning & Night after food'
+          });
+        }
+        if (med2Select && med2Select.value) {
+          const opt = med2Select.options ? med2Select.options[med2Select.selectedIndex] : null;
+          const genPrice = opt && opt.getAttribute && opt.getAttribute('data-gen') ? parseFloat(opt.getAttribute('data-gen')) : 10;
+          medicines.push({
+            name: med2Select.value,
+            genericPrice: genPrice || 10,
+            dosage: '1 Tab Noon after food'
+          });
+        }
       }
 
       if (!diagnosis) {
         alert('Please enter clinical diagnosis');
+        return;
+      }
+
+      if (!medicines.length) {
+        alert('Please select or write at least one medicine to prescribe.');
         return;
       }
 
@@ -577,7 +713,7 @@
         abhaId: patient.abhaId,
         diagnosis,
         advice,
-        medicines: medicines.length ? medicines : [{ name: 'Paracetamol 650mg', genericPrice: 8, dosage: '1 Tab TDS' }]
+        medicines
       });
 
       this.closeConsultModal();
@@ -589,7 +725,7 @@
       }
 
       if (typeof window.toast === 'function') {
-        window.toast('✓ Issued e-Prescription for ' + patient.patientName + ' (Rx ID: ' + newRx.id + ')');
+        window.toast('✓ Issued e-Prescription with ' + medicines.length + ' medicine(s) for ' + patient.patientName + ' (Rx ID: ' + newRx.id + ')');
       }
     }
   }

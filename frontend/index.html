@@ -2491,13 +2491,16 @@ body[data-theme="doom"] {
         <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;" data-i18n="rx_lbl_diagnosis">Clinical Diagnosis *</label>
         <input type="text" id="rxDiagnosis" class="input-field" placeholder="e.g. Acute Upper Respiratory Infection / Viral Fever" required>
       </div>
-      <div style="margin-bottom:12px;">
-        <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;" data-i18n="rx_lbl_med1">Jan Aushadhi Generic Medicine 1 *</label>
-        <select id="rxMed1" class="input-field" style="height:44px;" required></select>
-      </div>
-      <div style="margin-bottom:12px;">
-        <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;" data-i18n="rx_lbl_med2">Jan Aushadhi Generic Medicine 2</label>
-        <select id="rxMed2" class="input-field" style="height:44px;"></select>
+      <div style="margin-bottom:14px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <label style="font-size:12px;font-weight:700;color:var(--ink-dim);margin:0;" data-i18n="rx_lbl_meds_section">💊 Prescribed Medicines (Jan Aushadhi) *</label>
+          <button type="button" class="btn-glass" onclick="doctorController.addMedicineRow()" style="font-size:11px;padding:4px 10px;display:inline-flex;align-items:center;gap:4px;color:var(--primary-bright);border-color:rgba(2,132,199,0.4);border-radius:6px;cursor:pointer;font-weight:700;background:rgba(2,132,199,0.08);" title="Add another medicine to prescription">
+            <span style="font-size:14px;font-weight:900;">＋</span> Add Medicine
+          </button>
+        </div>
+        <div id="rxMedicinesContainer" style="display:flex;flex-direction:column;gap:8px;">
+          <!-- Dynamically populated rows with generic medicine dropdown, dosage, and custom write options -->
+        </div>
       </div>
       <div style="margin-bottom:16px;">
         <label style="font-size:12px;font-weight:700;color:var(--ink-dim);display:block;margin-bottom:4px;" data-i18n="rx_lbl_advice">Doctor Clinical Advice & Precautions *</label>

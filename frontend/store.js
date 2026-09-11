@@ -101,7 +101,16 @@
     medicines: [
       { id: 'DRUG-01', name: 'Paracetamol 650mg', category: 'Fever & Pain Relief', stock: 450, unit: 'Tablets', genericPrice: 8, brandPrice: 34, status: 'In Stock' },
       { id: 'DRUG-02', name: 'Amoxicillin 500mg', category: 'Antibiotic Infection', stock: 220, unit: 'Capsules', genericPrice: 28, brandPrice: 110, status: 'In Stock' },
-      { id: 'DRUG-03', name: 'Metformin 500mg', category: 'Diabetes / Blood Sugar', stock: 380, unit: 'Tablets', genericPrice: 12, brandPrice: 58, status: 'In Stock' }
+      { id: 'DRUG-03', name: 'Metformin 500mg', category: 'Diabetes / Blood Sugar', stock: 380, unit: 'Tablets', genericPrice: 12, brandPrice: 58, status: 'In Stock' },
+      { id: 'DRUG-04', name: 'Amlodipine 5mg', category: 'Hypertension / BP', stock: 310, unit: 'Tablets', genericPrice: 6, brandPrice: 38, status: 'In Stock' },
+      { id: 'DRUG-05', name: 'ORS Powder Sachets', category: 'Dehydration / Diarrhea', stock: 500, unit: 'Sachets', genericPrice: 5, brandPrice: 24, status: 'In Stock' },
+      { id: 'DRUG-06', name: 'Cetirizine 10mg', category: 'Allergy & Cold', stock: 420, unit: 'Tablets', genericPrice: 4, brandPrice: 22, status: 'In Stock' },
+      { id: 'DRUG-07', name: 'Azithromycin 500mg', category: 'Antibiotic (Throat/Chest)', stock: 180, unit: 'Tablets', genericPrice: 35, brandPrice: 130, status: 'In Stock' },
+      { id: 'DRUG-08', name: 'Pantoprazole 40mg', category: 'Antacid / Gastric', stock: 360, unit: 'Tablets', genericPrice: 18, brandPrice: 85, status: 'In Stock' },
+      { id: 'DRUG-09', name: 'Vitamin C + Zinc', category: 'Immunity & Recovery', stock: 400, unit: 'Tablets', genericPrice: 15, brandPrice: 75, status: 'In Stock' },
+      { id: 'DRUG-10', name: 'Iron & Folic Acid', category: 'ANC Maternal / Anemia', stock: 650, unit: 'Tablets', genericPrice: 4, brandPrice: 32, status: 'In Stock' },
+      { id: 'DRUG-11', name: 'Ibuprofen 400mg', category: 'Pain & Inflammation', stock: 290, unit: 'Tablets', genericPrice: 7, brandPrice: 30, status: 'In Stock' },
+      { id: 'DRUG-12', name: 'Ciprofloxacin 500mg', category: 'Antibiotic (Infection)', stock: 150, unit: 'Tablets', genericPrice: 22, brandPrice: 95, status: 'In Stock' }
     ]
   };
 
@@ -201,6 +210,14 @@
             parsed.session.user.permanent_address_completed = checkAddr(parsed.session.user);
           }
           const merged = { ...DEFAULT_INITIAL_STATE, ...parsed };
+          if (merged.medicines && Array.isArray(merged.medicines)) {
+            const existingNames = new Set(merged.medicines.map(m => (m && m.name ? m.name.toLowerCase().trim() : '')));
+            DEFAULT_INITIAL_STATE.medicines.forEach(defMed => {
+              if (defMed && defMed.name && !existingNames.has(defMed.name.toLowerCase().trim())) {
+                merged.medicines.push(defMed);
+              }
+            });
+          }
           if (merged.staff && Array.isArray(merged.staff)) {
             merged.staff = merged.staff.filter(s => {
               if (!s) return false;
