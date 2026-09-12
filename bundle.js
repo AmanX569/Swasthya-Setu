@@ -53,9 +53,6 @@ for (const f of jsFiles) {
 // Replace the script loader comment or place directly before the inline controller script
 html = html.replace('<!-- APP SCRIPTS -->', '<script>\n' + inlinedJs + '\n</script>');
 
-const outPath = path.join(projectRoot, 'swasthya-setu-standalone.html');
-fs.writeFileSync(outPath, html, 'utf8');
-
 const rootIndex = path.join(projectRoot, 'index.html');
 fs.writeFileSync(rootIndex, html, 'utf8');
 
@@ -71,6 +68,6 @@ if (fs.existsSync(path.join(projectRoot, 'assets'))) {
   if (fs.existsSync(srcLogo)) fs.copyFileSync(srcLogo, path.join(publicAssets, 'logo.png'));
 }
 
-console.log('✓ Successfully created 100% standalone single HTML file with embedded official logo at:', outPath);
+console.log('✓ Successfully bundled standalone app with embedded assets to index.html');
 console.log('✓ Successfully synced root index.html and public/ for GitHub Pages / Vercel Cloud Hosting');
 console.log('File size:', (html.length / 1024).toFixed(1), 'KB');

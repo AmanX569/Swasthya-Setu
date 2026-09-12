@@ -4,5 +4,5 @@ cd /d "%~dp0"
 echo ====================================================
 echo   Starting Swasthya Setu Web Application Server...
 echo ====================================================
-node server.js
+node server\server.js
 pause

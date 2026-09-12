@@ -230,8 +230,8 @@ node server/app.js
 npx serve .
 ```
 
-### 5. Re-bundle Standalone Outputs (Optional)
-If modifying files inside `frontend/`, run the bundler to sync `swasthya-setu-standalone.html`, `index.html`, and `public/`:
+### 5. Re-bundle Static Outputs (Optional)
+If modifying files inside `frontend/`, run the bundler to sync `index.html` and `public/`:
 ```bash
 node bundle.js
 ```
